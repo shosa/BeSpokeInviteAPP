@@ -1,0 +1,139 @@
+{
+  "engine": 2,
+  "id": "magnolia-di-sabbia",
+  "name": "Magnolia di sabbia",
+  "description": "Una busta beige a tutto schermo, con magnolie goffrate a secco e un sigillo 3D di ceralacca caramello, si apre in una luce calda sul cartoncino dell'invito: sabbia, lino e caramello, la stessa tinta dall'apertura alla firma.",
+  "models": [],
+  "themeColor": "#e7d0b8",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Pinyon+Script&family=Jost:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Beatrice & Lorenzo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-09-18",
+      "eventTime": "17:00",
+      "venue": "Villa Le Magnolie",
+      "address": "Strada di Vignano 8, Siena"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Una promessa in fiore",
+      "body": "Come le magnolie, il nostro amore è sbocciato piano, con pazienza e con luce.\nSaremo felici di avervi accanto nel giorno in cui diventerà una promessa."
+    },
+    "gallery": {
+      "heading": "Dettagli di sabbia",
+      "photos": [
+        "assets/villa-sabbia.jpg",
+        "assets/tavola.jpg",
+        "assets/vaso-magnolie.jpg",
+        "assets/scarpette.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola.jpg",
+      "caption": "La lunga tavola sotto gli ulivi, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "17:00", "label": "La cerimonia" },
+        { "time": "18:00", "label": "Aperitivo in giardino" },
+        { "time": "20:00", "label": "Cena sotto le magnolie" },
+        { "time": "23:00", "label": "Taglio della torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa Le Magnolie",
+      "kind": "villa",
+      "photo": "assets/villa-sabbia.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:15 una navetta partirà da Piazza del Campo."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni della sabbia",
+      "colors": [
+        { "hex": "#6E4B30", "name": "Noce" },
+        { "hex": "#AF7C58", "name": "Caramello" },
+        { "hex": "#D9BFA0", "name": "Sabbia" },
+        { "hex": "#F6ECE0", "name": "Lino" }
+      ]
+    },
+    "video": {
+      "heading": "Luce di settembre",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo alla magnolia e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A promise in bloom",
+      "body": "Like the magnolias, our love blossomed slowly, with patience and light.\nWe would be delighted to have you beside us on the day it becomes a promise."
+    },
+    "gallery": { "heading": "Details in sand" },
+    "image": { "caption": "The long table beneath the olive trees, where we will raise a glass together." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "17:00", "label": "The ceremony" },
+        { "time": "18:00", "label": "Garden aperitif" },
+        { "time": "20:00", "label": "Dinner beneath the magnolias" },
+        { "time": "23:00", "label": "Cutting the cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 4:15 pm a shuttle will leave from Piazza del Campo."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in sand tones",
+      "colors": [
+        { "hex": "#6E4B30", "name": "Walnut" },
+        { "hex": "#AF7C58", "name": "Caramel" },
+        { "hex": "#D9BFA0", "name": "Sand" },
+        { "hex": "#F6ECE0", "name": "Linen" }
+      ]
+    },
+    "video": { "heading": "September light" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the magnolia seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

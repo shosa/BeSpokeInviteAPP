@@ -1,0 +1,204 @@
+{
+  "engine": 2,
+  "id": "velluto-smeraldo",
+  "name": "Velluto smeraldo",
+  "description": "Una busta di velluto verde smeraldo a tutto schermo, con filetti e felci in lamina d'oro e un sigillo 3D di ceralacca rame, si apre sul cartoncino crema: velluto, crema e rame, la stessa tinta dall'apertura alla firma. La data è già scritta.",
+  "models": [],
+  "themeColor": "#123524",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Forum&family=Monsieur+La+Doulaise&family=Mulish:wght@400;600&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Elena & Tommaso",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-10-09",
+      "eventTime": "16:30",
+      "venue": "Villa dell'Edera",
+      "address": "Via di Fiesole 40, Firenze"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Un sì tra le felci",
+      "body": "Ci siamo trovati come si trovano le cose preziose: piano, al riparo, nel verde.\nVorremmo festeggiare con voi il giorno della nostra promessa."
+    },
+    "gallery": {
+      "heading": "Velluto e candele",
+      "photos": [
+        "assets/villa-edera.jpg",
+        "assets/tavola-candele.jpg",
+        "assets/felci-rose.jpg",
+        "assets/anello.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola-candele.jpg",
+      "caption": "La lunga tavola a lume di candela, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        {
+          "time": "16:30",
+          "label": "La cerimonia"
+        },
+        {
+          "time": "17:30",
+          "label": "Aperitivo nel giardino d'edera"
+        },
+        {
+          "time": "19:30",
+          "label": "Cena a lume di candela"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa dell'Edera",
+      "kind": "villa",
+      "photo": "assets/villa-edera.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 15:45 una navetta partirà da Piazza della Signoria."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del verde e del rame",
+      "colors": [
+        {
+          "hex": "#123524",
+          "name": "Smeraldo"
+        },
+        {
+          "hex": "#3F6B4E",
+          "name": "Felce"
+        },
+        {
+          "hex": "#B07A52",
+          "name": "Rame"
+        },
+        {
+          "hex": "#F3EAD8",
+          "name": "Crema"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Luce di candela",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo alla felce e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    },
+    "blockSwap": {
+      "scratchdate": "date"
+    },
+    "date": {
+      "cellShape": "box",
+      "showLabels": true
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A yes among the ferns",
+      "body": "We found each other the way precious things are found: slowly, sheltered, among the green.\nWe would love to celebrate the day of our promise with you."
+    },
+    "gallery": {
+      "heading": "Velvet and candles"
+    },
+    "image": {
+      "caption": "The long candlelit table, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        {
+          "time": "16:30",
+          "label": "The ceremony"
+        },
+        {
+          "time": "17:30",
+          "label": "Aperitif in the ivy garden"
+        },
+        {
+          "time": "19:30",
+          "label": "Candlelit dinner"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 3:45 pm a shuttle will leave from Piazza della Signoria."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in green and copper tones",
+      "colors": [
+        {
+          "hex": "#123524",
+          "name": "Emerald"
+        },
+        {
+          "hex": "#3F6B4E",
+          "name": "Fern"
+        },
+        {
+          "hex": "#B07A52",
+          "name": "Copper"
+        },
+        {
+          "hex": "#F3EAD8",
+          "name": "Cream"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Candlelight"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the fern seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

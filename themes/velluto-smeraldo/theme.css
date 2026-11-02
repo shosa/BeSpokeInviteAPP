@@ -1,0 +1,270 @@
+/* Velluto smeraldo. Una sola tinta per tutta la pagina: velluto verde smeraldo sotto, carte crema con filetti in lamina d'oro, dettagli e sigillo 3D in rame. */
+:root {
+  --bk-cover:#b07a52;
+  --paper:#123524; --ivory:#f3ead8; --mist:#e9dec6; --mauve:#c3a465; --plum:#0f3a26;
+  --ink:#1c2a21; --muted:#46564a; --accent:#8e5a34; --line:#d8c595; --glow:#fff3dc;
+  --panel:rgba(243,234,216,.94); --panel-soft:rgba(243,234,216,.82);
+  --display:'Forum',Didot,Georgia,serif; --script:'Monsieur La Doulaise','Forum',Georgia,serif;
+  --body:'Mulish',system-ui,sans-serif; --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--paper) }
+/* Sotto tutta la pagina il velluto smeraldo della busta; l'intestazione resta sul cartoncino crema. */
+body { margin:0; color:var(--ink); background:transparent; font:16px/1.75 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:var(--paper) url(assets/velluto.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--accent); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--plum); outline-offset:4px }
+button,input,a { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:44px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+/* Titoli in Forum maiuscolo, verde smeraldo, con un chiarore caldo dietro. */
+.title { position:relative; isolation:isolate; margin:0 0 22px; font:400 clamp(27px,7.8vw,42px)/1.25 var(--display); letter-spacing:.12em; text-transform:uppercase; color:var(--plum); text-align:center; text-wrap:balance }
+.title::before { content:""; position:absolute; z-index:-1; inset:-30% 10%; background:radial-gradient(closest-side,#fff3dccc,#fff3dc00); pointer-events:none }
+.title::after { content:""; display:block; width:min(250px,72%); height:44px; margin:6px auto 0; background:url(assets/floral.png) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:15px; line-height:1.9; text-wrap:pretty }
+.orn { width:150px; max-width:52%; height:auto; margin:26px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:min(300px,82%); height:auto; margin:0 auto 14px }
+.fl-div + .title::after { display:none }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+/* Le carte: cartoncino crema con doppio filetto in lamina d'oro, appoggiato sul velluto. */
+.date-sec .card,.countdown-sec .card,.invito-sec .card,.us-sec .card,.prog-sec .card,.loc-sec .card,.dress-sec .card,.video-sec .card,.rsvp-sec .card,.footer-in,.shuttle-sec .card { background:radial-gradient(120% 55% at 50% 0%,#fff3dcb0,#fff3dc00 60%),var(--ivory) url(assets/carta.jpg) center/cover no-repeat; border:1px solid var(--line); border-radius:4px; box-shadow:inset 0 0 0 9px var(--ivory),inset 0 0 0 10px var(--mauve),0 20px 46px #00000059 }
+
+/* Busta-video: dietro, il fermo del cartoncino. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--paper) url(assets/sfondo-fermo.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:400 20px/1.3 var(--display); letter-spacing:.08em; color:var(--plum); background:var(--panel); border:1px solid var(--line); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--mist)); border:1px solid var(--line); border-radius:3px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--mauve)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #06170e55); font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:86%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 24px; max-width:85vw; background:var(--panel); border:1px solid var(--line); border-radius:2px; text-align:center; box-shadow:inset 0 0 0 3px var(--ivory),inset 0 0 0 4px var(--mauve),0 8px 24px #06170e20 }
+[data-cover-label] { color:var(--plum); font-size:12px; letter-spacing:.18em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--accent); border-top:1px solid var(--accent); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: solo testo, al centro del cartoncino crema. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.h-vista,.hero-fl { display:none }
+.h-text { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:30% 16% 32%; text-align:center; background:radial-gradient(ellipse 46% 26% at 50% 48%,#ffffffd0,#ffffff00) }
+.h-text > div { max-width:100%; text-shadow:0 0 16px #ffffff }
+.occasion { order:-1; margin:0; font:italic 400 24px/1.2 var(--display); color:var(--accent) }
+.names { font:400 clamp(40px,11.5vw,66px)/1.25 var(--script); color:var(--plum); text-wrap:balance }
+.welcome { margin:0; font-size:12px; line-height:1.6; letter-spacing:.18em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:min(220px,70vw); height:40px; margin:0 auto 8px; background:url(assets/floral.png) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:2; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--plum); font-size:11px; letter-spacing:.18em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-86px }
+.scroll-cue span { color:var(--plum); display:inline-block; padding:7px 16px; background:var(--panel); border:1px solid var(--line); border-radius:2px; box-shadow:inset 0 0 0 3px var(--ivory),inset 0 0 0 4px var(--mauve) }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid; border-bottom:1px solid; transform:rotate(45deg) }
+
+/* Data da grattare (non usata dalla demo: la data è già scritta). */
+.date-sec .card { padding:clamp(96px,26vw,120px) 18px 34px }
+.date-sec .card::before { content:""; position:absolute; top:14px; left:50%; translate:-50% 0; width:100px; height:86px; background:url(assets/ulivo.webp) center/contain no-repeat; pointer-events:none }
+.date-sec .title { font-size:clamp(30px,8.4vw,42px) }
+.date-sec .title::after { display:none }
+.hint { font:italic 400 19px/1.45 var(--display); color:var(--muted); text-align:center }
+.scratch-row,.sc-labels { display:flex; justify-content:center; gap:10px; margin-top:22px }
+.scratch { position:relative; flex:1 1 0; min-width:0; max-width:104px; aspect-ratio:1; border-radius:50%; overflow:hidden; background:var(--ivory); box-shadow:0 0 0 1px var(--mauve),0 0 0 5px var(--ivory),0 0 0 6px var(--line),0 0 24px #fff3dc; touch-action:none }
+.sc-val { position:absolute; inset:0; display:grid; place-items:center; padding:3px; font:600 clamp(20px,6.4vw,32px)/1 var(--display); color:var(--plum) }
+.scratch canvas { position:absolute; inset:0; width:100%; height:100%; transition:opacity .4s }
+.scratch.done canvas { opacity:0; pointer-events:none }
+.sc-labels { margin-top:14px }
+.sc-labels span { flex:1 1 0; min-width:0; max-width:104px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; text-align:center; color:var(--muted) }
+.reveal-all { display:block; margin:18px auto 0; min-height:44px; padding:10px 18px; background:transparent; border:0; text-decoration:underline; text-underline-offset:5px; font-size:12px; color:var(--accent) }
+.reveal-all.show { background:var(--mist); border-radius:2px }
+
+/* Data già scritta: tre riquadri con filetto oro, in una carta come le altre. */
+.dt-sec { text-align:center }
+.dt-sec > * { position:relative }
+.dt-sec { max-width:var(--card); margin:44px auto; padding:40px 16px 34px; background:radial-gradient(120% 55% at 50% 0%,#fff3dcb0,#fff3dc00 60%),var(--ivory) url(assets/carta.jpg) center/cover no-repeat; border:1px solid var(--line); border-radius:4px; box-shadow:inset 0 0 0 9px var(--ivory),inset 0 0 0 10px var(--mauve),0 20px 46px #00000059; width:calc(100% - 36px) }
+.dt-sec::before { content:""; display:block; width:52px; height:80px; margin:0 auto 14px; background:url(assets/ulivo.webp) center/contain no-repeat }
+/* Sempre su una riga: il motore dà ai campi 110px minimi e lascia andare a capo (regole del motore dopo le nostre, quindi selettori più specifici). */
+.dt-sec .dt-row { display:flex; flex-wrap:nowrap; justify-content:center; gap:10px; max-width:420px; margin:6px auto 0 }
+.dt-sec .dt-col { display:block; flex:1 1 0; min-width:0; max-width:118px }
+.dt-sec .dt-cell { display:grid; place-items:center; width:100%; min-width:0; padding:0; aspect-ratio:1; min-height:0; opacity:1; border-radius:3px; background:var(--ivory); border:2px solid var(--plum); box-shadow:inset 0 0 0 4px var(--ivory),inset 0 0 0 5px var(--mauve),0 8px 18px #06170e1c }
+.dt-sec .dt-num { font:400 clamp(24px,30cqi,40px)/1 var(--display); white-space:nowrap; color:var(--plum); letter-spacing:.04em; text-transform:uppercase }
+.dt-sec .dt-lab { display:block; margin-top:10px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: ogni numero in una corona di ulivo. */
+.countdown-sec .card { padding:32px 6px 30px }
+.countdown-sec .orn { margin:0 auto 18px }
+[data-countdown] { display:flex; align-items:flex-start; justify-content:center; gap:2px; min-width:0 }
+.time-block { flex:1 1 0; min-width:0; max-width:100px; text-align:center }
+.number-wrap { display:grid; place-items:center; aspect-ratio:1; background:url(assets/corona.webp) center/contain no-repeat; padding:8px 2px }
+.number { display:block; font:600 clamp(20px,6vw,32px)/1 var(--display); color:var(--plum); transition:opacity .18s }
+.label { margin-top:6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted) }
+.separator { align-self:flex-start; margin-top:clamp(18px,7vw,38px); font:22px var(--display); color:var(--mauve) }
+.sep1,.sep2,.sep3 { padding-inline:0 }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.6 }
+
+/* Messaggio: la lettera con il mazzetto di felci legato dal nastro. */
+.invito-sec .card { isolation:isolate; padding:clamp(140px,38vw,170px) clamp(26px,8vw,56px) 42px }
+.invito-sec .card::before { content:""; position:absolute; top:18px; left:50%; translate:-50% 0; width:150px; height:108px; background:url(assets/mazzo.webp) center/contain no-repeat; pointer-events:none }
+.after { margin-top:18px }
+.lettera { font:italic 400 19px/1.8 var(--display); text-align:center; color:var(--ink) }
+
+/* Galleria: stampe con passe-partout, la seconda sfalsata. */
+.us-sec .card { padding:38px 14px 22px }
+.us-fl { width:42px; top:-30px; left:18px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:16px 12px; margin-top:22px; padding:0 2px 10px }
+.us-grid figure { margin:0; min-width:0; padding:8px; background:var(--ivory); border:1px solid var(--line); border-radius:2px; box-shadow:0 10px 22px #06170e1c }
+.us-grid figure:nth-child(even) { margin-top:30px }
+.us-grid img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:1px !important; outline:1px solid var(--mauve); outline-offset:3px }
+
+/* Immagine: stampa con l'angolo di felci. */
+.img-block { position:relative; isolation:isolate; max-width:560px; margin-inline:auto !important; padding:14px 14px 22px; background:var(--ivory); border:1px solid var(--line); border-radius:3px; box-shadow:0 16px 40px #06170e1c }
+.img-block::before { content:""; position:absolute; z-index:3; top:-30px; right:-12px; width:130px; height:130px; background:url(assets/floral-corner.png) top right/contain no-repeat; pointer-events:none }
+.img-block img { border-radius:1px !important }
+.img-block figcaption { padding:12px 6px 0; color:var(--muted); opacity:1 !important; font:italic 400 18px/1.5 var(--display) !important }
+
+/* Programma: medaglioni di velluto con le icone in lamina d'oro. */
+.prog-sec .card { padding:44px 16px 28px }
+.prog-fl { width:38px; top:-30px }
+.prog-fl.l { left:14px }
+.prog-fl.r { right:14px }
+.timeline { position:relative; max-width:440px; margin:22px auto 0; text-align:left; padding:16px 0 }
+.finial { position:absolute; width:22px; height:26px; top:-8px; left:39px }
+.rail { position:absolute; top:18px; bottom:24px; left:50px; width:1px; background:linear-gradient(var(--mauve),var(--line)) }
+.t-row { position:relative; display:grid; grid-template-columns:104px minmax(0,1fr); align-items:center; padding:10px 0; min-height:106px }
+.t-dot { position:relative; z-index:1; width:92px; height:92px; margin-left:4px; border-radius:50%; background:url(assets/t-anelli.webp) center/100% no-repeat; filter:drop-shadow(0 6px 10px #06170e2e) }
+.t-row:nth-of-type(4n+3) .t-dot { background-image:url(assets/t-calici.webp) }
+.t-row:nth-of-type(4n+4) .t-dot { background-image:url(assets/t-cena.webp) }
+.t-row:nth-of-type(4n+5) .t-dot,.t-row:nth-of-type(4n+1) .t-dot { background-image:url(assets/t-torta.webp) }
+.t-cell { padding:4px 6px 14px 10px; border-bottom:1px solid var(--line) }
+.t-time { color:var(--accent); font:500 22px/1.2 var(--display); letter-spacing:.04em }
+.t-name { margin-top:4px; font-size:14px; line-height:1.6 }
+
+/* Location: la villa, in una cornice incisa. */
+.loc-sec .card { padding:42px 18px 28px }
+.loc-name { font:400 28px/1.25 var(--display); color:var(--plum); margin-bottom:10px }
+.loc-addr { color:var(--muted); font-size:13px; opacity:1 !important }
+.loc-photo { width:100%; margin-top:24px; aspect-ratio:4/5; object-fit:cover; border-radius:2px !important; border:8px solid var(--ivory); outline:1px solid var(--mauve) }
+
+/* Mappa: cartolina nei toni del verde. */
+.map-frame { position:relative; max-width:620px; margin:auto; padding:10px 10px 12px; background:var(--ivory); border:1px solid var(--line); border-radius:3px; box-shadow:0 12px 30px #06170e18 }
+.map-frame iframe { width:100%; height:300px; border:0; border-radius:1px; filter:grayscale(1) sepia(.3) grayscale(1) sepia(.5) hue-rotate(75deg) saturate(1.1) }
+.map-fl { width:40px; height:auto; right:16px; top:-30px; bottom:auto; z-index:1 }
+
+/* Come arrivare: biglietto con il rametto d'ulivo. */
+.shuttle-sec .card { padding:26px 20px 22px; text-align:left }
+.shuttle-sec .card::after { content:""; position:absolute; top:-26px; right:10px; width:70px; height:62px; background:url(assets/ulivo.webp) center/contain no-repeat }
+.shuttle-sec .title { text-align:left; font-size:26px }
+.shuttle-sec .title::before { inset:-30% 40% -30% -10% }
+.shuttle-sec .title::after { margin-left:0 }
+.shuttle-box { padding:6px 0; border-top:1px solid var(--line) }
+
+/* Dress code: tondi di velluto e rame. */
+.dress-sec .card { padding:36px 16px 34px }
+.dress { font:italic 400 23px/1.4 var(--display); color:var(--plum); margin:0 0 20px }
+.dress-dots { gap:18px !important }
+.dress-dots>span { min-width:62px !important; padding:8px 2px }
+.dress-dots [role="img"] { width:42px !important; height:42px !important; outline:1px solid var(--mauve); outline-offset:4px; margin-bottom:8px; box-shadow:inset -6px -8px 12px #0000001a,inset 4px 4px 8px #ffffff80 }
+.dress-dots>span>span:last-child { color:var(--ink); opacity:1 !important; font-size:12px !important }
+
+/* Video: finestra rettangolare con filetto. */
+.video-sec .card { padding:22px 16px }
+.video-frame { position:relative; overflow:hidden; border-radius:2px; outline:1px solid var(--mauve); outline-offset:5px; background:var(--mist); aspect-ratio:9/14 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--mauve); border-radius:50%; background:var(--ivory); color:var(--plum) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo alla felce, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:var(--plum); border:0; border-radius:50%; filter:drop-shadow(0 6px 8px #06170e44); visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor; filter:drop-shadow(0 0 3px #f6ece0) }
+
+/* Conferma: lo stesso sigillo 3D della busta, che si illumina al passaggio. */
+.rsvp-sec .card { isolation:isolate; padding:40px 20px 42px }
+.rsvp-sec .body { max-width:360px; margin:0 auto }
+.rsvp-fl { width:100%; height:auto; left:0; bottom:10px; z-index:-1; opacity:.55 }
+.seal-btn { position:relative; width:150px; height:150px; display:grid; place-items:center; margin:26px auto 14px; border:0; border-radius:50%; color:var(--plum); background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 12px 14px #06170e40) drop-shadow(0 0 18px #fff3dc); transition:transform .3s ease, filter .3s ease }
+.seal-btn:hover { transform:translateY(-2px) rotate(-3deg); filter:drop-shadow(0 12px 14px #06170e40) drop-shadow(0 0 30px #ffe7c0) }
+/* Il monogramma resta per gli screen reader; a vista c'è la felce in rilievo. */
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--plum); font-size:12px; letter-spacing:.1em; text-align:center; padding:9px 18px; margin-bottom:40px; background:var(--ivory); border:1px solid var(--line); border-radius:2px; box-shadow:inset 0 0 0 3px var(--ivory),inset 0 0 0 4px var(--mauve) }
+.arrow-up { width:10px; height:10px; border-top:1px solid; border-left:1px solid; transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#06140cc4; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:clamp(70px,18vw,92px) 22px 30px; background:radial-gradient(120% 50% at 50% 0%,#fff3dc,#fff3dc00 60%),var(--ivory); border:1px solid var(--line); border-radius:4px; box-shadow:0 20px 80px #04100a33; overflow-wrap:anywhere }
+.popup__box::before { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:min(320px,76%); height:50px; background:url(assets/floral.png) center/contain no-repeat }
+.popup__title { color:var(--plum); font:400 26px/1.3 var(--display); letter-spacing:.08em; text-transform:uppercase; text-align:center; margin:0 10px 28px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:var(--ivory); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--plum) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font-size:14px; margin-bottom:8px; font-weight:500; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fff; border-radius:12px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:24px; cursor:pointer; font-size:14px; background:#fff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--accent); background:#fff }
+.radio input:checked+.ind { background:var(--accent); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--plum); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--plum); border-radius:2px; background:var(--plum); color:var(--ivory); font-size:14px; letter-spacing:.1em; text-transform:uppercase; box-shadow:0 0 22px #fff3dc }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--plum); font-weight:600; font-size:13px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--plum); box-shadow:0 0 0 3px var(--mist) }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 28px var(--display); color:var(--plum) }
+.honey { display:none !important }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Firma: corona d'ulivo con il sigillo di rame al centro. */
+.footer-sec { isolation:isolate; overflow:hidden; padding:60px 22px 70px; text-align:center }
+.footer-in { position:relative; z-index:1; padding:196px 14px 28px; max-width:480px; margin:auto }
+.footer-in::before { content:""; position:absolute; top:24px; left:50%; translate:-50% 0; width:150px; height:150px; background:radial-gradient(closest-side,#fff3dc,#fff3dc00 70%),url(assets/corona.webp) center/contain no-repeat }
+.footer-in::after { content:""; position:absolute; top:62px; left:50%; translate:-50% 0; width:74px; height:74px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #06170e44) }
+.footer-in .title { font-size:26px }
+.signature { font:400 34px/1.4 var(--script); color:var(--plum) }
+.footer-sec>.fl { display:none }
+.footer-sec>.fl.l { left:10% }
+.footer-sec>.fl.r { right:10% }
+.credits { position:relative; z-index:1; max-width:480px; margin:22px auto 0; padding:8px 12px; background:var(--panel); border:1px solid var(--line); border-radius:2px; font-size:12px; color:var(--muted) }
+
+/* Ingressi: dissolvenze e un bagliore lento sui titoli. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .9s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  img[data-anim="zoomin"] { transform:scale(.97); transition-property:opacity,transform }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .orn[data-anim],.fl-div[data-anim] { transform:translateY(8px); transition-property:opacity,transform }
+  .orn[data-anim].in,.fl-div[data-anim].in { transform:none }
+  .title::before { animation:glow 6s ease-in-out infinite alternate }
+  .prog-fl,.us-fl,.map-fl,.footer-sec>.fl { animation:sway 5s ease-in-out infinite alternate; transform-origin:top center }
+  .prog-fl.r,.footer-sec>.fl.r { animation-delay:-2.5s }
+}
+@keyframes sway { from { rotate:-4deg } to { rotate:4deg } }
+@keyframes glow { from { opacity:.55 } to { opacity:1 } }
+
+@media (min-width:700px) {
+  .sec { padding:64px 40px }
+  .h-text { padding:26% 24% 28% }
+  .names { font-size:84px }
+  .occasion { font-size:32px }
+  .hero-scene { min-height:min(100svh,1000px) }
+  .us-grid { gap:24px 20px }
+  .prog-sec .card { padding:50px 60px 34px }
+  .loc-photo { width:64%; margin-inline:auto }
+  .popup__box { padding-inline:42px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

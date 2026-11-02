@@ -1,0 +1,204 @@
+{
+  "engine": 2,
+  "id": "maiolica-di-capri",
+  "name": "Maiolica di Capri",
+  "description": "Una busta bianca a tutto schermo dipinta a mano come una maiolica caprese, con limoni blu cobalto e un sigillo 3D di ceralacca blu, si apre nella luce del mare: bianco e blu, la stessa tinta dall'apertura alla firma. La data è già scritta, in tre piastrelle.",
+  "models": [],
+  "themeColor": "#eef3fa",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Italiana&family=Great+Vibes&family=Nunito+Sans:wght@400;600&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Giulia & Marco",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "18:00",
+      "venue": "Villa Azzurra",
+      "address": "Via Tragara 21, Capri"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Sotto il sole di Capri",
+      "body": "Tra il profumo dei limoni e il blu del mare abbiamo trovato il nostro posto nel mondo.\nVorremmo condividerlo con voi nel giorno più bello."
+    },
+    "gallery": {
+      "heading": "Dettagli di maiolica",
+      "photos": [
+        "assets/terrazza-faraglioni.jpg",
+        "assets/tavola-maioliche.jpg",
+        "assets/vaso-mare.jpg",
+        "assets/sandali.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola-maioliche.jpg",
+      "caption": "La tavola tra limoni e maioliche, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        {
+          "time": "18:00",
+          "label": "La cerimonia sulla terrazza"
+        },
+        {
+          "time": "19:00",
+          "label": "Limoncello al tramonto"
+        },
+        {
+          "time": "20:30",
+          "label": "Cena vista Faraglioni"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa Azzurra",
+      "kind": "villa",
+      "photo": "assets/terrazza-faraglioni.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Capri si raggiunge in aliscafo da Napoli o Sorrento.\nAlle 17:00 una navetta partirà dalla Piazzetta per la villa."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del blu e del bianco",
+      "colors": [
+        {
+          "hex": "#1D3F8F",
+          "name": "Cobalto"
+        },
+        {
+          "hex": "#4F7FC4",
+          "name": "Maiolica"
+        },
+        {
+          "hex": "#A9C3E8",
+          "name": "Cielo"
+        },
+        {
+          "hex": "#FBFCFE",
+          "name": "Calce"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Luce di giugno",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo ai limoni e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    },
+    "blockSwap": {
+      "scratchdate": "date"
+    },
+    "date": {
+      "cellShape": "box",
+      "showLabels": true
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Under the Capri sun",
+      "body": "Amid the scent of lemons and the blue of the sea we found our place in the world.\nWe would love to share it with you on our most beautiful day."
+    },
+    "gallery": {
+      "heading": "Majolica details"
+    },
+    "image": {
+      "caption": "The table among lemons and majolica, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        {
+          "time": "18:00",
+          "label": "The ceremony on the terrace"
+        },
+        {
+          "time": "19:00",
+          "label": "Limoncello at sunset"
+        },
+        {
+          "time": "20:30",
+          "label": "Dinner facing the Faraglioni"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "Capri can be reached by hydrofoil from Naples or Sorrento.\nAt 5 pm a shuttle will leave from the Piazzetta for the villa."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in blue and white",
+      "colors": [
+        {
+          "hex": "#1D3F8F",
+          "name": "Cobalt"
+        },
+        {
+          "hex": "#4F7FC4",
+          "name": "Majolica"
+        },
+        {
+          "hex": "#A9C3E8",
+          "name": "Sky"
+        },
+        {
+          "hex": "#FBFCFE",
+          "name": "Lime white"
+        }
+      ]
+    },
+    "video": {
+      "heading": "June light"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the lemon seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}
