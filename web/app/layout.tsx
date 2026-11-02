@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Fraunces, Jost } from "next/font/google";
 import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
+import "./bespoke.css";
 import { Toaster } from "@/components/ui/Toaster";
 import { getLang } from "@/lib/i18n";
 
-// Titoli in Cormorant Garamond, interfaccia in Jost: scaricati in build e serviti dal nostro dominio.
-const display = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["300", "400", "500", "600"], style: ["normal", "italic"] });
+// Titoli in Fraunces, interfaccia in Jost (sistema Bespoke Invites): scaricati in build e serviti dal nostro dominio.
+const display = Fraunces({ subsets: ["latin"], variable: "--font-iv-display", display: "swap", weight: ["300", "400", "500"], style: ["normal", "italic"] });
 const text = Jost({ subsets: ["latin"], variable: "--font-text", display: "swap", weight: ["300", "400", "500", "600"] });
 
 export const metadata: Metadata = {
