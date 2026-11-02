@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { AdminConsole } from "@/components/AdminConsole";
 import { apiServer } from "@/lib/api";
@@ -12,7 +11,17 @@ export default async function Admin() {
   } catch {
     me = { user: null };
   }
-  if (!me.user) redirect("/accedi?next=/admin");
+  if (!me.user) {
+    return (
+      <>
+        <Nav />
+        <main className="wrap narrow admin-denied">
+          <h1>Accesso riservato</h1>
+          <p className="lede">La console si apre con il link di accesso dell'amministratore.</p>
+        </main>
+      </>
+    );
+  }
   if (me.user.role !== "admin") {
     return (
       <>

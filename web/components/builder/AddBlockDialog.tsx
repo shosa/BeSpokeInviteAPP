@@ -34,6 +34,7 @@ export function AddBlockDialog(p: Props) {
 
   // Nel portale (body): la colonna del builder ha animazioni con trasformazioni, che sposterebbero il modale.
   return createPortal(
+    <div className="bl-app bl-layer">
     <div className="bl-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) p.onClose(); }}>
       <div className="bl-modal" role="dialog" aria-modal="true" aria-labelledby="bl-modal-title">
         <header className="bl-modal-head">
@@ -85,6 +86,7 @@ export function AddBlockDialog(p: Props) {
           })}
         </ul>
       </div>
+    </div>
     </div>,
     document.body,
   );

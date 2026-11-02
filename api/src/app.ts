@@ -38,23 +38,11 @@ import { renderInvitePage } from "./engine/page";
 import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
-import {
-  SESSION_COOKIE,
-  adminAllowed,
-  consumeResetToken,
-  createResetToken,
-  currentUser,
-  endSession,
-  hashPassword,
-  startSession,
-  verifyPassword,
-  type SessionUser,
-} from "./auth";
-import { appUrl, inviteEmail, orderEmail, resetEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
-import { registerGoogle, googleEnabled } from "./google";
+import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
+import { appUrl, inviteEmail, orderEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
-import { createCheckout, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
+import { createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -142,41 +130,18 @@ export async function buildApp() {
 
   app.get("/api/catalog", async () => {
     const c = await loadCatalog();
-    return { ...c, eventTypes: EVENT_TYPES, shopify: shopifyConfigured(), google: googleEnabled() };
+    return { ...c, eventTypes: EVENT_TYPES, shopify: shopifyConfigured(), demo: demoMode() };
   });
 
   // ───────────── Autenticazione ─────────────
-  app.post("/api/auth/register", async (req, reply) => {
-    const b = (req.body ?? {}) as { email?: string; password?: string; name?: string };
-    const email = String(b.email ?? "").trim().toLowerCase();
-    const name = String(b.name ?? "").trim().slice(0, 80);
-    const password = String(b.password ?? "");
-    if (!EMAIL.test(email)) return reply.code(400).send({ error: "Inserisci un'email valida" });
-    if (password.length < 8) return reply.code(400).send({ error: "La password deve avere almeno 8 caratteri" });
-    if (!name) return reply.code(400).send({ error: "Inserisci il tuo nome" });
-
-    const role = process.env.ADMIN_EMAIL && email === process.env.ADMIN_EMAIL.toLowerCase() ? "admin" : "user";
-    try {
-      const { rows } = await pool.query(
-        "INSERT INTO users (id, email, name, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, name, role",
-        [randomUUID(), email, name, await hashPassword(password), role],
-      );
-      await startSession(reply, rows[0].id);
-      return reply.code(201).send(rows[0]);
-    } catch (e) {
-      if ((e as { code?: string }).code === "23505") return reply.code(409).send({ error: "Esiste già un account con questa email" });
-      throw e;
-    }
-  });
-
-  app.post("/api/auth/login", async (req, reply) => {
-    const b = (req.body ?? {}) as { email?: string; password?: string };
-    const email = String(b.email ?? "").trim().toLowerCase();
-    const { rows } = await pool.query("SELECT id, email, name, role, password_hash FROM users WHERE email = $1", [email]);
-    const user = rows[0];
-    // Stessa risposta per email sconosciuta e password errata: nessun elenco di account.
-    const ok = !!user && !!user.password_hash && (await verifyPassword(String(b.password ?? ""), user.password_hash));
-    if (!ok) return reply.code(401).send({ error: "Email o password non corretti" });
+  // Accesso con il link personale ricevuto dopo l'acquisto: il token apre la sessione, senza password.
+  app.post("/api/auth/token", async (req, reply) => {
+    const token = String(((req.body ?? {}) as { token?: string }).token ?? "");
+    const found = token ? await userForAccessToken(token) : null;
+    if (!found) return reply.code(401).send({ error: "Link non valido o scaduto" });
+    const role = roleForEmail(found.email);
+    const user = role === found.role ? found : { ...found, role };
+    if (user !== found) await pool.query("UPDATE users SET role = $2 WHERE id = $1", [user.id, role]);
     await startSession(reply, user.id);
     return { id: user.id, email: user.email, name: user.name, role: user.role };
   });
@@ -188,29 +153,6 @@ export async function buildApp() {
 
   app.delete("/api/auth/me", async (req, reply) => {
     await endSession(req, reply);
-    return { ok: true };
-  });
-
-  app.post("/api/auth/forgot", async (req) => {
-    const email = String(((req.body ?? {}) as { email?: string }).email ?? "").trim().toLowerCase();
-    const { rows } = await pool.query("SELECT id, email FROM users WHERE email = $1", [email]);
-    if (rows[0]) {
-      const token = await createResetToken(rows[0].id);
-      await sendMail(resetEmail({ to: rows[0].email, token }));
-    }
-    return { ok: true }; // risposta identica in ogni caso
-  });
-
-  app.post("/api/auth/reset", async (req, reply) => {
-    const b = (req.body ?? {}) as { token?: string; password?: string };
-    const password = String(b.password ?? "");
-    if (password.length < 8) return reply.code(400).send({ error: "La password deve avere almeno 8 caratteri" });
-    if (!b.token) return reply.code(400).send({ error: "Link non valido" });
-    const userId = await consumeResetToken(b.token);
-    if (!userId) return reply.code(400).send({ error: "Il link è scaduto o già usato. Richiedine uno nuovo." });
-    await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [await hashPassword(password), userId]);
-    await pool.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
-    await startSession(reply, userId);
     return { ok: true };
   });
 
@@ -790,6 +732,36 @@ export async function buildApp() {
     return id;
   }
 
+  // Modalità demo (DEMO_MODE=true, senza Shopify): crea un invito di prova senza pagamento, per provare il builder.
+  // Senza sessione crea un utente demo e apre la sessione. Non esiste con Shopify configurato.
+  app.post("/api/demo/invitations", async (req, reply) => {
+    if (!demoMode()) return reply.code(404).send({ error: "Modalità demo non attiva" });
+    let user = await currentUser(req);
+    if (!user) {
+      const id = randomUUID();
+      const { rows } = await pool.query("INSERT INTO users (id, email, name) VALUES ($1, $2, 'Demo') RETURNING id, email, name, role", [id, `demo-${id.slice(0, 8)}@demo.invalid`]);
+      user = rows[0];
+      await startSession(reply, user!.id);
+    }
+    const c = await loadCatalog();
+    const b = (req.body ?? {}) as { model?: string; themeId?: string; eventType?: string; addons?: unknown };
+    const model = getModel(c, String(b.model ?? "")) ?? c.models[0];
+    if (!model) return reply.code(400).send({ error: "Nessun modello disponibile" });
+    const theme = (b.themeId ? getTheme(c, String(b.themeId), model.id) : undefined) ?? enabledThemes(c, model.id)[0];
+    if (!theme) return reply.code(400).send({ error: "Nessun tema disponibile per questo modello" });
+    const eventType = EVENT_TYPES.find((e) => e.id === b.eventType)?.id ?? "wedding";
+    const addons = Array.isArray(b.addons) ? [...new Set(b.addons.filter((k): k is string => typeof k === "string" && model.options.includes(k as AddonKey)))] : [];
+    const amount = totalCents(c, model.id, addons);
+    const orderId = randomUUID();
+    const draft = { model: model.id, themeId: theme.id, eventType, addons };
+    await pool.query(
+      "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, checkout_url, kind, draft) VALUES ($1, $2, NULL, $3, 'EUR', 'local', 'pending', '', 'initial', $4)",
+      [orderId, user!.id, amount, JSON.stringify(draft)],
+    );
+    const invitationId = await createInvitationFromOrder({ id: orderId, user_id: user!.id, draft, amount_cents: amount }, "local", `DEMO-${Date.now()}`);
+    return { invitationId };
+  });
+
   // Acquisto prima dell'invito: si crea il pagamento con la scelta; l'invito nasce al pagamento riuscito.
   app.post("/api/checkout/new", async (req, reply) => {
     const user = await requireUser(req, reply);
@@ -1075,7 +1047,6 @@ export async function buildApp() {
 
   registerAdminInvitations(app, requireAdmin);
   registerAdminMedia(app, requireAdmin);
-  registerGoogle(app);
   return app;
 }
 

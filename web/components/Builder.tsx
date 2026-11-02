@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "./builder/builder.css";
 import {
   activeFeatures,
   enabledThemes,
@@ -24,7 +25,7 @@ import {
 } from "@inviteme/shared";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
-import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Music, Palette, Redo2, RotateCw, Smartphone, Undo2, Users, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Music, Palette, Redo2, RotateCw, Smartphone, Sparkles, Undo2, Users, X } from "lucide-react";
 import { Canvas } from "./builder/Canvas";
 import { Inspector } from "./builder/Inspector";
 import { AssistantPanel } from "./builder/AssistantPanel";
@@ -138,6 +139,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   // Su telefono: il menu degli strumenti dall'hamburger, e il modale di Salva con totale e pagamento al posto del footer.
   const [topMenu, setTopMenu] = useState(false);
   const [mobileSheet, setMobileSheet] = useState(false);
+  const [assistantSheet, setAssistantSheet] = useState(false);
   // Anteprima in una card con barra: ingrandisci a tutto schermo, ricarica, copia il link, apri in una nuova scheda.
   const [previewFull, setPreviewFull] = useState(false);
   // Su desktop l'elenco dei blocchi è una scheda del centro; su telefono resta nella sua colonna.
@@ -390,20 +392,6 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
     edit((c) => ({ ...c, event: { ...c.event, [key]: value } }), group);
   }
   // Cambio di template: contenuto e blocchi restano; tornano al template solo i colori personalizzati.
-  function setTheme(id: string) {
-    edit((c) => ({
-      ...c,
-      themeId: id,
-      blocks: c.blocks.map((b) => {
-        const props = { ...b.props };
-        delete props.lookBg;
-        delete props.lookInk;
-        delete props.lookCover;
-        return { ...b, props };
-      }),
-    }));
-  }
-
   async function upload(kind: "photo" | "video" | "audio", file: File): Promise<string | null> {
     setBusy(kind);
     setError(null);
@@ -480,7 +468,6 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       <header className="bl-top">
         <a href="/account" className="back-link" aria-label={L.back}><ArrowLeft size={16} aria-hidden="true" /><span className="bl-back-text">{L.back}</span></a>
         <h1 className="bl-title">{title}</h1>
-        <button type="button" className="bl-mobile-save btn solid small" onClick={() => (paidAlready && editable ? setSummary(true) : setMobileSheet(true))}>{L.saveNow}</button>
         <button type="button" className="bl-burger" aria-expanded={topMenu} aria-label={lang === "en" ? (topMenu ? "Close menu" : "Open menu") : (topMenu ? "Chiudi il menu" : "Apri il menu")} onClick={() => setTopMenu((o) => !o)}>{topMenu ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}</button>
         <div className={`bl-top-tools${topMenu ? " is-menu-open" : ""}`}>
           <button type="button" className="bl-icon" aria-label={L.undo} data-label={L.undo} title={`${L.undo} (Ctrl+Z)`} disabled={locked || !history.canUndo} onClick={history.undo}><Undo2 size={17} /></button>
@@ -516,16 +503,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           <span className="bl-preview-title"><Eye size={16} aria-hidden="true" />{lang === "en" ? "Live preview" : "Anteprima dal vivo"}</span>
           <span className="bl-preview-tools-row">
             <button type="button" aria-label={lang === "en" ? "Reload preview" : "Ricarica l'anteprima"} title={lang === "en" ? "Reload preview" : "Ricarica l'anteprima"} onClick={() => frame.current?.contentWindow?.location.reload()}><RotateCw size={16} aria-hidden="true" /></button>
-            <button type="button" aria-pressed={previewFull} aria-label={previewFull ? (lang === "en" ? "Exit full screen" : "Esci da schermo intero") : (lang === "en" ? "Full screen" : "Schermo intero")} title={previewFull ? (lang === "en" ? "Exit full screen" : "Esci da schermo intero") : (lang === "en" ? "Full screen" : "Schermo intero")} onClick={() => setPreviewFull((v) => !v)}>{previewFull ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}</button>
-            <button type="button" aria-label={lang === "en" ? "Copy link" : "Copia il link"} title={lang === "en" ? "Copy link" : "Copia il link"} disabled={initial.status !== "paid"} onClick={() => { navigator.clipboard?.writeText(shareUrl); toast.success("✓"); }}><Copy size={16} aria-hidden="true" /></button>
-            <button type="button" aria-label={lang === "en" ? "Open in a new tab" : "Apri in una nuova scheda"} title={lang === "en" ? "Open in a new tab" : "Apri in una nuova scheda"} disabled={initial.status !== "paid"} onClick={() => window.open(shareUrl, "_blank", "noopener")}><ExternalLink size={16} aria-hidden="true" /></button>
+            {isDesktop && <button type="button" aria-pressed={previewFull} aria-label={previewFull ? (lang === "en" ? "Exit full screen" : "Esci da schermo intero") : (lang === "en" ? "Full screen" : "Schermo intero")} title={previewFull ? (lang === "en" ? "Exit full screen" : "Esci da schermo intero") : (lang === "en" ? "Full screen" : "Schermo intero")} onClick={() => setPreviewFull((v) => !v)}>{previewFull ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}</button>}
           </span>
         </header>
         <div className="bl-preview-bar">
-          <div className="bl-tpl-chip">
-            <span className="bl-tpl-kicker">{L.template}</span>
-            <strong>{theme ? themeCopy(theme.id, theme.name, lang) : "—"}</strong>
-          </div>
           <div className="bl-preview-tools">
             <div className="bl-tools-col">
               {hasCover && (
@@ -633,7 +614,6 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             busy={busy}
             onSetProp={setProp}
             onSetEvent={setEvent}
-            onSetTheme={setTheme}
             locked={locked}
             onSetLocale={(locale) => edit((c) => ({ ...c, locale }))}
             onSetEventType={(eventType: EventType) => edit((c) => ({ ...c, eventType }))}
@@ -655,6 +635,31 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
 
       {error && <p role="alert" className="form-error bl-error">{error}</p>}
 
+      {!isDesktop && (
+        <div className="bl-fab-row">
+          {initial.assistant && !assistantSheet && (
+            <button type="button" className="bl-assist-fab" onClick={() => setAssistantSheet(true)}>
+              <Sparkles size={16} aria-hidden="true" />{lang === "en" ? "Assistant" : "Assistente"}
+            </button>
+          )}
+          {paidAlready && editable ? (
+            <button type="button" className="btn solid bl-fab-primary" onClick={() => setSummary(true)}>{lang === "en" ? "Confirm edit" : "Conferma modifica"}</button>
+          ) : !paidAlready || extra > 0 ? (
+            <button type="button" className="btn solid bl-fab-primary" onClick={() => setMobileSheet(true)}>{paidAlready ? (lang === "en" ? "Buy the new features" : "Acquista le funzioni nuove") : L.pay}</button>
+          ) : null}
+        </div>
+      )}
+      {!isDesktop && initial.assistant && assistantSheet && (
+        <div className="bl-modal-backdrop bl-assist-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setAssistantSheet(false); }}>
+          <div className="bl-modal bl-assist-sheet" role="dialog" aria-modal="true" aria-labelledby="bl-assist-title">
+            <header className="bl-modal-head">
+              <h2 id="bl-assist-title">{lang === "en" ? "Assistant" : "Assistente"}</h2>
+              <button type="button" className="bl-icon" aria-label={lang === "en" ? "Close" : "Chiudi"} onClick={() => setAssistantSheet(false)}><X size={18} aria-hidden="true" /></button>
+            </header>
+            <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} />
+          </div>
+        </div>
+      )}
       {mobileSheet && (
         <div className="bl-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setMobileSheet(false); }} onKeyDown={(e) => { if (e.key === "Escape") setMobileSheet(false); }}>
           <div className="bl-modal sheet-save" role="dialog" aria-modal="true" aria-labelledby="sheet-save-title">
@@ -662,12 +667,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
               <h2 id="sheet-save-title">{lang === "en" ? "Save" : "Salva"}</h2>
               <button type="button" className="bl-icon" aria-label={lang === "en" ? "Close" : "Chiudi"} onClick={() => setMobileSheet(false)}><X size={18} aria-hidden="true" /></button>
             </header>
-            {paidAlready && extra <= 0 ? (
-              <div className="shared">
-                <code>{shareUrl}</code>
-                <button type="button" className="btn outline small" onClick={() => { navigator.clipboard?.writeText(shareUrl); toast.success("✓"); }}><Copy size={15} aria-hidden="true" />{L.copy}</button>
-              </div>
-            ) : (
+            {paidAlready && extra <= 0 ? null : (
               <>
                 <div className="total">
                   <span>{paidAlready ? (lang === "en" ? "New feature to buy" : "Funzione da acquistare") : L.total}</span>
@@ -713,13 +713,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             <button type="button" className="link confirm-edit-summary" onClick={() => setSummary(true)}>{lang === "en" ? "Summary" : "Riepilogo"}</button>
             {extra > 0 && <span className="confirm-edit-extra">{formatPrice(extra)}</span>}
           </div>
-        ) : paidAlready && extra <= 0 ? (
-          <div className="shared">
-            <code>{shareUrl}</code>
-            <button type="button" className="btn outline small" onClick={() => { navigator.clipboard?.writeText(shareUrl); toast.success("✓"); }}><Copy size={15} aria-hidden="true" />{L.copy}</button>
-            <a className="btn solid" href={`https://wa.me/?text=${encodeURIComponent(`Ti invitiamo! Trovi tutti i dettagli qui: ${shareUrl}`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
-          </div>
-        ) : (
+        ) : paidAlready && extra <= 0 ? null : (
           <>
             <div className="total">
               <span>{paidAlready ? (lang === "en" ? "New feature to buy" : "Funzione da acquistare") : L.total}</span>

@@ -34,3 +34,8 @@ export async function apiPublicHtml(path: string): Promise<string | null> {
   if (!res.ok) throw new ApiError(res.status, `Errore ${res.status}`);
   return res.text();
 }
+
+// Chiamata POST lato server senza sessione: restituisce la risposta intera, con gli eventuali cookie da inoltrare.
+export async function apiPublicPost(path: string, body: unknown): Promise<Response> {
+  return fetch(`${API}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), cache: "no-store" });
+}

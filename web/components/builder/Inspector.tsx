@@ -1,12 +1,11 @@
 "use client";
 
-import { BLOCK_LABELS, EVENT_FIELDS, EVENT_TYPES, HERO_EVENT_KEYS, blockDef, enabledThemes, type BlockDef, type BlockInstance, type Catalog, type EventType, type FieldDef, type FontId, type InviteConfig, type RsvpQuestion, BACKGROUND_KINDS, BACKGROUND_LABELS, type BackgroundKind, type BackgroundSpec } from "@inviteme/shared";
+import { BLOCK_LABELS, EVENT_FIELDS, EVENT_TYPES, HERO_EVENT_KEYS, blockDef, type BlockDef, type BlockInstance, type Catalog, type EventType, type FieldDef, type FontId, type InviteConfig, type RsvpQuestion, BACKGROUND_KINDS, BACKGROUND_LABELS, type BackgroundKind, type BackgroundSpec } from "@inviteme/shared";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ArrowLeft, Ellipsis, Eye, EyeOff, Image as ImageIcon, LayoutGrid, Palette, Shapes, Trash2, Type } from "lucide-react";
 import { Field, FieldEditor, type Values } from "./fields";
 import { FontButton } from "./FontButton";
-import { TemplateSwitch } from "./TemplateSwitch";
 import { ui } from "@/lib/ui";
 import { blockCopy, blockDescCopy, fieldCopy } from "@/lib/catalogCopy";
 import { MusicPicker } from "./MusicPicker";
@@ -132,7 +131,6 @@ type Props = {
   busy: string | null;
   onSetProp: (id: string, key: string, value: unknown, group?: string) => void;
   onSetEvent: (key: string, value: unknown, group?: string) => void;
-  onSetTheme: (id: string) => void;
   locked?: boolean;
   videoEnvelope?: boolean; // il tema apre l'invito con un filmato: la Busta non ha proprietà
   onSetLocale: (locale: "it" | "en") => void;
@@ -235,7 +233,6 @@ export function Inspector(p: Props) {
     );
   }
 
-  const themes = enabledThemes(p.catalog, p.config.model);
   const hasMap = p.config.blocks.some((b) => b.type === "map");
   const hasHero = p.config.blocks.some((b) => b.type === "hero");
   const show = (k: "dettagli" | "tema" | "lingua" | "link") => !p.section || p.section === k;
@@ -294,8 +291,7 @@ export function Inspector(p: Props) {
 
       {show("tema") && (
       <section className="bl-group" aria-labelledby="bl-style">
-        <h3 id="bl-style">{L.template}</h3>
-        <TemplateSwitch themes={themes} currentId={p.config.themeId} locked={!!p.locked} onConfirm={p.onSetTheme} lang={p.lang} />
+        <h3 id="bl-style">{p.lang === "en" ? "Background" : "Sfondo"}</h3>
         <Field label={p.lang === "en" ? "Animated background" : "Sfondo animato"}>
           <select value={p.config.background?.kind ?? ""} onChange={(e) => p.onSetBackground(e.target.value ? { kind: e.target.value as BackgroundKind, color: p.config.background?.color } : null)}>
             <option value="">{p.lang === "en" ? "Theme default" : "Predefinito dello stile"}</option>

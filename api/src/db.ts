@@ -122,6 +122,14 @@ CREATE TABLE IF NOT EXISTS stock_imports (
   bytes integer NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS access_tokens (
+  token_hash text PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  expires_at timestamptz NOT NULL,
+  revoked_at timestamptz
+);
+DROP TABLE IF EXISTS password_resets;
 `;
 
 // Crea lo schema all'avvio. Il lock evita che due istanze lo eseguano insieme.

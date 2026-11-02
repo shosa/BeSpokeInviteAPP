@@ -85,6 +85,7 @@ export function PixabayDialog({ invitationId, onClose, onPick }: Props) {
 
   // Nel portale (body): il pannello del builder ha animazioni con trasformazioni che sposterebbero il modale.
   return createPortal(
+    <div className="bl-app bl-layer">
     <div className="bl-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
       <div className="bl-modal stock-modal" role="dialog" aria-modal="true" aria-labelledby="stock-title">
         <header className="bl-modal-head">
@@ -166,6 +167,7 @@ export function PixabayDialog({ invitationId, onClose, onPick }: Props) {
           </div>
         )}
       </div>
+    </div>
     </div>,
     document.body
   );

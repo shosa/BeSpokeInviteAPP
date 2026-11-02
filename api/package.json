@@ -12,7 +12,8 @@
     "validate-theme": "tsx scripts/validate-theme.ts",
     "preview-theme": "tsx scripts/theme-preview.ts",
     "test": "node --import tsx --test test/*.test.ts",
-    "reset-invitations": "node scripts/reset-invitations.mjs"
+    "reset-invitations": "node scripts/reset-invitations.mjs",
+    "access-token": "tsx scripts/access-token.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.2.0",

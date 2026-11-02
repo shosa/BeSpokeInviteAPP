@@ -13,6 +13,21 @@ Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 - **Test**: `shared` 18/18, `api` 10/10, typecheck di shared e API OK.
 - **Documentazione per agenti**: `docs/MOTORE.md` e `docs/TEMI.md`.
 
+## Conversione in Bespoke Invites (in corso)
+
+- **Perimetro:** planner (`/planner/[id]`), profilo con gli inviti (`/account`), builder (`/editor/[id]`), link pubblici (`/i/[slug]`). Niente home, landing, legal, checkout interno, registrazione o login con password. `/` rimanda al profilo.
+- **Accesso:** con il link personale `/accesso/[token]`: l'API verifica il token (salvato solo come hash in `access_tokens`, scadenza 365 giorni, revocabile) e apre la sessione. Il link lo crea `npm run access-token -w @inviteme/api -- <email> <nome>`. In seguito lo crea il webhook Shopify (fase 2 del piano).
+- **Google:** rimosso (route, modulo e variabili).
+- **Modalità demo:** con `DEMO_MODE=true` e senza Shopify il profilo mostra «Crea un invito di prova»: `POST /api/demo/invitations` crea (se manca) un utente demo e un invito pagato di prova. Con Shopify configurato la demo è sempre spenta.
+- **Da decidere:** la console admin e i checkout API (`/api/checkout*`) restano finché la fase 1 del piano Shopify non li sostituisce.
+- **Verifica:** test API 65/65, typecheck di API e web. Nessun deploy: il cambio di accesso è da confermare prima, perché gli account con password non entrano più.
+## Builder con il sistema «Bespoke Invites» (in corso)
+
+- **Stile**: le regole del builder stanno in `web/components/builder/builder.css`, tutte sotto `.bl-app`. Le regole di builder erano in `web/app/globals.css` e sono state spostate; restano lì solo `.bl-icon` (usata dalla console admin) e gli stili condivisi.
+- **Palette e font**: crema, avorio e sabbia; oro metallico per i pulsanti principali; Fraunces per i titoli (caricato in `web/app/editor/layout.tsx`) e Jost per il testo.
+- **Verificato**: typecheck del web e parsing del CSS. **Non ancora verificato nel browser**: serve un deploy o un'anteprima con un account.
+- **Non toccato**: la home e le pagine pubbliche (da rimuovere, decisione da prendere); la logica del builder.
+
 ## Aggiornamenti dell'ultimo ciclo
 
 - **Renderer a blocchi** verificato: 19/19 controlli di smoke test contro un Postgres reale (ephemeral), test API e shared verdi, validatore OK su 4 stili.
