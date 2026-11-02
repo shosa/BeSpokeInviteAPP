@@ -1,0 +1,139 @@
+{
+  "engine": 2,
+  "id": "velluto-bordeaux",
+  "name": "Velluto bordeaux",
+  "description": "Tutto in bordeaux: una busta di velluto chiusa da un sigillo di ceralacca in rilievo si apre su rose a sbalzo, e la stessa tinta di vino e cipria veste l'invito fino alla firma.",
+  "models": [],
+  "themeColor": "#3a0d17",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Alex+Brush&family=Lora:ital,wght@0,400;0,500;1,400&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Beatrice & Lorenzo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-12-11",
+      "eventTime": "17:30",
+      "venue": "Palazzo delle Rose",
+      "address": "Piazza del Duomo 4, Verona"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Una sera d'inverno",
+      "body": "Tra velluti, candele e rose, vogliamo promessa e festa nella stessa notte.\nSarà un onore avervi accanto mentre diciamo il nostro sì."
+    },
+    "gallery": {
+      "heading": "Atmosfere",
+      "photos": [
+        "assets/arco-rose.jpg",
+        "assets/vaso-rose.jpg",
+        "assets/lettere.jpg",
+        "assets/balcone-rose.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/banchetto.jpg",
+      "caption": "La sala del banchetto, illuminata solo dalle candele."
+    },
+    "program": {
+      "heading": "La nostra sera",
+      "items": [
+        { "time": "17:30", "label": "La cerimonia" },
+        { "time": "18:30", "label": "Brindisi nel salone" },
+        { "time": "20:00", "label": "Cena a lume di candela" },
+        { "time": "23:00", "label": "Taglio della torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Palazzo delle Rose",
+      "kind": "villa",
+      "photo": "assets/palazzo.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il palazzo è nel centro storico: consigliamo i parcheggi di Piazza Cittadella.\nAlle 17:00 un servizio di navetta partirà dagli hotel convenzionati."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Black tie, nei toni del vino",
+      "colors": [
+        { "hex": "#2A0810", "name": "Notte" },
+        { "hex": "#6E1A2B", "name": "Bordeaux" },
+        { "hex": "#C77C86", "name": "Rosa antico" },
+        { "hex": "#F3DCDC", "name": "Cipria" }
+      ]
+    },
+    "video": {
+      "heading": "Petali di velluto",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Rompi il sigillo e dicci se brinderai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A winter evening",
+      "body": "Among velvet, candles and roses, we want our promise and our party on the same night.\nIt will be an honour to have you beside us as we say yes."
+    },
+    "gallery": { "heading": "Atmospheres" },
+    "image": { "caption": "The banquet hall, lit only by candles." },
+    "program": {
+      "heading": "Our evening",
+      "items": [
+        { "time": "17:30", "label": "The ceremony" },
+        { "time": "18:30", "label": "A toast in the great hall" },
+        { "time": "20:00", "label": "Candlelit dinner" },
+        { "time": "23:00", "label": "Cutting the cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The palazzo is in the historic centre: we suggest the car parks in Piazza Cittadella.\nAt 5 pm a shuttle will leave from the partner hotels."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Black tie, in wine tones",
+      "colors": [
+        { "hex": "#2A0810", "name": "Night" },
+        { "hex": "#6E1A2B", "name": "Burgundy" },
+        { "hex": "#C77C86", "name": "Antique rose" },
+        { "hex": "#F3DCDC", "name": "Blush" }
+      ]
+    },
+    "video": { "heading": "Velvet petals" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Break the seal and tell us if you'll raise a glass with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}
