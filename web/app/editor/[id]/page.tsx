@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Builder, type Manage } from "@/components/Builder";
 import { ApiError, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
+import { SetupGate } from "@/components/SetupGate";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,13 @@ export default async function Editor({ params }: { params: Promise<{ id: string 
   try {
     const manage = await apiServer<Manage>(`/api/invitations/${id}/manage`);
     if (manage.status !== "paid") redirect(`/planner/${id}`);
-    return <Builder initial={manage} lang={await getLang()} />;
+    const ev = (manage.config.event ?? {}) as { title?: string; eventDate?: string; venue?: string };
+    const setupDone = Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone);
+    return (
+      <SetupGate id={id} setupDone={setupDone} initial={{ title: ev.title ?? "", eventDate: ev.eventDate ?? "", venue: ev.venue ?? "" }}>
+        <Builder initial={manage} lang={await getLang()} />
+      </SetupGate>
+    );
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) redirect("/account");
     if (e instanceof ApiError && e.status === 404) notFound();

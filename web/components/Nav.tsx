@@ -32,7 +32,7 @@ export function Nav({ current, lang = "it" }: { current?: "account" | "admin"; l
   return (
     <header className="nav">
       <div className="nav-inner">
-        <a href="/account" className="logo-link" aria-label="InviteMe"><Logo /></a>
+        <a href="/account" className="logo-link" aria-label="Bespoke Invites"><Logo /></a>
         <div className="nav-account">
           {me === undefined || !me ? null : (
             <>

@@ -130,6 +130,51 @@ CREATE TABLE IF NOT EXISTS access_tokens (
   revoked_at timestamptz
 );
 DROP TABLE IF EXISTS password_resets;
+CREATE TABLE IF NOT EXISTS planner_tables (
+  id uuid PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  seats integer NOT NULL DEFAULT 8,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE planner_guests ADD COLUMN IF NOT EXISTS table_id uuid REFERENCES planner_tables(id) ON DELETE SET NULL;
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS tier text NOT NULL DEFAULT 'rsvp';
+CREATE TABLE IF NOT EXISTS planner_budget_items (
+  id uuid PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  category text NOT NULL,
+  label text NOT NULL,
+  amount_cents integer NOT NULL DEFAULT 0,
+  due_date date,
+  paid boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS planner_tasks (
+  id uuid PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  done boolean NOT NULL DEFAULT false,
+  days_before integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS planner_vendors (
+  id uuid PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  role text NOT NULL DEFAULT '',
+  contact text NOT NULL DEFAULT '',
+  contract_status text NOT NULL DEFAULT 'unsigned' CHECK (contract_status IN ('unsigned', 'signed')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS planner_guests (
+  id uuid PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  group_name text NOT NULL DEFAULT '',
+  party_size integer NOT NULL DEFAULT 1,
+  response text NOT NULL DEFAULT 'pending' CHECK (response IN ('pending', 'yes', 'no')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 `;
 
 // Crea lo schema all'avvio. Il lock evita che due istanze lo eseguano insieme.

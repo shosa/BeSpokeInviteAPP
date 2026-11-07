@@ -8,15 +8,17 @@ import { ui } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
 
-type Row = { id: string; slug: string; status: "draft" | "paid"; title: string; eventDate: string; model: string; views: number; guests: number; rsvps: number };
+type Row = { id: string; slug: string; status: "draft" | "paid"; tier: string; title: string; eventDate: string; model: string; views: number; guests: number; rsvps: number };
 
 // Profilo: gli inviti acquistati, con builder, planner e link pubblico. Senza sessione si chiede il link di accesso.
 export default async function Account({ searchParams }: { searchParams: Promise<{ stato?: string; accesso?: string }> }) {
   const { stato, accesso } = await searchParams;
   const lang = await getLang();
   const t = ui(lang);
-  const catalog = await apiPublic<{ demo?: boolean }>("/api/catalog");
+  const catalog = await apiPublic<{ demo?: boolean; themes?: { enabled: boolean; manifest: { id: string; name: string; models: string[] } }[]; models?: { id: string }[] }>("/api/catalog");
   const demo = Boolean(catalog?.demo);
+  const demoThemes = (catalog?.themes ?? []).filter((t) => t.enabled).map((t) => ({ id: t.manifest.id, name: t.manifest.name, models: t.manifest.models }));
+  const demoModels = (catalog?.models ?? []).map((m) => m.id);
   const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL ?? "https://lucatelliphotographer.com";
   const createLabel = lang === "en" ? "Create a test invitation" : "Crea un invito di prova";
 
@@ -36,7 +38,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
               ? (lang === "en" ? "This link is not valid or has expired. Use the link we sent you after your purchase." : "Il link non è valido o è scaduto. Usa quello che ti abbiamo inviato dopo l'acquisto.")
               : (lang === "en" ? "Open the link we sent you after your purchase to see your invitations." : "Apri il link che ti abbiamo inviato dopo l'acquisto per vedere i tuoi inviti.")}
           </p>
-          {demo ? <DemoCreate label={createLabel} /> : null}
+          {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : null}
         </main>
       </>
     );
@@ -56,7 +58,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
             <h1>{t.myInvites}</h1>
             <p className="hint">{t.kActiveDrafts(paid, rows.length - paid)}</p>
           </div>
-          {demo ? <DemoCreate label={createLabel} /> : <a className="btn solid" href={shopUrl}>{t.dashNew}</a>}
+          {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : <a className="btn solid" href={shopUrl}>{t.dashNew}</a>}
         </header>
 
         <nav className="dash-filter" aria-label={t.listTitle}>
@@ -70,7 +72,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
             <div className="empty">
               <h3>{t.emptyTitle}</h3>
               <p className="lede">{t.emptyText}</p>
-              {demo ? <DemoCreate label={createLabel} /> : <a className="btn solid" href={shopUrl}>{t.chooseStyle}</a>}
+              {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : <a className="btn solid" href={shopUrl}>{t.chooseStyle}</a>}
             </div>
           ) : (
             <ul className="invite-cards">
@@ -92,7 +94,11 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                     {r.status === "paid" ? (
                       <>
                         <a className="btn solid small" href={`/editor/${r.id}`}>{t.manage}</a>
-                        <a className="btn outline small" href={`/planner/${r.id}`}>{t.managePlanner}</a>
+                        {r.tier === "premium" ? (
+                          <a className="btn solid small planner-cta" href={`/planner/${r.id}`}>Planner</a>
+                        ) : (
+                          <a className="btn outline small" href={`/planner/${r.id}`}>{t.managePlanner}</a>
+                        )}
                         <a className="btn outline small" href={`/i/${r.slug}`}>{t.viewInvite}</a>
                         <CopyLink path={`/i/${r.slug}`} lang={lang} />
                       </>

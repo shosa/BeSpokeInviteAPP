@@ -9,6 +9,7 @@ import { FontButton } from "./FontButton";
 import { ui } from "@/lib/ui";
 import { blockCopy, blockDescCopy, fieldCopy } from "@/lib/catalogCopy";
 import { MusicPicker } from "./MusicPicker";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 // Luogo e indirizzo: con il blocco Mappa si modificano lì, non nel pannello Evento.
 const LOCATION_KEYS = ["address"];
@@ -389,7 +390,7 @@ function QuestionsEditor({ questions, onChange, L }: { questions: RsvpQuestion[]
               <option value="text">{L.textType}</option>
             </select>
           </div>
-          <label className="check"><input type="checkbox" checked={!!q.required} onChange={(e) => update(q.id, { required: e.target.checked })} /> {L.required}</label>
+          <Checkbox checked={!!q.required} onChange={(v) => update(q.id, { required: v })} label={L.required} />
           {q.type === "yes-no" && (
             <div className="row">
               <input aria-label={L.yesLabel} value={q.yes ?? "Sì"} maxLength={40} onChange={(e) => update(q.id, { yes: e.target.value })} />

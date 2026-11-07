@@ -135,7 +135,7 @@ export function FieldEditor({
               {library.map((t) => (
                 <label key={t.id} className={`track${text === t.url ? " is-on" : ""}`}>
                   <input type="radio" name={`lib-${field.key}`} checked={text === t.url} onChange={() => onChange(t.url)} />
-                  <span><b>{t.title}</b><small>{t.artist || "Libreria InviteMe"}</small></span>
+                  <span><b>{t.title}</b><small>{t.artist || "Libreria Bespoke Invites"}</small></span>
                 </label>
               ))}
             </div>

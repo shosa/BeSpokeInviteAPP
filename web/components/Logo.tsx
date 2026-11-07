@@ -1,4 +1,4 @@
-// Logo InviteMe, come nell'artifact Atelier: parola in Cormorant, filetto d'ottone e la tag «Atelier».
+// Logo Bespoke Invites: parola in Fraunces, filetto d'ottone e la tag «Builder».
 export function LogoMark() {
   return null;
 }
@@ -6,9 +6,9 @@ export function LogoMark() {
 export function Logo() {
   return (
     <span className="logo">
-      <span className="logo-word">InviteMe</span>
+      <span className="logo-word">Bespoke Invites</span>
       <span className="logo-rule" aria-hidden="true" />
-      <span className="logo-tag">Atelier</span>
+      <span className="logo-tag">Builder</span>
     </span>
   );
 }

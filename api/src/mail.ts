@@ -1,4 +1,5 @@
 import { pool } from "./db";
+import { fromAddress, getMailSettings, recordMailResult, resendKey, type MailKind } from "./mailSettings";
 
 // Posta transazionale. Con RESEND_API_KEY invia davvero; senza, salva nella tabella outbox
 // (visibile in sviluppo su /api/dev/outbox), così il flusso è verificabile senza credenziali.
@@ -6,29 +7,42 @@ export const appUrl = () => (process.env.APP_URL ?? "http://localhost:3000").rep
 
 export type MailMessage = { to: string; subject: string; html: string; text: string };
 
-export async function sendMail(msg: MailMessage): Promise<void> {
-  const key = process.env.RESEND_API_KEY;
-  if (key) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: process.env.MAIL_FROM ?? "InviteMe <onboarding@resend.dev>",
-        to: [msg.to],
-        subject: msg.subject,
-        html: msg.html,
-        text: msg.text,
-      }),
-    });
-    if (!res.ok) throw new Error(`Invio email non riuscito (${res.status})`);
-    return;
+// Invio di una email. Con RESEND_API_KEY parte davvero; senza, va nella tabella outbox.
+// Gli interruttori della console decidono quali tipi partono: un tipo spento viene saltato senza errore,
+// tranne gli inviti agli ospiti, che l'API rifiuta prima di cominciare.
+export class MailDisabledError extends Error {}
+
+export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Promise<void> {
+  const s = getMailSettings();
+  if (kind === "invite" && !s.sendInvites) throw new MailDisabledError("L'invio degli inviti via email è disattivato nella console");
+  if (kind === "rsvp" && !s.notifyRsvp) return;
+  if (kind === "order" && !s.orderConfirm) return;
+  const key = resendKey();
+  try {
+    if (key) {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: fromAddress(),
+          to: [msg.to],
+          subject: msg.subject,
+          html: msg.html,
+          text: msg.text,
+          ...(s.replyTo ? { reply_to: s.replyTo } : {}),
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!res.ok) throw new Error(`Invio email non riuscito (${res.status})`);
+    } else {
+      await pool.query("INSERT INTO outbox (to_address, subject, html, text) VALUES ($1, $2, $3, $4)", [msg.to, msg.subject, msg.html, msg.text]);
+    }
+    await recordMailResult({ at: new Date().toISOString(), ok: true, kind });
+  } catch (e) {
+    const error = (e as Error).message;
+    await recordMailResult({ at: new Date().toISOString(), ok: false, error, kind }).catch(() => undefined);
+    throw e;
   }
-  await pool.query("INSERT INTO outbox (to_address, subject, html, text) VALUES ($1, $2, $3, $4)", [
-    msg.to,
-    msg.subject,
-    msg.html,
-    msg.text,
-  ]);
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
@@ -37,9 +51,9 @@ function shell(title: string, body: string): string {
   return `<!doctype html><html lang="it"><body style="margin:0;background:#f7f3ec;font-family:Georgia,serif;color:#1d1b18">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px"><tr><td align="center">
 <table role="presentation" width="560" style="max-width:560px;background:#ffffff;border-radius:20px;padding:40px 36px">
-<tr><td><p style="font:600 12px Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0a4560;margin:0 0 18px">InviteMe</p>
+<tr><td><p style="font:600 12px Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0a4560;margin:0 0 18px">Bespoke Invites</p>
 <h1 style="font:400 26px Georgia,serif;margin:0 0 16px">${title}</h1>${body}</td></tr></table>
-<p style="font:12px Arial,sans-serif;color:#8a8478;margin:16px 0 0">Ricevi questa email perché usi InviteMe.</p>
+<p style="font:12px Arial,sans-serif;color:#8a8478;margin:16px 0 0">Ricevi questa email perché usi Bespoke Invites.</p>
 </td></tr></table></body></html>`;
 }
 
@@ -87,7 +101,7 @@ export function resetEmail(p: { to: string; token: string }): MailMessage {
   const link = `${appUrl()}/reset?token=${p.token}`;
   return {
     to: p.to,
-    subject: "Reimposta la password di InviteMe",
+    subject: "Reimposta la password di Bespoke Invites",
     html: shell(
       "Reimposta la password",
       `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Hai chiesto di reimpostare la password. Il link vale 60 minuti.</p>${button(link, "Scegli una nuova password")}<p style="font:13px Arial,sans-serif;color:#8a8478">Se non sei stato tu, ignora questa email.</p>`,

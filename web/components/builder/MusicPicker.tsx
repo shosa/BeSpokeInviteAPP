@@ -71,7 +71,7 @@ export function MusicPicker({
           <div key={t.id} className={`mp-pick${on ? " is-on" : ""}`} role="radio" aria-checked={on} tabIndex={0}
             onClick={() => onChange(t.url)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChange(t.url); } }}>
             <span className="mp-ico" aria-hidden="true"><Music2 size={16} /></span>
-            <span className="mp-text"><strong>{t.title}</strong><small>{t.artist || (en ? "InviteMe library" : "Libreria InviteMe")}</small></span>
+            <span className="mp-text"><strong>{t.title}</strong><small>{t.artist || (en ? "Bespoke Invites library" : "Libreria Bespoke Invites")}</small></span>
             <button type="button" className={`mp-preview${isPlaying ? " is-playing" : ""}`} aria-label={`${isPlaying ? (en ? "Pause" : "Pausa") : "Preview"} ${t.title}`}
               onClick={(e) => { e.stopPropagation(); preview(t.url); }}>
               {isPlaying ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}

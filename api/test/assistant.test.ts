@@ -14,7 +14,7 @@ const OTHER = "22222222-2222-2222-2222-222222222222";
 const INV_ID = "33333333-3333-3333-3333-333333333333";
 
 function config(): InviteConfig {
-  const c = defaultConfig(theme("tema-a"), "invitation-rsvp", "wedding", new Set(DEFAULT_CATALOG.models[1].included));
+  const c = defaultConfig(theme("tema-a"), "invitation-rsvp", "wedding", new Set(DEFAULT_CATALOG.models[0].included));
   return { ...c, blocks: [...c.blocks, makeBlock("message")] };
 }
 

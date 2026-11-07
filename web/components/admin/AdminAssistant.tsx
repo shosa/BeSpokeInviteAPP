@@ -51,7 +51,7 @@ export function AdminAssistant() {
   const dirty = JSON.stringify(draft) !== JSON.stringify(data.settings);
 
   return (
-    <section className="adm-panel">
+    <section className="ac-card ac-assist">
       <p className="hint">
         {data.configured
           ? `Modello attivo: ${data.settings.model}, ${SOURCE_LABEL[data.source]}.`
@@ -60,7 +60,7 @@ export function AdminAssistant() {
 
       {data.modelsError && <p className="hint">{data.modelsError}</p>}
 
-      <div className="adm-form">
+      <div className="ac-form-grid">
         <label>
           <span>Modello</span>
           <select value={draft.model} disabled={!data.configured || options.length === 0} onChange={(e) => setDraft({ ...draft, model: e.target.value })}>
@@ -89,9 +89,11 @@ export function AdminAssistant() {
         </label>
       </div>
 
-      <button type="button" className="btn solid" disabled={!dirty || saving || !data.configured} onClick={() => void save()}>
-        {saving ? "Salvataggio…" : "Salva"}
-      </button>
+      <div className="ac-form-actions">
+        <button type="button" className="btn solid small" disabled={!dirty || saving || !data.configured} onClick={() => void save()}>
+          {saving ? "Salvataggio…" : "Salva"}
+        </button>
+      </div>
     </section>
   );
 }

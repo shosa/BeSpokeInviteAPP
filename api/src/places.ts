@@ -23,3 +23,20 @@ export async function searchPlaces(query: string): Promise<string[]> {
   cache.set(q, { at: Date.now(), results });
   return results;
 }
+
+// Un solo luogo con coordinate, per il meteo. Stessa fonte e stessa cache della ricerca.
+export async function geocodeOne(query: string): Promise<{ lat: number; lon: number; name: string } | null> {
+  const q = query.trim().slice(0, 200);
+  if (q.length < 3) return null;
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=it&q=${encodeURIComponent(q)}`, {
+      headers: { "User-Agent": "InviteMe/1.0 (https://demo.shosa.me)" },
+    });
+    const list = (await res.json()) as { lat?: string; lon?: string; display_name?: string }[];
+    const hit = list[0];
+    if (!hit?.lat || !hit?.lon) return null;
+    return { lat: Number(hit.lat), lon: Number(hit.lon), name: hit.display_name ?? q };
+  } catch {
+    return null;
+  }
+}

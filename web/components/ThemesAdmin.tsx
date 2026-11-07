@@ -26,6 +26,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
               </div>
             </div>
             <h3>{m.name}</h3>
+            <a className="btn outline small" href={`/api/themes/${m.id}/anteprima`} target="_blank" rel="noreferrer">Apri anteprima</a>
             <Switch checked={t.enabled} onChange={(v) => setEnabled(m.id, v)} label={t.enabled ? "Attivo" : "Disattivato"} />
           </article>
         );

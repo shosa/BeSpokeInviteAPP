@@ -11,7 +11,7 @@ const display = Fraunces({ subsets: ["latin"], variable: "--font-iv-display", di
 const text = Jost({ subsets: ["latin"], variable: "--font-text", display: "swap", weight: ["300", "400", "500", "600"] });
 
 export const metadata: Metadata = {
-  title: "InviteMe · Inviti digitali con musica e conferma di presenza",
+  title: "Bespoke Invites · Inviti su misura con musica e conferma di presenza",
   description: "Un invito digitale come una stampa su carta: busta sigillata, musica al primo tocco, programma, mappa e conferme in tempo reale.",
 };
 

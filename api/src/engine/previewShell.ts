@@ -1,13 +1,14 @@
 // Pagina dell'anteprima di uno stile: telefono di default, passaggio a desktop contenuto, schermo intero da telefono.
 // Mostra la pagina demo dello stile dentro una cornice; la pagina demo resta quella usata dalle miniature.
 const LABEL = {
-  it: { phone: "Telefono", desktop: "Desktop", title: "Anteprima" },
-  en: { phone: "Phone", desktop: "Desktop", title: "Preview" },
+  it: { phone: "Telefono", desktop: "Desktop", title: "Anteprima", envelope: "Mostra la busta" },
+  en: { phone: "Phone", desktop: "Desktop", title: "Preview", envelope: "Show the envelope" },
 };
 
 export function previewShell(themeId: string, name: string, lang: "it" | "en", seed: string): string {
   const l = LABEL[lang];
-  const src = `/api/themes/${themeId}/demo?lang=${lang}&s=${seed}`;
+  // La busta è visibile di default: la pagina demo la mostra con cover=1; l'interruttore passa a cover=0.
+  const src = `/api/themes/${themeId}/demo?lang=${lang}&s=${seed}&cover=1`;
   const safeName = name.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
   return `<!doctype html>
 <html lang="${lang}">
@@ -38,6 +39,7 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 <div class="bar" role="group" aria-label="${l.title}">
   <button type="button" data-mode="phone" aria-pressed="true">${l.phone}</button>
   <button type="button" data-mode="desktop" aria-pressed="false">${l.desktop}</button>
+  <button type="button" data-cover="on" aria-pressed="true">${l.envelope}</button>
 </div>
 <main class="stage" data-mode="phone">
   <div class="device"><iframe title="${safeName}" src="${src}" sandbox="allow-scripts"></iframe></div>
@@ -45,11 +47,18 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 <script>
   (function () {
     var stage = document.querySelector('.stage');
-    document.querySelectorAll('.bar button').forEach(function (b) {
+    var frame = document.querySelector('.device iframe');
+    var cover = document.querySelector('[data-cover]');
+    cover.addEventListener('click', function () {
+      var on = cover.getAttribute('aria-pressed') !== 'true';
+      cover.setAttribute('aria-pressed', String(on));
+      frame.src = frame.src.replace(/cover=[01]/, 'cover=' + (on ? '1' : '0'));
+    });
+    document.querySelectorAll('.bar button[data-mode]').forEach(function (b) {
       b.addEventListener('click', function () {
         var mode = b.getAttribute('data-mode');
         stage.setAttribute('data-mode', mode);
-        document.querySelectorAll('.bar button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        document.querySelectorAll('.bar button[data-mode]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
       });
     });
   })();

@@ -28,7 +28,7 @@ export default async function Admin() {
         <Nav />
         <main className="wrap narrow admin-denied">
           <h1>Non hai accesso alla console</h1>
-          <p className="lede">La console è riservata agli amministratori di InviteMe.</p>
+          <p className="lede">La console è riservata agli amministratori di Bespoke Invites.</p>
         </main>
       </>
     );

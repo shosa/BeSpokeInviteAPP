@@ -26,6 +26,7 @@ import {
   type InviteConfig,
   type RsvpQuestion,
   normalizeSlug,
+  blockDef,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -40,8 +41,14 @@ import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, type
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { appUrl, inviteEmail, orderEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
+import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
+import { getShopifyIds, loadShopifySettings, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
+import { hasPlanner, isInviteTier } from "@inviteme/shared";
+import { buildPlannerPdf, isPdfChoice } from "./planner-pdf";
+import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind } from "./planner";
+import { geocodeOne } from "./places";
 import { createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -56,8 +63,7 @@ const RUNTIME = fs.readFileSync(RUNTIME_PATH, "utf8");
 const textOf = (config: InviteConfig, key: string) => String(config.event[key] ?? "");
 
 // Funzioni già pagate di un invito: le funzioni tolte e riaggiunte restano pagate, quindi gratuite.
-const purchasedOf = (inv: { purchased_addons?: unknown; config?: unknown }) =>
-  new Set<string>((inv.purchased_addons as string[] | null) ?? (inv.config as InviteConfig).addons ?? []);
+const purchasedOf = (_inv: { purchased_addons?: unknown; config?: unknown }) => new Set<string>(ADDON_KEYS);
 // Funzioni in bozza che non sono ancora state pagate: servono un pagamento prima della conferma.
 const pendingOf = (inv: { purchased_addons?: unknown; config?: unknown }) =>
   (inv.config as InviteConfig).addons.filter((a) => !purchasedOf(inv).has(a));
@@ -162,7 +168,7 @@ export async function buildApp() {
     if (!user) return;
     const c = await loadFullCatalog();
     const { rows } = await pool.query(
-      `SELECT i.id, i.slug, i.status, i.config, i.views, i.guests, i.created_at,
+      `SELECT i.id, i.slug, i.status, i.tier, i.config, i.views, i.guests, i.created_at,
               (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps
        FROM invitations i WHERE i.user_id = $1 ORDER BY i.created_at DESC`,
       [user.id],
@@ -171,6 +177,7 @@ export async function buildApp() {
       id: r.id,
       slug: r.slug,
       status: r.status,
+      tier: r.tier,
       title: titleOf(r.config),
       eventDate: textOf(r.config, "eventDate"),
       model: getModel(c, r.config.model)?.name ?? r.config.model,
@@ -217,7 +224,7 @@ export async function buildApp() {
       planner: inv.planner ?? {},
       editCount: inv.edit_count ?? 0,
       editSession: inv.edit_session ?? null,
-      purchasedAddons: (inv.purchased_addons ?? inv.config.addons ?? []) as string[],
+      purchasedAddons: [...ADDON_KEYS] as string[],
       assistant: !!process.env.ANTHROPIC_KEY,
       assistantLimit: (await loadAssistantSettings()).settings.callLimit,
       assistantUsed: inv.assistant_calls ?? 0,
@@ -303,7 +310,7 @@ export async function buildApp() {
         findOwned: async (id, userId) => {
           const inv = await ownedInvitation(id, userId);
           // Stesso dato dell'editor: le funzioni già attive per l'invito (pagate, o scelte in bozza).
-          return inv ? { ...inv, purchased_addons: inv.purchased_addons ?? inv.config.addons ?? [] } as OwnedInvitation : null;
+          return inv ? { ...inv, purchased_addons: [...ADDON_KEYS] } as OwnedInvitation : null;
         },
         loadCatalog,
         apiKey: process.env.ANTHROPIC_KEY || undefined,
@@ -384,12 +391,13 @@ export async function buildApp() {
     const unique = [...new Set(list)].slice(0, 100);
     if (unique.length === 0) return reply.code(400).send({ error: "Nessun indirizzo email valido" });
     const personal = typeof b.message === "string" ? b.message.slice(0, 500) : undefined;
+    if (!getMailSettings().sendInvites) return reply.code(409).send({ error: "L'invio degli inviti via email è disattivato: attivalo nella console, sezione Email" });
 
     const sent: string[] = [];
     const failed: string[] = [];
     for (const to of unique) {
       try {
-        await sendMail(inviteEmail({ to, hosts: textOf(inv.config, "hosts"), title: titleOf(inv.config), slug: inv.slug, personal }));
+        await sendMail(inviteEmail({ to, hosts: textOf(inv.config, "hosts"), title: titleOf(inv.config), slug: inv.slug, personal }), "invite");
         sent.push(to);
       } catch {
         failed.push(to);
@@ -402,17 +410,210 @@ export async function buildApp() {
     return { sent: sent.length, failed };
   });
 
+  // Planner premium: panoramica con i conteggi. Solo per gli inviti del livello premium.
+  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/overview", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    if (!hasPlanner(inv.tier)) return reply.code(403).send({ error: "Il planner è incluso nell'RSVP premium" });
+    const { rows } = await pool.query(
+      `SELECT
+         (SELECT count(*)::int FROM planner_guests WHERE invitation_id = $1) AS guests,
+         (SELECT count(*)::int FROM planner_guests WHERE invitation_id = $1 AND response = 'yes') AS guests_yes,
+         (SELECT count(*)::int FROM planner_budget_items WHERE invitation_id = $1) AS budget_items,
+         (SELECT count(*)::int FROM planner_tasks WHERE invitation_id = $1) AS tasks,
+         (SELECT count(*)::int FROM planner_tasks WHERE invitation_id = $1 AND done) AS tasks_done,
+         (SELECT count(*)::int FROM planner_vendors WHERE invitation_id = $1) AS vendors`,
+      [inv.id],
+    );
+    return { tier: inv.tier, counts: rows[0] };
+  });
+
+  // ───────── Planner premium: dati dell'organizzatore (solo livello premium, solo proprietario) ─────────
+  async function premiumInvitation(req: FastifyRequest, reply: FastifyReply) {
+    const user = await requireUser(req, reply);
+    if (!user) return null;
+    const inv = await ownedInvitation((req.params as { id: string }).id, user.id);
+    if (!inv) {
+      reply.code(404).send({ error: "Invito non trovato" });
+      return null;
+    }
+    if (!hasPlanner(inv.tier)) {
+      reply.code(403).send({ error: "Il planner è incluso nell'RSVP premium" });
+      return null;
+    }
+    return inv;
+  }
+
+  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/data", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const [guests, budget, tasks, vendors, rsvps] = await Promise.all([
+      pool.query("SELECT id, name, group_name, party_size, response, table_id FROM planner_guests WHERE invitation_id = $1 ORDER BY group_name, name", [inv.id]),
+      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE invitation_id = $1 ORDER BY due_date NULLS LAST, created_at", [inv.id]),
+      pool.query("SELECT id, title, done, days_before FROM planner_tasks WHERE invitation_id = $1 ORDER BY days_before DESC, created_at", [inv.id]),
+      pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
+      pool.query("SELECT count(*)::int AS n FROM rsvps WHERE invitation_id = $1", [inv.id]),
+    ]);
+    const event = (inv.config.event ?? {}) as Record<string, unknown>;
+    const tables = await pool.query("SELECT id, name, seats FROM planner_tables WHERE invitation_id = $1 ORDER BY created_at", [inv.id]);
+    return {
+      tier: inv.tier,
+      tables: tables.rows,
+      event: { title: event.title ?? "", eventDate: event.eventDate ?? "", venue: event.venue ?? "", address: event.address ?? "" },
+      guests: guests.rows,
+      budget: budget.rows,
+      tasks: tasks.rows,
+      vendors: vendors.rows,
+      rsvpResponses: rsvps.rows[0]?.n ?? 0,
+      docs: inv.planner?.docs ?? {},
+      notes: inv.planner?.notes ?? "",
+      budgetCents: inv.planner?.budgetCents ?? 0,
+      guestQuota: inv.planner?.guestQuota ?? 0,
+    };
+  });
+
+  // Meteo del giorno dell'evento, nel luogo indicato. Oltre i giorni di previsione non c'è un dato affidabile.
+  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/weather", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const event = (inv.config.event ?? {}) as Record<string, string>;
+    const date = event.eventDate ?? "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { forecast: null, reason: "date" };
+    const place = await geocodeOne(event.address || event.venue || "");
+    if (!place) return { forecast: null, reason: "place" };
+    const forecast = await forecastFor(place.lat, place.lon, date);
+    return forecast ? { forecast, place: place.name } : { forecast: null, reason: "range", place: place.name };
+  });
+
+  // Cartella in PDF: l'organizzatore sceglie le parti da includere; il documento è impaginato dal server.
+  app.post<{ Params: { id: string } }>("/api/invitations/:id/planner/pdf", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const b = (req.body ?? {}) as { include?: unknown };
+    const include = (Array.isArray(b.include) ? b.include : []).filter((x): x is string => typeof x === "string" && isPdfChoice(x));
+    if (include.length === 0) return reply.code(400).send({ error: "Scegliete almeno una parte da includere" });
+    const [guests, tables, budget, tasks, vendors] = await Promise.all([
+      pool.query("SELECT name, group_name, party_size, response, table_id FROM planner_guests WHERE invitation_id = $1 ORDER BY group_name, name", [inv.id]),
+      pool.query("SELECT id, name, seats FROM planner_tables WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
+      pool.query("SELECT label, category, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE invitation_id = $1 ORDER BY due_date NULLS LAST, created_at", [inv.id]),
+      pool.query("SELECT title, done, days_before FROM planner_tasks WHERE invitation_id = $1 ORDER BY days_before DESC, created_at", [inv.id]),
+      pool.query("SELECT name, role, contact, contract_status FROM planner_vendors WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
+    ]);
+    const c = await loadCatalog();
+    const theme = c.themes.find((t) => t.manifest.id === inv.config.themeId)?.manifest;
+    const event = (inv.config.event ?? {}) as Record<string, string>;
+    const pdf = await buildPlannerPdf(
+      {
+        title: String(event.title ?? ""),
+        eventDate: String(event.eventDate ?? ""),
+        venue: String(event.venue ?? ""),
+        accent: theme?.themeColor ?? "#8a6427",
+        budgetCents: inv.planner?.budgetCents ?? 0,
+        guestQuota: inv.planner?.guestQuota ?? 0,
+        guests: guests.rows,
+        tables: tables.rows,
+        budget: budget.rows,
+        tasks: tasks.rows,
+        vendors: vendors.rows,
+        docs: inv.planner?.docs ?? {},
+      },
+      include,
+    );
+    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", 'attachment; filename="cartella-matrimonio.pdf"').send(pdf);
+  });
+
+  app.post<{ Params: { id: string; kind: string } }>("/api/invitations/:id/planner/:kind", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const kind = req.params.kind;
+    if (!isCollectionKind(kind)) return reply.code(404).send({ error: "Raccolta non trovata" });
+    const clean = sanitizeItem(kind, req.body, false);
+    if (!clean.ok) return reply.code(400).send({ error: clean.error });
+    if ("table_id" in clean.values) return reply.code(400).send({ error: "Assegna il posto dopo aver creato l'invitato" });
+    const cols = Object.keys(clean.values);
+    const table = COLLECTIONS[kind].table;
+    const { rows } = await pool.query(
+      `INSERT INTO ${table} (id, invitation_id, ${cols.join(", ")}) VALUES ($1, $2, ${cols.map((_, i) => "$" + (i + 3)).join(", ")}) RETURNING *`,
+      [randomUUID(), inv.id, ...cols.map((c) => clean.values[c])],
+    );
+    return reply.code(201).send(rows[0]);
+  });
+
+  app.patch<{ Params: { id: string; kind: string; itemId: string } }>("/api/invitations/:id/planner/:kind/:itemId", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const kind = req.params.kind;
+    if (!isCollectionKind(kind) || !UUID.test(req.params.itemId)) return reply.code(404).send({ error: "Elemento non trovato" });
+    const clean = sanitizeItem(kind, req.body, true);
+    if (!clean.ok) return reply.code(400).send({ error: clean.error });
+    const cols = Object.keys(clean.values);
+    if (cols.length === 0) return reply.code(400).send({ error: "Nessun dato da salvare" });
+    // Posti: il tavolo deve essere dell'invito e non superare la capienza.
+    if (kind === "guests" && clean.values.table_id) {
+      const t = await pool.query("SELECT seats FROM planner_tables WHERE id = $1 AND invitation_id = $2", [clean.values.table_id, inv.id]);
+      if (!t.rows[0]) return reply.code(404).send({ error: "Tavolo non trovato" });
+      const g = await pool.query("SELECT party_size FROM planner_guests WHERE id = $1 AND invitation_id = $2", [req.params.itemId, inv.id]);
+      const used = await pool.query("SELECT COALESCE(SUM(party_size), 0)::int AS n FROM planner_guests WHERE table_id = $1 AND id <> $2", [clean.values.table_id, req.params.itemId]);
+      if (used.rows[0].n + (g.rows[0]?.party_size ?? 0) > t.rows[0].seats) return reply.code(409).send({ error: "Tavolo pieno" });
+    }
+    if (kind === "tables" && typeof clean.values.seats === "number") {
+      const used = await pool.query("SELECT COALESCE(SUM(party_size), 0)::int AS n FROM planner_guests WHERE table_id = $1", [req.params.itemId]);
+      if (used.rows[0].n > (clean.values.seats as number)) return reply.code(409).send({ error: "Ci sono già più persone sedute di questi posti" });
+    }
+    const table = COLLECTIONS[kind].table;
+    const { rows } = await pool.query(
+      `UPDATE ${table} SET ${cols.map((c, i) => c + " = $" + (i + 3)).join(", ")} WHERE id = $1 AND invitation_id = $2 RETURNING *`,
+      [req.params.itemId, inv.id, ...cols.map((c) => clean.values[c])],
+    );
+    if (!rows[0]) return reply.code(404).send({ error: "Elemento non trovato" });
+    return rows[0];
+  });
+
+  app.delete<{ Params: { id: string; kind: string; itemId: string } }>("/api/invitations/:id/planner/:kind/:itemId", async (req, reply) => {
+    const inv = await premiumInvitation(req, reply);
+    if (!inv) return;
+    const kind = req.params.kind;
+    if (!isCollectionKind(kind) || !UUID.test(req.params.itemId)) return reply.code(404).send({ error: "Elemento non trovato" });
+    await pool.query(`DELETE FROM ${COLLECTIONS[kind as CollectionKind].table} WHERE id = $1 AND invitation_id = $2`, [req.params.itemId, inv.id]);
+    return { ok: true };
+  });
+
   // Note del pianificatore: testo libero per l'organizzatore (promemoria, nota del conto alla rovescia). Non va nella pagina invito.
+  // Dati primari dell'invito (nomi o titolo, data, luogo): si chiedono la prima volta che si apre il builder o il planner.
+  app.put<{ Params: { id: string } }>("/api/invitations/:id/setup", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    if (editRules({ status: inv.status, edit_count: inv.edit_count }).readOnly) return reply.code(409).send({ error: "Modifica già confermata: l'invito non si modifica più" });
+    const b = (req.body ?? {}) as { title?: unknown; eventDate?: unknown; venue?: unknown };
+    const title = typeof b.title === "string" ? b.title.trim().slice(0, 120) : "";
+    const eventDate = typeof b.eventDate === "string" ? b.eventDate : "";
+    const venue = typeof b.venue === "string" ? b.venue.trim().slice(0, 160) : "";
+    if (!title) return reply.code(400).send({ error: "Scrivete i nomi o il titolo dell'evento" });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || Number.isNaN(Date.parse(eventDate + "T00:00:00"))) return reply.code(400).send({ error: "Inserite una data valida" });
+    const config = { ...inv.config, event: { ...(inv.config.event ?? {}), title, eventDate, venue } };
+    const planner = { ...(inv.planner ?? {}), setupDone: true };
+    await pool.query("UPDATE invitations SET config = $2, published_config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
+    return { ok: true };
+  });
+
   app.put<{ Params: { id: string } }>("/api/invitations/:id/planner", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     if (inv.status !== "paid") return reply.code(409).send({ error: "Il pannello è disponibile dopo il pagamento" });
-    const b = (req.body ?? {}) as { notes?: unknown; countdownNote?: unknown };
+    const b = (req.body ?? {}) as { notes?: unknown; countdownNote?: unknown; docs?: unknown; budgetCents?: unknown; guestQuota?: unknown };
+    const docs = sanitizeDocs(b.docs) ?? (inv.planner?.docs ?? {});
     const planner = {
-      notes: typeof b.notes === "string" ? b.notes.slice(0, 4000) : "",
-      countdownNote: typeof b.countdownNote === "string" ? b.countdownNote.slice(0, 200) : "",
+      notes: typeof b.notes === "string" ? b.notes.slice(0, 4000) : (inv.planner?.notes ?? ""),
+      countdownNote: typeof b.countdownNote === "string" ? b.countdownNote.slice(0, 200) : (inv.planner?.countdownNote ?? ""),
+      docs,
+      budgetCents: typeof b.budgetCents === "number" && b.budgetCents >= 0 ? Math.min(1_000_000_000, Math.round(b.budgetCents)) : (inv.planner?.budgetCents ?? 0),
+      guestQuota: typeof b.guestQuota === "number" && b.guestQuota >= 0 ? Math.min(5000, Math.round(b.guestQuota)) : (inv.planner?.guestQuota ?? 0),
     };
     await pool.query("UPDATE invitations SET planner = $1 WHERE id = $2", [JSON.stringify(planner), inv.id]);
     return { ok: true, planner };
@@ -506,7 +707,9 @@ export async function buildApp() {
     const theme = themes().find((t) => t.manifest.id === req.params.id);
     if (!theme) return reply.code(404).type("text/plain; charset=utf-8").send("Tema non trovato");
     const lang = (req.query as { lang?: string }).lang === "en" ? "en" : "it";
-    const html = renderInvitePage({ theme, config: sampleConfig(theme.manifest, lang), slug: "demo", features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: true });
+    // Le miniature usano la pagina senza busta; l'anteprima la chiede con cover=1.
+    const cover = (req.query as { cover?: string }).cover === "1";
+    const html = renderInvitePage({ theme, config: sampleConfig(theme.manifest, lang), slug: "demo", features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: !cover });
     // Ogni caricamento è un esempio diverso: niente cache.
     return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(html);
   });
@@ -621,50 +824,16 @@ export async function buildApp() {
     // Notifica al proprietario: un errore di posta non blocca la risposta dell'ospite.
     await sendMail(
       rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: answers.attending === true, invitationId: inv.id }),
+      "rsvp",
     ).catch((e) => req.log.warn({ err: e }, "notifica RSVP non inviata"));
     return reply.code(201).send({ ok: true });
   });
 
   // ───────────── Pagamento ─────────────
-  app.post("/api/checkout", async (req, reply) => {
-    const user = await requireUser(req, reply);
-    if (!user) return;
-    const b = (req.body ?? {}) as { invitationId?: string };
-    const inv = b.invitationId && UUID.test(b.invitationId) ? await ownedInvitation(b.invitationId, user.id) : null;
-    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
-    // Invito già pagato: si paga solo la differenza delle funzioni nuove (ordine «upgrade»), non il modello.
-    const upgrade = inv.status === "paid";
-    if (upgrade && inv.edit_count >= 1) return reply.code(409).send({ error: "Modifica già confermata: l'invito non si modifica più" });
-    const pending = upgrade ? pendingOf(inv) : [];
-    if (upgrade && pending.length === 0) return reply.code(409).send({ error: "Nessuna funzione da pagare" });
-    if (!shopifyConfigured() && !localCheckoutAllowed()) {
-      return reply.code(503).send({ error: "I pagamenti non sono ancora attivi su questo server" });
-    }
-    const c = await loadCatalog();
-    const selected = upgrade
-      ? pending
-      : [...activeFeatures(c, inv.config.model, inv.config.addons)].filter((k) => inv.config.addons.includes(k));
-    const amount = upgrade ? addonsCents(c, inv.config.model, pending) : totalCents(c, inv.config.model, inv.config.addons);
-    try {
-      const checkout = await createCheckout({
-        invitationId: inv.id,
-        slug: inv.slug,
-        addons: selected,
-        totalCents: amount,
-        origin: appUrl(),
-        kind: upgrade ? "upgrade" : "initial",
-      });
-      await pool.query(
-        "INSERT INTO orders (id, invitation_id, amount_cents, currency, source, status, checkout_url, kind, addons) VALUES ($1, $2, $3, 'EUR', $4, 'pending', $5, $6, $7)",
-        [randomUUID(), inv.id, amount, checkout.source, checkout.checkoutUrl, upgrade ? "upgrade" : "initial", JSON.stringify(selected)],
-      );
-      await track("checkout_started", inv.id);
-      return { checkoutUrl: checkout.checkoutUrl };
-    } catch (e) {
-      return reply.code(502).send({ error: e instanceof Error ? e.message : "Errore checkout" });
-    }
+  app.post("/api/checkout", async (_req, reply) => {
+    // Tutte le sezioni sono incluse: non si acquistano funzioni a parte.
+    return reply.code(410).send({ error: "Tutte le sezioni sono incluse: non c'è nulla da acquistare" });
   });
-
   // Solo checkout di prova: disattivato con Shopify e in produzione (salvo ALLOW_LOCAL_CHECKOUT=true).
   app.post("/api/checkout/complete", async (req, reply) => {
     if (shopifyConfigured() || !localCheckoutAllowed()) return reply.code(403).send({ error: "Checkout di prova non disponibile" });
@@ -709,25 +878,63 @@ export async function buildApp() {
 
   // Dopo il pagamento di un ordine nato dalla home: l'invito nasce nel profilo, acquistato e ancora non pubblicato.
   // Resta modificabile dal builder finché non si pubblica (conferma).
-  async function createInvitationFromOrder(order: { id: string; user_id: string; draft: { model: string; themeId: string; eventType: string; addons: string[] }; amount_cents: number }, source: "shopify" | "local", orderRef: string): Promise<string> {
+  // Foto e video dello stile diventano file dell'invito, come quelli caricati dal cliente: galleria e immagini
+  // li gestiscono dalle proprie proprietà. Un file che non si riesce a importare resta com'è.
+  async function importStyleMedia(config: InviteConfig, themeId: string): Promise<InviteConfig> {
+    const dir = themes().find((t) => t.manifest.id === themeId)?.dir;
+    if (!dir) return config;
+    const importOne = async (kind: MediaKind, value: string): Promise<string> => {
+      if (!value || /^(https?:|\/)/.test(value)) return value;
+      // I valori dello stile sono relativi alla cartella del tema (assets/…), o alla sua cartella assets.
+      const direct = path.join(dir, value);
+      const file = fs.existsSync(direct) ? direct : path.join(dir, "assets", value);
+      if (!fs.existsSync(file)) return value;
+      try {
+        const saved = await convertMedia(kind, fs.readFileSync(file), path.extname(file).slice(1).toLowerCase());
+        return saved.url;
+      } catch (e) {
+        app.log.warn({ err: e, file }, "media dello stile non importata");
+        return value;
+      }
+    };
+    const blocks = [];
+    for (const block of config.blocks) {
+      const props: Record<string, unknown> = { ...block.props };
+      for (const field of blockDef(block.type)?.fields ?? []) {
+        const v = props[field.key];
+        if ((field.type === "photo" || field.type === "video" || field.type === "audio") && typeof v === "string") props[field.key] = await importOne(field.type, v);
+        if (field.type === "photos" && Array.isArray(v)) props[field.key] = await Promise.all(v.map((x) => importOne("photo", String(x))));
+      }
+      blocks.push({ ...block, props });
+    }
+    return { ...config, blocks };
+  }
+
+  async function createInvitationFromOrder(order: { id: string; user_id: string; draft: { model: string; themeId: string; eventType: string; addons: string[]; tier?: string }; amount_cents: number }, source: "shopify" | "local", orderRef: string, sample = false): Promise<string> {
     const c = await loadCatalog();
     const d = order.draft;
     const theme = getTheme(c, d.themeId, d.model) ?? enabledThemes(c, d.model)[0];
     if (!theme) throw new Error("Nessun tema disponibile");
     const eventType = (EVENT_TYPES.find((e) => e.id === d.eventType)?.id ?? "wedding") as EventType;
     const addons = d.addons as AddonKey[];
-    const config = { ...defaultConfig(theme, d.model, eventType, activeFeatures(c, d.model, addons)), addons };
+    // Prova: stessi blocchi e stesse immagini dello stile (la pagina demo), con modello e funzioni scelti.
+    // Prova: tutte le funzioni del modello, altrimenti il motore nasconde i blocchi che le richiedono (galleria, video, mappa).
+    const sampleAddons = [...ADDON_KEYS] as AddonKey[];
+    // Stesso contenuto dell'anteprima: la configurazione di esempio del template, senza cambiare modello.
+    const config = sample
+      ? await importStyleMedia({ ...sampleConfig(theme, "it"), addons: sampleAddons }, theme.id)
+      : { ...defaultConfig(theme, d.model, eventType, activeFeatures(c, d.model, addons)), addons: [...ADDON_KEYS] };
     const id = randomUUID();
     const slug = makeSlug(titleOf(config));
     await pool.query(
-      "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6)",
-      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(d.addons), orderRef],
+      "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7)",
+      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, sample ? "premium" : (d.tier === "premium" ? "premium" : "rsvp")],
     );
     await pool.query("UPDATE orders SET status = 'paid', invitation_id = $2, source = $3 WHERE id = $1", [order.id, id, source]);
     await track("order_paid", id);
     const { rows } = await pool.query("SELECT email FROM users WHERE id = $1", [order.user_id]);
     if (rows[0]) {
-      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug })).catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
+      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug }), "order").catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
     return id;
   }
@@ -744,7 +951,7 @@ export async function buildApp() {
       await startSession(reply, user!.id);
     }
     const c = await loadCatalog();
-    const b = (req.body ?? {}) as { model?: string; themeId?: string; eventType?: string; addons?: unknown };
+    const b = (req.body ?? {}) as { model?: string; themeId?: string; eventType?: string; addons?: unknown; tier?: unknown };
     const model = getModel(c, String(b.model ?? "")) ?? c.models[0];
     if (!model) return reply.code(400).send({ error: "Nessun modello disponibile" });
     const theme = (b.themeId ? getTheme(c, String(b.themeId), model.id) : undefined) ?? enabledThemes(c, model.id)[0];
@@ -758,7 +965,7 @@ export async function buildApp() {
       "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, checkout_url, kind, draft) VALUES ($1, $2, NULL, $3, 'EUR', 'local', 'pending', '', 'initial', $4)",
       [orderId, user!.id, amount, JSON.stringify(draft)],
     );
-    const invitationId = await createInvitationFromOrder({ id: orderId, user_id: user!.id, draft, amount_cents: amount }, "local", `DEMO-${Date.now()}`);
+    const invitationId = await createInvitationFromOrder({ id: orderId, user_id: user!.id, draft, amount_cents: amount }, "local", `DEMO-${Date.now()}`, true);
     return { invitationId };
   });
 
@@ -768,7 +975,7 @@ export async function buildApp() {
     if (!user) return;
     if (!shopifyConfigured() && !localCheckoutAllowed()) return reply.code(503).send({ error: "I pagamenti non sono ancora attivi su questo server" });
     const c = await loadCatalog();
-    const b = (req.body ?? {}) as { model?: string; themeId?: string; eventType?: string; addons?: unknown };
+    const b = (req.body ?? {}) as { model?: string; themeId?: string; eventType?: string; addons?: unknown; tier?: unknown };
     const model = getModel(c, String(b.model ?? ""));
     if (!model) return reply.code(400).send({ error: "Modello non disponibile" });
     const requested = b.themeId ? getTheme(c, String(b.themeId), model.id) : undefined;
@@ -779,9 +986,10 @@ export async function buildApp() {
     const addons = Array.isArray(b.addons) ? [...new Set(b.addons.filter((k): k is string => typeof k === "string" && model.options.includes(k as AddonKey)))] : [];
     const amount = totalCents(c, model.id, addons);
     const orderId = randomUUID();
-    const draft = { model: model.id, themeId: theme.id, eventType, addons };
+    const tier = isInviteTier(b.tier) ? b.tier : "rsvp";
+    const draft = { model: model.id, themeId: theme.id, eventType, addons, tier };
     try {
-      const checkout = await createCheckout({ orderId, addons, totalCents: amount, origin: appUrl(), kind: "initial" });
+      const checkout = await createCheckout({ orderId, addons, totalCents: amount, origin: appUrl(), kind: "initial", tier });
       await pool.query(
         "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, checkout_url, kind, draft) VALUES ($1, $2, NULL, $3, 'EUR', $4, 'pending', $5, 'initial', $6)",
         [orderId, user.id, amount, checkout.source, checkout.checkoutUrl, JSON.stringify(draft)],
@@ -812,6 +1020,7 @@ export async function buildApp() {
     if (rows[0]) {
       await sendMail(
         orderEmail({ to: rows[0].email, title: titleOf(rows[0].config), amount: formatPrice(amountCents), slug: rows[0].slug }),
+        "order",
       ).catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
   }
@@ -1045,6 +1254,76 @@ export async function buildApp() {
     return rows;
   });
 
+  // Collegamento Shopify: stato, ID non segreti salvabili dalla console, verifica reale. I segreti non escono mai da qui.
+  const shopifyPayload = () => {
+    const ids = getShopifyIds();
+    return {
+      items: shopifyStatus(),
+      ids,
+      configured: shopifyConfigured(),
+      demo: demoMode(),
+      webhookUrl: `${appUrl()}/api/webhooks/shopify`,
+      webhookTopic: "orders/paid",
+      appUrl: appUrl(),
+    };
+  };
+  app.get("/api/admin/shopify", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    return shopifyPayload();
+  });
+
+  app.put("/api/admin/shopify", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const checked = validateShopifyIds((req.body ?? {}) as Record<string, unknown>);
+    if (!checked.ok) return reply.code(400).send({ error: checked.error });
+    await saveShopifyIds(checked.value);
+    return shopifyPayload();
+  });
+
+  app.post("/api/admin/shopify/test", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    return testShopify();
+  });
+
+  // Posta: impostazioni dalla console, chiave Resend nel .env. Mostra cosa è attivo e l'ultimo invio.
+  const mailPayload = () => ({
+    settings: getMailSettings(),
+    provider: mailProvider(),
+    keyPresent: resendKey().length > 0,
+    fromPreview: fromAddress(),
+    lastResult: getLastMailResult(),
+  });
+  app.get("/api/admin/mail", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    return mailPayload();
+  });
+
+  app.put("/api/admin/mail", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const checked = validateMailSettings((req.body ?? {}) as Record<string, unknown>);
+    if (!checked.ok) return reply.code(400).send({ error: checked.error });
+    await saveMailSettings(checked.value);
+    return mailPayload();
+  });
+
+  app.post("/api/admin/mail/test", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const to = String((req.body as { to?: unknown })?.to ?? "").trim().toLowerCase();
+    if (!EMAIL.test(to)) return reply.code(400).send({ error: "Indirizzo di prova non valido" });
+    const msg = {
+      to,
+      subject: "Prova di posta: Bespoke Invites",
+      html: "<p>Questa è una prova. Se la ricevi, la posta di Bespoke Invites funziona.</p>",
+      text: "Questa è una prova. Se la ricevi, la posta di Bespoke Invites funziona.",
+    };
+    try {
+      await sendMail(msg, "test");
+      return { ok: true, provider: mailProvider() };
+    } catch (e) {
+      return { ok: false, provider: mailProvider(), error: (e as Error).message };
+    }
+  });
+
   registerAdminInvitations(app, requireAdmin);
   registerAdminMedia(app, requireAdmin);
   return app;
@@ -1052,6 +1331,8 @@ export async function buildApp() {
 
 export async function startApi() {
   await migrate();
+  await loadShopifySettings();
+  await loadMailSettings();
   // Se ADMIN_EMAIL è impostata, quell'utente diventa admin all'avvio (utile dopo il primo deploy).
   if (process.env.ADMIN_EMAIL) {
     await pool.query("UPDATE users SET role = 'admin' WHERE email = $1", [process.env.ADMIN_EMAIL.toLowerCase()]);

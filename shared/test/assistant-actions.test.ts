@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { DEFAULT_CATALOG, defaultConfig, makeBlock, validateActions, MAX_BLOCKS, type ActionContext, type BlockType, type Catalog, type InviteConfig, type ThemeManifest } from "../src/index";
+import { DEFAULT_CATALOG, MODEL_ID, defaultConfig, makeBlock, validateActions, MAX_BLOCKS, type ActionContext, type BlockType, type Catalog, type InviteConfig, type ThemeManifest } from "../src/index";
 
 // Catalogo di prova: "save-the-date" ha le funzioni solo come opzioni (non incluse), "invitation-rsvp" le ha tutte incluse.
 const theme = (id: string): ThemeManifest => ({ engine: 2, id, name: id, description: "", models: [], themeColor: "#FFFFFF", fonts: [], demo: {} });
@@ -8,8 +8,8 @@ const catalog: Catalog = { ...DEFAULT_CATALOG, themes: [{ enabled: true, manifes
 const ctx = (over: Partial<ActionContext> = {}): ActionContext => ({ catalog, paid: false, purchased: new Set(), ...over });
 
 // Invito di partenza: copertina (ancorata in cima), principale (fisso), messaggio e galleria (funzione inclusa nel modello).
-function base(model = "invitation-rsvp"): InviteConfig {
-  const c = defaultConfig(theme("tema-a"), model, "wedding", new Set(model === "invitation-rsvp" ? DEFAULT_CATALOG.models[1].included : []));
+function base(model = MODEL_ID): InviteConfig {
+  const c = defaultConfig(theme("tema-a"), model, "wedding", new Set(DEFAULT_CATALOG.models[0].included));
   return { ...c, blocks: [...c.blocks, makeBlock("message"), makeBlock("gallery")] };
 }
 
@@ -52,14 +52,6 @@ describe("azioni dell'assistente: validatore", () => {
     const r = validateActions(c, [{ tool: "setBlockProp", blockId: img.id, key: "couplePhoto", value: "https://evil.example/x.jpg" }], ctx());
     assert.equal(r.actions.length, 0);
     assert.match(r.rejected[0].reason, /a mano/);
-  });
-
-  it("scarta un campo che richiede una funzione non attiva", () => {
-    const c = base("save-the-date");
-    const cd = { tool: "addBlock", type: "countdown" };
-    const r = validateActions(c, [cd], ctx());
-    assert.equal(r.actions.length, 0);
-    assert.match(r.rejected[0].reason, /non attiva/);
   });
 
   it("aggiunge un blocco con funzione attiva", () => {

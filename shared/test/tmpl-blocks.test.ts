@@ -14,10 +14,10 @@ describe("blocchi del tema alla creazione", () => {
     assert.ok(types.includes("venue"));
     assert.ok(!types.includes("date"));
   });
-  it("le funzioni non incluse nel modello restano fuori dal config", () => {
-    const m = getModel(c, "save-the-date")!;
+  it("con un solo modello tutte le funzioni sono attive: la galleria c'è sempre", () => {
+    const m = getModel(c, "qualunque")!;
     const cfg = defaultConfig(theme, m.id, "wedding", activeFeatures(c, m.id, []));
-    assert.ok(!cfg.blocks.some((b) => b.type === "gallery"));
+    assert.ok(cfg.blocks.some((b) => b.type === "gallery"));
   });
   void getTheme;
 });

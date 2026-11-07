@@ -13,6 +13,24 @@ Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 - **Test**: `shared` 18/18, `api` 10/10, typecheck di shared e API OK.
 - **Documentazione per agenti**: `docs/MOTORE.md` e `docs/TEMI.md`.
 
+## Planner premium: cartella, stampa e tavoli (fatto nel giro attuale)
+
+- **Cartella:** 34 sezioni in 9 gruppi (catalogo in `shared/src/folder.ts`), con righe tipizzate: programmi con orari, contatti, checklist con spunte, testo libero. Ricerca, «Utile adesso», conteggi per sezione. Fornitori letti dalla scheda Fornitori.
+- **Stampa:** documento vero (copertina, indice, una pagina per sezione, piano dei tavoli), non la sola pagina a schermo. Si attiva con «Crea PDF».
+- **Organizza tavoli:** tabella `planner_tables`, invitati con `table_id`. La capienza è controllata dal server (non si supera, né si riduce un tavolo sotto i posti occupati).
+- **Dati primari:** il modale obbligatorio chiede nomi, data e luogo alla prima apertura di builder o planner.
+- **Verificato nel browser:** cartella (salvataggio e contatore), tavoli (creazione e assegnazione), setup.
+- **Ancora da fare rispetto al riferimento:** esempi già scritti nelle sezioni, schede Riepilogo e Attività con categorie e dettagli del riferimento, checklist con i loro gruppi (valigie, decorazioni), ringraziamenti con conteggio, dettaglio di ogni fornitore nella stampa. Il testo e la grafica restano nostri.
+
+## Planner premium (completato con limiti)
+
+- **Livelli:** `save_the_date`, `rsvp`, `premium` (colonna `tier`). Il planner si apre solo con `premium` (API risponde 403 altrove).
+- **Dati:** tabelle `planner_guests`, `planner_budget_items`, `planner_tasks`, `planner_vendors`; budget totale, quota di persone e cartella (19 sezioni) in `invitations.planner`.
+- **Interfaccia:** `/planner/[id]` mostra il planner premium (Riepilogo, Budget, Invitati, Attività, Fornitori, Cartella) o il pannello base. Crea PDF con la stampa del browser.
+- **Meteo:** Open-Meteo per il giorno dell'evento, solo entro circa 16 giorni; la sede si cerca dall'indirizzo.
+- **Acquisto:** il checkout accetta il livello; il premium usa `SHOPIFY_VARIANT_PREMIUM_ID` se configurata.
+- **Verificato:** test di validazione 6/6, pacchetto condiviso 61/61, flusso nel browser (invitati, attività standard, budget, riepilogo).
+- **Limiti da chiudere:** la quota è unica per l'invito (non per gruppo); gli invitati del planner non sono collegati alle risposte RSVP (che non identificano l'ospite); il prezzo premium va confermato sulla variante Shopify; 14 test di tema di `engine.test.ts` falliscono dal pull che ha rimosso quei temi.
 ## Conversione in Bespoke Invites (in corso)
 
 - **Perimetro:** planner (`/planner/[id]`), profilo con gli inviti (`/account`), builder (`/editor/[id]`), link pubblici (`/i/[slug]`). Niente home, landing, legal, checkout interno, registrazione o login con password. `/` rimanda al profilo.
@@ -178,3 +196,13 @@ Cose aperte della fase 1:
 - **Un solo passo di cronologia** per risposta: Ctrl+Z ritira tutto. Verificato con risposta simulata: quattro modifiche insieme, annullamento allo stato iniziale.
 - **Fuori dall'assistente, di proposito**: pagamenti, funzioni a pagamento, lista ospiti e risposte RSVP (dati personali e denaro). Il builder manuale resta come riserva: non è stato rimosso.
 - **Massimo giri di strumenti**: 8 per messaggio. Limite di richieste per invito dalla console (`callLimit`).
+
+## Console admin e collegamento Shopify (2026-11-07)
+- Console riorganizzata in gruppi: Vendita (Panoramica, Ordini, Clienti), Contenuti (Inviti, Template, Musica, File), Sistema (Shopify, Assistente).
+- Panoramica: «Da fare», numeri, percorso del cliente, ultimi ordini.
+- Ordini: filtri per stato e fonte, ricerca ed esportazione CSV.
+- Scheda Shopify: dominio del negozio e ID delle varianti (base e premium) si salvano dalla console (tabella settings, chiave `shopify`). Token Storefront e segreto del webhook restano nel `.env`: la console ne mostra solo la presenza.
+- «Verifica collegamento» interroga Shopify (negozio e varianti) e mostra il risultato. Webhook: `/api/webhooks/shopify`, evento orders/paid.
+- Test: `api/test/shopifySettings.test.ts`. Suite API: 62 pass, 14 fail nei test di `engine.test.ts` già noti (temi rimossi).
+- PDF del planner: l'accento del tema viene scurito finché il contrasto sul foglio è almeno 4,5:1 (`readableAccent`).
+- Non ancora deployato: console e PDF vanno pubblicati con `docker compose build api web` e `up -d --force-recreate api web`.

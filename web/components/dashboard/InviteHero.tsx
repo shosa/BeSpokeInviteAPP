@@ -7,14 +7,14 @@ export function InviteHero({ kicker, title, when, ink, backHref, backLabel, deco
   return (
     <section className="idash-hero">
       <Confetti className="idash-confetti" color={ink} />
-      {decor?.floral && <img className="idash-floral idash-floral-l" src={decor.floral} alt="" aria-hidden="true" />}
-      {decor?.floral && <img className="idash-floral idash-floral-r" src={decor.floral} alt="" aria-hidden="true" />}
-      {decor?.photos[0] && <img className="idash-photo" src={decor.photos[0]} alt="" aria-hidden="true" />}
+      {decor?.floral && <img className="idash-floral idash-floral-l" src={decor.floral} alt="" aria-hidden="true" draggable={false} />}
+      {decor?.floral && <img className="idash-floral idash-floral-r" src={decor.floral} alt="" aria-hidden="true" draggable={false} />}
+      {decor?.photos[0] && <img className="idash-photo" src={decor.photos[0]} alt="" aria-hidden="true" draggable={false} />}
       <div className="wrap">
         {backHref && <Link className="idash-back" href={backHref}>← {backLabel}</Link>}
         <p className="idash-kicker">{kicker}</p>
         <h1>{title}</h1>
-        {decor?.ornament && <img className="idash-orn" src={decor.ornament} alt="" aria-hidden="true" />}
+        {decor?.ornament && <img className="idash-orn" src={decor.ornament} alt="" aria-hidden="true" draggable={false} />}
         <p className="idash-when">{when}</p>
       </div>
     </section>

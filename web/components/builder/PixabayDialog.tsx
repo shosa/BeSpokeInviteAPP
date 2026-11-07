@@ -4,6 +4,7 @@ import { createContext, useContext, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { importStock, searchStock, type StockFilters, type StockPhoto } from "@/lib/stock";
+import { Checkbox } from "@/components/ui/Checkbox";
 
 // L'invito aperto nel builder: serve alla ricerca e all'importazione delle foto.
 export const StockContext = createContext<string | null>(null);
@@ -141,10 +142,7 @@ export function PixabayDialog({ invitationId, onClose, onPick }: Props) {
             </label>
           </div>
           <div className="stock-filter-foot">
-            <label className="stock-check">
-              <input type="checkbox" checked={filters.editorsChoice} onChange={(e) => change({ editorsChoice: e.target.checked })} />
-              Solo scelte della redazione
-            </label>
+            <Checkbox className="stock-check" checked={filters.editorsChoice} onChange={(v) => change({ editorsChoice: v })} label="Solo scelte della redazione" />
             {filtersOn && <button type="button" className="link" onClick={() => change(DEFAULT_FILTERS)}>Azzera i filtri</button>}
           </div>
         </fieldset>

@@ -1,6 +1,8 @@
 // Catalogo condiviso tra API e frontend. I valori qui sono i DEFAULT: in produzione il catalogo effettivo
 // è letto dal database e modificabile dalla console admin (vedi api/src/catalog.ts).
-import type { AddonKey } from "./addons";
+import { ADDON_KEYS, type AddonKey } from "./addons";
+
+export const MODEL_ID = "invitation-rsvp";
 import type { ThemeManifest } from "./engine/manifest";
 
 export type { AddonKey } from "./addons";
@@ -33,37 +35,15 @@ export type Catalog = { models: ModelDef[]; addons: AddonDef[]; themes: ThemeEnt
 export const DEFAULT_CATALOG: Omit<Catalog, "themes" | "music"> = {
   models: [
     {
-      id: "save-the-date",
-      name: "Save the Date",
-      tagline: "Annuncia la data con una sola immagine",
-      description: "Una scheda elegante con foto, nomi e data. Il dettaglio completo arriva dopo.",
-      priceCents: 3900,
-      included: [],
-      options: ["countdown", "music", "gallery"],
-      enabled: true,
-      sort: 1,
-    },
-    {
-      id: "invitation-rsvp",
-      name: "Invito con conferma presenza",
-      tagline: "Tutti i dettagli e le risposte in un solo link",
-      description: "Invito completo con programma e modulo di conferma. Mappa, musica e altre funzioni si aggiungono a parte.",
+      id: MODEL_ID,
+      name: "Invito su misura",
+      tagline: "Un invito completo, con tutte le sue sezioni",
+      description: "Tutte le sezioni incluse: foto, galleria, programma, mappa, musica, conto alla rovescia e conferma di presenza.",
       priceCents: 6500,
-      included: ["rsvp", "program", "map", "music", "countdown", "gallery"],
+      included: [...ADDON_KEYS],
       options: [],
       enabled: true,
-      sort: 2,
-    },
-    {
-      id: "custom",
-      name: "Su misura",
-      tagline: "Costruisci l'invito funzione per funzione",
-      description: "Parti dalla base e aggiungi solo ciò che ti serve. Ogni funzione ha un prezzo fisso, visibile prima del pagamento.",
-      priceCents: 2900,
-      included: [],
-      options: ["rsvp", "program", "map", "music", "countdown", "gallery"],
-      enabled: true,
-      sort: 3,
+      sort: 1,
     },
   ],
   addons: [
@@ -91,14 +71,14 @@ export function enabledModels(c: Catalog) {
 }
 
 // Temi attivi che offrono il modello (un tema senza elenco di modelli li offre tutti).
-export function enabledThemes(c: Catalog, model?: string): ThemeManifest[] {
-  return c.themes
-    .filter((t) => t.enabled && (!model || t.manifest.models.length === 0 || t.manifest.models.includes(model)))
-    .map((t) => t.manifest);
+// Un solo modello: tutti i temi attivi valgono per l'invito, a prescindere dal modello richiesto.
+export function enabledThemes(c: Catalog, _model?: string): ThemeManifest[] {
+  return c.themes.filter((t) => t.enabled).map((t) => t.manifest);
 }
 
-export function getModel(c: Catalog, id: string) {
-  return c.models.find((m) => m.id === id && m.enabled);
+// Il modello è unico: qualunque id richiesto restituisce quello attivo.
+export function getModel(c: Catalog, _id?: string) {
+  return c.models.find((m) => m.id === MODEL_ID && m.enabled) ?? c.models.find((m) => m.enabled);
 }
 export function getTheme(c: Catalog, id: string, model?: string): ThemeManifest | undefined {
   return enabledThemes(c, model).find((t) => t.id === id);
@@ -108,11 +88,9 @@ export function getAddon(c: Catalog, key: string) {
 }
 
 // Funzioni attive: quelle incluse nel modello più quelle scelte, solo se acquistabili e abilitate.
-export function activeFeatures(c: Catalog, model: string, selected: string[]): Set<AddonKey> {
-  const m = getModel(c, model);
-  const set = new Set<AddonKey>(m?.included ?? []);
-  for (const a of selected) if (m?.options.includes(a as AddonKey) && getAddon(c, a)) set.add(a as AddonKey);
-  return set;
+// Tutti i blocchi sono sempre inclusi: niente acquisti a parte.
+export function activeFeatures(_c: Catalog, _model: string, _selected: string[]): Set<AddonKey> {
+  return new Set<AddonKey>(ADDON_KEYS);
 }
 
 export function formatPrice(cents: number, locale = "it-IT", currency = CURRENCY) {

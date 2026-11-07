@@ -1,0 +1,17 @@
+/* Casella di spunta dell'interfaccia: quadrato con bordo ottone, riempito in oro quando è attiva. */
+.ck {
+  display: inline-flex; align-items: center; gap: 10px; min-width: 0;
+  background: none; border: 0; padding: 4px 0; margin: 0; cursor: pointer;
+  font: inherit; color: var(--ink); text-align: left;
+}
+.ck:disabled { opacity: 0.5; cursor: not-allowed; }
+.ck:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 3px; border-radius: 6px; }
+.ck-box {
+  flex: none; width: 20px; height: 20px; border-radius: 6px; display: inline-grid; place-items: center;
+  background: var(--paper-light); box-shadow: inset 0 0 0 1.5px var(--brass-light);
+  color: transparent; transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+.ck:not(:disabled):hover .ck-box { box-shadow: inset 0 0 0 1.5px var(--brass); }
+.ck:not(:disabled):active .ck-box { transform: scale(0.92); }
+.ck.is-on .ck-box { background: var(--iv-grad-gold); box-shadow: none; color: #fff; }
+.ck-text { min-width: 0; line-height: 1.4; }

@@ -1,4 +1,4 @@
-import { DEFAULT_CATALOG, type Catalog, type ModelDef, type AddonDef, type MusicTrack, type ThemeEntry } from "@inviteme/shared";
+import { ADDON_KEYS, DEFAULT_CATALOG, MODEL_ID, type Catalog, type ModelDef, type AddonDef, type MusicTrack, type ThemeEntry } from "@inviteme/shared";
 import { pool } from "./db";
 import { loadThemes, type LoadedTheme } from "./engine/themes";
 
@@ -54,11 +54,18 @@ async function readFull(): Promise<Catalog> {
   return full;
 }
 
+// Un solo modello, con tutte le funzioni incluse: il catalogo salvato può ancora avere modelli e prezzi vecchi.
+function singleModel(models: Catalog["models"]): Catalog["models"] {
+  const base = models.find((m) => m.id === MODEL_ID) ?? DEFAULT_CATALOG.models[0];
+  return [{ ...base, id: MODEL_ID, included: [...ADDON_KEYS], options: [], enabled: true }];
+}
+
 export async function loadCatalog(opts: { includeDisabled?: boolean } = {}): Promise<Catalog> {
   const full = await readFull();
-  if (opts.includeDisabled) return full;
+  const models = singleModel(full.models);
+  if (opts.includeDisabled) return { ...full, models };
   const on = <T extends { enabled: boolean }>(list: T[]) => list.filter((x) => x.enabled);
-  return { models: on(full.models), addons: on(full.addons), themes: on(full.themes), music: on(full.music) };
+  return { models, addons: on(full.addons), themes: on(full.themes), music: on(full.music) };
 }
 
 // Salva modelli, funzioni e attivazione dei temi. Il resto (contenuto dei temi) non è modificabile dalla console.
