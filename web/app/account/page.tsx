@@ -5,6 +5,8 @@ import { DemoCreate } from "@/components/DemoCreate";
 import { ApiError, apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
 import { ui } from "@/lib/ui";
+import { ClaimPurchases, type PendingPurchase } from "@/components/ClaimPurchases";
+import type { ThemeManifest } from "@inviteme/shared";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const { stato, accesso } = await searchParams;
   const lang = await getLang();
   const t = ui(lang);
-  const catalog = await apiPublic<{ demo?: boolean; themes?: { enabled: boolean; manifest: { id: string; name: string; models: string[] } }[]; models?: { id: string }[] }>("/api/catalog");
+  const catalog = await apiPublic<{ demo?: boolean; themes?: { enabled: boolean; manifest: ThemeManifest & { models: string[] } }[]; models?: { id: string }[] }>("/api/catalog");
   const demo = Boolean(catalog?.demo);
   const demoThemes = (catalog?.themes ?? []).filter((t) => t.enabled).map((t) => ({ id: t.manifest.id, name: t.manifest.name, models: t.manifest.models }));
   const demoModels = (catalog?.models ?? []).map((m) => m.id);
@@ -48,6 +50,8 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const filter = stato === "bozze" || stato === "attivi" ? stato : "tutti";
   const shown = filter === "tutti" ? rows : rows.filter((r) => (filter === "attivi" ? r.status === "paid" : r.status !== "paid"));
   const labels = lang === "en" ? { all: "All", drafts: "Drafts", active: "Active" } : { all: "Tutti", drafts: "Bozze", active: "Attivi" };
+  const pending = await apiServer<PendingPurchase[]>("/api/account/pending").catch(() => [] as PendingPurchase[]);
+  const templates = (catalog?.themes ?? []).filter((t) => t.enabled).map((t) => t.manifest);
 
   return (
     <>
@@ -66,6 +70,8 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           <a href="/account?stato=bozze" className={filter === "bozze" ? "is-on" : undefined} aria-current={filter === "bozze" ? "page" : undefined}>{labels.drafts}</a>
           <a href="/account?stato=attivi" className={filter === "attivi" ? "is-on" : undefined} aria-current={filter === "attivi" ? "page" : undefined}>{labels.active}</a>
         </nav>
+
+        <ClaimPurchases pending={pending} templates={templates} />
 
         <section aria-label={t.listTitle}>
           {rows.length === 0 ? (

@@ -40,11 +40,11 @@ import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
-import { appUrl, inviteEmail, orderEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
+import { appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
-import { getShopifyIds, loadShopifySettings, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
+import { getShopifyIds, loadShopifySettings, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
 import { hasPlanner, isInviteTier } from "@inviteme/shared";
 import { buildPlannerPdf, isPdfChoice } from "./planner-pdf";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind } from "./planner";
@@ -1025,7 +1025,85 @@ export async function buildApp() {
     }
   }
 
-  // Webhook Shopify orders/paid: firma verificata sul corpo grezzo, poi attivazione dell'invito.
+  // Registra un acquisto di Shopify: crea o riusa l'account dal cliente, salva l'ordine come pagato senza invito
+  // e manda il link personale. Restituisce false se l'ordine non riguarda i nostri prodotti.
+  type ShopifyOrderLite = {
+    id: number;
+    email?: string;
+    total_price: string;
+    currency: string;
+    customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
+    line_items?: { variant_id?: number | string | null }[];
+  };
+  async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
+    const ids = getShopifyIds();
+    const base = normalizeVariant(ids.variantId);
+    const premium = normalizeVariant(ids.variantPremiumId);
+    const ours = (order.line_items ?? []).find((l) => {
+      const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
+      return v !== null && (v === base || v === premium);
+    });
+    if (!ours) return false;
+    const tier = premium && normalizeVariant(String(ours.variant_id)) === premium ? "premium" : "rsvp";
+    const email = (order.email ?? order.customer?.email ?? "").trim().toLowerCase();
+    if (!EMAIL.test(email)) {
+      app.log.warn({ order: order.id }, "acquisto Shopify senza email valida");
+      return true;
+    }
+    const name = [order.customer?.first_name, order.customer?.last_name].filter(Boolean).join(" ").trim() || email.split("@")[0];
+    const { rows: userRows } = await pool.query(
+      "INSERT INTO users (id, email, name, password_hash) VALUES ($1, $2, $3, '') ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email RETURNING id",
+      [randomUUID(), email, name],
+    );
+    const userId = userRows[0].id as string;
+    const c = await loadCatalog();
+    const draft = { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier };
+    const inserted = await pool.query(
+      "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft) VALUES ($1, $2, NULL, $3, $4, 'shopify', 'paid', 'initial', $5) ON CONFLICT (id) DO NOTHING",
+      [String(order.id), userId, Math.round(Number(order.total_price) * 100), order.currency, JSON.stringify(draft)],
+    );
+    if (inserted.rowCount === 0) return true; // ripetizione del webhook: già registrato, niente email doppia
+    const token = await createAccessToken(userId);
+    await sendMail(purchaseEmail({ to: email, link: `${appUrl()}/accesso/${token}` }), "order").catch((e) => app.log.warn({ err: e }, "email d'acquisto non inviata"));
+    return true;
+  }
+
+  // Acquisti da attivare: pagati su Shopify, senza ancora un invito. Il cliente sceglie il template qui.
+  app.get("/api/account/pending", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const { rows } = await pool.query(
+      "SELECT id, draft, created_at FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL ORDER BY created_at",
+      [user.id],
+    );
+    return rows.map((r) => ({ id: r.id, tier: r.draft?.tier === "premium" ? "premium" : "rsvp", createdAt: r.created_at }));
+  });
+
+  // Il cliente sceglie il template in galleria: si crea l'invito con quel tema.
+  app.post("/api/account/claim", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const b = (req.body ?? {}) as { orderId?: unknown; themeId?: unknown };
+    const orderId = typeof b.orderId === "string" ? b.orderId : "";
+    const themeId = typeof b.themeId === "string" ? b.themeId : "";
+    const { rows } = await pool.query(
+      "SELECT id, user_id, draft, amount_cents FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL",
+      [orderId, user.id],
+    );
+    if (!rows[0] || !rows[0].draft) return reply.code(404).send({ error: "Acquisto non trovato o già attivato" });
+    const c = await loadCatalog();
+    const model = c.models[0]?.id ?? "";
+    if (!enabledThemes(c, model).some((t) => t.id === themeId)) return reply.code(400).send({ error: "Template non disponibile" });
+    const row = rows[0];
+    const id = await createInvitationFromOrder(
+      { id: row.id, user_id: row.user_id, draft: { ...row.draft, model, themeId }, amount_cents: row.amount_cents },
+      "shopify",
+      row.id,
+    );
+    return { ok: true, invitationId: id };
+  });
+
+  // Webhook Shopify orders/paid  // Webhook Shopify orders/paid: firma verificata sul corpo grezzo, poi attivazione dell'invito.
   app.post("/api/webhooks/shopify", async (req, reply) => {
     const raw = (req as FastifyRequest & { rawBody?: string }).rawBody ?? "";
     if (!verifyShopifyWebhook(raw, req.headers["x-shopify-hmac-sha256"] as string | undefined)) {
@@ -1035,11 +1113,17 @@ export async function buildApp() {
     const order = req.body as {
       id: number;
       name: string;
+      email?: string;
       total_price: string;
       currency: string;
+      customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
       note_attributes?: { name: string; value: string }[];
-      line_items?: { properties?: { name: string; value: string }[] }[];
+      line_items?: { variant_id?: number | string | null; properties?: { name: string; value: string }[] }[];
     };
+    // Acquisto del nostro prodotto senza invito collegato: il cliente sceglie il template al primo accesso.
+    if (!orderIdFromOrder(order) && !invitationIdFromOrder(order)) {
+      return { ok: true, purchase: await registerShopifyPurchase(order) };
+    }
     const orderId = orderIdFromOrder(order);
     if (orderId) {
       const { rows } = await pool.query("SELECT id, user_id, draft, amount_cents, invitation_id FROM orders WHERE id = $1 AND status = 'pending' AND draft IS NOT NULL", [orderId]);

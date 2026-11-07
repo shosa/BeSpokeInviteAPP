@@ -109,3 +109,16 @@ export function resetEmail(p: { to: string; token: string }): MailMessage {
     text: `Reimposta la password: ${link} (valido 60 minuti)`,
   };
 }
+
+// Email dopo l'acquisto su Shopify: il cliente entra con il link personale e sceglie il template in galleria.
+export function purchaseEmail(p: { to: string; link: string }): MailMessage {
+  return {
+    to: p.to,
+    subject: "Il tuo acquisto è confermato: scegli il template",
+    html: shell(
+      "Grazie, il tuo invito è pronto",
+      `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Il pagamento è andato a buon fine. Entra con il link personale: troverai la galleria dei template, scegli quello che ti piace e comincia a personalizzarlo.</p>${button(p.link, "Entra e scegli il template")}<p style="font:13px Arial,sans-serif;color:#8a8478">Il link è personale: non condividerlo con altri.</p>`,
+    ),
+    text: `Il pagamento è confermato. Entra con il link personale per scegliere il template: ${p.link}`,
+  };
+}
