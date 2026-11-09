@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import type { ThemeManifest } from "@inviteme/shared";
 import { TemplateCarousel } from "@/components/TemplateCarousel";
 
-export type PendingPurchase = { id: string; tier: "rsvp" | "premium"; createdAt: string };
+export type PendingPurchase = { id: string; tier: "rsvp" | "premium"; createdAt: string; statusUrl: string | null };
 
 // Acquisti pagati su Shopify che non hanno ancora un invito: il cliente sceglie il template in galleria e l'invito nasce da lì.
-export function ClaimPurchases({ pending, templates }: { pending: PendingPurchase[]; templates: ThemeManifest[] }) {
+export function ClaimPurchases({ pending, templates, shopUrl }: { pending: PendingPurchase[]; templates: ThemeManifest[]; shopUrl: string }) {
   const router = useRouter();
   const [themeId, setThemeId] = useState(templates[0]?.id ?? "");
   const [busy, setBusy] = useState<string | null>(null);
@@ -31,12 +31,18 @@ export function ClaimPurchases({ pending, templates }: { pending: PendingPurchas
       <span className="claim-kicker">Acquisti da attivare</span>
       <h2>Scegli il template per il tuo invito</h2>
       <p className="hint">Il pagamento è già andato a buon fine. Scegli il template in galleria: il tuo invito nasce con quello.</p>
+      <p className="claim-links">
+        <a href={shopUrl} target="_blank" rel="noopener noreferrer">Torna allo shop</a>
+      </p>
       {templates.length > 0 && <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang="it" size="md" />}
       {error && <p className="form-error" role="alert">{error}</p>}
       <ul className="claim-list">
         {pending.map((p) => (
           <li key={p.id}>
-            <span>{p.tier === "premium" ? "Invito con planner" : "Invito"} · acquisto del {new Date(p.createdAt).toLocaleDateString("it-IT")}</span>
+            <span>
+              {p.tier === "premium" ? "Invito con planner" : "Invito"} · acquisto del {new Date(p.createdAt).toLocaleDateString("it-IT")}
+              {p.statusUrl && <> · <a href={p.statusUrl} target="_blank" rel="noopener noreferrer">Vedi l&apos;ordine su Shopify</a></>}
+            </span>
             <button type="button" className="btn solid small" disabled={busy !== null || !themeId} onClick={() => claim(p.id)}>
               {busy === p.id ? "Attivo…" : "Crea il mio invito con questo template"}
             </button>

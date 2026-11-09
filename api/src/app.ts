@@ -40,7 +40,7 @@ import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
-import { appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
+import { accessEmail, appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
@@ -150,6 +150,25 @@ export async function buildApp() {
     if (user !== found) await pool.query("UPDATE users SET role = $2 WHERE id = $1", [user.id, role]);
     await startSession(reply, user.id);
     return { id: user.id, email: user.email, name: user.name, role: user.role };
+  });
+
+  // Accesso dal sito: chi ha già un account inserisce l'email e riceve il link personale. La risposta è sempre la stessa,
+  // così non si scopre chi è registrato. Un indirizzo può chiedere un link al minuto.
+  const accessRequests = new Map<string, number>();
+  app.post("/api/auth/request", async (req, reply) => {
+    const email = String(((req.body ?? {}) as { email?: unknown }).email ?? "").trim().toLowerCase();
+    const reply200 = { ok: true, message: "Se l'email è quella dell'acquisto, ti abbiamo mandato il link per entrare." };
+    if (!EMAIL.test(email)) return reply.code(400).send({ error: "Indirizzo email non valido" });
+    if (accessRequests.size > 5000) accessRequests.clear();
+    const last = accessRequests.get(email) ?? 0;
+    if (Date.now() - last < 60_000) return reply200;
+    accessRequests.set(email, Date.now());
+    const { rows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+    if (rows[0]) {
+      const token = await createAccessToken(rows[0].id);
+      await sendMail(accessEmail({ to: email, link: `${appUrl()}/accesso/${token}` }), "other").catch((e) => app.log.warn({ err: e }, "link di accesso non inviato"));
+    }
+    return reply200;
   });
 
   app.get("/api/auth/me", async (req) => {
@@ -1034,6 +1053,7 @@ export async function buildApp() {
     currency: string;
     customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
     line_items?: { variant_id?: number | string | null }[];
+    order_status_url?: string | null;
   };
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
@@ -1058,9 +1078,11 @@ export async function buildApp() {
     const userId = userRows[0].id as string;
     const c = await loadCatalog();
     const draft = { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier };
+    // Link di stato dell'ordine su Shopify: serve al cliente per tornare alla sua pagina d'acquisto. Solo https.
+    const statusUrl = typeof order.order_status_url === "string" && /^https:\/\//.test(order.order_status_url) ? order.order_status_url : null;
     const inserted = await pool.query(
-      "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft) VALUES ($1, $2, NULL, $3, $4, 'shopify', 'paid', 'initial', $5) ON CONFLICT (id) DO NOTHING",
-      [String(order.id), userId, Math.round(Number(order.total_price) * 100), order.currency, JSON.stringify(draft)],
+      "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url) VALUES ($1, $2, NULL, $3, $4, 'shopify', 'paid', 'initial', $5, $6) ON CONFLICT (id) DO NOTHING",
+      [String(order.id), userId, Math.round(Number(order.total_price) * 100), order.currency, JSON.stringify(draft), statusUrl],
     );
     if (inserted.rowCount === 0) return true; // ripetizione del webhook: già registrato, niente email doppia
     const token = await createAccessToken(userId);
@@ -1073,10 +1095,10 @@ export async function buildApp() {
     const user = await requireUser(req, reply);
     if (!user) return;
     const { rows } = await pool.query(
-      "SELECT id, draft, created_at FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL ORDER BY created_at",
+      "SELECT id, draft, created_at, status_url FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL ORDER BY created_at",
       [user.id],
     );
-    return rows.map((r) => ({ id: r.id, tier: r.draft?.tier === "premium" ? "premium" : "rsvp", createdAt: r.created_at }));
+    return rows.map((r) => ({ id: r.id, tier: r.draft?.tier === "premium" ? "premium" : "rsvp", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
   });
 
   // Il cliente sceglie il template in galleria: si crea l'invito con quel tema.
@@ -1117,6 +1139,7 @@ export async function buildApp() {
       total_price: string;
       currency: string;
       customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
+      order_status_url?: string | null;
       note_attributes?: { name: string; value: string }[];
       line_items?: { variant_id?: number | string | null; properties?: { name: string; value: string }[] }[];
     };

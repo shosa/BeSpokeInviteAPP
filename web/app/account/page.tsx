@@ -6,6 +6,7 @@ import { ApiError, apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
 import { ui } from "@/lib/ui";
 import { ClaimPurchases, type PendingPurchase } from "@/components/ClaimPurchases";
+import { RequestLoginLink } from "@/components/RequestLoginLink";
 import type { ThemeManifest } from "@inviteme/shared";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
               ? (lang === "en" ? "This link is not valid or has expired. Use the link we sent you after your purchase." : "Il link non è valido o è scaduto. Usa quello che ti abbiamo inviato dopo l'acquisto.")
               : (lang === "en" ? "Open the link we sent you after your purchase to see your invitations." : "Apri il link che ti abbiamo inviato dopo l'acquisto per vedere i tuoi inviti.")}
           </p>
+          <RequestLoginLink />
           {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : null}
         </main>
       </>
@@ -71,7 +73,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           <a href="/account?stato=attivi" className={filter === "attivi" ? "is-on" : undefined} aria-current={filter === "attivi" ? "page" : undefined}>{labels.active}</a>
         </nav>
 
-        <ClaimPurchases pending={pending} templates={templates} />
+        <ClaimPurchases pending={pending} templates={templates} shopUrl={shopUrl} />
 
         <section aria-label={t.listTitle}>
           {rows.length === 0 ? (

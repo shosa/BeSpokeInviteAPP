@@ -110,6 +110,16 @@ export function resetEmail(p: { to: string; token: string }): MailMessage {
   };
 }
 
+// Accesso richiesto dal sito: il link personale per entrare, senza passare dall'acquisto.
+export function accessEmail(p: { to: string; link: string }): MailMessage {
+  return {
+    to: p.to,
+    subject: "Il tuo link per entrare in Bespoke Invites",
+    html: shell("Entra nel tuo account", `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Hai chiesto il link per entrare. Qui trovi i tuoi inviti e la galleria dei template.</p>${button(p.link, "Entra")}<p style="font:13px Arial,sans-serif;color:#8a8478">Il link è personale: non condividerlo. Se non sei stato tu, ignora questa email.</p>`),
+    text: `Entra nel tuo account: ${p.link}`,
+  };
+}
+
 // Email dopo l'acquisto su Shopify: il cliente entra con il link personale e sceglie il template in galleria.
 export function purchaseEmail(p: { to: string; link: string }): MailMessage {
   return {
