@@ -151,7 +151,8 @@ export async function buildApp() {
     const token = String(((req.body ?? {}) as { token?: string }).token ?? "");
     const found = token ? await userForAccessToken(token) : null;
     if (!found) return reply.code(401).send({ error: "Link non valido o scaduto" });
-    const role = roleForEmail(found.email);
+    // ADMIN_EMAIL promuove sempre; per gli altri vale il ruolo salvato nel database (così gli admin creati dalla console restano tali).
+    const role = roleForEmail(found.email) === "admin" ? "admin" : found.role;
     const user = role === found.role ? found : { ...found, role };
     if (user !== found) await pool.query("UPDATE users SET role = $2 WHERE id = $1", [user.id, role]);
     await startSession(reply, user.id);
