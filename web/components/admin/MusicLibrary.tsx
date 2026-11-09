@@ -21,6 +21,7 @@ export function MusicLibrary({ tracks, onChange }: { tracks: MusicTrack[]; onCha
     if (!rights) return setMsg({ kind: "err", text: "Conferma di avere i diritti del brano per caricarlo." });
     const form = e.currentTarget;
     const data = new FormData(form);
+    data.set("rights", rights ? "true" : "false");
     setBusy(true);
     setMsg(null);
     const res = await fetch("/api/admin/music", { method: "POST", body: data });
