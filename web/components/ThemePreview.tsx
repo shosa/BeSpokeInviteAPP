@@ -1,9 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { Switch } from "@/components/ui/Switch";
 
 // Anteprima del template dentro un telefono, in un modale. La busta è attiva di default, come nel builder.
+// Nasconde la scrollbar dentro l'anteprima: la pagina resta scorrevole con la rotella e il dito, senza la barra.
+// L'anteprima è sullo stesso sito, quindi il suo documento è accessibile.
+function hideScrollbar(e: SyntheticEvent<HTMLIFrameElement>) {
+  try {
+    const doc = e.currentTarget.contentDocument;
+    if (!doc || doc.getElementById("hide-scrollbar")) return;
+    const style = doc.createElement("style");
+    style.id = "hide-scrollbar";
+    style.textContent = "html,body{scrollbar-width:none;-ms-overflow-style:none}::-webkit-scrollbar{display:none}";
+    doc.head.appendChild(style);
+  } catch {
+    /* documento non accessibile: la barra resta */
+  }
+}
+
 export function ThemePreview({ themeId, themeName, onClose, onChoose }: { themeId: string; themeName: string; onClose: () => void; onChoose: () => void }) {
   const [cover, setCover] = useState(true);
   const src = `/api/themes/${encodeURIComponent(themeId)}/anteprima?cover=${cover ? 1 : 0}`;
@@ -20,7 +35,7 @@ export function ThemePreview({ themeId, themeName, onClose, onChoose }: { themeI
         </header>
         <div className="tp-body">
           <div className="tp-phone">
-            <iframe title={`Anteprima di ${themeName}`} src={src} />
+            <iframe title={`Anteprima di ${themeName}`} src={src} onLoad={hideScrollbar} />
           </div>
           <div className="tp-side">
             <label className="tp-toggle">

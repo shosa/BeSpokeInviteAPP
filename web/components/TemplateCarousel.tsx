@@ -11,7 +11,7 @@ const RESUME_MS = 6000;
 
 // Carosello dei template pre-fatti: ogni template è un telefono con la sua pagina reale, che scorre da solo.
 // Si sceglie toccando il telefono: niente pulsanti con il nome.
-export function TemplateCarousel({ templates, selectedId, onSelect, label, lang = "it", size = "md" }: { templates: ThemeManifest[]; selectedId: string; onSelect: (id: string) => void; label: string; lang?: Lang; size?: "md" | "lg" }) {
+export function TemplateCarousel({ templates, selectedId, onSelect, label, lang = "it", size = "md", autoplay = true }: { templates: ThemeManifest[]; selectedId: string; onSelect: (id: string) => void; label: string; lang?: Lang; size?: "md" | "lg"; autoplay?: boolean }) {
   const L = ui(lang).builder;
   const track = useRef<HTMLDivElement>(null);
   // Anteprime da caricare: la scelta e le vicine subito, le altre quando entrano nel carosello.
@@ -45,10 +45,12 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
     return () => io.disconnect();
   }, [templates]);
 
-  // Scorrimento automatico: avanza di una diapositiva alla volta e ricomincia dall'inizio. Si ferma se l'utente lo tocca, lo sfiora o ha il focus.
+  // Scorrimento automatico avanti e indietro: va verso destra fino in fondo, poi torna verso sinistra fino all'inizio, senza salti.
+  // Si ferma se l'utente lo tocca, lo sfiora o ha il focus.
+  const dir = useRef<1 | -1>(1);
   useEffect(() => {
     const el = track.current;
-    if (!el || templates.length < 2) return;
+    if (!el || templates.length < 2 || !autoplay) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
       const p = pause.current;
@@ -56,18 +58,27 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
       const cards = el.querySelectorAll<HTMLElement>(".tpl-card");
       const step = cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : 0;
       if (!step) return;
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 4) el.scrollTo({ left: 0, behavior: "auto" });
-      else el.scrollBy({ left: step, behavior: "smooth" });
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 4) return;
+      if (dir.current === 1 && el.scrollLeft >= max - 4) dir.current = -1;
+      else if (dir.current === -1 && el.scrollLeft <= 4) dir.current = 1;
+      el.scrollBy({ left: dir.current * step, behavior: "smooth" });
     }, STEP_MS);
     return () => window.clearInterval(timer);
-  }, [templates]);
+  }, [templates, autoplay]);
 
-  // Quando cambia il template scelto, il carosello si posiziona su di lui.
+  // Quando cambia il template scelto, il carosello si posiziona su di lui. All'apertura lo centra subito.
+  const firstPlace = useRef(true);
   useEffect(() => {
     const el = track.current;
     const card = el?.querySelector<HTMLElement>(".tpl-card.is-on");
     if (!el || !card) return;
-    el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: "smooth" });
+    // Se la scelta è già visibile non si sposta nulla: il carosello resta dove l'utente lo sta guardando.
+    const visible = card.offsetLeft >= el.scrollLeft && card.offsetLeft + card.offsetWidth <= el.scrollLeft + el.clientWidth;
+    const first = firstPlace.current;
+    firstPlace.current = false;
+    if (visible && !first) return;
+    el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: first ? "auto" : "smooth" });
     // Le anteprime fuori schermo restano spesso non dipinte finché il carosello non si muove: un micro-scorrimento le fa comparire.
     const nudge = window.setTimeout(() => { el.scrollBy({ left: 1 }); el.scrollBy({ left: -1 }); }, 700);
     return () => window.clearTimeout(nudge);

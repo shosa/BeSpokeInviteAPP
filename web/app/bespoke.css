@@ -502,3 +502,59 @@ img {
 /* Scelta del template: più largo, con il carosello a tutta larghezza */
 .act-page { max-width: 1040px; }
 .act-page .lede { max-width: 72ch; }
+
+/* Contatori dell'area cliente: sono link, ma non devono sottolinearsi */
+.acc-stat, .acc-stat:hover, .acc-stat:focus-visible { text-decoration: none; color: inherit; }
+.acc-stat:hover { transform: translateY(-2px); box-shadow: 0 30px 60px -34px rgba(110, 78, 28, 0.55); border-color: var(--brass-light); }
+.acc-stat { transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+
+/* Scelta del template: pagina più larga, il carosello grande usa la sua variante */
+.act-page { max-width: 1320px; }
+
+/* Scelta del template: barra fissa in fondo con il template scelto e le sue azioni. */
+.act-page { padding-bottom: 150px; }
+.act .act-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0; border-radius: 0;
+  padding: 16px max(24px, calc((100vw - 1320px) / 2 + 24px));
+  background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 0; border-top: 1px solid var(--line); box-shadow: 0 -22px 44px -26px rgba(42, 33, 25, 0.4);
+}
+.act .act-bar strong { font-size: 1.6rem; }
+.act .act-hint-foot { margin: 0; }
+@media (max-width: 640px) {
+  .act .act-bar { padding: 12px 18px; }
+  .act .act-bar strong { font-size: 1.3rem; }
+  .act-actions .btn { padding: 0 14px; }
+}
+
+/* Template scelto: più evidente rispetto agli altri */
+.act-page .tpl-card { transition: transform 0.35s ease, opacity 0.35s ease; }
+.act-page .tpl-card:not(.is-on) .tpl-phone { opacity: 0.7; filter: saturate(0.75); transition: opacity 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease; }
+.act-page .tpl-card.is-on { transform: translateY(-12px); }
+.act-page .tpl-card.is-on .tpl-phone {
+  opacity: 1; filter: none;
+  box-shadow: inset 0 0 0 1px #3b3834, 0 0 0 3px var(--brass-light), 0 0 0 14px rgba(184, 137, 63, 0.16), 0 44px 80px -24px rgba(110, 78, 28, 0.6);
+}
+.act-page .tpl-card.is-on .tpl-meta h3 { color: var(--brass); }
+
+/* Carosello scelta template: a tutta larghezza, con spazio sopra e sotto perché il template attivo non venga tagliato */
+.act-page .tpl-carousel { width: 100vw; margin-left: calc(50% - 50vw); }
+.act-page .tpl-track { padding: 44px 56px 56px; scroll-padding: 0 56px; }
+
+/* Pagina di scelta: il template scelto resta visibile e l'alone non viene tagliato */
+.act-page .tpl-carousel.is-lg .tpl-track { padding: 44px 56px 56px; }
+@media (max-width: 700px) {
+  .act-page .tpl-carousel.is-lg .tpl-track { padding: 40px 24px 40px; }
+  .act-page .tpl-carousel.is-lg .tpl-phone { height: 520px; }
+}
+
+/* Carosello scelta: a tutta larghezza anche oltre il contenitore */
+.act-page .tpl-carousel, .act-page .tpl-track { max-width: none; }
+
+/* Carosello scelta: centrato quando i template non riempiono la larghezza (safe: non taglia il primo se eccede) */
+.act-page .tpl-track { justify-content: safe center; }
+
+/* Builder pubblicato: solo lettura. I contenitori non cambiano il layout (display: contents). */
+.bl-zone { display: contents; }
+.bl-zone.is-locked > *, .bl-left.is-locked > * { opacity: 0.72; filter: saturate(0.85); }
+.bl-left.is-locked > .bl-locked, .bl-app .bl-locked { opacity: 1; }

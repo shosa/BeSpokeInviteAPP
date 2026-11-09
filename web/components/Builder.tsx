@@ -116,7 +116,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       return;
     }
     const res = await fetch(`/api/invitations/${initial.id}/confirm-edit`, { method: "POST" });
-    if (res.ok) return window.location.reload();
+    if (res.ok) return (window.location.href = `/planner/${initial.id}`);
     const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
     if (res.status === 409 && data.code === "payment_required") {
       setSummary(false);
@@ -451,6 +451,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   const saveLabel = locked ? L.paid : save === "saving" ? L.saving : save === "error" ? L.notSaved : L.saved;
 
   const blocksPanel = (
+          <div className={locked ? "bl-zone is-locked" : "bl-zone"} inert={locked || undefined}>
           <Canvas
             blocks={config.blocks}
             config={config}
@@ -471,6 +472,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             onToggle={toggleBlock}
             onRemove={removeBlock}
           />
+          </div>
   );
 
   return (
@@ -501,7 +503,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         <button role="tab" aria-selected={mobileTab === "proprieta"} onClick={() => setMobileTab("proprieta")}>{L.tabProps}</button>
       </nav>
 
-      <aside className="bl-left" aria-label={initial.assistant && isDesktop ? (lang === "en" ? "Assistant" : "Assistente") : "Blocchi"}>
+      <aside className={`bl-left${locked ? " is-locked" : ""}`} inert={locked || undefined} aria-label={initial.assistant && isDesktop ? (lang === "en" ? "Assistant" : "Assistente") : "Blocchi"}>
         {!isDesktop && blocksPanel}
         {/* Desktop: l'assistente sta nella colonna a destra dell'anteprima. Su telefono la colonna è nascosta. */}
         {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} />}
@@ -598,6 +600,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             );
           })}
         </nav>
+        <div className={locked && panel !== "ospiti" ? "bl-zone is-locked" : "bl-zone"} inert={(locked && panel !== "ospiti") || undefined}>
         {isDesktop && tab === "blocchi" && !block ? blocksPanel : panel === "ospiti" ? (
           <GuestsPanel lang={lang} invitationId={initial.id} paid={locked} hasRsvp={hasRsvp} guests={guests} onSent={(sent) => setGuests((g) => [...g, ...sent.map((email) => ({ email, sentAt: new Date().toISOString() }))])} />
         ) : tabMissingBlock && tabDef?.type ? (
@@ -638,6 +641,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             onUpload={upload}
           />
         )}
+        </div>
         {locked && panel === "proprieta" && (
           <p className="hint bl-locked">{L.lockedNote}</p>
         )}
@@ -698,7 +702,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           lang={lang}
           onClose={() => setPublishOpen(false)}
           onPayment={() => { setPublishOpen(false); setSummary(false); checkout(); }}
-          onDone={() => window.location.reload()}
+          onDone={() => { window.location.href = `/planner/${initial.id}`; }}
         />
       )}
       {summary && paidAlready && editable && (

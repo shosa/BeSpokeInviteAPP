@@ -83,6 +83,10 @@ const titleOf = (config: InviteConfig) => textOf(config, "title");
 const isMediaKind = (v: string): v is MediaKind => v === "photo" || v === "video" || v === "audio";
 
 // Pagina dell'invito per una configurazione. Null se il tema non esiste più (invito da ricreare).
+// Anteprime (template e builder): nessuna barra di scorrimento. La pagina scorre comunque con rotella e dito.
+const NO_SCROLLBAR = "<style>html,body{scrollbar-width:none;-ms-overflow-style:none}::-webkit-scrollbar{display:none}</style>";
+const quietScroll = (html: string) => (html.includes("</head>") ? html.replace("</head>", `${NO_SCROLLBAR}</head>`) : NO_SCROLLBAR + html);
+
 function renderFor(c: Catalog, slug: string, config: InviteConfig, preview = false, builder = false): string | null {
   const theme = themes().find((t) => t.manifest.id === config.themeId);
   if (!theme) return null;
@@ -274,9 +278,11 @@ export async function buildApp() {
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     const slugify = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    const names = slugify(textOf(inv.config, "hosts") || titleOf(inv.config) || "invito") || "invito";
+    // Base: i nomi o il titolo dell'evento. Poi l'anno, e numeri casuali o un ID breve: nessuna parola generica.
+    const names = slugify(titleOf(inv.config)) || "invito";
     const year = /^\d{4}/.exec(textOf(inv.config, "eventDate"))?.[0] ?? "";
-    const candidates = [names, `${names}-${year}`, `${names}-nozze`, `${names}-invito`, `${names}-${year}-nozze`, `${names}-${year}-invito`]
+    const digits = () => String(1000 + Math.floor(Math.random() * 9000));
+    const candidates = [names, `${names}-${year}`, `${names}-${digits()}`, `${names}-${digits()}`, `${names}-${randomUUID().slice(0, 6)}`]
       .map((c) => normalizeSlug(c.replace(/-+$/g, "")))
       .filter((c): c is string => Boolean(c));
     const free: string[] = [];
@@ -761,7 +767,7 @@ export async function buildApp() {
     const q = req.query as { lang?: string; s?: string };
     const lang = q.lang === "en" ? "en" : "it";
     const seed = /^[a-z0-9]{1,12}$/i.test(q.s ?? "") ? (q.s as string) : "x";
-    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(previewShell(theme.manifest.id, theme.manifest.name, lang, seed));
+    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(previewShell(theme.manifest.id, theme.manifest.name, lang, seed)));
   });
 
   app.get<{ Params: { id: string } }>("/api/themes/:id/demo", async (req, reply) => {
@@ -770,7 +776,7 @@ export async function buildApp() {
     const lang = (req.query as { lang?: string }).lang === "en" ? "en" : "it";
     // Le miniature usano la pagina senza busta; l'anteprima la chiede con cover=1.
     const cover = (req.query as { cover?: string }).cover === "1";
-    const html = renderInvitePage({ theme, config: sampleConfig(theme.manifest, lang), slug: "demo", features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: !cover });
+    const html = quietScroll(renderInvitePage({ theme, config: sampleConfig(theme.manifest, lang), slug: "demo", features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: !cover }));
     // Ogni caricamento è un esempio diverso: niente cache.
     return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(html);
   });
@@ -788,7 +794,8 @@ export async function buildApp() {
     const showCover = (req.query as { cover?: string }).cover === "1";
     const html = renderFor(c, inv.slug, config, !showCover, true);
     if (!html) return reply.code(400).send({ error: "Tema non disponibile" });
-    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(html);
+    // anteprima del builder: senza barra di scorrimento
+    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(html));
   });
 
   // Carica un file del cliente (foto, video, audio): ffmpeg lo converte prima di salvarlo. Chiuso solo dopo la conferma della modifica.

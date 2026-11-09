@@ -30,7 +30,7 @@ export function ActivateTemplate({ orderId, templates }: { orderId: string; temp
   return (
     <div className="act">
       {templates.length > 0 ? (
-        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang="it" size="md" />
+        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang="it" size="lg" autoplay={false} />
       ) : (
         <p className="hint">Nessun template disponibile al momento.</p>
       )}
@@ -44,7 +44,7 @@ export function ActivateTemplate({ orderId, templates }: { orderId: string; temp
           <button type="button" className="btn solid" disabled={busy || !themeId} onClick={create}>{busy ? "Creo il tuo invito…" : "Crea il tuo invito"}</button>
         </div>
       </div>
-      <p className="hint">Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.</p>
+      <p className="hint act-hint-foot">Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.</p>
       {error && <p className="form-error" role="alert">{error}</p>}
       {previewOpen && selected && <ThemePreview themeId={selected.id} themeName={selected.name} onClose={() => setPreviewOpen(false)} onChoose={() => setPreviewOpen(false)} />}
     </div>
