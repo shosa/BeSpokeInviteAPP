@@ -42,6 +42,8 @@ import { StockError, importStock, parseStockFilters, searchStock } from "./pixab
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
+import { getAllMailTemplates, isMailKind, loadMailTemplates, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
+import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
 import { getShopifyIds, loadShopifySettings, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
@@ -187,7 +189,7 @@ export async function buildApp() {
     if (!user) return;
     const c = await loadFullCatalog();
     const { rows } = await pool.query(
-      `SELECT i.id, i.slug, i.status, i.tier, i.config, i.views, i.guests, i.created_at,
+      `SELECT i.id, i.slug, i.status, i.tier, i.edit_count, i.config, i.views, i.guests, i.created_at,
               (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps
        FROM invitations i WHERE i.user_id = $1 ORDER BY i.created_at DESC`,
       [user.id],
@@ -196,6 +198,7 @@ export async function buildApp() {
       id: r.id,
       slug: r.slug,
       status: r.status,
+      published: r.edit_count >= 1,
       tier: r.tier,
       title: titleOf(r.config),
       eventDate: textOf(r.config, "eventDate"),
@@ -221,7 +224,8 @@ export async function buildApp() {
     const eventType = EVENT_TYPES.find((e) => e.id === b.eventType)?.id ?? "wedding";
     const config = defaultConfig(theme, model.id, eventType, activeFeatures(c, model.id, []));
     const id = randomUUID();
-    const slug = makeSlug(titleOf(config));
+    // Slug provvisorio: l'ID. Il link vero si sceglie solo alla pubblicazione.
+    const slug = id;
     await pool.query("INSERT INTO invitations (id, slug, user_id, config) VALUES ($1, $2, $3, $4)", [id, slug, user.id, JSON.stringify(config)]);
     await track("invitation_created", id);
     return reply.code(201).send({ id, slug });
@@ -263,13 +267,38 @@ export async function buildApp() {
     return reply.code(204).send();
   });
 
-  // Link dell'invito: si può cambiare solo finché l'invito è in bozza. Un invito pubblicato mantiene il suo link.
+  // Suggerimenti per il link, costruiti dai nomi e dalla data. Solo quelli liberi e validi.
+  app.get<{ Params: { id: string } }>("/api/invitations/:id/slug-suggestions", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    const slugify = (x: string) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const names = slugify(textOf(inv.config, "hosts") || titleOf(inv.config) || "invito") || "invito";
+    const year = /^\d{4}/.exec(textOf(inv.config, "eventDate"))?.[0] ?? "";
+    const candidates = [names, `${names}-${year}`, `${names}-nozze`, `${names}-invito`, `${names}-${year}-nozze`, `${names}-${year}-invito`]
+      .map((c) => normalizeSlug(c.replace(/-+$/g, "")))
+      .filter((c): c is string => Boolean(c));
+    const free: string[] = [];
+    for (const c of [...new Set(candidates)]) {
+      const { rows } = await pool.query("SELECT 1 FROM invitations WHERE slug = $1 AND id <> $2", [c, inv.id]);
+      if (rows.length === 0) free.push(c);
+      if (free.length >= 5) break;
+    }
+    while (free.length < 3) {
+      const c = normalizeSlug(`${names}-${randomUUID().slice(0, 4)}`);
+      if (c && !free.includes(c)) free.push(c);
+    }
+    return { suggestions: free, published: inv.edit_count >= 1, current: inv.slug };
+  });
+
+  // Link dell'invito: si può cambiare solo finché l'invito non è pubblicato. Un invito pubblicato mantiene il suo link.
   app.put<{ Params: { id: string }; Body: { slug?: unknown } }>("/api/invitations/:id/slug", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
-    if (inv.status === "paid") return reply.code(409).send({ error: "Il link di un invito pubblicato non cambia: gli ospiti lo hanno già ricevuto." });
+    if (inv.edit_count >= 1) return reply.code(409).send({ error: "Il link di un invito pubblicato non cambia: gli ospiti lo hanno già ricevuto." });
     const slug = normalizeSlug((req.body ?? {}).slug);
     if (!slug) return reply.code(400).send({ error: "Il link può contenere solo lettere minuscole, numeri e trattini (3–60 caratteri)." });
     try {
@@ -391,9 +420,21 @@ export async function buildApp() {
       const c = await loadCatalog();
       return reply.code(409).send({ error: "Per le funzioni nuove serve il pagamento", code: "payment_required", amountCents: addonsCents(c, inv.config.model, pending) });
     }
+    // Alla prima pubblicazione il cliente sceglie il link: finché non è pubblicato, l'invito non ha un indirizzo pubblico.
+    let slug = inv.slug;
+    if (inv.edit_count === 0) {
+      const chosen = normalizeSlug((req.body as { slug?: unknown } | undefined)?.slug);
+      if (!chosen) return reply.code(400).send({ error: "Scegli un link: lettere minuscole, numeri e trattini (3–60 caratteri)." });
+      slug = chosen;
+    }
     // Conferma = pubblicazione: la bozza diventa la versione che vedono gli ospiti, e la modifica si chiude.
-    await pool.query("UPDATE invitations SET edit_count = 1, published_config = config WHERE id = $1", [inv.id]);
-    return { ok: true, editCount: 1 };
+    try {
+      await pool.query("UPDATE invitations SET edit_count = 1, published_config = config, slug = $2 WHERE id = $1", [inv.id, slug]);
+    } catch (e) {
+      if ((e as { code?: string }).code === "23505") return reply.code(409).send({ error: "Questo link è già in uso: scegline un altro." });
+      throw e;
+    }
+    return { ok: true, editCount: 1, slug };
   });
 
   app.post<{ Params: { id: string } }>("/api/invitations/:id/guests", async (req, reply) => {
@@ -402,6 +443,7 @@ export async function buildApp() {
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     if (inv.status !== "paid") return reply.code(409).send({ error: "Paga l'invito prima di inviarlo agli ospiti" });
+    if (inv.edit_count < 1) return reply.code(409).send({ error: "Pubblica l'invito prima di inviarlo agli ospiti: scegli il link nel builder" });
 
     const b = (req.body ?? {}) as { emails?: unknown; message?: unknown };
     const list = (Array.isArray(b.emails) ? b.emails : [])
@@ -676,7 +718,7 @@ export async function buildApp() {
 
   // ───────────── Pubblico: pagina dell'invito, conferme ─────────────
   app.get<{ Params: { slug: string } }>("/api/public/invitations/:slug/page", async (req, reply) => {
-    const { rows } = await pool.query("SELECT * FROM invitations WHERE slug = $1 AND status = 'paid'", [req.params.slug]);
+    const { rows } = await pool.query("SELECT * FROM invitations WHERE slug = $1 AND status = 'paid' AND edit_count >= 1", [req.params.slug]);
     const inv = rows[0];
     if (!inv) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
     const c = await loadCatalog();
@@ -818,7 +860,7 @@ export async function buildApp() {
     if (!b.slug || !b.answers || typeof b.answers !== "object") return reply.code(400).send({ error: "Dati mancanti" });
     const { rows } = await pool.query(
       `SELECT i.id, i.config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
-       WHERE i.slug = $1 AND i.status = 'paid'`,
+       WHERE i.slug = $1 AND i.status = 'paid' AND i.edit_count >= 1`,
       [b.slug],
     );
     const inv = rows[0];
@@ -944,7 +986,8 @@ export async function buildApp() {
       ? await importStyleMedia({ ...sampleConfig(theme, "it"), addons: sampleAddons }, theme.id)
       : { ...defaultConfig(theme, d.model, eventType, activeFeatures(c, d.model, addons)), addons: [...ADDON_KEYS] };
     const id = randomUUID();
-    const slug = makeSlug(titleOf(config));
+    // Slug provvisorio: l'ID. Il cliente sceglie il link al momento di pubblicare.
+    const slug = id;
     await pool.query(
       "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7)",
       [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, sample ? "premium" : (d.tier === "premium" ? "premium" : "rsvp")],
@@ -953,7 +996,7 @@ export async function buildApp() {
     await track("order_paid", id);
     const { rows } = await pool.query("SELECT email FROM users WHERE id = $1", [order.user_id]);
     if (rows[0]) {
-      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug }), "order").catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
+      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug, link: `${appUrl()}/account` }), "order").catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
     return id;
   }
@@ -1038,7 +1081,7 @@ export async function buildApp() {
     );
     if (rows[0]) {
       await sendMail(
-        orderEmail({ to: rows[0].email, title: titleOf(rows[0].config), amount: formatPrice(amountCents), slug: rows[0].slug }),
+        orderEmail({ to: rows[0].email, title: titleOf(rows[0].config), amount: formatPrice(amountCents), slug: rows[0].slug, link: `${appUrl()}/account` }),
         "order",
       ).catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
@@ -1329,9 +1372,13 @@ export async function buildApp() {
   app.get("/api/admin/orders", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
     const { rows } = await pool.query(
-      `SELECT o.id, o.amount_cents, o.source, o.status, o.created_at, i.config->>'title' AS title, u.email
-       FROM orders o LEFT JOIN invitations i ON i.id = o.invitation_id LEFT JOIN users u ON u.id = i.user_id
-       ORDER BY o.created_at DESC LIMIT 200`,
+      `SELECT o.id, o.source, o.status, o.kind, o.created_at, o.status_url, o.draft->>'tier' AS tier, o.draft->>'model' AS model,
+              o.invitation_id, i.slug, i.status AS invitation_status, i.order_ref, i.config->>'title' AS title,
+              u.id AS user_id, u.email, u.name AS user_name
+       FROM orders o
+       LEFT JOIN invitations i ON i.id = o.invitation_id
+       LEFT JOIN users u ON u.id = COALESCE(i.user_id, o.user_id)
+       ORDER BY o.created_at DESC LIMIT 300`,
     );
     return rows;
   });
@@ -1399,6 +1446,7 @@ export async function buildApp() {
     keyPresent: resendKey().length > 0,
     fromPreview: fromAddress(),
     lastResult: getLastMailResult(),
+    templates: getAllMailTemplates(),
   });
   app.get("/api/admin/mail", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
@@ -1411,6 +1459,32 @@ export async function buildApp() {
     if (!checked.ok) return reply.code(400).send({ error: checked.error });
     await saveMailSettings(checked.value);
     return mailPayload();
+  });
+
+  // Modelli delle email: salvataggio di un testo, ripristino del predefinito, anteprima con dati di esempio.
+  app.put("/api/admin/mail/template", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown; reset?: unknown };
+    if (!isMailKind(b.kind)) return reply.code(400).send({ error: "Tipo di email non valido" });
+    if (b.reset === true) {
+      await saveMailTemplate(b.kind, null);
+      return mailPayload();
+    }
+    const checked = validateMailTemplate(b.template);
+    if (!checked.ok) return reply.code(400).send({ error: checked.error });
+    await saveMailTemplate(b.kind, checked.value);
+    return mailPayload();
+  });
+
+  app.post("/api/admin/mail/preview", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown };
+    if (!isMailKind(b.kind)) return reply.code(400).send({ error: "Tipo di email non valido" });
+    const checked = validateMailTemplate(b.template);
+    if (!checked.ok) return reply.code(400).send({ error: checked.error });
+    const sample = { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna e Luca", hosts: "Anna e Luca", amount: "99,00 €", verdict: "parteciperà" };
+    const m = renderMail(b.kind, checked.value, sample);
+    return { subject: m.subject, html: m.html, variables: MAIL_VARIABLES[b.kind] };
   });
 
   app.post("/api/admin/mail/test", async (req, reply) => {
@@ -1440,6 +1514,7 @@ export async function startApi() {
   await migrate();
   await loadShopifySettings();
   await loadMailSettings();
+  await loadMailTemplates();
   // Se ADMIN_EMAIL è impostata, quell'utente diventa admin all'avvio (utile dopo il primo deploy).
   if (process.env.ADMIN_EMAIL) {
     await pool.query("UPDATE users SET role = 'admin' WHERE email = $1", [process.env.ADMIN_EMAIL.toLowerCase()]);

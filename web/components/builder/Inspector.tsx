@@ -354,6 +354,7 @@ function LinkSection({ lang, slug, shareUrl, onSave }: { lang: "it" | "en"; slug
     <section className="bl-group" aria-labelledby="bl-link">
       <h3 id="bl-link">{en ? "Invitation link" : "Link dell'invito"}</h3>
       {shareUrl && <code className="bl-link-url">{shareUrl}</code>}
+      {!shareUrl && !onSave && <p className="hint">{en ? "The link is chosen when you publish the invitation." : "Il link si sceglie quando pubblichi l'invito."}</p>}
       {onSave && (
         <form className="link-edit" onSubmit={async (e) => {
           e.preventDefault();

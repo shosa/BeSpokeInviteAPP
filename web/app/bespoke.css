@@ -403,3 +403,14 @@ img {
 
 .claim-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .claim-form input { flex: 1 1 260px; max-width: 380px; border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; font: inherit; font-size: 15px; background: var(--paper); color: var(--ink); }
+
+/* Pubblicazione: scelta del link */
+.publish-dialog { display: grid; gap: 14px; }
+.publish-dialog h2 { margin: 0; }
+.publish-field { display: grid; gap: 6px; font-size: 14px; }
+.publish-input { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; background: var(--paper); }
+.publish-input code { color: var(--ink-soft); font-size: 14px; }
+.publish-input input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 15px; color: var(--ink); outline: none; padding: 6px 0; }
+.publish-suggest { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.publish-chip { border: 1px solid var(--line); background: var(--paper-light); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; color: var(--ink); }
+.publish-chip.is-on { background: var(--iv-grad-gold); color: #fff; border-color: transparent; }

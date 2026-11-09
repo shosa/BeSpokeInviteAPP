@@ -5,9 +5,19 @@ import { toast } from "sonner";
 import { Switch } from "../ui/Switch";
 
 // Impostazioni della posta: mittente, risposte e interruttori per tipo di email. La chiave Resend resta nel .env.
-type Settings = { fromName: string; fromEmail: string; replyTo: string; sendInvites: boolean; notifyRsvp: boolean; orderConfirm: boolean };
+type Settings = { fromName: string; fromEmail: string; replyTo: string; sendInvites: boolean; notifyRsvp: boolean; orderConfirm: boolean; accent: string };
 type Result = { at: string; ok: boolean; error?: string; kind: string } | null;
-type Payload = { settings: Settings; provider: "resend" | "outbox"; keyPresent: boolean; fromPreview: string; lastResult: Result };
+type Text = { subject: string; title: string; body: string; button: string; footer: string };
+type TemplateInfo = { kind: TemplateKind; label: string; variables: string[]; current: Text; defaults: Text };
+type TemplateKind = "access" | "purchase" | "order" | "rsvp" | "invite";
+type Payload = { settings: Settings; provider: "resend" | "outbox"; keyPresent: boolean; fromPreview: string; lastResult: Result; templates: TemplateInfo[] };
+const FIELDS: { key: keyof Text; label: string; multi?: boolean }[] = [
+  { key: "subject", label: "Oggetto" },
+  { key: "title", label: "Titolo nell'email" },
+  { key: "body", label: "Testo (una riga vuota separa i paragrafi)", multi: true },
+  { key: "button", label: "Testo del pulsante" },
+  { key: "footer", label: "Nota in fondo (facoltativa)" },
+];
 
 const KIND_LABEL: Record<string, string> = { invite: "invito agli ospiti", rsvp: "avviso di risposta", order: "conferma di pagamento", test: "prova", other: "email" };
 
@@ -57,6 +67,7 @@ export function AdminMail() {
   if (!data || !draft) return <p className="hint">Caricamento…</p>;
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(data.settings);
+  const accentOk = /^#[0-9a-fA-F]{6}$/.test(draft.accent);
   const set = (patch: Partial<Settings>) => setDraft({ ...draft, ...patch });
   const live = data.provider === "resend";
 
@@ -110,6 +121,14 @@ export function AdminMail() {
 
         <section className="ac-card ac-form">
           <span className="ac-kicker">Cosa si invia</span>
+          <label className="ac-field">
+            <span>Colore del marchio</span>
+            <span className="ac-color">
+              <input type="color" value={accentOk ? draft.accent : "#0a4560"} onChange={(e) => set({ accent: e.target.value })} aria-label="Colore del marchio" />
+              <input value={draft.accent} onChange={(e) => set({ accent: e.target.value })} maxLength={7} aria-label="Colore in formato esadecimale" />
+            </span>
+            <small>Pulsanti e nome del marchio nelle email.</small>
+          </label>
           <Toggle label="Inviti agli ospiti" hint="Il pulsante Invia nel pannello ospiti manda l'invito via email." checked={draft.sendInvites} onChange={(v) => set({ sendInvites: v })} />
           <Toggle label="Avviso al cliente per ogni risposta" hint="Il cliente riceve un'email quando un ospite risponde." checked={draft.notifyRsvp} onChange={(v) => set({ notifyRsvp: v })} />
           <Toggle label="Conferma al cliente dopo il pagamento" hint="Mail di ringraziamento con il link dell'invito attivo." checked={draft.orderConfirm} onChange={(v) => set({ orderConfirm: v })} />
@@ -127,6 +146,8 @@ export function AdminMail() {
           <button type="button" className="btn solid small" disabled={testing || !to.includes("@")} onClick={sendTest}>{testing ? "Invio…" : "Invia prova"}</button>
         </div>
       </section>
+
+      <TemplateEditor templates={data.templates} accent={draft.accent} onSaved={load} />
 
       <section className="ac-card">
         <span className="ac-kicker">Chiave del servizio</span>
@@ -153,5 +174,90 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint: strin
       </div>
       <Switch checked={checked} onChange={onChange} ariaLabel={label} />
     </div>
+  );
+}
+
+// Editor dei testi: un tipo di email alla volta, con anteprima che si aggiorna mentre si scrive.
+function TemplateEditor({ templates, accent, onSaved }: { templates: TemplateInfo[]; accent: string; onSaved: () => void }) {
+  const [kind, setKind] = useState<TemplateKind>(templates[0]?.kind ?? "invite");
+  const info = templates.find((t) => t.kind === kind) ?? templates[0];
+  const [draft, setDraft] = useState<Text | null>(info?.current ?? null);
+  const [preview, setPreview] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+
+  // Il testo si riparte dal salvato solo quando si cambia tipo di email: così le modifiche non salvate non si perdono.
+  useEffect(() => {
+    setDraft(info?.current ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind]);
+
+  useEffect(() => {
+    if (!draft || !info) return;
+    const t = setTimeout(() => {
+      fetch("/api/admin/mail/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, template: draft }) })
+        .then((r) => r.json())
+        .then((d: { html?: string }) => d.html && setPreview(d.html))
+        .catch(() => undefined);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [draft, kind, info, accent]);
+
+  if (!info || !draft) return null;
+  const changed = JSON.stringify(draft) !== JSON.stringify(info.current);
+
+  async function save() {
+    if (!draft) return;
+    setSaving(true);
+    const res = await fetch("/api/admin/mail/template", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, template: draft }) });
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    setSaving(false);
+    if (!res.ok) return toast.error(body.error ?? "Salvataggio non riuscito");
+    toast.success("Testo salvato: vale per le prossime email.");
+    onSaved();
+  }
+
+  async function reset() {
+    if (!confirm("Riportare questa email al testo predefinito?")) return;
+    const res = await fetch("/api/admin/mail/template", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, reset: true }) });
+    if (!res.ok) return toast.error("Ripristino non riuscito");
+    toast.success("Testo ripristinato.");
+    onSaved();
+  }
+
+  return (
+    <section className="ac-card ac-tpl" aria-label="Testi delle email">
+      <span className="ac-kicker">Testi delle email</span>
+      <nav className="ac-segment" aria-label="Tipo di email">
+        {templates.map((t) => (
+          <button key={t.kind} type="button" className={t.kind === kind ? "is-on" : ""} onClick={() => setKind(t.kind)}>{t.label}</button>
+        ))}
+      </nav>
+      <div className="ac-tpl-grid">
+        <div className="ac-form-grid one">
+          {FIELDS.map((f) => (
+            <label key={f.key} className="ac-field">
+              <span>{f.label}</span>
+              {f.multi ? (
+                <textarea rows={5} value={draft[f.key]} onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })} maxLength={1000} />
+              ) : (
+                <input value={draft[f.key]} onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })} maxLength={f.key === "subject" ? 150 : 120} />
+              )}
+            </label>
+          ))}
+          <p className="hint ac-vars">
+            Variabili disponibili: {info.variables.map((v) => <code key={v}>{`{{${v}}}`}</code>)}
+          </p>
+          <div className="ac-form-actions">
+            <button type="button" className="btn solid small" disabled={!changed || saving} onClick={save}>{saving ? "Salvo…" : "Salva testo"}</button>
+            <button type="button" className="link" onClick={reset}>Ripristina predefinito</button>
+          </div>
+        </div>
+        <div className="ac-preview" aria-label="Anteprima">
+          <span className="ac-kicker">Anteprima</span>
+          <iframe title="Anteprima email" srcDoc={preview} sandbox="" />
+          <small className="hint">Dati di esempio. Il colore del marchio è {accent}.</small>
+        </div>
+      </div>
+    </section>
   );
 }

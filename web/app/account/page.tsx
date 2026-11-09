@@ -11,7 +11,7 @@ import type { ThemeManifest } from "@inviteme/shared";
 
 export const dynamic = "force-dynamic";
 
-type Row = { id: string; slug: string; status: "draft" | "paid"; tier: string; title: string; eventDate: string; model: string; views: number; guests: number; rsvps: number };
+type Row = { id: string; slug: string; status: "draft" | "paid"; published: boolean; tier: string; title: string; eventDate: string; model: string; views: number; guests: number; rsvps: number };
 
 // Profilo: gli inviti acquistati, con builder, planner e link pubblico. Senza sessione si chiede il link di accesso.
 export default async function Account({ searchParams }: { searchParams: Promise<{ stato?: string; accesso?: string }> }) {
@@ -107,8 +107,14 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                         ) : (
                           <a className="btn outline small" href={`/planner/${r.id}`}>{t.managePlanner}</a>
                         )}
-                        <a className="btn outline small" href={`/i/${r.slug}`}>{t.viewInvite}</a>
-                        <CopyLink path={`/i/${r.slug}`} lang={lang} />
+                        {r.published ? (
+                          <>
+                            <a className="btn outline small" href={`/i/${r.slug}`}>{t.viewInvite}</a>
+                            <CopyLink path={`/i/${r.slug}`} lang={lang} />
+                          </>
+                        ) : (
+                          <a className="btn solid small" href={`/editor/${r.id}`}>{lang === "en" ? "Publish" : "Pubblica"}</a>
+                        )}
                       </>
                     ) : (
                       <DeleteDraft id={r.id} lang={lang} />

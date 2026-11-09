@@ -1,5 +1,6 @@
 import { pool } from "./db";
 import { fromAddress, getMailSettings, recordMailResult, resendKey, type MailKind } from "./mailSettings";
+import { fillTemplate, getMailTemplate, type MailTemplate, type MailTemplateKind, type MailVars } from "./mailTemplates";
 
 // Posta transazionale. Con RESEND_API_KEY invia davvero; senza, salva nella tabella outbox
 // (visibile in sviluppo su /api/dev/outbox), così il flusso è verificabile senza credenziali.
@@ -47,54 +48,56 @@ export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Prom
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
 
-function shell(title: string, body: string): string {
-  return `<!doctype html><html lang="it"><body style="margin:0;background:#f7f3ec;font-family:Georgia,serif;color:#1d1b18">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px"><tr><td align="center">
-<table role="presentation" width="560" style="max-width:560px;background:#ffffff;border-radius:20px;padding:40px 36px">
-<tr><td><p style="font:600 12px Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0a4560;margin:0 0 18px">Bespoke Invites</p>
-<h1 style="font:400 26px Georgia,serif;margin:0 0 16px">${title}</h1>${body}</td></tr></table>
-<p style="font:12px Arial,sans-serif;color:#8a8478;margin:16px 0 0">Ricevi questa email perché usi Bespoke Invites.</p>
+function shell(title: string, body: string, footer?: string): string {
+  const accent = getMailSettings().accent;
+  return `<!doctype html><html lang="it"><body style="margin:0;padding:0;background:#fdfbf7;font-family:Georgia,'Times New Roman',serif;color:#2a2119">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdfbf7;padding:36px 12px"><tr><td align="center">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e9dcc6;border-radius:22px;padding:40px 40px 34px">
+<tr><td>
+<p style="margin:0 0 6px;font:600 11px Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:${accent}">Bespoke Invites</p>
+<div style="height:1px;background:#e9dcc6;margin:14px 0 26px"></div>
+<h1 style="margin:0 0 16px;font:400 28px/1.2 Georgia,'Times New Roman',serif;letter-spacing:-.01em;color:#2a2119">${title}</h1>${body}${footer ? `<p style="margin:26px 0 0;font:13px/1.6 Arial,Helvetica,sans-serif;color:#7b6a57">${esc(footer)}</p>` : ""}
+</td></tr></table>
+<p style="margin:18px 0 0;font:12px Arial,Helvetica,sans-serif;color:#7b6a57">Ricevi questa email perché usi Bespoke Invites.</p>
 </td></tr></table></body></html>`;
 }
 
 const button = (href: string, label: string) =>
-  `<p style="margin:28px 0"><a href="${href}" style="display:inline-block;background:#0a4560;color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:999px;font:600 15px Arial,sans-serif">${label}</a></p>`;
+  `<p style="margin:30px 0 8px"><a href="${esc(href)}" style="display:inline-block;background:${getMailSettings().accent};color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:999px;font:600 15px Arial,Helvetica,sans-serif;letter-spacing:.01em">${esc(label)}</a></p>`;
+
+const paragraphs = (text: string) =>
+  text.split(/\n{2,}/).map((p) => `<p style="margin:0 0 14px;font:16px/1.7 Georgia,'Times New Roman',serif;color:#4a3f33">${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+
+// Compone un'email da un modello: stessa funzione per l'invio e per l'anteprima della console.
+export function renderMail(kind: MailTemplateKind, t: MailTemplate, vars: MailVars): { subject: string; html: string; text: string } {
+  const title = fillTemplate(t.title, vars);
+  const body = fillTemplate(t.body, vars);
+  const button_ = fillTemplate(t.button, vars);
+  const footer = fillTemplate(t.footer, vars);
+  const link = vars.link ?? "";
+  const copy = kind === "invite" && link ? `<p style="margin:18px 0 0;font:13px/1.6 Arial,Helvetica,sans-serif;color:#7b6a57;word-break:break-all">Oppure copia questo link: <a href="${esc(link)}" style="color:#8a6427">${esc(link)}</a></p>` : "";
+  const html = shell(esc(title), paragraphs(body) + (link ? button(link, button_) : "") + copy, footer || undefined);
+  return { subject: fillTemplate(t.subject, vars), html, text: [title, body, link].filter(Boolean).join(". ").replace(/\.\s\./g, ".") };
+}
 
 export function inviteEmail(p: { to: string; hosts: string; title: string; slug: string; personal?: string }): MailMessage {
   const link = `${appUrl()}/i/${p.slug}`;
-  return {
-    to: p.to,
-    subject: `Invito: ${p.title}`,
-    html: shell(
-      `${esc(p.hosts)} vi invitano`,
-      `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">${p.personal ? esc(p.personal) : `Trovate qui tutti i dettagli di <strong>${esc(p.title)}</strong>, il programma e il modulo per confermare la presenza.`}</p>${button(link, "Apri l'invito")}<p style="font:13px Arial,sans-serif;color:#8a8478">Oppure copia questo link: ${link}</p>`,
-    ),
-    text: `${p.hosts} vi invitano. Apri l'invito: ${link}`,
-  };
+  const t = getMailTemplate("invite");
+  // Il messaggio personale scritto per l'invito sostituisce il corpo del modello.
+  const m = renderMail("invite", p.personal ? { ...t, body: p.personal } : t, { link, title: p.title, hosts: p.hosts });
+  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 
 export function rsvpNoticeEmail(p: { to: string; title: string; attending: boolean; invitationId: string }): MailMessage {
   const link = `${appUrl()}/invito/${p.invitationId}`;
-  const verdict = p.attending ? "parteciperà" : "non potrà partecipare";
-  return {
-    to: p.to,
-    subject: `Nuova risposta per ${p.title}`,
-    html: shell("Nuova conferma", `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Un ospite ${verdict} a <strong>${esc(p.title)}</strong>.</p>${button(link, "Vedi le risposte")}`),
-    text: `Nuova risposta per ${p.title}: un ospite ${verdict}. Vedi le risposte in ${link}`,
-  };
+  const m = renderMail("rsvp", getMailTemplate("rsvp"), { link, title: p.title, verdict: p.attending ? "parteciperà" : "non potrà partecipare" });
+  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 
-export function orderEmail(p: { to: string; title: string; amount: string; slug: string }): MailMessage {
-  const link = `${appUrl()}/i/${p.slug}`;
-  return {
-    to: p.to,
-    subject: `Pagamento ricevuto: ${p.title}`,
-    html: shell(
-      "Grazie, il tuo invito è attivo",
-      `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Abbiamo ricevuto il pagamento di <strong>${esc(p.amount)}</strong>. Il tuo link è pronto da condividere con gli ospiti.</p>${button(link, "Apri l'invito")}`,
-    ),
-    text: `Pagamento di ${p.amount} ricevuto. Il tuo invito: ${link}`,
-  };
+export function orderEmail(p: { to: string; title: string; amount: string; slug: string; link?: string }): MailMessage {
+  const link = p.link ?? `${appUrl()}/i/${p.slug}`;
+  const m = renderMail("order", getMailTemplate("order"), { link, title: p.title, amount: p.amount });
+  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 
 export function resetEmail(p: { to: string; token: string }): MailMessage {
@@ -110,25 +113,14 @@ export function resetEmail(p: { to: string; token: string }): MailMessage {
   };
 }
 
-// Accesso richiesto dal sito: il link personale per entrare, senza passare dall'acquisto.
+// Accesso richiesto dal sito: il link personale per entrare.
 export function accessEmail(p: { to: string; link: string }): MailMessage {
-  return {
-    to: p.to,
-    subject: "Il tuo link per entrare in Bespoke Invites",
-    html: shell("Entra nel tuo account", `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Hai chiesto il link per entrare. Qui trovi i tuoi inviti e la galleria dei template.</p>${button(p.link, "Entra")}<p style="font:13px Arial,sans-serif;color:#8a8478">Il link è personale: non condividerlo. Se non sei stato tu, ignora questa email.</p>`),
-    text: `Entra nel tuo account: ${p.link}`,
-  };
+  const m = renderMail("access", getMailTemplate("access"), { link: p.link });
+  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 
 // Email dopo l'acquisto su Shopify: il cliente entra con il link personale e sceglie il template in galleria.
 export function purchaseEmail(p: { to: string; link: string }): MailMessage {
-  return {
-    to: p.to,
-    subject: "Il tuo acquisto è confermato: scegli il template",
-    html: shell(
-      "Grazie, il tuo invito è pronto",
-      `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Il pagamento è andato a buon fine. Entra con il link personale: troverai la galleria dei template, scegli quello che ti piace e comincia a personalizzarlo.</p>${button(p.link, "Entra e scegli il template")}<p style="font:13px Arial,sans-serif;color:#8a8478">Il link è personale: non condividerlo con altri.</p>`,
-    ),
-    text: `Il pagamento è confermato. Entra con il link personale per scegliere il template: ${p.link}`,
-  };
+  const m = renderMail("purchase", getMailTemplate("purchase"), { link: p.link });
+  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }

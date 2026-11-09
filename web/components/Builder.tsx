@@ -35,6 +35,7 @@ import { parseFragments } from "@/lib/blockFragments";
 import { ui, type Lang } from "@/lib/ui";
 import { blockCopy, modelCopy, themeCopy } from "@/lib/catalogCopy";
 import { StockContext } from "./builder/PixabayDialog";
+import { PublishDialog } from "@/components/PublishDialog";
 
 export type Manage = {
   id: string;
@@ -99,12 +100,21 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   const config = history.present;
   // Dopo l'acquisto l'invito si modifica finché non si conferma la modifica: poi è chiuso.
   const locked = initial.status === "paid" && initial.editCount >= 1;
+  // Pubblicato = prima conferma: solo allora l'invito ha il suo link pubblico.
+  const published = initial.editCount >= 1;
+  const [publishOpen, setPublishOpen] = useState(false);
   const editable = !locked;
   // Conferma = pubblicazione. Prima si salva la bozza (così la conferma vede l'ultima versione); se ci sono funzioni
   // nuove da pagare, il server lo dice e si va al checkout della differenza, senza perdere la bozza.
   async function confirmEdit() {
     setError(null);
     if (!(await persist(config))) return;
+    // Prima pubblicazione: il cliente sceglie il link nella finestra dedicata.
+    if (!published) {
+      setSummary(false);
+      setPublishOpen(true);
+      return;
+    }
     const res = await fetch(`/api/invitations/${initial.id}/confirm-edit`, { method: "POST" });
     if (res.ok) return window.location.reload();
     const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
@@ -604,7 +614,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           <Inspector
             lang={lang}
             section={GENERAL_TABS.includes(tab) && !block ? (tab as "dettagli" | "tema" | "lingua" | "link") : undefined}
-            shareUrl={shareUrl}
+            shareUrl={published ? shareUrl : undefined}
             slug={slug}
             onSaveSlug={editable && initial.status !== "paid" ? saveSlug : undefined}
             config={config}
@@ -681,6 +691,16 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </div>
       )}
 
+      {publishOpen && (
+        <PublishDialog
+          id={initial.id}
+          origin={origin}
+          lang={lang}
+          onClose={() => setPublishOpen(false)}
+          onPayment={() => { setPublishOpen(false); setSummary(false); checkout(); }}
+          onDone={() => window.location.reload()}
+        />
+      )}
       {summary && paidAlready && editable && (
         <div className="bl-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setSummary(false); }} onKeyDown={(e) => { if (e.key === "Escape") setSummary(false); }}>
           <div className="bl-modal confirm-summary" role="dialog" aria-modal="true" aria-labelledby="confirm-summary-title">
