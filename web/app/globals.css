@@ -58,7 +58,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
-.narrow { max-width: 760px; }
+.narrow { max-width: 1040px; }
 .section { padding: clamp(84px, 10vw, 140px) 0; }
 .rule-top { border-top: 1px solid var(--line); }
 .section-title { max-width: 18ch; margin-bottom: 56px; }
