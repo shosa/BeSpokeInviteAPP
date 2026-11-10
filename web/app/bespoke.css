@@ -156,6 +156,12 @@ h3 { font-size: 1.5rem; }
 .pp-rail-item { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 14px; background: transparent; color: var(--ink-soft); font: 500 15px var(--font-text), sans-serif; cursor: pointer; text-align: left; transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease; }
 .pp-rail-item:hover { background: var(--paper-deep); color: var(--ink); transform: translateX(2px); }
 .pp-rail-item.is-on { background: var(--inv, var(--brass)); color: var(--inv-ink, #fff); box-shadow: 0 10px 20px -14px var(--inv, var(--brass)); }
+/* Condividi e copia link: in cima alla colonna (sempre visibile su desktop), barra fissa in basso su telefono */
+.pp-share { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.pp-share-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink); font: 500 14px var(--font-text), sans-serif; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background 0.2s ease, border-color 0.2s ease; }
+.pp-share-btn:hover { border-color: var(--inv, var(--brass)); }
+.pp-share-btn.is-primary { grid-column: 1 / -1; background: var(--inv, var(--brass)); border-color: transparent; color: var(--inv-ink, #fff); }
+.pp-share-btn.is-primary:hover { filter: brightness(1.06); }
 .pp-rail-print { margin-top: 8px; border-top: 1px solid var(--line); border-radius: 0 0 14px 14px; padding-top: 12px; }
 .pp-content { min-width: 0; display: grid; gap: 18px; animation: pp-fade 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .pp-stagger > * { animation: pp-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
@@ -194,6 +200,9 @@ h3 { font-size: 1.5rem; }
   .pp-rail-item { flex: none; min-height: 40px; padding: 0 12px; }
   .pp-rail-item:hover { transform: none; }
   .pp-rail-print { display: none; }
+  .pp-share { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 30; grid-template-columns: 1fr 1fr; margin: 0; padding: 8px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 14px 34px -16px rgba(60, 40, 15, 0.45); }
+  .pp-share-btn.is-primary { grid-column: auto; }
+  .pp-share:has(> a.pp-share-btn) { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pp-content, .pp-stagger > *, .pp-enter, .pp-bar span { animation: none !important; transition: none !important; }

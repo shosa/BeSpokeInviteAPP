@@ -9,6 +9,7 @@ import { Seating } from "./Seating";
 import { PdfDialog } from "./PdfDialog";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RsvpStats, RsvpTable, type RsvpSummary } from "./RsvpInsights";
+import { ShareInvite } from "./ShareInvite";
 
 // Planner premium: riepilogo, budget, invitati, attività, fornitori e cartella del matrimonio.
 // Colori e font seguono il tema dell'invito (variabili --inv e --inv-ink impostate dalla pagina).
@@ -70,7 +71,8 @@ const taskDue = (eventDate: string, daysBefore: number) => {
   return `entro il ${d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`;
 };
 
-export function PremiumPlanner({ id, initial, lang }: { id: string; initial: PremiumData; lang: "it" | "en" }) {
+// sharePath: link pubblico dell'invito (/i/…), null se non è ancora pubblicato.
+export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; initial: PremiumData; lang: "it" | "en"; sharePath: string | null }) {
   const router = useRouter();
   const [data, setData] = useState<PremiumData>(initial);
   const [tab, setTab] = useState<Tab>("riepilogo");
@@ -160,6 +162,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
     <div className="pp-shell">
       <div className="pp-layout">
         <aside className="pp-rail" aria-label="Sezioni del planner">
+          <ShareInvite path={sharePath} title={data.event.title || "Il nostro invito"} editHref={`/editor/${id}`} lang={lang} />
           <nav className="pp-rail-nav" role="tablist" aria-orientation="vertical">
             {TABS.map(({ key, label, icon: Icon }) => (
               <button key={key} type="button" role="tab" aria-selected={tab === key} className={`pp-rail-item${tab === key ? " is-on" : ""}`} onClick={() => setTab(key)}>
