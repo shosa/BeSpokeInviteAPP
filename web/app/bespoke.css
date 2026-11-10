@@ -527,13 +527,15 @@ img {
   .act-actions .btn { padding: 0 14px; }
 }
 
-/* Template scelto: più evidente rispetto agli altri */
-.act-page .tpl-card { transition: transform 0.35s ease, opacity 0.35s ease; }
-.act-page .tpl-card:not(.is-on) .tpl-phone { opacity: 0.7; filter: saturate(0.75); transition: opacity 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease; }
-.act-page .tpl-card.is-on { transform: translateY(-12px); }
+/* Template scelto: gli altri restano a colori pieni; quello scelto si alza, cresce un poco e ha la cornice d'oro con un alone caldo. */
+.act-page .tpl-card { transition: transform 0.35s ease; }
+.act-page .tpl-phone { transition: box-shadow 0.35s ease; }
+.act-page .tpl-card.is-on { transform: translateY(-16px) scale(1.04); }
 .act-page .tpl-card.is-on .tpl-phone {
-  opacity: 1; filter: none;
-  box-shadow: inset 0 0 0 1px #3b3834, 0 0 0 3px var(--brass-light), 0 0 0 14px rgba(184, 137, 63, 0.16), 0 44px 80px -24px rgba(110, 78, 28, 0.6);
+  box-shadow: inset 0 0 0 1px #3b3834, 0 0 0 3px var(--brass-light), 0 0 0 9px rgba(184, 137, 63, 0.24), 0 0 36px 4px rgba(184, 137, 63, 0.35), 0 44px 80px -24px rgba(110, 78, 28, 0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .act-page .tpl-card, .act-page .tpl-phone { transition: none; }
 }
 .act-page .tpl-card.is-on .tpl-meta h3 { color: var(--brass); }
 
