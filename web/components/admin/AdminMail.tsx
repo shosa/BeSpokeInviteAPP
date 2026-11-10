@@ -5,11 +5,11 @@ import { toast } from "sonner";
 import { Switch } from "../ui/Switch";
 
 // Impostazioni della posta: mittente, risposte e interruttori per tipo di email. La chiave Resend resta nel .env.
-type Settings = { fromName: string; fromEmail: string; replyTo: string; sendInvites: boolean; notifyRsvp: boolean; orderConfirm: boolean; accent: string };
+type Settings = { fromName: string; fromEmail: string; replyTo: string; notifyRsvp: boolean; orderConfirm: boolean; accent: string };
 type Result = { at: string; ok: boolean; error?: string; kind: string } | null;
 type Text = { subject: string; title: string; body: string; button: string; footer: string };
 type TemplateInfo = { kind: TemplateKind; label: string; variables: string[]; current: Text; defaults: Text };
-type TemplateKind = "access" | "purchase" | "order" | "rsvp" | "invite";
+type TemplateKind = "access" | "purchase" | "order" | "rsvp";
 type Payload = { settings: Settings; provider: "resend" | "outbox"; keyPresent: boolean; fromPreview: string; lastResult: Result; templates: TemplateInfo[] };
 const FIELDS: { key: keyof Text; label: string; multi?: boolean }[] = [
   { key: "subject", label: "Oggetto" },
@@ -129,10 +129,9 @@ export function AdminMail() {
             </span>
             <small>Pulsanti e nome del marchio nelle email.</small>
           </label>
-          <Toggle label="Inviti agli ospiti" hint="Il pulsante Invia nel pannello ospiti manda l'invito via email." checked={draft.sendInvites} onChange={(v) => set({ sendInvites: v })} />
           <Toggle label="Avviso al cliente per ogni risposta" hint="Il cliente riceve un'email quando un ospite risponde." checked={draft.notifyRsvp} onChange={(v) => set({ notifyRsvp: v })} />
           <Toggle label="Conferma al cliente dopo il pagamento" hint="Mail di ringraziamento con il link dell'invito attivo." checked={draft.orderConfirm} onChange={(v) => set({ orderConfirm: v })} />
-          <p className="hint">Le modifiche agli interruttori valgono dopo il salvataggio. Gli inviti spenti non partono: il pulsante nel pannello ospiti lo segnala.</p>
+          <p className="hint">Le modifiche agli interruttori valgono dopo il salvataggio.</p>
         </section>
       </div>
 
@@ -179,7 +178,7 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint: strin
 
 // Editor dei testi: un tipo di email alla volta, con anteprima che si aggiorna mentre si scrive.
 function TemplateEditor({ templates, accent, onSaved }: { templates: TemplateInfo[]; accent: string; onSaved: () => void }) {
-  const [kind, setKind] = useState<TemplateKind>(templates[0]?.kind ?? "invite");
+  const [kind, setKind] = useState<TemplateKind>(templates[0]?.kind ?? "access");
   const info = templates.find((t) => t.kind === kind) ?? templates[0];
   const [draft, setDraft] = useState<Text | null>(info?.current ?? null);
   const [preview, setPreview] = useState<string>("");

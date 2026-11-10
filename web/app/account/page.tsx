@@ -81,7 +81,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const demo = Boolean(catalog?.demo);
   const demoThemes = (catalog?.themes ?? []).filter((x) => x.enabled).map((x) => ({ id: x.manifest.id, name: x.manifest.name, models: x.manifest.models }));
   const demoModels = (catalog?.models ?? []).map((m) => m.id);
-  const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL ?? "https://lucatelliphotographer.com";
+  const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL ?? "https://thebespokeinvite.com";
   const createLabel = lang === "en" ? "Create a test invitation" : "Crea un invito di prova";
 
   let rows: Row[];
@@ -198,7 +198,6 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                   <dl className="invite-stats">
                     <div><dt>{t.visits}</dt><dd>{r.views}</dd></div>
                     <div><dt>{t.replies}</dt><dd>{r.rsvps}</dd></div>
-                    <div><dt>{t.guests}</dt><dd>{r.guests}</dd></div>
                   </dl>
                   <div className="invite-actions">
                     {r.status === "paid" ? (

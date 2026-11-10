@@ -162,7 +162,6 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
     return () => mq.removeEventListener("change", on);
   }, []);
   const [origin, setOrigin] = useState("");
-  const [guests, setGuests] = useState(initial.guests);
   const [firstSave, setFirstSave] = useState(true);
   const [showCover, setShowCover] = useState(false);
   // La busta si vede in anteprima quando è selezionata, oppure con l'interruttore «Mostra la busta».
@@ -602,7 +601,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </nav>
         <div className={locked && panel !== "ospiti" ? "bl-zone is-locked" : "bl-zone"} inert={(locked && panel !== "ospiti") || undefined}>
         {isDesktop && tab === "blocchi" && !block ? blocksPanel : panel === "ospiti" ? (
-          <GuestsPanel lang={lang} invitationId={initial.id} paid={locked} hasRsvp={hasRsvp} guests={guests} onSent={(sent) => setGuests((g) => [...g, ...sent.map((email) => ({ email, sentAt: new Date().toISOString() }))])} />
+          <GuestsPanel lang={lang} invitationId={initial.id} paid={locked} hasRsvp={hasRsvp} />
         ) : tabMissingBlock && tabDef?.type ? (
           <div className="bl-inspector bl-missing-block">
             <p className="bl-kicker">{lang === "en" ? "Not in the invitation" : "Non presente nell'invito"}</p>

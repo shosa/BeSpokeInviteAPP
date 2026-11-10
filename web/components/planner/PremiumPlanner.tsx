@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import { FOLDER, FOLDER_KEYS } from "@inviteme/shared";
 import { Folder, type FolderValue } from "./Folder";
-import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, Printer, Store, Users, Wallet, type LucideProps } from "lucide-react";
+import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, MailCheck, Printer, Store, Users, Wallet, type LucideProps } from "lucide-react";
 import { Seating } from "./Seating";
 import { PdfDialog } from "./PdfDialog";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { RsvpStats, RsvpTable, type RsvpSummary } from "./RsvpInsights";
 
 // Planner premium: riepilogo, budget, invitati, attività, fornitori e cartella del matrimonio.
 // Colori e font seguono il tema dell'invito (variabili --inv e --inv-ink impostate dalla pagina).
@@ -29,11 +30,12 @@ export type PremiumData = {
 };
 
 type Weather = { forecast: { tmaxC: number; tminC: number; precipMm: number; precipProb: number | null } | null; reason?: string; place?: string };
-type Tab = "riepilogo" | "budget" | "invitati" | "tavoli" | "attivita" | "fornitori" | "cartella";
+type Tab = "riepilogo" | "conferme" | "budget" | "invitati" | "tavoli" | "attivita" | "fornitori" | "cartella";
 type Icon = ComponentType<LucideProps>;
 
 const TABS: { key: Tab; label: string; icon: Icon }[] = [
   { key: "riepilogo", label: "Riepilogo", icon: LayoutDashboard },
+  { key: "conferme", label: "Conferme", icon: MailCheck },
   { key: "budget", label: "Budget", icon: Wallet },
   { key: "invitati", label: "Invitati", icon: Users },
   { key: "tavoli", label: "Tavoli", icon: Armchair },
@@ -68,13 +70,29 @@ const taskDue = (eventDate: string, daysBefore: number) => {
   return `entro il ${d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`;
 };
 
-export function PremiumPlanner({ id, initial }: { id: string; initial: PremiumData; lang: "it" | "en" }) {
+export function PremiumPlanner({ id, initial, lang }: { id: string; initial: PremiumData; lang: "it" | "en" }) {
   const router = useRouter();
   const [data, setData] = useState<PremiumData>(initial);
   const [tab, setTab] = useState<Tab>("riepilogo");
   const [weather, setWeather] = useState<Weather | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [rsvp, setRsvp] = useState<RsvpSummary | null>(null);
+  const [rsvpFailed, setRsvpFailed] = useState(false);
+
+  // Risposte alla conferma: si caricano all'apertura della scheda e si aggiornano ogni 30 secondi finché resta aperta.
+  useEffect(() => {
+    if (tab !== "conferme") return;
+    let alive = true;
+    const load = () =>
+      fetch(`/api/invitations/${id}/rsvps`)
+        .then((r) => (r.ok ? (r.json() as Promise<RsvpSummary>) : Promise.reject()))
+        .then((d) => { if (alive) { setRsvp(d); setRsvpFailed(false); } })
+        .catch(() => { if (alive) setRsvpFailed(true); });
+    load();
+    const t = setInterval(load, 30_000);
+    return () => { alive = false; clearInterval(t); };
+  }, [tab, id]);
 
   useEffect(() => {
     fetch(`/api/invitations/${id}/planner/weather`)
@@ -210,6 +228,30 @@ export function PremiumPlanner({ id, initial }: { id: string; initial: PremiumDa
                   <Bar value={Math.round((docsWritten / FOLDER.length) * 100)} />
                 </div>
               </div>
+            </section>
+          )}
+
+          {tab === "conferme" && (
+            <section className="pp-stagger" aria-label="Conferme">
+              {!rsvp ? (
+                <div className="pp-card"><p className="hint">{rsvpFailed ? "Non è stato possibile caricare le risposte. Riprova tra poco." : "Caricamento delle risposte…"}</p></div>
+              ) : (
+                <>
+                  <div className="pp-hero-stats">
+                    <div className="pp-stat"><span className="pp-kicker">Risposte</span><strong>{rsvp.total}</strong><small>dal link dell&apos;invito</small></div>
+                    <div className="pp-stat"><span className="pp-kicker">Presenti</span><strong>{rsvp.attending}</strong><small>{rsvp.declined} non potranno</small></div>
+                    <div className="pp-stat"><span className="pp-kicker">Persone</span><strong>{rsvp.guests}</strong><small>attese in tutto</small></div>
+                  </div>
+                  <div className="pp-card">
+                    <span className="pp-kicker">Statistiche delle risposte</span>
+                    <RsvpStats summary={rsvp} lang={lang} />
+                  </div>
+                  <div className="pp-card">
+                    <span className="pp-kicker">Tutte le risposte</span>
+                    <RsvpTable invitationId={id} summary={rsvp} lang={lang} />
+                  </div>
+                </>
+              )}
             </section>
           )}
 

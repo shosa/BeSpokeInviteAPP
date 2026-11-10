@@ -3,17 +3,16 @@ import { pool } from "./db";
 // Testi e aspetto delle email, modificabili dalla console. Ogni tipo di email ha un modello predefinito;
 // la console salva solo le modifiche (tabella settings, chiave 'mail_templates'). Nei testi si usano le variabili {{nome}}.
 
-export const MAIL_KINDS = ["access", "purchase", "order", "rsvp", "invite"] as const;
+export const MAIL_KINDS = ["access", "purchase", "order", "rsvp"] as const;
 export type MailTemplateKind = (typeof MAIL_KINDS)[number];
 export type MailTemplate = { subject: string; title: string; body: string; button: string; footer: string };
-export type MailVars = Partial<Record<"link" | "title" | "hosts" | "amount" | "verdict", string>>;
+export type MailVars = Partial<Record<"link" | "title" | "amount" | "verdict", string>>;
 
 export const MAIL_VARIABLES: Record<MailTemplateKind, string[]> = {
   access: ["link"],
   purchase: ["link"],
   order: ["title", "amount", "link"],
   rsvp: ["title", "verdict", "link"],
-  invite: ["title", "hosts", "link"],
 };
 
 export const MAIL_LABELS: Record<MailTemplateKind, string> = {
@@ -21,7 +20,6 @@ export const MAIL_LABELS: Record<MailTemplateKind, string> = {
   purchase: "Acquisto confermato (Shopify)",
   order: "Pagamento ricevuto",
   rsvp: "Avviso di risposta",
-  invite: "Invito agli ospiti",
 };
 
 export const MAIL_TEMPLATE_DEFAULTS: Record<MailTemplateKind, MailTemplate> = {
@@ -51,13 +49,6 @@ export const MAIL_TEMPLATE_DEFAULTS: Record<MailTemplateKind, MailTemplate> = {
     title: "Nuova conferma",
     body: "Un ospite {{verdict}} a {{title}}.",
     button: "Vedi le risposte",
-    footer: "",
-  },
-  invite: {
-    subject: "Invito: {{title}}",
-    title: "{{hosts}} vi invitano",
-    body: "Trovate qui tutti i dettagli di {{title}}, il programma e il modulo per confermare la presenza.",
-    button: "Apri l'invito",
     footer: "",
   },
 };
@@ -90,7 +81,7 @@ export type MailTemplateValidation = { ok: true; value: MailTemplate } | { ok: f
 
 export function validateMailTemplate(input: unknown): MailTemplateValidation {
   const src = (input ?? {}) as Record<string, unknown>;
-  const value = { ...MAIL_TEMPLATE_DEFAULTS.invite } as MailTemplate;
+  const value = { ...MAIL_TEMPLATE_DEFAULTS.access } as MailTemplate;
   for (const key of Object.keys(LIMITS) as (keyof MailTemplate)[]) {
     const v = src[key];
     if (typeof v !== "string") return { ok: false, error: `Il campo ${key} non è valido` };

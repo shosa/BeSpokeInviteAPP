@@ -8,16 +8,15 @@ export type MailSettings = {
   fromName: string;
   fromEmail: string;
   replyTo: string;
-  sendInvites: boolean; // invio degli inviti agli ospiti
   notifyRsvp: boolean; // avviso al cliente quando un ospite risponde
   orderConfirm: boolean; // conferma al cliente dopo il pagamento
   accent: string; // colore del pulsante e del marchio nelle email, #rrggbb
 };
-export type MailKind = "invite" | "rsvp" | "order" | "test" | "other";
+export type MailKind = "rsvp" | "order" | "test" | "other";
 export type MailResult = { at: string; ok: boolean; error?: string; kind: MailKind } | null;
 
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
-export const MAIL_DEFAULTS: MailSettings = { fromName: "Bespoke Invites", fromEmail: "", replyTo: "", sendInvites: true, notifyRsvp: true, orderConfirm: true, accent: "#8a6427" };
+export const MAIL_DEFAULTS: MailSettings = { fromName: "Bespoke Invites", fromEmail: "", replyTo: "", notifyRsvp: true, orderConfirm: true, accent: "#8a6427" };
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 let stored: Partial<MailSettings> = {};
@@ -47,7 +46,7 @@ export async function loadMailSettings(): Promise<void> {
   if (typeof v.fromName === "string") stored.fromName = v.fromName.slice(0, 80);
   if (typeof v.fromEmail === "string" && (v.fromEmail === "" || EMAIL_RE.test(v.fromEmail))) stored.fromEmail = v.fromEmail;
   if (typeof v.replyTo === "string" && (v.replyTo === "" || EMAIL_RE.test(v.replyTo))) stored.replyTo = v.replyTo;
-  for (const k of ["sendInvites", "notifyRsvp", "orderConfirm"] as const) if (typeof v[k] === "boolean") stored[k] = v[k] as boolean;
+  for (const k of ["notifyRsvp", "orderConfirm"] as const) if (typeof v[k] === "boolean") stored[k] = v[k] as boolean;
   if (typeof v.accent === "string" && HEX_RE.test(v.accent)) stored.accent = v.accent;
   const st = byKey.mail_status as NonNullable<MailResult> | undefined;
   lastResult = st && typeof st.at === "string" ? st : null;
@@ -68,7 +67,7 @@ export function validateMailSettings(input: Partial<Record<keyof MailSettings, u
   const flag = (k: keyof MailSettings) => input[k] === true;
   return {
     ok: true,
-    value: { fromName, fromEmail, replyTo, sendInvites: flag("sendInvites"), notifyRsvp: flag("notifyRsvp"), orderConfirm: flag("orderConfirm"), accent },
+    value: { fromName, fromEmail, replyTo, notifyRsvp: flag("notifyRsvp"), orderConfirm: flag("orderConfirm"), accent },
   };
 }
 

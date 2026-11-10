@@ -14,13 +14,10 @@ export type RsvpSummary = {
   rsvps: { id: string; createdAt: string; answers: Record<string, string | number | boolean> }[];
 };
 
-export function GuestsPanel({ invitationId, paid, hasRsvp, guests, onSent, lang = "it" }: { invitationId: string; paid: boolean; hasRsvp: boolean; guests: { email: string; sentAt: string }[]; onSent: (emails: string[]) => void; lang?: Lang }) {
+// Pannello Ospiti del builder: le risposte alla conferma di presenza. L'invito si condivide con il suo link.
+export function GuestsPanel({ invitationId, paid, hasRsvp, lang = "it" }: { invitationId: string; paid: boolean; hasRsvp: boolean; lang?: Lang }) {
   const L = ui(lang).builder;
   const [summary, setSummary] = useState<RsvpSummary | null>(null);
-  const [emails, setEmails] = useState("");
-  const [note, setNote] = useState("");
-  const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasRsvp || !paid) return;
@@ -38,28 +35,6 @@ export function GuestsPanel({ invitationId, paid, hasRsvp, guests, onSent, lang 
     };
   }, [hasRsvp, paid, invitationId]);
 
-  async function send() {
-    const list = emails.split(/[\s,;]+/).filter(Boolean);
-    setSending(true);
-    setResult(null);
-    try {
-      const res = await fetch(`/api/invitations/${invitationId}/guests`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emails: list, message: note || undefined }),
-      });
-      const data = (await res.json()) as { sent?: number; failed?: string[]; error?: string };
-      if (!res.ok) throw new Error(data.error ?? L.guestsError);
-      setResult(L.guestsSentResult(data.sent ?? 0, data.failed?.length ?? 0));
-      onSent(list.filter((e) => !data.failed?.includes(e)));
-      setEmails("");
-    } catch (e) {
-      setResult(e instanceof Error ? e.message : "Errore");
-    } finally {
-      setSending(false);
-    }
-  }
-
   if (!paid) return (
     <div className="guests-empty" role="status">
       <span className="guests-empty-ico" aria-hidden="true"><Send size={22} /></span>
@@ -69,24 +44,6 @@ export function GuestsPanel({ invitationId, paid, hasRsvp, guests, onSent, lang 
 
   return (
     <div className="stack">
-      <section className="block">
-        <h3>{L.guestsSend}</h3>
-        <p className="hint">{L.guestsOneLink}</p>
-        <label className="field wide">
-          <span>{L.guestsEmails}</span>
-          <textarea rows={4} value={emails} onChange={(e) => setEmails(e.target.value)} placeholder="mario@esempio.it, giulia@esempio.it" />
-        </label>
-        <label className="field wide">
-          <span>{L.guestsNote}</span>
-          <textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
-        </label>
-        <button type="button" className="btn solid" disabled={sending || !emails.trim()} onClick={send}>
-          {sending ? L.guestsSending : L.guestsSendBtn}
-        </button>
-        {result && <p className="form-notice">{result}</p>}
-        {guests.length > 0 && <p className="hint">{L.guestsAlreadySent(guests.length)}</p>}
-      </section>
-
       {hasRsvp && (
         <section className="block">
           <h3>{L.guestsRsvp}</h3>

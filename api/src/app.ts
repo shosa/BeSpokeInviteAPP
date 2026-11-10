@@ -41,7 +41,7 @@ import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
-import { accessEmail, appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
+import { accessEmail, appUrl, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { getAllMailTemplates, isMailKind, loadMailTemplates, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
 import { renderMail } from "./mail";
@@ -443,40 +443,6 @@ export async function buildApp() {
       throw e;
     }
     return { ok: true, editCount: 1, slug };
-  });
-
-  app.post<{ Params: { id: string } }>("/api/invitations/:id/guests", async (req, reply) => {
-    const user = await requireUser(req, reply);
-    if (!user) return;
-    const inv = await ownedInvitation(req.params.id, user.id);
-    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
-    if (inv.status !== "paid") return reply.code(409).send({ error: "Paga l'invito prima di inviarlo agli ospiti" });
-    if (inv.edit_count < 1) return reply.code(409).send({ error: "Pubblica l'invito prima di inviarlo agli ospiti: scegli il link nel builder" });
-
-    const b = (req.body ?? {}) as { emails?: unknown; message?: unknown };
-    const list = (Array.isArray(b.emails) ? b.emails : [])
-      .map((e) => String(e).trim().toLowerCase())
-      .filter((e) => EMAIL.test(e));
-    const unique = [...new Set(list)].slice(0, 100);
-    if (unique.length === 0) return reply.code(400).send({ error: "Nessun indirizzo email valido" });
-    const personal = typeof b.message === "string" ? b.message.slice(0, 500) : undefined;
-    if (!getMailSettings().sendInvites) return reply.code(409).send({ error: "L'invio degli inviti via email è disattivato: attivalo nella console, sezione Email" });
-
-    const sent: string[] = [];
-    const failed: string[] = [];
-    for (const to of unique) {
-      try {
-        await sendMail(inviteEmail({ to, hosts: textOf(inv.config, "hosts"), title: titleOf(inv.config), slug: inv.slug, personal }), "invite");
-        sent.push(to);
-      } catch {
-        failed.push(to);
-      }
-    }
-    const now = new Date().toISOString();
-    const guests = [...(inv.guests as Row[])];
-    for (const email of sent) if (!guests.some((g) => g.email === email)) guests.push({ email, sentAt: now });
-    await pool.query("UPDATE invitations SET guests = $1 WHERE id = $2", [JSON.stringify(guests), inv.id]);
-    return { sent: sent.length, failed };
   });
 
   // Planner premium: panoramica con i conteggi. Solo per gli inviti del livello premium.
@@ -1518,7 +1484,7 @@ export async function buildApp() {
     if (!isMailKind(b.kind)) return reply.code(400).send({ error: "Tipo di email non valido" });
     const checked = validateMailTemplate(b.template);
     if (!checked.ok) return reply.code(400).send({ error: checked.error });
-    const sample = { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna e Luca", hosts: "Anna e Luca", amount: "99,00 €", verdict: "parteciperà" };
+    const sample = { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna e Luca", amount: "99,00 €", verdict: "parteciperà" };
     const m = renderMail(b.kind, checked.value, sample);
     return { subject: m.subject, html: m.html, variables: MAIL_VARIABLES[b.kind] };
   });

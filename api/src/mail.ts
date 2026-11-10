@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { pool } from "./db";
 import { fromAddress, getMailSettings, recordMailResult, resendKey, type MailKind } from "./mailSettings";
 import { fillTemplate, getMailTemplate, type MailTemplate, type MailTemplateKind, type MailVars } from "./mailTemplates";
@@ -8,19 +11,32 @@ export const appUrl = () => (process.env.APP_URL ?? "http://localhost:3000").rep
 
 export type MailMessage = { to: string; subject: string; html: string; text: string };
 
-// Invio di una email. Con RESEND_API_KEY parte davvero; senza, va nella tabella outbox.
-// Gli interruttori della console decidono quali tipi partono: un tipo spento viene saltato senza errore,
-// tranne gli inviti agli ospiti, che l'API rifiuta prima di cominciare.
-export class MailDisabledError extends Error {}
+// Logo incorporato nell'email (allegato inline, src="cid:…"): molti client non scaricano le immagini remote,
+// e il logo da URL compariva come immagine mancante. Il file è lo stesso servito dal frontend.
+const LOGO_CID = "bespoke-logo";
+let logoBase64: string | null | undefined;
+function inlineLogo(): string | null {
+  if (logoBase64 !== undefined) return logoBase64;
+  const rel = path.join("web", "public", "brand", "logo-email.png");
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [path.join(process.cwd(), rel), path.join(process.cwd(), "..", rel), path.join(here, "..", "..", rel)];
+  const file = candidates.find((f) => fs.existsSync(f));
+  logoBase64 = file ? fs.readFileSync(file).toString("base64") : null;
+  return logoBase64;
+}
 
+// Invio di una email. Con RESEND_API_KEY parte davvero; senza, va nella tabella outbox.
+// Gli interruttori della console decidono quali tipi partono: un tipo spento viene saltato senza errore.
 export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Promise<void> {
   const s = getMailSettings();
-  if (kind === "invite" && !s.sendInvites) throw new MailDisabledError("L'invio degli inviti via email è disattivato nella console");
   if (kind === "rsvp" && !s.notifyRsvp) return;
   if (kind === "order" && !s.orderConfirm) return;
   const key = resendKey();
   try {
     if (key) {
+      // Il logo viaggia dentro l'email; senza il file resta l'URL remoto come riserva.
+      const logo = msg.html.includes(LOGO_URL()) ? inlineLogo() : null;
+      const html = logo ? msg.html.split(LOGO_URL()).join(`cid:${LOGO_CID}`) : msg.html;
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -28,8 +44,9 @@ export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Prom
           from: fromAddress(),
           to: [msg.to],
           subject: msg.subject,
-          html: msg.html,
+          html,
           text: msg.text,
+          ...(logo ? { attachments: [{ content: logo, filename: "logo.png", content_type: "image/png", content_id: LOGO_CID }] } : {}),
           ...(s.replyTo ? { reply_to: s.replyTo } : {}),
         }),
         signal: AbortSignal.timeout(10000),
@@ -81,17 +98,8 @@ export function renderMail(kind: MailTemplateKind, t: MailTemplate, vars: MailVa
   const button_ = fillTemplate(t.button, vars);
   const footer = fillTemplate(t.footer, vars);
   const link = vars.link ?? "";
-  const copy = kind === "invite" && link ? `<p style="margin:18px 0 0;font:13px/1.6 Arial,Helvetica,sans-serif;color:#7b6a57;word-break:break-all">Oppure copia questo link: <a href="${esc(link)}" style="color:#8a6427">${esc(link)}</a></p>` : "";
-  const html = shell(esc(title), paragraphs(body) + (link ? button(link, button_) : "") + copy, footer || undefined);
+  const html = shell(esc(title), paragraphs(body) + (link ? button(link, button_) : ""), footer || undefined);
   return { subject: fillTemplate(t.subject, vars), html, text: [title, body, link].filter(Boolean).join(". ").replace(/\.\s\./g, ".") };
-}
-
-export function inviteEmail(p: { to: string; hosts: string; title: string; slug: string; personal?: string }): MailMessage {
-  const link = `${appUrl()}/i/${p.slug}`;
-  const t = getMailTemplate("invite");
-  // Il messaggio personale scritto per l'invito sostituisce il corpo del modello.
-  const m = renderMail("invite", p.personal ? { ...t, body: p.personal } : t, { link, title: p.title, hosts: p.hosts });
-  return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 
 export function rsvpNoticeEmail(p: { to: string; title: string; attending: boolean; invitationId: string }): MailMessage {

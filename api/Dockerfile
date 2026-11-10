@@ -16,6 +16,8 @@ COPY shared shared
 COPY api api
 COPY engine engine
 COPY themes themes
+# Logo incorporato nelle email (api/src/mail.ts): lo stesso file servito dal frontend.
+COPY web/public/brand/logo-email.png web/public/brand/logo-email.png
 
 RUN mkdir -p /app/data/media && chown -R node:node /app/data
 USER node

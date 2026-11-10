@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { validateMailSettings, fromAddress, MAIL_DEFAULTS } from "../src/mailSettings";
 
 test("il mittente accetta nome ed email validi e normalizza l'email", () => {
-  const r = validateMailSettings({ fromName: " Bespoke Invites ", fromEmail: " Ciao@Dominio.it ", replyTo: "", sendInvites: true, notifyRsvp: false, orderConfirm: true });
+  const r = validateMailSettings({ fromName: " Bespoke Invites ", fromEmail: " Ciao@Dominio.it ", replyTo: "", notifyRsvp: false, orderConfirm: true });
   assert.ok(r.ok);
   assert.equal(r.ok && r.value.fromName, "Bespoke Invites");
   assert.equal(r.ok && r.value.fromEmail, "ciao@dominio.it");
@@ -18,9 +18,8 @@ test("nome o indirizzi non validi vengono rifiutati", () => {
 });
 
 test("gli interruttori sono attivi solo se vale true", () => {
-  const r = validateMailSettings({ fromName: "Ok", sendInvites: "yes", notifyRsvp: 1 });
+  const r = validateMailSettings({ fromName: "Ok", orderConfirm: "yes", notifyRsvp: 1 });
   assert.ok(r.ok);
-  assert.equal(r.ok && r.value.sendInvites, false);
   assert.equal(r.ok && r.value.notifyRsvp, false);
   assert.equal(r.ok && r.value.orderConfirm, false);
 });

@@ -161,7 +161,6 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <div><dt>Tema</dt><dd>{d.theme ?? "—"}</dd></div>
             <div><dt>Creato</dt><dd>{fmtDate(d.created_at)}</dd></div>
             <div><dt>Visite</dt><dd>{d.views}</dd></div>
-            <div><dt>Ospiti</dt><dd>{d.guests.length}</dd></div>
             <div><dt>Modifiche</dt><dd>{d.edit_count >= 1 ? "Confermata" : "Aperta"}</dd></div>
           </dl>
 

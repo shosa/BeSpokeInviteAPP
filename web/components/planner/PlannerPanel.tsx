@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Catalog, InviteConfig, RsvpQuestion } from "@inviteme/shared";
-import { Bell, CalendarDays, Check, Clock, Eye, FileDown, Pencil, Search, Share2, StickyNote, Users } from "lucide-react";
+import { BarChart3, CalendarDays, Check, Clock, Eye, Pencil, Share2, StickyNote, Users } from "lucide-react";
 import { CopyLink } from "../CopyLink";
+import { RsvpStats, RsvpTable, rsvpCopy } from "./RsvpInsights";
 import { ui, type Lang } from "@/lib/ui";
 
 export type PlannerData = {
@@ -46,25 +47,9 @@ export function PlannerPanel({ data, lang = "it" }: { data: PlannerData; lang?: 
   const [notes, setNotes] = useState(manage.planner.notes ?? "");
   const [countdownNote, setCountdownNote] = useState(manage.planner.countdownNote ?? "");
   const [saved, setSaved] = useState<"idle" | "saving" | "ok" | "error">("idle");
-  const [filter, setFilter] = useState<"all" | "yes" | "no">("all");
-  const [query, setQuery] = useState("");
-  const [guestQuery, setGuestQuery] = useState("");
-  const sent = manage.guests.length;
-  const pending = Math.max(0, sent - summary.total);
-  const questions = useMemo(() => summary.questions, [summary.questions]);
-  // La prima domanda sì/no dice chi viene: serve per i filtri Presenti / Assenti.
-  const attendingQ = questions.find((q) => q.type === "yes-no");
-  const attendingOf = (r: PlannerData["summary"]["rsvps"][number]) => (attendingQ ? r.answers[attendingQ.id] === true : null);
-  const rows = useMemo(() => summary.rsvps.filter((r) => {
-    if (filter === "yes" && attendingOf(r) !== true) return false;
-    if (filter === "no" && attendingOf(r) !== false) return false;
-    if (!query.trim()) return true;
-    return Object.values(r.answers).some((a) => String(a).toLowerCase().includes(query.trim().toLowerCase()));
-  }), [summary.rsvps, filter, query]); // eslint-disable-line react-hooks/exhaustive-deps
-  const guests = manage.guests.filter((g) => g.email.toLowerCase().includes(guestQuery.trim().toLowerCase()));
+  const R = rsvpCopy(lang);
   const shareHref = `/i/${manage.slug}`;
   const shareText = `${lang === "en" ? "You're invited! All the details here" : "Vi invitiamo! Trovate tutti i dettagli qui"}: ${typeof window === "undefined" ? shareHref : window.location.origin + shareHref}`;
-  const replyPct = sent > 0 ? Math.min(100, Math.round((summary.total / sent) * 100)) : 0;
   const yesPct = summary.total > 0 ? Math.round((summary.attending / summary.total) * 100) : 0;
 
   async function save() {
@@ -93,15 +78,12 @@ export function PlannerPanel({ data, lang = "it" }: { data: PlannerData; lang?: 
       </div>
 
       <div className="pl-tiles" aria-label={L.kicker}>
-        <div className="pl-tile pl-tile-a"><Users size={22} aria-hidden="true" /><span>{L.invited}</span><strong>{sent}</strong><small>{L.invitedSub}</small></div>
-        <div className="pl-tile pl-tile-b"><Check size={22} aria-hidden="true" /><span>{L.replied}</span><strong>{summary.total}</strong><small>{L.repliedSub(pending)}</small></div>
+        <div className="pl-tile pl-tile-b"><Check size={22} aria-hidden="true" /><span>{L.replied}</span><strong>{summary.total}</strong><small>{L.repliedSub}</small></div>
         <div className="pl-tile pl-tile-c"><CalendarDays size={22} aria-hidden="true" /><span>{L.present}</span><strong>{summary.attending}</strong><small>{L.presentSub(summary.declined)}</small></div>
         <div className="pl-tile pl-tile-d"><Users size={22} aria-hidden="true" /><span>{L.people}</span><strong>{summary.guests}</strong><small>{L.peopleSub}</small></div>
       </div>
 
-      <div className="pl-progress" aria-label={T.progress}>
-        <div className="pl-progress-top"><span>{T.progress}</span><strong>{summary.total} {T.of} {sent}</strong></div>
-        <div className="pl-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={replyPct}><span style={{ width: `${replyPct}%` }} /></div>
+      <div className="pl-progress" aria-label={L.present}>
         <div className="pl-progress-top"><span>{L.present}</span><strong>{yesPct}%</strong></div>
         <div className="pl-bar pl-bar-yes" aria-hidden="true"><span style={{ width: `${yesPct}%` }} /></div>
       </div>
@@ -129,66 +111,12 @@ export function PlannerPanel({ data, lang = "it" }: { data: PlannerData; lang?: 
         </Panel>
       </div>
 
-      <Panel id="pl-rsvp" icon={<Check size={20} aria-hidden="true" />} title={L.replies} action={<a className="pl-chip" href={`/api/invitations/${manage.id}/rsvps?format=csv`}><FileDown size={16} aria-hidden="true" />{L.csv}</a>}>
-        {summary.rsvps.length === 0 ? (
-          <p className="hint">{L.noReplies}</p>
-        ) : (
-          <>
-            <div className="pl-tools">
-              <div className="pl-seg" role="group" aria-label={T.all}>
-                {(["all", "yes", "no"] as const).map((f) => (
-                  <button key={f} type="button" className={filter === f ? "is-on" : ""} aria-pressed={filter === f} onClick={() => setFilter(f)} disabled={f !== "all" && !attendingQ}>
-                    {f === "all" ? T.all : f === "yes" ? T.yes : T.no}
-                  </button>
-                ))}
-              </div>
-              <label className="pl-search"><Search size={16} aria-hidden="true" /><input type="search" value={query} placeholder={T.search} onChange={(e) => setQuery(e.target.value)} /></label>
-            </div>
-            {rows.length === 0 ? (
-              <p className="hint">{T.noMatch}</p>
-            ) : (
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th scope="col">{L.received}</th>{questions.map((q) => <th scope="col" key={q.id}>{q.label}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r) => (
-                      <tr key={r.id}>
-                        <td>{new Date(r.createdAt).toLocaleString(lang === "en" ? "en-GB" : "it-IT", { dateStyle: "short", timeStyle: "short" })}</td>
-                        {questions.map((q) => {
-                          const a = r.answers[q.id];
-                          if (q.type === "yes-no") return <td key={q.id}><span className={`pl-answer ${a === true ? "is-yes" : a === false ? "is-no" : ""}`}>{a === true ? (q.yes ?? "Sì") : a === false ? (q.no ?? "No") : "–"}</span></td>;
-                          return <td key={q.id}>{String(a ?? "–")}</td>;
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
+      <Panel id="pl-stats" icon={<BarChart3 size={20} aria-hidden="true" />} title={R.statsTitle}>
+        <RsvpStats summary={summary} lang={lang} />
       </Panel>
 
-      <Panel id="pl-guests" icon={<Bell size={20} aria-hidden="true" />} title={L.guestsInvited}>
-        {sent === 0 ? (
-          <p className="hint">{L.noInvites}</p>
-        ) : (
-          <>
-            <label className="pl-search"><Search size={16} aria-hidden="true" /><input type="search" value={guestQuery} placeholder={T.guestsSearch} onChange={(e) => setGuestQuery(e.target.value)} /></label>
-            <ul className="pl-guests">
-              {guests.map((g) => (
-                <li key={g.email}>
-                  <span className="pl-avatar" aria-hidden="true">{g.email.charAt(0).toUpperCase()}</span>
-                  <span className="pl-guest-mail">{g.email}</span>
-                  <small>{L.sentOn(new Date(g.sentAt).toLocaleDateString(lang === "en" ? "en-GB" : "it-IT"))}</small>
-                </li>
-              ))}
-            </ul>
-            {guests.length === 0 && <p className="hint">{T.noMatch}</p>}
-          </>
-        )}
+      <Panel id="pl-rsvp" icon={<Check size={20} aria-hidden="true" />} title={L.replies}>
+        <RsvpTable invitationId={manage.id} summary={summary} lang={lang} />
       </Panel>
     </div>
   );
