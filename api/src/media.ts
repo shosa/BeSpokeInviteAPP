@@ -96,6 +96,11 @@ function args(kind: MediaKind, src: string, out: string): string[] {
   return [...base, "-an", "-vf", scale, "-q:v", "3", out];
 }
 
+// Miniatura JPEG di un'immagine (es. la busta chiusa di un tema), larga `width` px. Passa dalla stessa coda delle conversioni.
+export function makeThumbnail(src: string, out: string, width: number): Promise<void> {
+  return serial(() => ffmpeg(["-y", "-loglevel", "error", "-i", src, "-vf", `scale=${width}:-2:flags=lanczos`, "-q:v", "4", out]));
+}
+
 // "nice -n 19" lascia la CPU agli altri servizi: la conversione è lenta ma non deve rallentare il resto.
 function ffmpeg(args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {

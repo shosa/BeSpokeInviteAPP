@@ -733,7 +733,7 @@ td a { color: var(--ink); }
 
 /* ───────────── Carosello dei template ───────────── */
 .tpl-carousel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-/* Telefoni: cornice 252x520, schermo 228x496. La pagina demo è larga 390 e si riduce con scale(228/390). */
+/* Telefoni: cornice 252x520, schermo 238x506. Nel carosello lo schermo mostra la busta chiusa del tema (immagine statica). */
 .tpl-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 252px; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 40px 18px; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
 .tpl-track::-webkit-scrollbar { display: none; }
 .tpl-track:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
@@ -742,6 +742,7 @@ td a { color: var(--ink); }
 .tpl-card.is-on .tpl-phone { box-shadow: inset 0 0 0 1px #3b3834, 0 0 0 2px var(--brass), 0 18px 40px rgba(0, 0, 0, 0.18); }
 .tpl-screen { position: relative; width: 100%; height: 100%; border-radius: 33px; overflow: hidden; background: var(--paper); }
 .tpl-screen iframe { position: absolute; top: 0; left: 0; width: 390px; height: 829px; border: 0; display: block; pointer-events: none; transform: scale(0.6103); transform-origin: 0 0; }
+.tpl-screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; border-radius: inherit; pointer-events: none; user-select: none; }
 /* Il telaio ritaglia l'iframe sugli angoli arrotondati: senza questo il bianco della pagina sporge agli angoli. */
 .tpl-screen, .pick-phone { isolation: isolate; transform: translateZ(0); }
 .tpl-screen iframe, .pick-phone iframe { border-radius: inherit; }

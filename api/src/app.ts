@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
 import cookie from "@fastify/cookie";
@@ -37,7 +38,7 @@ import { invalidateCatalog, loadCatalog, loadFullCatalog, saveCatalog, themes } 
 import { previewShell } from "./engine/previewShell";
 import { renderInvitePage } from "./engine/page";
 import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
-import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, type MediaKind } from "./media";
+import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, inviteEmail, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
@@ -769,6 +770,33 @@ export async function buildApp() {
     const lang = q.lang === "en" ? "en" : "it";
     const seed = /^[a-z0-9]{1,12}$/i.test(q.s ?? "") ? (q.s as string) : "x";
     return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(previewShell(theme.manifest.id, theme.manifest.name, lang, seed)));
+  });
+
+  // Copertina statica di un tema per il carosello di scelta: la busta chiusa (poster del filmato), ridotta a 480 px.
+  // Si genera alla prima richiesta e resta su disco finché il container vive (i temi cambiano solo con un rilascio).
+  const coverDir = path.join(os.tmpdir(), "theme-covers");
+  const coverJobs = new Map<string, Promise<string>>();
+  app.get<{ Params: { id: string } }>("/api/themes/:id/cover.jpg", async (req, reply) => {
+    const theme = themes().find((t) => t.manifest.id === req.params.id);
+    const poster = theme?.manifest.envelope?.poster;
+    if (!theme || !poster) return reply.code(404).type("text/plain; charset=utf-8").send("Copertina non disponibile");
+    const id = theme.manifest.id;
+    let job = coverJobs.get(id);
+    if (!job) {
+      const out = path.join(coverDir, `${id}.jpg`);
+      job = fs.existsSync(out)
+        ? Promise.resolve(out)
+        : (fs.mkdirSync(coverDir, { recursive: true }), makeThumbnail(path.join(theme.dir, poster), out, 480).then(() => out));
+      coverJobs.set(id, job);
+      job.catch(() => coverJobs.delete(id));
+    }
+    try {
+      const file = await job;
+      return reply.type("image/jpeg").header("Cache-Control", "public, max-age=604800").send(fs.createReadStream(file));
+    } catch (e) {
+      req.log.error(e, "copertina del tema non generata");
+      return reply.code(500).type("text/plain; charset=utf-8").send("Copertina non disponibile");
+    }
   });
 
   app.get<{ Params: { id: string } }>("/api/themes/:id/demo", async (req, reply) => {

@@ -9,16 +9,15 @@ import { ui, type Lang } from "@/lib/ui";
 const STEP_MS = 3800;
 const RESUME_MS = 6000;
 
-// Carosello dei template pre-fatti: ogni template è un telefono con la sua pagina reale, che scorre da solo.
+// Carosello dei template pre-fatti: ogni template è un telefono con l'immagine statica della busta chiusa.
+// Niente pagine vere qui (troppo pesanti tutte insieme): l'invito completo si vede con «Anteprima».
 // Si sceglie toccando il telefono: niente pulsanti con il nome.
 export function TemplateCarousel({ templates, selectedId, onSelect, label, lang = "it", size = "md", autoplay = true }: { templates: ThemeManifest[]; selectedId: string; onSelect: (id: string) => void; label: string; lang?: Lang; size?: "md" | "lg"; autoplay?: boolean }) {
   const L = ui(lang).builder;
   const track = useRef<HTMLDivElement>(null);
-  // Anteprime da caricare: la scelta e le vicine subito, le altre quando entrano nel carosello.
+  // Immagini da caricare: la scelta e le vicine subito, le altre quando entrano nel carosello.
   // Il caricamento nativo (loading="lazy") nel carosello orizzontale non le caricava affatto.
   const [ready, setReady] = useState<Set<string>>(() => new Set());
-  // Ogni montaggio della vetrina mostra esempi nuovi: il seme cambia la versione del demo.
-  const [seed] = useState(() => Math.random().toString(36).slice(2, 8));
   // Stato di pausa letto dal timer: tenuto in un ref, così il timer non si riavvia a ogni passaggio del mouse.
   const pause = useRef({ hover: false, focus: false, until: 0 });
 
@@ -79,9 +78,6 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
     firstPlace.current = false;
     if (visible && !first) return;
     el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: first ? "auto" : "smooth" });
-    // Le anteprime fuori schermo restano spesso non dipinte finché il carosello non si muove: un micro-scorrimento le fa comparire.
-    const nudge = window.setTimeout(() => { el.scrollBy({ left: 1 }); el.scrollBy({ left: -1 }); }, 700);
-    return () => window.clearTimeout(nudge);
   }, [selectedId]);
 
   function holdAutoplay() {
@@ -126,8 +122,10 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
           return (
             <article key={t.id} data-id={t.id} className={`tpl-card${on ? " is-on" : ""}`} aria-roledescription="diapositiva" aria-label={`${i + 1} / ${templates.length}: ${name}`}>
               <div className="tpl-phone">
-                <div className="tpl-screen">
-                  <iframe title={name} src={ready.has(t.id) ? `/api/themes/${t.id}/demo?lang=${lang}&s=${seed}` : undefined} scrolling="no" sandbox="allow-scripts" tabIndex={-1} aria-hidden="true" />
+                <div className="tpl-screen" style={{ background: t.themeColor }}>
+                  {t.envelope?.poster && ready.has(t.id) && (
+                    <img src={`/api/themes/${encodeURIComponent(t.id)}/cover.jpg`} alt="" width={480} height={853} decoding="async" draggable={false} />
+                  )}
                 </div>
                 <button type="button" className="tpl-hit" aria-pressed={on} aria-label={`${name}: ${L.tplUse}`} title={on ? L.tplChosen : L.tplUse} onClick={() => onSelect(t.id)} />
               </div>
