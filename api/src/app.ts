@@ -36,10 +36,11 @@ import { pool, migrate, track } from "./db";
 import { handleAssistant, type OwnedInvitation } from "./assistant";
 import { searchPlaces } from "./places";
 import { EFFORTS, listAssistantModels, loadAssistantSettings, saveAssistantSettings, type ModelOption } from "./assistantSettings";
-import { invalidateCatalog, loadCatalog, loadFullCatalog, saveCatalog, themes } from "./catalog";
+import { invalidateCatalog, loadCatalog, loadFullCatalog, reloadThemes, saveCatalog, themes } from "./catalog";
 import { previewShell } from "./engine/previewShell";
 import { renderInvitePage } from "./engine/page";
-import { RUNTIME_PATH, sampleConfig } from "./engine/themes";
+import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
+import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
@@ -105,11 +106,18 @@ export async function buildApp() {
   await app.register(multipart, { limits: { fileSize: 150 * 1024 * 1024, files: 1 } });
   ensureMediaDirs();
   await app.register(staticFiles, { root: MEDIA_DIR, prefix: "/api/media/", decorateReply: false, maxAge: "7d" });
-  // Asset di ogni tema (immagini, video, audio del tema), serviti dalla cartella del tema.
-  for (const t of themes()) {
-    const assets = path.join(t.dir, "assets");
-    if (fs.existsSync(assets)) await app.register(staticFiles, { root: assets, prefix: `/api/themes/${t.manifest.id}/assets/`, decorateReply: false, index: false, maxAge: "7d" });
-  }
+  // Asset dei temi (immagini, video, audio): una sola rotta per tutti, così un tema caricato dalla console
+  // funziona subito, senza riavvio. sendFile gestisce tipi, cache e richieste parziali (video su Safari).
+  await app.register(staticFiles, { root: THEMES_DIR, serve: false });
+  app.get<{ Params: { id: string; "*": string } }>("/api/themes/:id/assets/*", async (req, reply) => {
+    const theme = themes().find((t) => t.manifest.id === req.params.id);
+    const file = req.params["*"];
+    if (!theme || !/^[A-Za-z0-9._-]+$/.test(file) || file.startsWith(".")) return reply.code(404).send({ error: "File non trovato" });
+    // I file dei temi non eseguono codice anche se aperti da soli (es. un SVG): niente script, contenuto isolato.
+    reply.header("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; media-src 'self'; sandbox");
+    reply.header("X-Content-Type-Options", "nosniff");
+    return reply.sendFile(file, path.join(theme.dir, "assets"), { maxAge: "7d", index: false });
+  });
 
   // Il webhook Shopify va verificato sul corpo grezzo: lo conserviamo accanto al JSON già parsato.
   app.addContentTypeParser("application/json", { parseAs: "string" }, (req, body, done) => {
@@ -749,13 +757,16 @@ export async function buildApp() {
     const theme = themes().find((t) => t.manifest.id === req.params.id);
     const poster = theme?.manifest.envelope?.poster;
     if (!theme || !poster) return reply.code(404).type("text/plain; charset=utf-8").send("Copertina non disponibile");
-    const id = theme.manifest.id;
+    // La chiave include la data del file: un tema sostituito dalla console ha subito la copertina nuova.
+    const src = path.join(theme.dir, poster);
+    const mtime = fs.existsSync(src) ? Math.round(fs.statSync(src).mtimeMs) : 0;
+    const id = `${theme.manifest.id}-${mtime}`;
     let job = coverJobs.get(id);
     if (!job) {
       const out = path.join(coverDir, `${id}.jpg`);
       job = fs.existsSync(out)
         ? Promise.resolve(out)
-        : (fs.mkdirSync(coverDir, { recursive: true }), makeThumbnail(path.join(theme.dir, poster), out, 480).then(() => out));
+        : (fs.mkdirSync(coverDir, { recursive: true }), makeThumbnail(src, out, 480).then(() => out));
       coverJobs.set(id, job);
       job.catch(() => coverJobs.delete(id));
     }
@@ -1295,6 +1306,49 @@ export async function buildApp() {
   });
 
   // Attiva o disattiva un tema.
+  // Caricamento di un tema da ZIP (console, scheda Template). Il tema nuovo nasce disattivato:
+  // l'admin lo controlla con l'anteprima e poi lo attiva. Con ?replace=1 sostituisce quello con lo stesso id.
+  app.post<{ Querystring: { replace?: string } }>("/api/admin/themes/upload", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const part = await req.file();
+    if (!part) return reply.code(400).send({ error: "Nessun file ricevuto" });
+    const buffer = await part.toBuffer();
+    if (part.file.truncated) return reply.code(413).send({ error: "File troppo grande" });
+    if (!/\.zip$/i.test(part.filename) && buffer.readUInt32LE(0) !== 0x04034b50) return reply.code(400).send({ error: "Carica un file .zip" });
+    try {
+      const result = installThemeZip(buffer, { replace: req.query.replace === "1" });
+      reloadThemes();
+      const c = await loadFullCatalog();
+      const stored = c.themes.map((t) => ({ id: t.manifest.id, enabled: t.manifest.id === result.id && !result.replaced ? false : t.enabled }));
+      await saveCatalog({ models: c.models, addons: c.addons, themes: stored });
+      req.log.info({ theme: result.id, replaced: result.replaced }, "tema caricato dalla console");
+      return reply.code(201).send(result);
+    } catch (e) {
+      if (e instanceof ThemeUploadError) return reply.code(e.status).send({ error: e.message, details: e.details, code: e.code });
+      throw e;
+    }
+  });
+
+  // Elimina un tema dalla cartella themes/. Solo se nessun invito lo usa: altrimenti va disattivato.
+  app.delete<{ Params: { id: string } }>("/api/admin/themes/:id", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const c = await loadFullCatalog();
+    if (!c.themes.some((t) => t.manifest.id === req.params.id)) return reply.code(404).send({ error: "Tema non trovato" });
+    const { rows } = await pool.query("SELECT count(*)::int AS n FROM invitations WHERE config->>'themeId' = $1", [req.params.id]);
+    if (rows[0].n > 0) return reply.code(409).send({ error: `Il tema è usato da ${rows[0].n} ${rows[0].n === 1 ? "invito" : "inviti"}: disattivalo invece di eliminarlo` });
+    if (!c.themes.some((t) => t.enabled && t.manifest.id !== req.params.id)) return reply.code(400).send({ error: "Serve almeno un tema attivo" });
+    try {
+      removeThemeDir(req.params.id);
+    } catch (e) {
+      if (e instanceof ThemeUploadError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+    reloadThemes();
+    const after = await loadFullCatalog();
+    await saveCatalog({ models: after.models, addons: after.addons, themes: after.themes.map((t) => ({ id: t.manifest.id, enabled: t.enabled })) });
+    return { ok: true };
+  });
+
   app.patch<{ Params: { id: string } }>("/api/admin/themes/:id", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
     const c = await loadFullCatalog();

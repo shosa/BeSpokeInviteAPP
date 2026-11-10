@@ -10,6 +10,9 @@ const nextConfig = {
   poweredByHeader: false,
   outputFileTracingRoot: root,
   transpilePackages: ["@inviteme/shared"],
+  // Il frontend inoltra /api all'API e di base taglia i corpi oltre 10 MB: ZIP dei temi, video e brani sono più grandi.
+  // Stesso limite di nginx (client_max_body_size 160m).
+  experimental: { middlewareClientMaxBodySize: "160mb" },
   // Il frontend inoltra /api/* all'API: stessa origine per il browser, quindi cookie di sessione semplici.
   // Le immagini dello stock non cambiano: il browser le tiene una settimana invece di riscaricarle a ogni visita.
   async headers() {

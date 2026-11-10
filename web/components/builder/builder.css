@@ -72,13 +72,15 @@
 .bl-app .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .bl-app .btn:not(:disabled):hover { transform: translateY(-1px); }
 .bl-app .btn:not(:disabled):active { transform: scale(0.97); }
-.bl-app .btn.solid { background: transparent; color: var(--ink); box-shadow: 0 14px 28px -20px rgba(110, 78, 28, 0.7); }
-.bl-app .btn.solid::before, .bl-app .confirm-edit-btn::before {
+/* Pulsante principale: lo stile in vetro di bespoke.css (.btn.solid), qui solo riaffermato sopra .bl-app .btn. */
+.bl-app .btn.solid { background: linear-gradient(180deg, rgba(255, 246, 224, 0.5) 0%, rgba(233, 207, 147, 0.16) 100%); color: var(--ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(160, 115, 45, 0.12), 0 14px 30px -16px rgba(110, 78, 28, 0.45), 0 2px 5px -2px rgba(110, 78, 28, 0.18); }
+.bl-app .btn.solid:hover:not(:disabled) { background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 250, 238, 0.16) 100%); }
+.bl-app .confirm-edit-btn::before {
   content: ""; position: absolute; inset: -60%; z-index: -2; background: conic-gradient(from 0deg, #8a6427, #f3dfae, #b8893f, #fff3d6, #8a6427, #c9a266, #8a6427);
   animation: bl-metal 6s linear infinite;
 }
-.bl-app .btn.solid::after, .bl-app .confirm-edit-btn::after { content: ""; position: absolute; inset: 1.5px; z-index: -1; border-radius: inherit; background: rgba(255, 255, 255, 0.94); }
-.bl-app .btn.solid:hover:not(:disabled)::before, .bl-app .confirm-edit-btn:hover::before { animation-duration: 2.2s; }
+.bl-app .confirm-edit-btn::after { content: ""; position: absolute; inset: 1.5px; z-index: -1; border-radius: inherit; background: rgba(255, 255, 255, 0.94); }
+.bl-app .confirm-edit-btn:hover::before { animation-duration: 2.2s; }
 .bl-app .btn.outline { background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 0 0 1px var(--line); }
 .bl-app .btn.outline:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--brass-light); color: var(--brass); }
 .bl-app .btn.ghost { background: transparent; box-shadow: none; color: var(--ink-soft); }
@@ -379,7 +381,7 @@ button.bl-crumb:hover { color: var(--brass); }
 
 /* Movimento: le animazioni restano lente; con «riduci movimento» tutto è fermo. */
 @media (prefers-reduced-motion: reduce) {
-  .bl-app .btn.solid::before, .bl-app .confirm-edit-btn::before, .bl-app .bl-spin { animation: none; }
+  .bl-app .confirm-edit-btn::before, .bl-app .bl-spin { animation: none; }
   .bl-app *, .bl-app *::before, .bl-app *::after { transition-duration: 0.01ms !important; }
   .bl-app .bl-left, .bl-app .bl-center, .bl-app .bl-right, .bl-app .bl-right > *, .bl-app .bl-right .bl-fields > * { animation: none !important; }
 }

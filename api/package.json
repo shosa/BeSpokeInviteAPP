@@ -10,6 +10,7 @@
     "smoke": "node scripts/smoke.mjs",
     "devdb": "node scripts/devdb.mjs",
     "validate-theme": "tsx scripts/validate-theme.ts",
+    "check-theme-zip": "tsx scripts/check-theme-zip.ts",
     "preview-theme": "tsx scripts/theme-preview.ts",
     "test": "node --import tsx --test test/*.test.ts",
     "reset-invitations": "node scripts/reset-invitations.mjs",

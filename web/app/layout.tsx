@@ -4,6 +4,7 @@ import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 import "./bespoke.css";
 import { Toaster } from "@/components/ui/Toaster";
+import { ButtonRipple } from "@/components/ui/ButtonRipple";
 import { getLang } from "@/lib/i18n";
 
 // Titoli in Fraunces, interfaccia in Jost (sistema Bespoke Invites): scaricati in build e serviti dal nostro dominio.
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const lang = await getLang();
   return (
     <html lang={lang} className={`${display.variable} ${text.variable}`}>
-      <body>{children}<Toaster /></body>
+      <body>{children}<Toaster /><ButtonRipple /></body>
     </html>
   );
 }

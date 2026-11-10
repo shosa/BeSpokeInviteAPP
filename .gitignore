@@ -15,3 +15,6 @@ data/
 # Materiale di riferimento (non versionare)
 reference/
 InviteReference/
+
+# Cartelle temporanee del caricamento dei temi dalla console
+themes/.upload-*

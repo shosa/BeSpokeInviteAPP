@@ -805,6 +805,16 @@ td a { color: var(--ink); }
 .tpl-admin-card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .tpl-admin-card h3 { margin: 0; font-size: 1.05rem; text-align: center; }
 .tpl-admin-card.is-off .tpl-phone { opacity: 0.4; filter: grayscale(0.6); }
+.tpl-admin-del { font-size: 13px; color: #b42318; }
+.tpl-upload { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 20px; align-items: center; margin-bottom: 28px; padding: 20px 22px; background: #fff; border: 1px dashed var(--line); border-radius: 18px; }
+.tpl-upload h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.tpl-upload .hint { margin: 0; }
+.tpl-upload label.btn { cursor: pointer; white-space: nowrap; }
+.tpl-upload label.btn.is-busy { opacity: 0.6; cursor: progress; }
+.tpl-upload .form-notice, .tpl-upload-errors { grid-column: 1 / -1; margin: 0; }
+.tpl-upload-errors { background: #fef3f2; border: 1px solid #fecdca; border-radius: 12px; padding: 12px 14px; color: #7a271a; font-size: 14px; }
+.tpl-upload-errors ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .tpl-upload { grid-template-columns: 1fr; } }
 
 /* Builder: la struttura è la parte principale della colonna sinistra; i blocchi nuovi stanno nella finestra del «+». */
 .bl-modal-head .bl-icon { font-size: 22px; line-height: 1; }

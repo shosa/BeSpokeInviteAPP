@@ -330,6 +330,84 @@ Il validatore controlla, in ordine: il manifest (chiavi ammesse, tipi, `themeCol
 8. Prova: mentre scrivi lo stile, avvia `npm run preview-theme -w @inviteme/api -- --theme <id>` e guarda la pagina con la busta e con `?cover=0`. Poi crea un invito con lo stile, aggiungi i blocchi, apri l'anteprima su telefono (390 px) e su desktop. Verifica lo sfondo animato, se lo proponi, con movimento normale e con «riduci movimento».
 9. Rilascia: rebuild e riavvio dell'API.
 
+## Esportare lo stile per la console (ZIP)
+
+Uno stile finito si installa anche dalla console admin, scheda **Template → Carica un template**, senza rilascio: lo ZIP viene controllato con lo stesso validatore di `validate-theme` e, se passa, il server lo installa in `themes/<id>/`, la stessa cartella di tutti gli stili. Il tema nuovo nasce **disattivato**: si controlla con «Apri anteprima» e poi si attiva.
+
+### Formato esatto
+
+Lo ZIP contiene **solo** la cartella dello stile, così:
+
+```
+<id>.zip
+└── <id>/                 facoltativa: i file possono stare anche direttamente nella radice dello ZIP
+    ├── theme.json        obbligatorio; "id" uguale al nome della cartella
+    ├── theme.css         obbligatorio
+    ├── assets/           facoltativa; solo file, nessuna sottocartella
+    │   └── <nome>.<ext>  jpg, jpeg, png, webp, gif, avif, svg, mp4, webm, mp3, m4a, ogg
+    └── blocks/           facoltativa
+        └── <tipo>.html   un file per tipo di blocco (cover.html, hero.html, …)
+```
+
+Regole che il server applica (se una non è rispettata lo ZIP è rifiutato e la console mostra l'elenco dei problemi):
+
+1. **Una sola cartella o la radice.** `theme.json` sta nella radice dello ZIP oppure in un'unica cartella che contiene tutto. Mai più cartelle di primo livello.
+2. **Solo i file ammessi.** Qualunque altro file (README, `.js`, `.psd`, sorgenti, sottocartelle in `assets/`, file nascosti) fa rifiutare lo ZIP. I file di sistema `__MACOSX/`, `.DS_Store`, `Thumbs.db` e `._*` sono ignorati.
+3. **Nomi semplici.** Negli asset solo lettere, numeri, `.`, `-` e `_`, senza spazi né accenti; non iniziano con un punto.
+4. **SVG puliti.** Niente `<script>`, attributi `on…=`, `javascript:`, `<foreignObject>`, `<iframe>`, `<embed>`, `<object>`.
+5. **Limiti.** Al massimo 400 file, 60 MB per file, 250 MB in tutto una volta estratto, 150 MB per lo ZIP. ZIP normale: compressione «deflate» o nessuna, niente cifratura, niente ZIP64, niente collegamenti simbolici.
+6. **Validatore.** Valgono tutte le regole di questo documento: manifest, CSS, host ammessi, file citati presenti, sostituzioni di blocco, prova di rendering della demo. Gli avvisi (per esempio un blocco con foto senza foto stock) non bloccano, ma la console li mostra.
+7. **Stesso id = sostituzione.** Se in `themes/` esiste già uno stile con quell'`id`, la console chiede conferma e lo sostituisce: gli inviti che lo usano vedono subito la versione nuova. Per uno stile nuovo usa un `id` nuovo.
+
+### Comandi per esportare
+
+Prima valida, poi comprimi **dalla cartella `themes/`**, così lo ZIP contiene la cartella `<id>/` e nient'altro:
+
+```bash
+npm run validate-theme -w @inviteme/api -- themes/<id>     # deve passare senza errori
+cd themes
+zip -r -X ../<id>.zip <id> -x '*.DS_Store' -x '__MACOSX/*' -x '*/._*'
+unzip -l ../<id>.zip                                         # controllo: solo <id>/theme.json, <id>/theme.css, <id>/assets/…, <id>/blocks/…
+```
+
+Poi **controlla lo ZIP con lo stesso codice della console** (lo installa in una cartella temporanea, non tocca `themes/`). Deve rispondere `OK`; se risponde `RIFIUTATO`, correggi e riesporta:
+
+```bash
+cd ..                                                        # torna alla radice del progetto, dove ora c'è <id>.zip
+npm run check-theme-zip -w @inviteme/api -- <id>.zip
+```
+
+Senza `zip` (per esempio in un ambiente con solo Python):
+
+```bash
+cd themes && python3 -c "import shutil; shutil.make_archive('../<id>', 'zip', '.', '<id>')"
+```
+
+Su macOS non usare «Comprimi» del Finder se la cartella contiene file nascosti o sottocartelle extra: il comando `zip` qui sopra è il modo sicuro.
+
+### Errori frequenti (e come evitarli)
+
+| Errore della console | Causa | Rimedio |
+|---|---|---|
+| «Nello ZIP manca theme.json» | compresso il contenuto di `themes/` intero, o due cartelle di primo livello | comprimi solo `<id>` da dentro `themes/` |
+| «file non ammessi» | README, note, sorgenti (`.psd`, `.ai`, `.fig`), `.js`, file nascosti, sottocartelle in `assets/` | togli i file; gli asset vanno tutti in `assets/` senza sottocartelle |
+| «file non ammessi» su un asset | estensione non in elenco (es. `.mov`, `.tiff`, `.woff2`) o nome con spazi/accenti | converti (video in `mp4`, immagini in `jpg`/`webp`/`png`), rinomina con lettere, numeri, `-`, `_` |
+| «SVG con script o contenuti attivi» | SVG esportato con `onload`, `<script>` o `<foreignObject>` | riesporta l'SVG «pulito» o convertilo in PNG/WebP |
+| «L'id in theme.json…» / id diverso dalla cartella | `id` con maiuscole o spazi, o cartella con nome diverso | `id` = nome della cartella, minuscole e trattini |
+| «Esiste già un tema con id…» | `id` già usato | per uno stile nuovo scegli un `id` nuovo; la sostituzione è voluta solo per aggiornare lo stesso stile |
+| «Il tema non supera il controllo» | regole del validatore (manifest, CSS, file mancanti, demo) | correggi finché `validate-theme` passa, poi riesporta |
+
+### Consegna da parte di un agente
+
+Un agente che crea uno stile da caricare in console consegna **tutti e quattro** questi elementi:
+
+1. il file `<id>.zip`, prodotto con i comandi sopra (mai a mano, mai con file aggiunti dopo);
+2. l'output di `npm run validate-theme -w @inviteme/api -- themes/<id>` senza errori;
+3. l'output di `npm run check-theme-zip -w @inviteme/api -- <id>.zip` che inizia con `OK`;
+4. l'elenco di `unzip -l <id>.zip`, dove compaiono solo `<id>/theme.json`, `<id>/theme.css`, `<id>/assets/…` e `<id>/blocks/…`.
+
+Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge la cartella, riesporta e ricontrolla.
+
 ## Checklist prima del rilascio
 
 - [ ] il validatore passa senza errori
@@ -349,6 +427,7 @@ Il validatore controlla, in ordine: il manifest (chiavi ammesse, tipi, `themeCol
 - [ ] lo sfondo animato, se presente, si vede dietro i contenuti e non copre i testi
 - [ ] font e mappe solo dagli host ammessi
 - [ ] nessun `<script>`, `<style>` o gestore inline nei file
+- [ ] se va caricato dalla console: ZIP esportato come in «Esportare lo stile per la console», controllato con `unzip -l`
 
 ## Prompt per un agente
 
@@ -359,3 +438,7 @@ Per uno stile semplice:
 Per uno stile complesso e animato:
 
 > Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, in particolare la sezione «Sfondi animati» e il contratto delle classi. Atmosfera: [descrizione]. Obiettivi: (1) tutti i blocchi con una loro identità visiva, non un'unica griglia; (2) animazioni CSS decorative di ingresso con `data-anim` e `--d` per ritardi, senza alterare il testo; (3) sfondo animato `[tipo]` con colore `[#RRGGBB]`, con i pannelli semitrasparenti dove serve; (4) layout mobile first a 390 px senza scorrimento orizzontale, e movimento ridotto rispettato. Vincoli: nessun codice nuovo, nessun `<script>`, nessun gestore inline, nessun dato di persone. Se lo stile ha video di sfondo, l'intestazione resta solo testo e i video sono in loop (vedi «Video di sfondo per zona»), con l'eccezione della foto principale: `.h-vista` va posizionato sopra il video, senza nasconderlo né nascondere il video. Non animare `.scroll-cue`: il rimbalzo lo fa il motore. Non creare file o cartelle fuori da `themes/<id>/`. Ogni blocco con foto (hero, gallery, image, venue) ha una foto stock nella demo, mai vuota. Rispetta le regole non negoziabili 1–11. Non inventare classi o attributi del runtime che non sono in `docs/TEMI.md`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e correggi finché non passa; poi elenca cosa hai fatto per ogni punto e le scelte che hai dovuto prendere.
+
+Per uno stile da caricare dalla console (ZIP):
+
+> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, poi esportalo come ZIP per la console seguendo **esattamente** la sezione «Esportare lo stile per la console (ZIP)» di `docs/TEMI.md`. Lo stile è [descrizione]. `id`: `[id-nuovo]` (minuscole e trattini, uguale al nome della cartella, non già presente in `themes/`). Asset solo in `assets/`, senza sottocartelle, con estensioni ammesse e nomi semplici; SVG senza script né attributi `on…`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>`, esporta con `cd themes && zip -r -X ../<id>.zip <id> -x '*.DS_Store' -x '__MACOSX/*' -x '*/._*'`, poi controlla con `npm run check-theme-zip -w @inviteme/api -- <id>.zip` finché risponde `OK`. Consegna i quattro elementi della sezione «Consegna da parte di un agente». Non mettere nello ZIP altri file o altre cartelle.

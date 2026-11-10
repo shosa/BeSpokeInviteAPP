@@ -40,6 +40,9 @@ services:
       DEMO_MODE: ${DEMO_MODE:-false}
     volumes:
       - media:/app/data/media
+      # Cartella dei temi del progetto: la console vi installa i temi caricati da ZIP (themes/<id>/),
+      # accanto agli altri, e restano dopo ogni rilascio. Deve essere scrivibile dall'utente del container (uid 1000).
+      - ./themes:/app/themes
     depends_on:
       db:
         condition: service_healthy

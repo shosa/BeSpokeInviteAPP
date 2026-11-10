@@ -67,7 +67,7 @@ npm run validate-theme -w @inviteme/api      # tutti i temi in themes/
 
 ## Console admin
 
-Si apre su `/admin` con un account amministratore. Da lì si gestiscono modelli, funzioni e prezzi, attivazione dei temi, libreria musicale, ordini e utenti. I temi non si caricano dalla console: sono nella cartella `themes/`. Un account diventa amministratore se la sua email coincide con `ADMIN_EMAIL`.
+Si apre su `/admin` con un account amministratore. Da lì si gestiscono modelli, funzioni e prezzi, attivazione dei temi, libreria musicale, ordini e utenti. I temi sono cartelle in `themes/`: si aggiungono con un rilascio oppure dalla console (Template → Carica un template) con uno ZIP nel formato di `docs/TEMI.md`, «Esportare lo stile per la console». La console li installa nella stessa cartella `themes/`, che il container dell'API usa direttamente (deve essere scrivibile dall'uid 1000). Un account diventa amministratore se la sua email coincide con `ADMIN_EMAIL`.
 
 ## Pagamenti (Shopify)
 

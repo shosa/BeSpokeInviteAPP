@@ -20,6 +20,41 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
   const [ready, setReady] = useState<Set<string>>(() => new Set());
   // Stato di pausa letto dal timer: tenuto in un ref, così il timer non si riavvia a ogni passaggio del mouse.
   const pause = useRef({ hover: false, focus: false, until: 0 });
+  // Template al centro del carosello: il contatore segue lo scorrimento, non solo il tocco.
+  const [centerIdx, setCenterIdx] = useState(() => Math.max(0, templates.findIndex((t) => t.id === selectedId)));
+  // Scorrimento fatto con il dito: quando si ferma, il template al centro diventa quello scelto.
+  const swiping = useRef(false);
+  const selectedRef = useRef(selectedId);
+  selectedRef.current = selectedId;
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    let timer = 0;
+    const centered = () => {
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let best = 0;
+      let dist = Infinity;
+      el.querySelectorAll<HTMLElement>(".tpl-card").forEach((c, i) => {
+        const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid);
+        if (d < dist) { dist = d; best = i; }
+      });
+      return best;
+    };
+    const onScroll = () => {
+      setCenterIdx(centered());
+      window.clearTimeout(timer);
+      // Fine dello scorrimento (anche dopo lo scatto sul template): si sceglie quello al centro.
+      timer = window.setTimeout(() => {
+        if (!swiping.current) return;
+        swiping.current = false;
+        const t = templates[centered()];
+        if (t && t.id !== selectedRef.current) onSelect(t.id);
+      }, 140);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => { el.removeEventListener("scroll", onScroll); window.clearTimeout(timer); };
+  }, [templates, onSelect]);
 
   useEffect(() => {
     const idx = templates.findIndex((t) => t.id === selectedId);
@@ -113,7 +148,7 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
         tabIndex={0}
         onKeyDown={onKey}
         onPointerDown={holdAutoplay}
-        onTouchStart={holdAutoplay}
+        onTouchStart={() => { holdAutoplay(); swiping.current = true; }}
         onWheel={holdAutoplay}
       >
         {templates.map((t, i) => {
@@ -140,7 +175,7 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
       </div>
       <div className="tpl-nav">
         <button type="button" className="btn outline small" aria-label={L.tplPrev} onClick={() => scrollBy(-1)}>←</button>
-        <span className="tpl-count">{templates.findIndex((t) => t.id === selectedId) + 1} / {templates.length}</span>
+        <span className="tpl-count" aria-live="polite">{centerIdx + 1} / {templates.length}</span>
         <button type="button" className="btn outline small" aria-label={L.tplNext} onClick={() => scrollBy(1)}>→</button>
       </div>
     </div>

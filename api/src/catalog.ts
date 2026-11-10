@@ -10,8 +10,12 @@ export type StoredCatalog = {
   themes?: { id: string; enabled: boolean }[];
 };
 
-// Temi caricati una volta all'avvio: sono file del repository, cambiano solo con un deploy.
+// Temi caricati all'avvio dalla cartella themes/; si ricaricano quando la console installa o elimina un tema.
 let themeFiles: LoadedTheme[] | null = null;
+export function reloadThemes(): void {
+  themeFiles = null;
+  invalidateCatalog();
+}
 export function themes(): LoadedTheme[] {
   if (!themeFiles) {
     const loaded = loadThemes();
