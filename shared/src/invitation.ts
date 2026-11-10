@@ -55,6 +55,32 @@ export const DEFAULT_RSVP_EN: RsvpQuestion[] = [
   { id: "note", label: "A message for the hosts", type: "text" },
 ];
 
+// Domanda che dice se l'ospite viene: quella con id "attending" (domande di partenza), altrimenti la prima sì/no.
+// Gli inviti con domande personalizzate hanno id come "q2": cercare solo "attending" li leggeva tutti come assenti.
+export function attendanceQuestion(questions: RsvpQuestion[]): RsvpQuestion | undefined {
+  return questions.find((q) => q.id === "attending" && q.type === "yes-no") ?? questions.find((q) => q.type === "yes-no");
+}
+
+// Domanda sul numero di persone: id "guests", altrimenti la prima domanda numerica.
+export function partySizeQuestion(questions: RsvpQuestion[]): RsvpQuestion | undefined {
+  return questions.find((q) => q.id === "guests" && q.type === "number") ?? questions.find((q) => q.type === "number");
+}
+
+// Presenza dichiarata in una risposta: true, false, o null se l'invito non chiede la presenza.
+export function attendanceOf(questions: RsvpQuestion[], answers: Record<string, unknown>): boolean | null {
+  const q = attendanceQuestion(questions);
+  if (!q) return null;
+  const v = answers[q.id];
+  return v === true ? true : v === false ? false : null;
+}
+
+// Persone in una risposta positiva: il numero dichiarato (almeno 1), altrimenti 1.
+export function partySizeOf(questions: RsvpQuestion[], answers: Record<string, unknown>): number {
+  const q = partySizeQuestion(questions);
+  const n = q ? Number(answers[q.id]) : NaN;
+  return Number.isFinite(n) && n >= 1 ? Math.round(n) : 1;
+}
+
 export function defaultRsvp(locale: "it" | "en"): RsvpQuestion[] {
   return locale === "en" ? DEFAULT_RSVP_EN : DEFAULT_RSVP;
 }

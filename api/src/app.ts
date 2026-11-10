@@ -26,6 +26,8 @@ import {
   type Catalog,
   type InviteConfig,
   type RsvpQuestion,
+  attendanceOf,
+  partySizeOf,
   normalizeSlug,
   blockDef,
 } from "@inviteme/shared";
@@ -679,12 +681,13 @@ export async function buildApp() {
       return "﻿" + [header.map(esc).join(","), ...lines].join("\n");
     }
 
-    const yes = rows.filter((r) => r.answers.attending === true);
+    const qs = questions as unknown as RsvpQuestion[];
+    const yes = rows.filter((r) => attendanceOf(qs, r.answers) === true);
     return {
       total: rows.length,
       attending: yes.length,
-      declined: rows.filter((r) => r.answers.attending === false).length,
-      guests: yes.reduce((s, r) => s + (Number(r.answers.guests) || 1), 0),
+      declined: rows.filter((r) => attendanceOf(qs, r.answers) === false).length,
+      guests: yes.reduce((s, r) => s + partySizeOf(qs, r.answers), 0),
       questions,
       rsvps: rows.map((r) => ({ id: r.id, createdAt: r.created_at, answers: r.answers })),
     };
@@ -886,7 +889,7 @@ export async function buildApp() {
     await track("rsvp_submitted", inv.id);
     // Notifica al proprietario: un errore di posta non blocca la risposta dell'ospite.
     await sendMail(
-      rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: answers.attending === true, invitationId: inv.id }),
+      rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: attendanceOf(questions, answers), invitationId: inv.id }),
       "rsvp",
     ).catch((e) => req.log.warn({ err: e }, "notifica RSVP non inviata"));
     return reply.code(201).send({ ok: true });

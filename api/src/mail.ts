@@ -102,9 +102,10 @@ export function renderMail(kind: MailTemplateKind, t: MailTemplate, vars: MailVa
   return { subject: fillTemplate(t.subject, vars), html, text: [title, body, link].filter(Boolean).join(". ").replace(/\.\s\./g, ".") };
 }
 
-export function rsvpNoticeEmail(p: { to: string; title: string; attending: boolean; invitationId: string }): MailMessage {
-  const link = `${appUrl()}/invito/${p.invitationId}`;
-  const m = renderMail("rsvp", getMailTemplate("rsvp"), { link, title: p.title, verdict: p.attending ? "parteciperà" : "non potrà partecipare" });
+// attending: null quando l'invito non chiede la presenza (allora l'avviso dice solo che l'ospite ha risposto).
+export function rsvpNoticeEmail(p: { to: string; title: string; attending: boolean | null; invitationId: string }): MailMessage {
+  const link = `${appUrl()}/planner/${p.invitationId}`;
+  const m = renderMail("rsvp", getMailTemplate("rsvp"), { link, title: p.title, verdict: p.attending === true ? "parteciperà" : p.attending === false ? "non potrà partecipare" : "ha risposto" });
   return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }
 

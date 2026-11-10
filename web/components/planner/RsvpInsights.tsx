@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import type { RsvpQuestion } from "@inviteme/shared";
+import { attendanceQuestion, type RsvpQuestion } from "@inviteme/shared";
 import { FileDown, Search } from "lucide-react";
 import type { Lang } from "@/lib/ui";
 
@@ -158,7 +158,7 @@ export function RsvpTable({ invitationId, summary, lang = "it" }: { invitationId
   const [query, setQuery] = useState("");
   const questions = summary.questions;
   // La prima domanda sì/no dice chi viene: serve per i filtri Presenti / Assenti.
-  const attendingQ = questions.find((q) => q.type === "yes-no");
+  const attendingQ = attendanceQuestion(questions);
   const rows = useMemo(() => summary.rsvps.filter((r) => {
     const att = attendingQ ? r.answers[attendingQ.id] : undefined;
     if (filter === "yes" && att !== true) return false;
