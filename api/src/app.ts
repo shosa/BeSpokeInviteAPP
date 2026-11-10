@@ -750,7 +750,7 @@ export async function buildApp() {
     let results: string[] = [];
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=it&q=${encodeURIComponent(q)}`, {
-        headers: { "User-Agent": "InviteMe/1.0 (https://demo.shosa.me)" },
+        headers: { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" },
       });
       const list = (await res.json()) as { display_name?: string }[];
       results = list.map((x) => x.display_name ?? "").filter(Boolean);

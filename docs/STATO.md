@@ -91,7 +91,7 @@ Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 ## Ultimo rilascio
 
 - Container `inviteme-web-1` e `inviteme-api-1` aggiornati dalla cartella del progetto; database invariato (vuoto), colonna `planner` aggiunta.
-- Verificati dopo il rilascio: salute API, pagine demo di quattro stili (Arco, Rivista, Minimo, Giardino), `demo.shosa.me` 200.
+- Verificati dopo il rilascio: salute API, pagine demo di quattro stili (Arco, Rivista, Minimo, Giardino), `app.thebespokeinvite.com` 200.
 - Test: smoke 21/21, shared 18/18, api 10/10, validatore su 4 stili, typecheck API e web.
 
 ## Pannello di gestione (planner)
