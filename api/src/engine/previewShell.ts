@@ -15,7 +15,7 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon.png" type="image/png">
 <title>${l.title} · ${safeName}</title>
 <style>
   html, body { margin: 0; height: 100%; background: #E8EBEF; font-family: Inter, system-ui, sans-serif; }

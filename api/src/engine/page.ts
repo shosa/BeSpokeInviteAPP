@@ -161,7 +161,7 @@ export function renderInvitePage(input: PageInput): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon.png" type="image/png">
 <meta name="robots" content="noindex,nofollow">
 
 <title>${escapeHtml(title)}</title>

@@ -48,14 +48,20 @@ export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Prom
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] ?? c);
 
+// Logo delle email: PNG trasparente ritagliato (440 px, mostrato a 220), servito dal frontend.
+// L'originale è in web/public/brand/logo.png.
+const LOGO_URL = () => `${appUrl()}/brand/logo-email.png`;
+
 function shell(title: string, body: string, footer?: string): string {
   const accent = getMailSettings().accent;
   return `<!doctype html><html lang="it"><body style="margin:0;padding:0;background:#fdfbf7;font-family:Georgia,'Times New Roman',serif;color:#2a2119">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdfbf7;padding:36px 12px"><tr><td align="center">
-<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e9dcc6;border-radius:22px;padding:40px 40px 34px">
-<tr><td>
-<p style="margin:0 0 6px;font:600 11px Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:${accent}">Bespoke Invites</p>
-<div style="height:1px;background:#e9dcc6;margin:14px 0 26px"></div>
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e9dcc6;border-radius:22px;overflow:hidden;border-collapse:separate">
+<tr><td align="center" style="padding:36px 40px 0">
+<a href="${esc(appUrl())}" style="text-decoration:none"><img src="${esc(LOGO_URL())}" width="220" height="181" alt="The Bespoke Invite" style="display:block;width:220px;height:181px;border:0;outline:none;color:${accent};font:400 20px Georgia,'Times New Roman',serif"></a>
+<div style="height:1px;background:#e9dcc6;margin:28px 0 0"></div>
+</td></tr>
+<tr><td style="padding:28px 40px 34px">
 <h1 style="margin:0 0 16px;font:400 28px/1.2 Georgia,'Times New Roman',serif;letter-spacing:-.01em;color:#2a2119">${title}</h1>${body}${footer ? `<p style="margin:26px 0 0;font:13px/1.6 Arial,Helvetica,sans-serif;color:#7b6a57">${esc(footer)}</p>` : ""}
 </td></tr></table>
 <p style="margin:18px 0 0;font:12px Arial,Helvetica,sans-serif;color:#7b6a57">Ricevi questa email perché usi Bespoke Invites.</p>
