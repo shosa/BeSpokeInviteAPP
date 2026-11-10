@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "sotto-il-glicine",
+  "name": "Sotto il glicine",
+  "description": "Due persiane color lilla chiuse dal chiavistello d'argento si spalancano su una terrazza sotto il glicine, affacciata sul mare; la data compare al centro di una meridiana, dopo che l'ombra ha fatto il giro del quadrante.",
+  "models": [],
+  "themeColor": "#f6f2f8",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Marcellus&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Italianno&family=Questrial&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/persiane.mp4",
+    "poster": "assets/persiane-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Beatrice & Lorenzo",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-04-24",
+      "eventTime": "17:30",
+      "venue": "Villa del Glicine",
+      "address": "Via del Belvedere 12, Ravello (Salerno)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Affacciati sul nostro giorno"
+    },
+    "message": {
+      "heading": "Sotto il pergolato",
+      "body": "Il glicine fiorisce in aprile e ogni anno torna più forte, intrecciando i suoi rami a ciò che ama.\nCosì vorremmo il nostro amore: per questo abbiamo scelto la sua stagione, e vi aspettiamo sulla terrazza per dirci sì sotto i suoi fiori."
+    },
+    "gallery": {
+      "heading": "Alle nostre finestre",
+      "photos": [
+        "assets/porta-finestra.jpg",
+        "assets/glicine-bianco.jpg",
+        "assets/tavola-luce.jpg",
+        "assets/glicine-muro.jpg",
+        "assets/cancello.jpg",
+        "assets/grappolo.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/sedie.jpg",
+      "caption": "La tavola sulla terrazza, dove brinderemo al tramonto."
+    },
+    "program": {
+      "heading": "La scalinata del giorno",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "Il sì sotto il glicine"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitivo sulla terrazza"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena vista mare"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa del Glicine",
+      "kind": "villa",
+      "photo": "assets/terrazza.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Da Ravello seguite le indicazioni per il Belvedere: la villa è in fondo alla strada, con il cancello coperto di glicine.\nAlle 16:45 una navetta partirà da Piazza Duomo."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni pastello della primavera",
+      "colors": [
+        {
+          "hex": "#C9B6E0",
+          "name": "Glicine"
+        },
+        {
+          "hex": "#E9DFF2",
+          "name": "Lilla"
+        },
+        {
+          "hex": "#B9C7AE",
+          "name": "Salvia"
+        },
+        {
+          "hex": "#D9DDE3",
+          "name": "Argento"
+        },
+        {
+          "hex": "#F4E7DC",
+          "name": "Cipria"
+        },
+        {
+          "hex": "#FBF9F6",
+          "name": "Calce"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Primavera in fiore",
+      "video": "assets/foto-glicine.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il chiavistello d'argento e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Look out onto our day"
+    },
+    "message": {
+      "heading": "Under the pergola",
+      "body": "Wisteria blooms in April and every year it comes back stronger, weaving its branches around what it loves.\nThat is how we want our love to be: so we chose its season, and we will be waiting for you on the terrace to say yes beneath its flowers."
+    },
+    "gallery": {
+      "heading": "At our windows"
+    },
+    "image": {
+      "caption": "The table on the terrace, where we will raise a glass at sunset."
+    },
+    "program": {
+      "heading": "The staircase of the day",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "Our yes beneath the wisteria"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitif on the terrace"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner by the sea"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "From Ravello follow the signs to the Belvedere: the villa is at the end of the road, behind the wisteria-covered gate.\nAt 4:45 pm a shuttle will leave from Piazza Duomo."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in soft spring pastels",
+      "colors": [
+        {
+          "hex": "#C9B6E0",
+          "name": "Wisteria"
+        },
+        {
+          "hex": "#E9DFF2",
+          "name": "Lilac"
+        },
+        {
+          "hex": "#B9C7AE",
+          "name": "Sage"
+        },
+        {
+          "hex": "#D9DDE3",
+          "name": "Silver"
+        },
+        {
+          "hex": "#F4E7DC",
+          "name": "Blush"
+        },
+        {
+          "hex": "#FBF9F6",
+          "name": "Lime white"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Spring in bloom"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the silver latch and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

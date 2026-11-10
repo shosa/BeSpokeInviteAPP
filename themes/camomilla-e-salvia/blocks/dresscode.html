@@ -1,0 +1,7 @@
+<section class="sec dress-sec tazze-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.15s">{{dress}}</div>{{/dress}}
+    <div class="dress-dots" data-anim="fadeinup" style="--d:.2s">{{#colors}}{{#hex}}<span class="tazza"><span class="tz-piattino"><span class="tz-tazza"><span class="tz-te" role="img" aria-label="{{name}}" style="--c:{{hex}}"></span></span></span>{{#name}}<span class="tz-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+  </div>
+</section>

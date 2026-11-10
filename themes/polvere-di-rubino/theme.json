@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "polvere-di-rubino",
+  "name": "Polvere di rubino",
+  "description": "Un velo di glitter rubino copre lo schermo: al tocco vola via, il sipario di velluto rosso si apre e sul palco, sotto l'occhio di bue, gli sposi ballano. Dentro è una serata a teatro: l'insegna luminosa che accende la data, le poltrone di velluto col conto alla rovescia, la locandina, gli specchi del camerino e il programma in atti.",
+  "models": [],
+  "themeColor": "#1a0508",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Limelight&family=Parisienne&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Josefin+Sans:wght@300;400&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/sipario.mp4",
+    "poster": "assets/sipario-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/palco.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Aurora & Leonardo",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-10-09",
+      "eventTime": "18:00",
+      "venue": "Teatro Sociale",
+      "address": "Piazza Cavour 3, Bergamo Alta"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Stasera in scena",
+      "scrollLabel": "Entra in sala"
+    },
+    "message": {
+      "heading": "Gentile pubblico",
+      "body": "la sera del nove ottobre andrà in scena, per una sola replica, il giorno più bello della nostra vita.\nI posti migliori sono riservati a voi."
+    },
+    "gallery": {
+      "heading": "Dietro le quinte",
+      "photos": [
+        "assets/fedi-rose.jpg",
+        "assets/bouquet-rosso.jpg",
+        "assets/rose.jpg",
+        "assets/bouquet-bianco.jpg",
+        "assets/rose-pini.jpg",
+        "assets/bouquet-misto.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/salotto.jpg",
+      "caption": "Il ridotto del teatro, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il programma di sala",
+      "items": [
+        {
+          "time": "18:00",
+          "label": "Si alza il sipario: il rito"
+        },
+        {
+          "time": "19:15",
+          "label": "Intervallo con bollicine"
+        },
+        {
+          "time": "20:30",
+          "label": "Cena di gala in platea"
+        },
+        {
+          "time": "22:30",
+          "label": "Il primo ballo"
+        },
+        {
+          "time": "23:30",
+          "label": "Gran finale e torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "Il teatro",
+      "venue": "Teatro Sociale",
+      "kind": "teatro",
+      "photo": "assets/scalone.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il teatro è nel cuore di Bergamo Alta: si sale in funicolare o con la navetta dal parcheggio di Città Bassa, dalle 17:00.\nA fine serata le auto aspettano in piazza."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Da prima a teatro",
+      "colors": [
+        {
+          "hex": "#7A0F1E",
+          "name": "Rubino"
+        },
+        {
+          "hex": "#3A0A12",
+          "name": "Vino"
+        },
+        {
+          "hex": "#E9C9C4",
+          "name": "Cipria"
+        },
+        {
+          "hex": "#CDB07A",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#141012",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Prove generali",
+      "video": "assets/foto-rubino.mp4"
+    },
+    "rsvp": {
+      "heading": "Prenota il tuo posto",
+      "intro": "Tocca il rubino e dicci se sarai in sala.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, posto riservato"
+    },
+    "footer": {
+      "signature": "Grazie di cuore, e che lo spettacolo cominci"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "On stage tonight",
+      "scrollLabel": "Take your seat"
+    },
+    "message": {
+      "heading": "Dear audience",
+      "body": "on the evening of the ninth of October, for one night only, the most beautiful day of our lives will take the stage.\nThe best seats are reserved for you."
+    },
+    "gallery": {
+      "heading": "Behind the scenes"
+    },
+    "image": {
+      "caption": "The theatre foyer, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The playbill",
+      "items": [
+        {
+          "time": "18:00",
+          "label": "Curtain up: the ceremony"
+        },
+        {
+          "time": "19:15",
+          "label": "Interval with bubbles"
+        },
+        {
+          "time": "20:30",
+          "label": "Gala dinner in the stalls"
+        },
+        {
+          "time": "22:30",
+          "label": "The first dance"
+        },
+        {
+          "time": "23:30",
+          "label": "Grand finale and cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The theatre"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The theatre is in the heart of Bergamo's upper town: take the funicular or the shuttle from the lower town car park, from 5 pm.\nAt the end of the night cars wait in the square."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Opening night",
+      "colors": [
+        {
+          "hex": "#7A0F1E",
+          "name": "Ruby"
+        },
+        {
+          "hex": "#3A0A12",
+          "name": "Wine"
+        },
+        {
+          "hex": "#E9C9C4",
+          "name": "Blush"
+        },
+        {
+          "hex": "#CDB07A",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#141012",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Dress rehearsal"
+    },
+    "rsvp": {
+      "heading": "Book your seat",
+      "intro": "Tap the ruby and tell us if you'll be in the house.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, seat reserved"
+    },
+    "footer": {
+      "signature": "Thank you, and let the show begin"
+    }
+  }
+}

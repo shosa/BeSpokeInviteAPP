@@ -1,0 +1,14 @@
+<section class="sec loc-sec insegna-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#photo}}<div class="is-foto" data-anim="fadeinup"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""></div>{{/photo}}
+    <div class="insegna" data-anim="fadeinup" style="--d:.15s">
+      <i class="is-corda l" aria-hidden="true"></i><i class="is-corda r" aria-hidden="true"></i>
+      <div class="is-tavola">
+        <div class="loc-name">{{venue | lines}}</div>
+        {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+        {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+      </div>
+    </div>
+  </div>
+</section>

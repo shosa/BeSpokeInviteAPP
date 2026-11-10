@@ -1,0 +1,250 @@
+/* Glicine ricamato. Solo presentazione: busta-video lilla, poi il ricamo di glicine resta come fondo fisso dell'invito. */
+:root {
+  --paper:#f4efe6; --ivory:#fbf8f3; --lilac:#ede6f2; --wisteria:#b9a3d3; --sage:#a9b49a;
+  --ink:#3e3350; --muted:#5e5470; --plum:#5b4478; --accent:#6b4f8a; --gold:#7a5e3a; --line:#c9b8d9;
+  --panel:rgba(251,248,243,.88); --panel-soft:rgba(251,248,243,.74);
+  --display:'Cormorant Garamond',Georgia,serif; --script:'Pinyon Script','Cormorant Garamond',Georgia,serif;
+  --body:'Jost',system-ui,sans-serif; --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--paper) }
+/* Il fermo del ricamo: stesso fotogramma con cui parte l'intestazione, così la busta sfuma senza stacco. */
+body { margin:0; color:var(--ink); background:transparent; font:16px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:var(--paper) url(assets/sfondo-fermo.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--accent); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--plum); outline-offset:4px }
+button,input,a { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:44px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 22px; font:500 clamp(34px,10vw,50px)/1.1 var(--display); color:var(--plum); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:120px; height:40px; margin:6px auto 0; background:url(assets/ornament.svg) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:15px; line-height:1.9; text-wrap:pretty }
+.orn { width:140px; max-width:50%; height:auto; margin:26px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:min(280px,80%); height:auto; margin:0 auto 14px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+
+/* Busta-video: il filmato è dello stile. Dietro, il fermo del ricamo, per una dissolvenza continua. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--paper) url(assets/sfondo-fermo.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:italic 26px/1.3 var(--display); color:var(--plum); background:var(--panel); border:1px solid var(--line); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--lilac)); border:1px solid var(--line); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--lilac)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); display:grid; place-items:center; width:84px; height:84px; border-radius:50%; background:var(--seal,var(--wisteria)); color:var(--ivory); font:italic 28px var(--display) }
+[data-cover-tap] { position:absolute; left:50%; top:80%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 22px; max-width:85vw; background:var(--panel); border:1px solid var(--line); border-radius:30px; text-align:center; box-shadow:0 8px 24px #3e335018 }
+[data-cover-label] { color:var(--plum); font-size:12px; letter-spacing:.14em; text-transform:uppercase }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--accent); border-top:1px solid var(--accent); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: solo testo, al centro libero della cornice di glicine animata. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.h-vista,.hero-fl { display:none }
+.h-text { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:20% 16% 18%; text-align:center }
+.h-text > div { max-width:100%; text-shadow:0 0 18px #fbf8f3, 0 0 6px #fbf8f3 }
+.occasion { order:-1; margin:0; font:italic 500 25px/1.2 var(--display); color:var(--accent); letter-spacing:.02em }
+.names { font:400 clamp(46px,14vw,74px)/1.08 var(--script); color:var(--plum); text-wrap:balance }
+.welcome { margin:0; font-size:13px; line-height:1.6; letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+.scroll-cue { position:relative; z-index:2; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--plum); font-size:11px; letter-spacing:.16em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-86px }
+.scroll-cue span { display:inline-block; padding:6px 14px; background:var(--panel-soft); border-radius:20px }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid; border-bottom:1px solid; transform:rotate(45deg) }
+
+/* Data da grattare: ghirlanda ricamata sopra e sotto, tre perle da scoprire. */
+.date-sec .card { padding:clamp(120px,34vw,190px) 22px clamp(110px,30vw,170px); background:var(--panel) url(assets/cornice-ghirlanda.webp) center/100% 100% no-repeat; border-radius:6px; box-shadow:0 14px 40px #3e335014 }
+.date-sec .title { font-size:clamp(30px,8.6vw,44px) }
+.hint { font:italic 20px/1.4 var(--display); color:var(--muted); text-align:center }
+.scratch-row,.sc-labels { display:flex; justify-content:center; gap:10px; margin-top:22px }
+.scratch { position:relative; flex:1 1 0; min-width:0; max-width:108px; aspect-ratio:1; border-radius:50%; overflow:hidden; background:var(--ivory); box-shadow:0 0 0 1px var(--line),0 0 0 5px var(--ivory),0 0 0 6px var(--wisteria); touch-action:none }
+.sc-val { position:absolute; inset:0; display:grid; place-items:center; padding:3px; font:500 clamp(20px,6.4vw,32px)/1 var(--display); color:var(--plum) }
+.scratch canvas { position:absolute; inset:0; width:100%; height:100%; transition:opacity .4s }
+.scratch.done canvas { opacity:0; pointer-events:none }
+.sc-labels { margin-top:14px }
+.sc-labels span { flex:1 1 0; min-width:0; max-width:108px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; text-align:center; color:var(--muted) }
+.reveal-all { display:block; margin:18px auto 0; min-height:44px; padding:10px 18px; background:transparent; border:0; text-decoration:underline; text-underline-offset:5px; font-size:12px; color:var(--accent) }
+.reveal-all.show { background:var(--lilac); border-radius:24px }
+
+/* Data semplice: tre perle su un nastro lilla. */
+.dt-sec { text-align:center }
+.dt-sec .title { display:inline-block; padding:6px 18px; background:var(--panel-soft); border-radius:30px }
+.dt-row { position:relative; display:flex; justify-content:center; gap:10px; max-width:430px; margin:22px auto 0; padding:14px 0; background:linear-gradient(transparent 40%,#b9a3d366 40%,#b9a3d366 60%,transparent 60%) }
+.dt-col { flex:1; min-width:0; max-width:120px }
+.dt-cell { display:grid; place-items:center; min-height:80px; aspect-ratio:1; border-radius:50%; background:var(--ivory); box-shadow:0 0 0 1px var(--line),inset 0 0 0 5px var(--lilac) }
+.dt-num { font:500 clamp(24px,7vw,36px) var(--display); color:var(--plum) }
+.dt-lab { display:block; margin-top:10px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: quattro medaglioni di perle. */
+.countdown-sec .card { padding:26px 6px 30px; background:var(--panel); border:1px solid var(--line); border-radius:110px 110px 8px 8px }
+.countdown-sec .orn { margin:0 auto 18px }
+[data-countdown] { display:flex; align-items:flex-start; justify-content:center; gap:2px; min-width:0 }
+.time-block { flex:1 1 0; min-width:0; max-width:104px; text-align:center }
+.number-wrap { display:grid; place-items:center; aspect-ratio:1; background:url(assets/medaglione-perle.webp) center/contain no-repeat; padding:8px 2px }
+.number { display:block; font:500 clamp(22px,6.6vw,38px)/1 var(--display); color:var(--plum); transition:opacity .18s }
+.label { margin-top:6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted) }
+.separator { align-self:flex-start; margin-top:clamp(14px,5vw,30px); font:26px var(--display); color:var(--gold) }
+.sep1,.sep2,.sep3 { padding-inline:0 }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.6 }
+
+/* Messaggio: la lettera sotto un arco di glicine e rose ricamato. */
+.invito-sec .card { padding:clamp(70px,20vw,110px) clamp(42px,13vw,86px) clamp(60px,16vw,90px); background:var(--panel) url(assets/arco-glicine.webp) center/100% 100% no-repeat; border-radius:200px 200px 10px 10px }
+.after { margin-top:18px }
+.lettera { font:400 21px/1.65 var(--display); text-align:center; color:var(--ink) }
+
+/* Galleria: stampe su carta di lino, sospese ai grappoli di glicine. */
+.us-sec .card { padding:64px 12px 20px; background:var(--panel-soft); border-radius:8px }
+.us-fl { width:120px; top:-14px; left:4px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:20px 12px; margin-top:26px; padding:0 4px 12px }
+.us-grid figure { margin:0; min-width:0; padding:7px 7px 20px; background:var(--ivory); border:1px solid var(--line); box-shadow:0 10px 22px #3e335018; rotate:-2.5deg }
+.us-grid figure:nth-child(even) { rotate:2.5deg; margin-top:26px }
+.us-grid figure:nth-child(3n) { grid-column:1/-1; width:78%; justify-self:center; rotate:-1.5deg }
+.us-grid img { width:100%; aspect-ratio:4/5; object-fit:cover }
+
+/* Immagine: passe-partout con angolo di glicine. */
+.img-block { position:relative; isolation:isolate; max-width:620px; margin-inline:auto !important; padding:22px 22px 30px; background:var(--panel); border:1px solid var(--line); box-shadow:inset 0 0 0 6px var(--ivory),0 14px 34px #3e335016 }
+.img-block::before { content:""; position:absolute; z-index:3; top:-26px; left:-8px; width:110px; height:170px; background:url(assets/floral-corner.png) top left/contain no-repeat; pointer-events:none }
+.img-block img { border-radius:46% 46% 6px 6px }
+.img-block figcaption { padding:10px 6px 0; color:var(--muted); opacity:1 !important; font:italic 20px/1.5 var(--display) !important }
+
+/* Programma: un ramo verticale e quattro icone ricamate al posto dei punti. */
+.prog-sec .card { padding:74px 14px 26px; background:var(--panel); border:1px solid var(--line); border-radius:180px 180px 10px 10px }
+.prog-fl { width:96px; top:-10px }
+.prog-fl.l { left:6px }
+.prog-fl.r { right:6px }
+.timeline { position:relative; max-width:440px; margin:26px auto 0; text-align:left; padding:16px 0 }
+.finial { position:absolute; width:22px; height:26px; top:-8px; left:19px }
+.rail { position:absolute; top:18px; bottom:24px; left:30px; width:1px; background:var(--line) }
+.t-row { position:relative; display:grid; grid-template-columns:62px minmax(0,1fr); align-items:start; padding:10px 0; min-height:88px }
+.t-dot { position:relative; z-index:1; width:56px; height:56px; margin-left:2px; border-radius:50%; background:var(--ivory) url(assets/t-cappella.webp) center/80% no-repeat; box-shadow:0 0 0 1px var(--line) }
+.t-row:nth-of-type(4n+3) .t-dot { background-image:url(assets/t-calici.webp) }
+.t-row:nth-of-type(4n+4) .t-dot { background-image:url(assets/t-cocktail.webp) }
+.t-row:nth-of-type(4n+5) .t-dot,.t-row:nth-of-type(4n+1) .t-dot { background-image:url(assets/t-anelli.webp) }
+.t-cell { padding:4px 6px 14px 8px; border-bottom:1px solid #c9b8d980 }
+.t-time { color:var(--accent); font:500 24px/1.2 var(--display) }
+.t-name { margin-top:4px; font-size:14px; line-height:1.6 }
+
+/* Location: arco da cerimonia con la villa ricamata. */
+.loc-sec .card { padding:44px 18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:180px 180px 10px 10px }
+.loc-sec .card::before { content:""; position:absolute; top:-18px; right:-4px; width:96px; height:150px; background:url(assets/floral-corner.png) top right/contain no-repeat; transform:scaleX(-1); pointer-events:none }
+.loc-name { font:italic 30px/1.2 var(--display); color:var(--plum); margin-bottom:10px }
+.loc-addr { color:var(--muted); font-size:13px; opacity:1 !important }
+.loc-photo { width:100%; margin-top:24px; border-radius:12px; border:6px solid var(--ivory); outline:1px solid var(--line) }
+
+/* Mappa: cartolina con l'angolo di glicine. */
+.map-frame { position:relative; max-width:620px; margin:auto; padding:10px 10px 46px; background:var(--panel); border:1px solid var(--line); box-shadow:0 12px 30px #3e335014 }
+.map-frame iframe { width:100%; height:300px; border:0; border-radius:120px 120px 4px 4px }
+.map-fl { width:120px; height:auto; right:-6px; bottom:-26px; z-index:1 }
+
+/* Come arrivare: nota con bordo doppio e ghirlanda. */
+.shuttle-sec .card { padding:22px 20px; text-align:left; background:var(--panel); border-left:3px double var(--wisteria); border-radius:0 10px 10px 0 }
+.shuttle-sec .title { text-align:left; font-size:34px }
+.shuttle-sec .title::after { margin-left:0; width:96px }
+.shuttle-box { padding:6px 0; border-top:1px solid #c9b8d980 }
+
+/* Dress code: campionario sotto i grappoli. */
+.dress-sec .card { padding:clamp(110px,30vw,170px) 16px 34px; background:var(--panel) url(assets/ghirlanda-glicine.webp) top center/100% auto no-repeat; border:1px solid var(--line); border-radius:8px }
+.dress { font:italic 26px/1.3 var(--display); color:var(--plum); margin:0 0 20px }
+.dress-dots { gap:18px !important }
+.dress-dots>span { min-width:62px !important; padding:8px 2px }
+.dress-dots [role="img"] { width:40px !important; height:40px !important; outline:1px solid var(--line); outline-offset:4px; margin-bottom:8px }
+.dress-dots>span>span:last-child { color:var(--ink); opacity:1 !important; font-size:12px !important }
+
+/* Video: finestra ad arco sul lago. */
+.video-sec .card { padding:28px 14px; background:var(--panel); border:1px solid var(--line); box-shadow:inset 0 0 0 6px var(--ivory) }
+.video-frame { position:relative; overflow:hidden; border-radius:140px 140px 6px 6px; background:var(--lilac); aspect-ratio:3/4 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--line); border-radius:50%; background:var(--ivory); color:var(--plum) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: perla fissa in basso. */
+.music-toggle { position:fixed; left:16px; bottom:20px; width:50px; height:50px; z-index:1000; display:grid; place-items:center; background:var(--ivory) url(assets/perla.webp) center/cover; color:var(--plum); border:1px solid var(--line); border-radius:50%; box-shadow:0 4px 16px #3e335026; visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor }
+
+/* Conferma: medaglione di perle con il monogramma e la busta ricamata. */
+.rsvp-sec .card { isolation:isolate; padding:48px 20px 42px; background:var(--panel); border:1px solid var(--line); border-radius:180px 180px 14px 14px }
+.rsvp-sec .body { max-width:360px; margin:0 auto }
+.rsvp-sec .card::before { content:""; display:block; width:120px; height:120px; margin:-20px auto 6px; background:url(assets/busta-ricamata.webp) center/contain no-repeat }
+.rsvp-fl { width:100%; height:auto; left:0; bottom:10px; z-index:-1; opacity:.9 }
+.seal-btn { position:relative; width:124px; height:124px; display:grid; place-items:center; margin:30px auto 16px; border:0; border-radius:50%; color:var(--plum); background:url(assets/medaglione-perle.webp) center/contain no-repeat; filter:drop-shadow(0 8px 10px #3e335030) }
+.seal-text { font:400 34px var(--script); overflow-wrap:anywhere; max-width:84px }
+.seal-cue { display:inline-block; color:var(--plum); font-size:12px; letter-spacing:.1em; text-align:center; padding:8px 16px; margin-bottom:40px; background:var(--ivory); border:1px solid var(--line); border-radius:20px }
+.arrow-up { width:10px; height:10px; border-top:1px solid; border-left:1px solid; transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#2b2238c4; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:64px 22px 30px; background:var(--ivory); border:1px solid var(--line); border-radius:120px 120px 12px 12px; box-shadow:0 20px 80px #1d152833; overflow-wrap:anywhere }
+.popup__title { color:var(--plum); font:500 34px/1.2 var(--display); text-align:center; margin:0 10px 28px }
+.popup__close { position:absolute; right:18px; top:16px; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:var(--ivory); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--plum) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font-size:14px; margin-bottom:8px; font-weight:500; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fff; border-radius:6px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:24px; cursor:pointer; font-size:14px; background:#fff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--accent); background:#fff }
+.radio input:checked+.ind { background:var(--accent); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--plum); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--plum); border-radius:28px; background:var(--plum); color:var(--ivory); font-size:14px; letter-spacing:.08em }
+.err,.invio-ko { display:none; color:#8f2f3f; font-size:13px; padding-top:8px }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid #8f2f3f }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:500 32px var(--display); color:var(--plum) }
+.honey { display:none !important }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Firma: il giardino ricamato che chiude l'invito. */
+.footer-sec { isolation:isolate; overflow:hidden; min-height:420px; padding:84px 22px 200px; text-align:center; background:var(--panel-soft) url(assets/castello-ricamato.webp) bottom center/min(100%,620px) auto no-repeat; border-radius:46% 46% 0 0/40px 40px 0 0 }
+.footer-in { position:relative; z-index:1; padding:20px 14px; max-width:480px; margin:auto; background:var(--panel); border:1px solid var(--line); border-radius:80px }
+.footer-in .title { font-size:32px }
+.signature { font:400 34px/1.3 var(--script); color:var(--plum) }
+.footer-sec>.fl { width:62%; top:10px; z-index:0 }
+.footer-sec>.fl.l { left:-14%; }
+.footer-sec>.fl.r { right:-14% }
+.credits { position:relative; z-index:1; max-width:480px; margin:22px auto 0; padding:8px 12px; background:var(--panel); border-radius:20px; font-size:12px; color:var(--muted) }
+
+/* Ingressi: solo dissolvenze, nessun testo trasformato. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .8s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  img[data-anim="zoomin"] { transform:scale(.97); transition-property:opacity,transform }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .orn[data-anim],.fl-div[data-anim] { transform:translateY(8px); transition-property:opacity,transform }
+  .orn[data-anim].in,.fl-div[data-anim].in { transform:none }
+  .us-fl,.prog-fl { animation:sway 6s ease-in-out infinite alternate; transform-origin:top center }
+  .prog-fl.r { animation-delay:-3s }
+}
+@keyframes sway { from { rotate:-2deg } to { rotate:2deg } }
+
+@media (min-width:700px) {
+  .sec { padding:64px 40px }
+  .h-text { padding:22% 20% 20% }
+  .names { font-size:96px }
+  .occasion { font-size:34px }
+  .welcome { font-size:15px }
+  .hero-scene { min-height:min(100svh,1000px) }
+  .us-grid { gap:32px 26px }
+  .prog-sec .card { padding:80px 60px 34px }
+  .prog-fl { width:140px }
+  .popup__box { padding-inline:42px }
+  .footer-sec { max-width:920px; padding:100px 80px 260px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+}

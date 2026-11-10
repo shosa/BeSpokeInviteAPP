@@ -1,0 +1,14 @@
+{{#hasItems}}
+<section class="sec prog-sec battigia-sec">
+  {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+  <div class="battigia">
+    <span class="battigia-mare" aria-hidden="true"></span>
+    {{#items}}
+    <div class="tappa" data-anim="fadeinup">
+      <span class="tappa-conchiglia" aria-hidden="true"></span>
+      <div class="tappa-testo"><div class="t-time">{{time}}</div><div class="t-name">{{label}}</div></div>
+    </div>
+    {{/items}}
+  </div>
+</section>
+{{/hasItems}}

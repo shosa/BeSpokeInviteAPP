@@ -1,0 +1,23 @@
+<section class="sec date-sec vasca-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="vasca" data-anim="zoomin" style="--d:.15s">
+      <input class="vasca-tg" type="checkbox" id="vasca-data">
+      <div class="vasca-scena" aria-hidden="true">
+        <div class="vasca-bagno"></div>
+        <div class="vasca-marmo"><span class="vm-a"></span><span class="vm-b"></span><span class="vm-c"></span></div>
+        <span class="vasca-onda o1"></span><span class="vasca-onda o2"></span><span class="vasca-onda o3"></span>
+        <div class="vasca-quiete"></div>
+        <div class="vd">
+          <span class="vd-wd">{{date.weekday}}</span>
+          <span class="vd-day">{{date.day}}</span>
+          <span class="vd-month">{{date.month}}</span>
+          <span class="vd-year">{{date.year}}</span>
+        </div>
+        <div class="vasca-bordo"></div>
+      </div>
+      <span class="vd-label">{{date.long}}</span>
+      <label class="vasca-btn" for="vasca-data"><span class="vasca-goccia" aria-hidden="true"><span></span></span><span class="vasca-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

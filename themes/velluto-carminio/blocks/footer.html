@@ -1,0 +1,10 @@
+<section class="footer-sec finale-sec">
+  <div class="footer-in">
+    <h2 class="title" data-anim="fadein">{{t.footerTitle}}</h2>
+    <div class="fn-nomi" data-anim="fadeinup" style="--d:.15s">{{title}}</div>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <div class="fn-data" data-anim="fadein" style="--d:.4s">{{date.day}} · {{date.monthShort}} · {{date.year}}</div>
+    <img class="fn-sigillo" src="assets/sigillo.webp" alt="" aria-hidden="true" data-anim="fadein" style="--d:.5s">
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

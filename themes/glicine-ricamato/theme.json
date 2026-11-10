@@ -1,0 +1,140 @@
+{
+  "engine": 2,
+  "id": "glicine-ricamato",
+  "name": "Glicine ricamato",
+  "description": "Una busta lilla con sigillo di ceralacca che si apre su un ricamo di glicine, perle e rose: carta di lino, filo d'oro e luce di primavera.",
+  "models": [],
+  "themeColor": "#f4efe6",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&family=Jost:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4",
+    "body": "assets/corpo.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Giulia & Tommaso",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-05-15",
+      "eventTime": "16:00",
+      "venue": "Villa dei Glicini",
+      "address": "Via dei Glicini 8, Stresa"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Un filo che ci unisce",
+      "body": "Come un ricamo fatto a mano, punto dopo punto, abbiamo intrecciato le nostre vite.\nSaremmo felici di avervi accanto nel giorno del nostro sì."
+    },
+    "gallery": {
+      "heading": "Dettagli in fiore",
+      "photos": [
+        "assets/balcone-glicine.jpg",
+        "assets/cigni-ricamati.jpg",
+        "assets/villa-glicine.jpg",
+        "assets/giardino-ricamato.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/balcone-glicine.jpg",
+      "caption": "Una terrazza sul lago, tra grappoli di glicine."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "16:00", "label": "La cerimonia" },
+        { "time": "17:30", "label": "Brindisi sotto il pergolato" },
+        { "time": "19:00", "label": "Aperitivo in terrazza" },
+        { "time": "20:30", "label": "Cena e balli" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa dei Glicini",
+      "kind": "villa",
+      "photo": "assets/villa-glicine.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nDalla stazione partirà una navetta alle 15:15."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Eleganza di primavera",
+      "colors": [
+        { "hex": "#B9A3D3", "name": "Glicine" },
+        { "hex": "#D9B6BC", "name": "Rosa antico" },
+        { "hex": "#A9B49A", "name": "Salvia" },
+        { "hex": "#EDE4D3", "name": "Lino" }
+      ]
+    },
+    "video": {
+      "heading": "Sul lago, al tramonto",
+      "video": "assets/balcone.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Il tuo posto è già ricamato tra i nostri.\nConferma la tua presenza.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A thread that binds us",
+      "body": "Like hand embroidery, stitch by stitch, we have woven our lives together.\nWe would love to have you by our side on the day we say yes."
+    },
+    "gallery": { "heading": "Details in bloom" },
+    "image": { "caption": "A terrace on the lake, among clusters of wisteria." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "16:00", "label": "The ceremony" },
+        { "time": "17:30", "label": "A toast under the pergola" },
+        { "time": "19:00", "label": "Aperitif on the terrace" },
+        { "time": "20:30", "label": "Dinner and dancing" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nA shuttle will leave the station at 3:15 pm."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Spring elegance",
+      "colors": [
+        { "hex": "#B9A3D3", "name": "Wisteria" },
+        { "hex": "#D9B6BC", "name": "Antique rose" },
+        { "hex": "#A9B49A", "name": "Sage" },
+        { "hex": "#EDE4D3", "name": "Linen" }
+      ]
+    },
+    "video": { "heading": "On the lake, at sunset" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Your place is already stitched among ours.\nPlease confirm your attendance.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

@@ -1,0 +1,18 @@
+<section class="sec date-sec insegna-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="ig" data-anim="fadein" style="--d:.15s">
+      <input class="ig-tg" type="checkbox" id="insegna-data">
+      <span class="ig-label">{{date.long}}</span>
+      <div class="ig-insegna" aria-hidden="true">
+        <i class="ig-catena l"></i><i class="ig-catena r"></i>
+        <div class="ig-luci su"><i class="lp" style="--i:0"></i><i class="lp" style="--i:1"></i><i class="lp" style="--i:2"></i><i class="lp" style="--i:3"></i><i class="lp" style="--i:4"></i><i class="lp" style="--i:5"></i><i class="lp" style="--i:6"></i><i class="lp" style="--i:7"></i><i class="lp" style="--i:8"></i></div>
+        <div class="ig-luci giu"><i class="lp" style="--i:0"></i><i class="lp" style="--i:1"></i><i class="lp" style="--i:2"></i><i class="lp" style="--i:3"></i><i class="lp" style="--i:4"></i><i class="lp" style="--i:5"></i><i class="lp" style="--i:6"></i><i class="lp" style="--i:7"></i><i class="lp" style="--i:8"></i></div>
+        <div class="ig-luci sx"><i class="lp" style="--i:0"></i><i class="lp" style="--i:1"></i><i class="lp" style="--i:2"></i><i class="lp" style="--i:3"></i><i class="lp" style="--i:4"></i><i class="lp" style="--i:5"></i><i class="lp" style="--i:6"></i><i class="lp" style="--i:7"></i><i class="lp" style="--i:8"></i></div>
+        <div class="ig-luci dx"><i class="lp" style="--i:0"></i><i class="lp" style="--i:1"></i><i class="lp" style="--i:2"></i><i class="lp" style="--i:3"></i><i class="lp" style="--i:4"></i><i class="lp" style="--i:5"></i><i class="lp" style="--i:6"></i><i class="lp" style="--i:7"></i><i class="lp" style="--i:8"></i></div>
+        <div class="ig-pannello"><span class="igd-wd">{{date.weekday}}</span><span class="igd-day">{{date.day}}</span><span class="igd-month">{{date.month}}</span><span class="igd-year">{{date.year}}</span>{{#eventTime}}<span class="igd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+      </div>
+      <label class="ig-tap" for="insegna-data"><span class="ig-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

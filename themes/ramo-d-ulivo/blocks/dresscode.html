@@ -1,0 +1,8 @@
+<section class="sec dress-sec anfore-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.15s">{{dress}}</div>{{/dress}}
+    <div class="dress-dots" data-anim="fadeinup" style="--d:.2s">{{#colors}}{{#hex}}<span class="anf"><span class="anf-vaso" role="img" aria-label="{{name}}" style="background:{{hex}}"></span>{{#name}}<span class="anf-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+    <div class="anf-mensola" aria-hidden="true"></div>
+  </div>
+</section>

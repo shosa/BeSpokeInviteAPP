@@ -1,0 +1,12 @@
+<section class="sec loc-sec exlibris-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="xl-lastra" data-anim="zoomin" style="--d:.1s">
+      <div class="xl-motto" aria-hidden="true">Ex libris</div>
+      {{#photo}}<div class="xl-ovale"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""></div>{{/photo}}
+      <div class="xl-nastro"><div class="loc-name">{{venue | lines}}</div></div>
+      {{#kindLabel}}<div class="loc-addr xl-tipo">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-addr">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "ramo-d-ulivo",
+  "name": "Ramo d'ulivo",
+  "description": "Busta avorio a tutto schermo col sigillo d'oro e il rametto d'ulivo, cartoncino con la cornice dorata; la data compare incisa in oro mentre una corona d'ulivo cresce foglia dopo foglia.",
+  "models": [],
+  "themeColor": "#f3ecdd",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cinzel+Decorative:wght@400&family=Lora:ital,wght@0,400;0,500;1,400&family=Great+Vibes&family=Raleway:wght@300;400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Giulia & Matteo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "17:30",
+      "venue": "Villa degli Ulivi",
+      "address": "Strada degli Oliveti 8, Montepulciano (Siena)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Come un ulivo",
+      "body": "L'ulivo cresce piano, mette radici profonde e dura per sempre.\nCosì vorremmo il nostro amore: per questo desideriamo avervi accanto nel giorno in cui lo piantiamo insieme."
+    },
+    "gallery": {
+      "heading": "Sotto la loggia",
+      "photos": [
+        "assets/tavola-ulivo.jpg",
+        "assets/rami-ulivo.jpg",
+        "assets/cerimonia.jpg",
+        "assets/cartoleria.jpg",
+        "assets/olive.jpg",
+        "assets/cortile.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/ricevimento.jpg",
+      "caption": "La lunga tavola sotto il pergolato, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "La tavola del giorno",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "La cerimonia tra gli ulivi"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitivo nel cortile"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena sotto il pergolato"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa degli Ulivi",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Dal paese seguite la strada bianca tra gli ulivi fino alla villa in cima alla collina: il parcheggio è riservato agli ospiti.\nAlle 16:45 una navetta partirà dalla piazza principale."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni dell'avorio, dell'oro e del verde oliva",
+      "colors": [
+        {
+          "hex": "#3F4A2A",
+          "name": "Oliva"
+        },
+        {
+          "hex": "#8A9A6B",
+          "name": "Salvia"
+        },
+        {
+          "hex": "#B48A3F",
+          "name": "Oro"
+        },
+        {
+          "hex": "#E9DCBF",
+          "name": "Lino"
+        },
+        {
+          "hex": "#F8F2E4",
+          "name": "Avorio"
+        },
+        {
+          "hex": "#E8B4B8",
+          "name": "Peonia"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Luce di giugno",
+      "video": "assets/foto-ulivo.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo d'oro e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Like an olive tree",
+      "body": "An olive tree grows slowly, puts down deep roots and lasts forever.\nThat is how we want our love to be: so we would love you beside us on the day we plant it together."
+    },
+    "gallery": {
+      "heading": "Under the loggia"
+    },
+    "image": {
+      "caption": "The long table under the pergola, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The table of the day",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "The ceremony among the olive trees"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitif in the courtyard"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner under the pergola"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "From the village, follow the white road through the olive groves up to the villa on top of the hill: parking is reserved for guests.\nAt 4:45 pm a shuttle will leave from the main square."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in ivory, gold and olive green tones",
+      "colors": [
+        {
+          "hex": "#3F4A2A",
+          "name": "Olive"
+        },
+        {
+          "hex": "#8A9A6B",
+          "name": "Sage"
+        },
+        {
+          "hex": "#B48A3F",
+          "name": "Gold"
+        },
+        {
+          "hex": "#E9DCBF",
+          "name": "Linen"
+        },
+        {
+          "hex": "#F8F2E4",
+          "name": "Ivory"
+        },
+        {
+          "hex": "#E8B4B8",
+          "name": "Peony"
+        }
+      ]
+    },
+    "video": {
+      "heading": "June light"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the golden seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

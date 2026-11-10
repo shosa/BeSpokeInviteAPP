@@ -1,0 +1,11 @@
+<section class="footer-sec petali-sec">
+  <div class="cadono" aria-hidden="true"><i style="--x:6%;--t:11s;--r:0s;--s:1"></i><i style="--x:18%;--t:13s;--r:3s;--s:0.8"></i><i style="--x:30%;--t:10s;--r:6s;--s:1.1"></i><i style="--x:42%;--t:12s;--r:1.5s;--s:0.7"></i><i style="--x:55%;--t:14s;--r:4.5s;--s:0.9"></i><i style="--x:66%;--t:11s;--r:7s;--s:1"></i><i style="--x:78%;--t:13s;--r:2s;--s:0.8"></i><i style="--x:90%;--t:12s;--r:5.5s;--s:1.1"></i><i style="--x:24%;--t:15s;--r:9s;--s:0.7"></i><i style="--x:72%;--t:10s;--r:10s;--s:0.9"></i></div>
+  <div class="footer-in">
+    <h2 class="title" data-anim="fadein">{{t.footerTitle}}</h2>
+    <div class="fn-nomi" data-anim="fadeinup" style="--d:.15s">{{title}}</div>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <div class="fn-data" data-anim="fadein" style="--d:.4s">{{date.day}} · {{date.monthShort}} · {{date.year}}</div>
+    <img class="fn-emblema" src="assets/emblema.webp" alt="" aria-hidden="true" data-anim="fadein" style="--d:.5s">
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

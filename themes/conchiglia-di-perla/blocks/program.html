@@ -1,0 +1,15 @@
+{{#hasItems}}
+<section class="sec prog-sec strisce-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="timeline">
+      <div class="rail" aria-hidden="true"></div>
+      {{#items}}
+      <div class="t-row" data-anim="fadeinup">
+        <div class="t-cell"><span class="foglio" aria-hidden="true"><span class="carta"></span></span><div class="t-time">{{time}}</div><div class="t-name">{{label}}</div></div>
+      </div>
+      {{/items}}
+    </div>
+  </div>
+</section>
+{{/hasItems}}

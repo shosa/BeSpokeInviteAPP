@@ -1,0 +1,15 @@
+{{#hasItems}}
+<section class="sec prog-sec scalinata-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="timeline scalinata">
+      <img class="sc-glicine" src="assets/glicine2.webp" alt="" aria-hidden="true">
+      {{#items}}
+      <div class="t-row" data-anim="fadeinup">
+        <div class="t-cell"><div class="t-time">{{time}}</div><div class="t-name">{{label}}</div></div>
+      </div>
+      {{/items}}
+    </div>
+  </div>
+</section>
+{{/hasItems}}

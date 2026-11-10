@@ -1,0 +1,7 @@
+<section class="sec dress-sec abito-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.1s">{{dress}}</div>{{/dress}}
+    <div class="dress-dots" data-anim="fadeinup" style="--d:.2s">{{#colors}}{{#hex}}<span class="bottone"><span class="bt-velluto" role="img" aria-label="{{name}}" style="--c:{{hex}}"></span>{{#name}}<span class="bt-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+  </div>
+</section>

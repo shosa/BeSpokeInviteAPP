@@ -1,0 +1,13 @@
+<section class="footer-sec finale-sec">
+  <i class="fn-tenda l" aria-hidden="true"></i><i class="fn-tenda r" aria-hidden="true"></i>
+  <div class="pioggia" aria-hidden="true"><i style="--x:59%;--t:11s;--r:8.6s;--s:1.3"></i><i style="--x:59%;--t:11s;--r:8.6s;--s:0.8"></i><i style="--x:25%;--t:11s;--r:4.8s;--s:0.8"></i><i style="--x:14%;--t:10s;--r:3.0s;--s:0.6"></i><i style="--x:70%;--t:12s;--r:6.3s;--s:1.3"></i><i style="--x:59%;--t:12s;--r:7.4s;--s:0.8"></i><i style="--x:81%;--t:7s;--r:8.3s;--s:0.6"></i><i style="--x:9%;--t:7s;--r:1.9s;--s:0.8"></i><i style="--x:78%;--t:7s;--r:7.8s;--s:1"></i><i style="--x:58%;--t:11s;--r:8.4s;--s:0.8"></i><i style="--x:83%;--t:9s;--r:5.0s;--s:0.6"></i><i style="--x:60%;--t:12s;--r:2.8s;--s:0.6"></i><i style="--x:92%;--t:9s;--r:3.2s;--s:0.8"></i><i style="--x:67%;--t:9s;--r:0.3s;--s:0.6"></i><i style="--x:53%;--t:7s;--r:8.5s;--s:1.3"></i><i style="--x:10%;--t:7s;--r:8.5s;--s:0.6"></i><i style="--x:29%;--t:8s;--r:9.3s;--s:0.6"></i><i style="--x:62%;--t:10s;--r:9.8s;--s:1.3"></i><i style="--x:55%;--t:7s;--r:5.7s;--s:0.8"></i><i style="--x:88%;--t:9s;--r:3.4s;--s:1"></i><i style="--x:44%;--t:7s;--r:9.6s;--s:0.6"></i><i style="--x:19%;--t:8s;--r:7.1s;--s:0.6"></i></div>
+  <div class="footer-in">
+    <i class="fn-fascio" aria-hidden="true"></i>
+    <h2 class="title" data-anim="fadein">{{t.footerTitle}}</h2>
+    <div class="fn-nomi" data-anim="fadeinup" style="--d:.15s">{{title}}</div>
+    <div class="fn-data" data-anim="fadein" style="--d:.3s">{{date.day}} · {{date.monthShort}} · {{date.year}}</div>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.4s">{{signature}}</div>{{/signature}}
+    <img class="fn-emblema" src="assets/emblema.webp" alt="" aria-hidden="true" data-anim="fadein" style="--d:.5s">
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

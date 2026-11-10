@@ -1,0 +1,140 @@
+{
+  "engine": 2,
+  "id": "toile-di-lago",
+  "name": "Toile di lago",
+  "description": "Tutto in blu toile su carta avorio: la busta stampata si apre sul lago, con ville, rose e perle disegnate nello stesso inchiostro dall'inizio alla fine.",
+  "models": [],
+  "themeColor": "#f3eee3",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Parisienne&family=Mulish:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4",
+    "body": "assets/corpo.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Elena & Marco",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-19",
+      "eventTime": "17:00",
+      "venue": "Villa del Lago",
+      "address": "Lungolago 12, Bellagio"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Inchiostro e acqua",
+      "body": "Come un disegno antico, tracciato a mano con lo stesso inchiostro, le nostre storie sono diventate una sola.\nSaremo felici di avervi con noi sulle rive del lago."
+    },
+    "gallery": {
+      "heading": "Cartoline dal lago",
+      "photos": [
+        "assets/arco-lago.jpg",
+        "assets/villa-lago.jpg",
+        "assets/hotel-lago.jpg",
+        "assets/giardino-toile.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/arco-lago.jpg",
+      "caption": "Un balcone tra le rose, affacciato sull'acqua."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "17:00", "label": "La cerimonia" },
+        { "time": "18:00", "label": "Brindisi in riva al lago" },
+        { "time": "20:00", "label": "Cena in villa" },
+        { "time": "23:00", "label": "Partenza degli sposi" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa del Lago",
+      "kind": "villa",
+      "photo": "assets/villa-lago.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nDal pontile di Bellagio partirà un battello alle 16:15."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del blu",
+      "colors": [
+        { "hex": "#1F3352", "name": "Inchiostro" },
+        { "hex": "#3D5F94", "name": "Toile" },
+        { "hex": "#9FB3D1", "name": "Cielo" },
+        { "hex": "#F3EEE3", "name": "Avorio" }
+      ]
+    },
+    "video": {
+      "heading": "Il balcone sul lago",
+      "video": "assets/balcone.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Abbiamo già disegnato il tuo posto accanto a noi.\nConferma la tua presenza.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Ink and water",
+      "body": "Like an old drawing, traced by hand in the same ink, our stories have become one.\nWe would love to have you with us on the shores of the lake."
+    },
+    "gallery": { "heading": "Postcards from the lake" },
+    "image": { "caption": "A balcony among the roses, overlooking the water." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "17:00", "label": "The ceremony" },
+        { "time": "18:00", "label": "A toast by the lake" },
+        { "time": "20:00", "label": "Dinner at the villa" },
+        { "time": "23:00", "label": "The couple's farewell" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nA boat will leave the Bellagio pier at 4:15 pm."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in shades of blue",
+      "colors": [
+        { "hex": "#1F3352", "name": "Ink" },
+        { "hex": "#3D5F94", "name": "Toile" },
+        { "hex": "#9FB3D1", "name": "Sky" },
+        { "hex": "#F3EEE3", "name": "Ivory" }
+      ]
+    },
+    "video": { "heading": "The balcony on the lake" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "We have already drawn your place beside us.\nPlease confirm your attendance.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

@@ -1,0 +1,25 @@
+<section class="sec date-sec lettera-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="l3" data-anim="fadein" style="--d:.15s">
+      <input class="l3-tg" type="checkbox" id="lettera-in-tre">
+      <div class="l3-scena" aria-hidden="true">
+        <div class="l3-ombra"></div>
+        <div class="l3-mezzo"><div class="l3-faccia">
+          <span class="l3-giorno">{{date.day}}</span>
+          <span class="l3-filo"><span></span></span>
+        </div></div>
+        <div class="l3-basso">
+          <div class="l3-dentro"><span class="l3-mese">{{date.month}}</span><span class="l3-anno">{{date.year}}</span></div>
+          <div class="l3-fuori"></div>
+        </div>
+        <div class="l3-alto">
+          <div class="l3-dentro"><span class="l3-rametto"></span><span class="l3-sett">{{date.weekday}}</span></div>
+          <div class="l3-fuori"><span class="l3-a-voi"></span></div>
+        </div>
+      </div>
+      <span class="visually-hidden">{{date.long}}</span>
+      <label class="l3-btn" for="lettera-in-tre"><span class="l3-sigillo" aria-hidden="true"></span><span class="l3-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

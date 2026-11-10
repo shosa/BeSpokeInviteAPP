@@ -1,0 +1,11 @@
+<section class="footer-sec">
+  <div class="footer-in">
+    <div class="foglio ft-f1" aria-hidden="true"><div class="carta carta-scura"></div></div>
+    <div class="foglio ft-f2" aria-hidden="true"><div class="carta carta-scura"></div></div>
+    <div class="foglio ft-f3" aria-hidden="true"><div class="carta"></div></div>
+    <span class="ft-sigillo" aria-hidden="true"></span>
+    <h2 class="title" data-anim="fadein" style="--d:.15s">{{t.footerTitle}}</h2>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

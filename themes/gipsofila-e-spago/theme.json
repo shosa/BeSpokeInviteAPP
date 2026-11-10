@@ -1,0 +1,204 @@
+{
+  "engine": 2,
+  "id": "gipsofila-e-spago",
+  "name": "Gipsofila e spago",
+  "description": "Una busta avorio a portafoglio con il bordo curvo, legata con lo spago, un mazzetto di gipsofila secca e un sigillo 3D di ceralacca oro, a tutto schermo: avorio, lino e oro antico, la stessa tinta dall'apertura alla firma. La data è già scritta.",
+  "models": [],
+  "themeColor": "#f4efe6",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Gilda+Display&family=Allura&family=Work+Sans:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Sara & Davide",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-05-22",
+      "eventTime": "17:00",
+      "venue": "Casale dei Fiori Secchi",
+      "address": "Strada del Grano 5, Pienza"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Semplicemente noi",
+      "body": "Ci piacciono le cose semplici: lo spago, i fiori di campo, una tavola lunga tra gli ulivi.\nE soprattutto le persone che amiamo, per questo vi vogliamo con noi."
+    },
+    "gallery": {
+      "heading": "Fiori secchi e lino",
+      "photos": [
+        "assets/casale.jpg",
+        "assets/tavola-lino.jpg",
+        "assets/brocca-gipsofila.jpg",
+        "assets/fedi-spago.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola-lino.jpg",
+      "caption": "La tavola di lino tra gli ulivi, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "La cerimonia nel prato"
+        },
+        {
+          "time": "18:00",
+          "label": "Aperitivo tra gli ulivi"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena sotto le stelle"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Casale dei Fiori Secchi",
+      "kind": "villa",
+      "photo": "assets/casale.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il casale si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:15 una navetta partirà dal centro di Pienza."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni naturali",
+      "colors": [
+        {
+          "hex": "#5C4A32",
+          "name": "Noce"
+        },
+        {
+          "hex": "#B39466",
+          "name": "Oro antico"
+        },
+        {
+          "hex": "#D9CBB0",
+          "name": "Spago"
+        },
+        {
+          "hex": "#FBF8F2",
+          "name": "Avorio"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Luce di maggio",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    },
+    "blockSwap": {
+      "scratchdate": "date"
+    },
+    "date": {
+      "cellShape": "box",
+      "showLabels": true
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Simply us",
+      "body": "We love simple things: twine, wildflowers, a long table among the olive trees.\nAnd above all the people we love, which is why we want you with us."
+    },
+    "gallery": {
+      "heading": "Dried flowers and linen"
+    },
+    "image": {
+      "caption": "The linen table among the olive trees, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "The ceremony in the meadow"
+        },
+        {
+          "time": "18:00",
+          "label": "Aperitif among the olive trees"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner under the stars"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The farmhouse can be reached by car, with parking reserved for guests.\nAt 4:15 pm a shuttle will leave from the centre of Pienza."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in natural tones",
+      "colors": [
+        {
+          "hex": "#5C4A32",
+          "name": "Walnut"
+        },
+        {
+          "hex": "#B39466",
+          "name": "Antique gold"
+        },
+        {
+          "hex": "#D9CBB0",
+          "name": "Twine"
+        },
+        {
+          "hex": "#FBF8F2",
+          "name": "Ivory"
+        }
+      ]
+    },
+    "video": {
+      "heading": "May light"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

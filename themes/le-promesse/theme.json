@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "le-promesse",
+  "name": "Le promesse",
+  "description": "Il cofanetto ottagonale di pelle bordeaux con i fregi d'oro e le due fedi sul velluto rosso: il coperchio si alza e dentro, sulla pelle scamosciata avorio, c'è il cartoncino coi nomi. Dentro: la data dorata a foglia col pennello, il conto alla rovescia sui dorsi dei libri, le promesse a due voci, cornici ottagonali e un segnalibro di seta per il programma.",
+  "models": [],
+  "themeColor": "#3d0a12",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Italiana&family=Pinyon+Script&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/cofanetto.mp4",
+    "poster": "assets/cofanetto-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/sala.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Ginevra & Tommaso",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "16:00",
+      "venue": "Villa dei Cedri",
+      "address": "Via dei Cedri 12, Colle Val d'Elsa (Siena)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Le nostre promesse",
+      "scrollLabel": "Apri la nostra lettera"
+    },
+    "message": {
+      "heading": "Cari famiglia e amici",
+      "body": "il dodici giugno ci scambieremo le nostre promesse,\ne non riusciamo a immaginare quel giorno senza di voi.\nVi aspettiamo per festeggiare insieme."
+    },
+    "gallery": {
+      "heading": "I nostri ritratti",
+      "photos": [
+        "assets/fedi-rose.jpg",
+        "assets/bouquet-rosso.jpg",
+        "assets/rose.jpg",
+        "assets/bouquet-bianco.jpg",
+        "assets/rose-pini.jpg",
+        "assets/bouquet-misto.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/salotto.jpg",
+      "caption": "Il salone della villa, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il giorno",
+      "items": [
+        {
+          "time": "16:00",
+          "label": "Lo scambio delle promesse"
+        },
+        {
+          "time": "17:15",
+          "label": "Aperitivo nel parco"
+        },
+        {
+          "time": "19:30",
+          "label": "Cena sotto i cedri"
+        },
+        {
+          "time": "22:00",
+          "label": "Il primo ballo"
+        },
+        {
+          "time": "23:00",
+          "label": "La torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "Dove",
+      "venue": "Villa dei Cedri",
+      "kind": "villa",
+      "photo": "assets/scalone.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa è a dieci minuti da Colle Val d'Elsa, con parcheggio libero al cancello.\nUna navetta parte da Siena alle 14:45 e riparte alle 23:30."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Abito da sera",
+      "colors": [
+        {
+          "hex": "#5C0F1B",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#8E1B2B",
+          "name": "Rubino"
+        },
+        {
+          "hex": "#C9A25E",
+          "name": "Oro"
+        },
+        {
+          "hex": "#EFE6D6",
+          "name": "Avorio"
+        },
+        {
+          "hex": "#1C1414",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Un giorno di giugno",
+      "video": "assets/foto-promesse.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca le fedi e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Grazie di far parte della nostra storia"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Our vows",
+      "scrollLabel": "Open our letter"
+    },
+    "message": {
+      "heading": "Dear family and friends",
+      "body": "on the twelfth of June we will exchange our vows,\nand we cannot imagine that day without you.\nJoin us to celebrate together."
+    },
+    "gallery": {
+      "heading": "Our portraits"
+    },
+    "image": {
+      "caption": "The villa's salon, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The day",
+      "items": [
+        {
+          "time": "16:00",
+          "label": "Exchanging our vows"
+        },
+        {
+          "time": "17:15",
+          "label": "Aperitif in the park"
+        },
+        {
+          "time": "19:30",
+          "label": "Dinner under the cedars"
+        },
+        {
+          "time": "22:00",
+          "label": "The first dance"
+        },
+        {
+          "time": "23:00",
+          "label": "The cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "Where"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa is ten minutes from Colle Val d'Elsa, with free parking at the gate.\nA shuttle leaves Siena at 2:45 pm and returns at 11:30 pm."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Evening attire",
+      "colors": [
+        {
+          "hex": "#5C0F1B",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#8E1B2B",
+          "name": "Ruby"
+        },
+        {
+          "hex": "#C9A25E",
+          "name": "Gold"
+        },
+        {
+          "hex": "#EFE6D6",
+          "name": "Ivory"
+        },
+        {
+          "hex": "#1C1414",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "A June day"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the rings and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "Thank you for being part of our story"
+    }
+  }
+}

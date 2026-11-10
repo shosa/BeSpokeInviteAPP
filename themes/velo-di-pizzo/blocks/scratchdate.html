@@ -1,0 +1,16 @@
+<section class="sec date-sec velo-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="velo" data-anim="zoomin" style="--d:.15s">
+      <input class="velo-tg" type="checkbox" id="velo-data">
+      <div class="vd">
+        <span class="vd-label">{{date.long}}</span>
+        <span class="vd-wd" aria-hidden="true">{{date.weekday}}</span>
+        <svg class="vd-day" viewBox="0 0 200 140" aria-hidden="true"><text class="vd-fill" x="100" y="118">{{date.day}}</text><text class="vd-st" x="100" y="118">{{date.day}}</text></svg>
+        <span class="vd-month" aria-hidden="true">{{date.month}}</span>
+        <span class="vd-year" aria-hidden="true">{{date.year}}</span>
+      </div>
+      <label class="velo-veil" for="velo-data"><span class="velo-seal" aria-hidden="true"></span><span class="velo-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

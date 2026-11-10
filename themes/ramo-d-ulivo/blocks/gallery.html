@@ -1,0 +1,13 @@
+{{#hasPhotos}}
+<section class="sec us-sec loggia-sec">
+  <div class="card">
+    <img class="fl us-fl" src="assets/floral-sprig.png" alt="" aria-hidden="true">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="lg-cornice" aria-hidden="true"></div>
+    <div class="us-grid loggia">
+      {{#photos}}<figure data-anim="fadeinup"><img src="{{.}}" loading="lazy" decoding="async" alt=""></figure>{{/photos}}
+    </div>
+    <div class="lg-cornice lg-base" aria-hidden="true"></div>
+  </div>
+</section>
+{{/hasPhotos}}

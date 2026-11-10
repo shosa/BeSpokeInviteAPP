@@ -1,0 +1,341 @@
+/* Polvere di rubino. Una sola tinta per tutta la pagina: rubino, vino scuro, cipria e un filo d'oro.
+   L'apertura è un velo di glitter rubino che vola via: sotto c'è il sipario di velluto, che si apre sul palco
+   dove gli sposi ballano sotto l'occhio di bue. Dentro è una serata a teatro, e ogni sezione è un pezzo del teatro. */
+:root {
+  --bk-cover:#1a0508;
+  --rub:#7a0f1e; --rub-l:#a81c30; --rub-ll:#d2384c; --vino:#3a0a12; --notte:#170407; --nero:#0d0204;
+  --perla:#f7e9e5; --cipria:#e9c9c4; --cipria-m:#c79a98;
+  --oro-c:#cdb07a; --oro-l:#f0dcae; --oro-d:#8c6c38;
+  --ink:#3a0a12; --muted:#8a5a5e;
+  --display:'Limelight','Bodoni Moda',Georgia,serif; --body:'Bodoni Moda',Georgia,serif;
+  --script:'Parisienne','Bodoni Moda',cursive; --caps:'Josefin Sans',system-ui,sans-serif;
+  --oro:linear-gradient(110deg,#8c6c38 4%,#cdb07a 24%,#f8e9c2 40%,#b08e52 58%,#f0dcae 74%,#8c6c38 96%);
+  --pieghe:repeating-linear-gradient(90deg,#2a060c 0,#7a0f1e 7px,#b3233a 12px,#8a1424 16px,#3a0a12 24px,#5c0c18 30px,#2a060c 36px);
+  --bagliore:0 0 8px #ffd9d9cc,0 0 22px #e0405a99,0 0 44px #a81c3080;
+  --lampada:radial-gradient(circle,#fffbe8 0 30%,#ffd98a 55%,#c98f3a 100%);
+  --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--notte) }
+body { margin:0; color:var(--perla); background:var(--notte); font:400 18px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:inherit; text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--oro-c); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+/* Sezioni a tutta larghezza, tutte scure: il buio della sala, il vino del foyer, oppure il velluto del sipario. */
+.sec,.footer-sec { position:relative; width:100%; max-width:none; margin:0; padding:70px 20px; overflow-wrap:anywhere }
+.sec { background:radial-gradient(ellipse 90% 60% at 50% 0,#5c0c1866,#0000),linear-gradient(#2a070d,#1a0508) }
+.insegna-sec,.camerino-sec,.palchetto-sec,.lampadario-sec,.riflettore-sec { background:radial-gradient(1.5px 1.5px at 12% 18%,#ffd9d9aa 50%,#0000 51%),radial-gradient(1px 1px at 78% 32%,#ffd9d988 50%,#0000 51%),radial-gradient(1.5px 1.5px at 64% 76%,#ffd9d977 50%,#0000 51%),radial-gradient(1px 1px at 24% 64%,#ffd9d988 50%,#0000 51%),radial-gradient(1px 1px at 90% 90%,#ffd9d977 50%,#0000 51%),radial-gradient(ellipse 80% 50% at 50% 30%,#3a0a1288,#0000),var(--notte) }
+.locandina-sec,.atti-sec { background:linear-gradient(#17040799,#170407cc),var(--vino) url(assets/velluto.jpg) center/cover }
+/* Un filo di glitter chiude in alto e in basso le sezioni di velluto. */
+.locandina-sec::before,.atti-sec::before,.locandina-sec::after,.atti-sec::after { content:""; position:absolute; left:0; right:0; height:7px; background:url(assets/glitter.jpg) center/320px; box-shadow:0 0 14px #e0405a66 }
+.locandina-sec::before,.atti-sec::before { top:0 }
+.locandina-sec::after,.atti-sec::after { bottom:0 }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 22px; font:400 clamp(40px,11.5vw,58px)/1.15 var(--script); color:var(--perla); text-shadow:var(--bagliore); text-align:center }
+.title::after { content:"✦  ✦  ✦"; display:block; margin:8px auto 0; font:400 11px/1 var(--caps); letter-spacing:.3em; padding-left:.3em; color:var(--oro-c); text-shadow:none }
+.body,.lettera { margin:0; text-wrap:pretty }
+.orn,.fl { display:none }
+.timeline { animation:none !important }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Apertura: il velo di glitter rubino a tutto schermo, che luccica mentre aspetta. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--notte) url(assets/sipario-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+[data-cover]::before,[data-cover]::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(2.5px 2.5px at 14% 22%,#fff 50%,#0000 52%),radial-gradient(2px 2px at 72% 12%,#fff 50%,#0000 52%),radial-gradient(3px 3px at 86% 44%,#ffe3e3 50%,#0000 52%),radial-gradient(2px 2px at 30% 58%,#fff 50%,#0000 52%),radial-gradient(2.5px 2.5px at 58% 70%,#fff 50%,#0000 52%),radial-gradient(2px 2px at 8% 84%,#ffe3e3 50%,#0000 52%),radial-gradient(3px 3px at 46% 34%,#fff 50%,#0000 52%),radial-gradient(2px 2px at 92% 86%,#fff 50%,#0000 52%); filter:drop-shadow(0 0 4px #fff) }
+[data-cover]::after { transform:scale(-1,-1) }
+@media (prefers-reduced-motion:no-preference) {
+  [data-cover]::before { animation:brillio 2.2s ease-in-out infinite alternate }
+  [data-cover]::after { animation:brillio 2.8s ease-in-out -1.2s infinite alternate }
+}
+@keyframes brillio { from { opacity:.1 } to { opacity:1 } }
+.env-top { position:absolute; z-index:2; left:0; right:0; top:9%; max-width:none; margin:0 auto; padding:0 16px; text-align:center; font:italic 400 clamp(18px,5vw,22px)/1.3 var(--body); color:var(--perla); text-shadow:0 2px 10px #170407 }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--rub)); border:1px solid var(--oro-d); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--rub-l)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/emblema.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:76%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:10px; margin:0; padding:10px 16px; width:max-content; max-width:94vw; background:none; border:0; text-align:center }
+[data-cover-label] { color:#fff; font:400 clamp(34px,10.5vw,50px)/1.1 var(--script); text-shadow:var(--bagliore); white-space:nowrap }
+.wei-chevron { order:2; width:12px; height:12px; border-left:1px solid #fff; border-top:1px solid #fff; transform:rotate(45deg); filter:drop-shadow(0 0 4px #fff) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening .env-top,.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+.wei-opening[data-cover]::before,.wei-opening[data-cover]::after,[data-cover].wei-opening::before,[data-cover].wei-opening::after,.wei-opening [data-cover]::before,.wei-opening [data-cover]::after { opacity:0 !important; animation:none; transition:opacity .3s }
+
+/* Intestazione: il palco col sipario aperto; i nomi in corsivo luminoso nel buio sopra gli sposi. */
+.zone-hero { background:var(--notte) url(assets/palco.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip; padding:0; background:none }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:none }
+.h-text { position:absolute; left:17%; right:17%; top:9%; bottom:44%; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:0; text-align:center; color:var(--perla) }
+.occasion { order:-1; font:italic 400 clamp(15px,4.2vw,19px)/1.4 var(--body); color:var(--cipria) }
+.names { font:400 clamp(44px,13vw,76px)/1.08 var(--script); color:#fff; text-shadow:var(--bagliore); text-wrap:balance }
+.welcome { margin-top:4px; font:400 11px/1.7 var(--caps); letter-spacing:.3em; padding-left:.3em; text-transform:uppercase; color:var(--cipria) }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 22px; color:var(--perla); font:400 11px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-88px }
+.scroll-cue span { display:inline-block; padding:10px 22px 8px; background:#170407b3; border:1px solid #cdb07a80; border-radius:30px; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px) }
+.arrow { width:10px; height:10px; margin:10px auto 0; border-right:1px solid var(--perla); border-bottom:1px solid var(--perla); transform:rotate(45deg) }
+
+/* La data sull'insegna del teatro. Il tema sostituisce la data da grattare: un'insegna appesa a due catene,
+   con la cornice di lampadine spente e la data che si intravede appena. Al tocco (una casella nascosta, niente script)
+   le lampadine si accendono una dopo l'altra tutt'intorno, poi la data sfarfalla come un neon e resta accesa. */
+.ig { --w:min(300px,80vw); position:relative; width:var(--w); margin:26px auto 0 }
+.ig-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.ig-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.ig-insegna { position:relative; width:100%; aspect-ratio:4/5; padding:30px; border-radius:16px; background:linear-gradient(135deg,#4a0a14,#2a060c 60%,#3a0a12); box-shadow:inset 0 0 0 2px #cdb07a,inset 0 0 0 5px #170407,inset 0 0 0 6px #8c6c38,0 30px 50px #000a }
+.ig-catena { position:absolute; bottom:100%; width:3px; height:60px; background:repeating-linear-gradient(#cdb07a 0 5px,#8c6c38 5px 7px,#0000 7px 9px) }
+.ig-catena.l { left:22% } .ig-catena.r { right:22% }
+.ig-luci { position:absolute; display:flex; justify-content:space-between; align-items:center }
+.ig-luci.su { --b:0s; left:34px; right:34px; top:9px }
+.ig-luci.dx { --b:.72s; right:9px; top:34px; bottom:34px; flex-direction:column }
+.ig-luci.giu { --b:1.44s; left:34px; right:34px; bottom:9px; flex-direction:row-reverse }
+.ig-luci.sx { --b:2.16s; left:9px; top:34px; bottom:34px; flex-direction:column-reverse }
+.lp { display:block; width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#7a4a3a,#3a1a14); box-shadow:inset 0 0 0 1px #17040799 }
+.ig-pannello { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; border-radius:8px; background:radial-gradient(ellipse at 50% 40%,#2a060c,#0d0204); box-shadow:inset 0 0 0 1px #8c6c3880,inset 0 0 30px #000 }
+.ig-pannello span { color:#fff3f0; opacity:.13 }
+.igd-wd { font:400 11.5px/1 var(--caps); letter-spacing:.36em; padding-left:.36em; text-transform:uppercase }
+.igd-day { margin-top:8px; font:400 calc(var(--w) * .34)/1 var(--display); text-shadow:var(--bagliore) }
+.igd-month { margin-top:2px; font:400 calc(var(--w) * .15)/1.15 var(--script); text-shadow:var(--bagliore) }
+.igd-year { margin-top:6px; font:400 13px/1 var(--caps); letter-spacing:.5em; padding-left:.5em }
+.igd-ora { margin-top:12px; padding:8px 14px 0; border-top:1px solid #cdb07a; font:italic 400 19px/1 var(--body) }
+.ig-tap { display:flex; justify-content:center; margin-top:24px; cursor:pointer }
+.ig-hint { white-space:nowrap; padding:12px 24px 10px; font:400 11.5px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--nero); background:var(--oro); border-radius:30px; box-shadow:0 8px 18px #0008 }
+.ig-tg:focus-visible ~ .ig-tap .ig-hint { outline:3px solid var(--oro-l); outline-offset:4px }
+/* Accesa: stato finale (anche con «riduci movimento»). */
+.ig-tg:checked ~ .ig-tap { pointer-events:none }
+.ig-tg:checked ~ .ig-tap .ig-hint { opacity:0 }
+.ig-tg:checked ~ .ig-insegna .lp { background:var(--lampada); box-shadow:0 0 8px #ffd98a,0 0 18px #ffb84d99 }
+.ig-tg:checked ~ .ig-insegna .ig-pannello span { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .ig-tg:checked ~ .ig-insegna .lp { animation:accende .25s ease calc(var(--b) + var(--i) * .08s) both,ammicca 1.8s ease-in-out 4.4s infinite alternate }
+  .ig-tg:checked ~ .ig-insegna .lp:nth-child(even) { animation-delay:calc(var(--b) + var(--i) * .08s),5.3s }
+  .ig-tg:checked ~ .ig-insegna .ig-pannello span { animation:neon 1.5s linear 2.9s both }
+  .ig-tg:checked ~ .ig-insegna .igd-month { animation-delay:3.1s }
+  .ig-tg:checked ~ .ig-insegna .igd-year,.ig-tg:checked ~ .ig-insegna .igd-ora { animation-delay:3.3s }
+  .ig-tg:checked ~ .ig-tap .ig-hint { animation:svanisce .4s ease both }
+  .ig-insegna { transform-origin:50% -60px; animation:dondola 7s ease-in-out infinite alternate }
+}
+@keyframes accende { from { background:radial-gradient(circle at 35% 30%,#7a4a3a,#3a1a14); box-shadow:none } to { background:var(--lampada); box-shadow:0 0 8px #ffd98a,0 0 18px #ffb84d99 } }
+@keyframes ammicca { from { opacity:1 } to { opacity:.45 } }
+@keyframes neon { 0% { opacity:.13 } 8% { opacity:1 } 14% { opacity:.2 } 22% { opacity:.9 } 30% { opacity:.25 } 46% { opacity:1 } 52% { opacity:.6 } 60%,100% { opacity:1 } }
+@keyframes dondola { from { rotate:-.8deg } to { rotate:.8deg } }
+@keyframes svanisce { to { opacity:0 } }
+
+/* Conto alla rovescia: quattro poltrone di velluto rubino in fila, con la targhetta d'ottone sullo schienale. */
+.platea { display:flex; justify-content:center; padding:10px 0 22px }
+[data-countdown] { display:flex; align-items:flex-end; gap:clamp(14px,4.4vw,22px) }
+.time-block { position:relative; display:flex; flex-direction:column; align-items:center; width:clamp(58px,16.5vw,76px); height:158px; min-width:0; padding:20px 0 0; border-radius:30px 30px 6px 6px;
+  background:radial-gradient(circle 2.5px at 28% 62%,#3a0a12 60%,#0000 70%),radial-gradient(circle 2.5px at 72% 62%,#3a0a12 60%,#0000 70%),radial-gradient(circle 2.5px at 50% 78%,#3a0a12 60%,#0000 70%),linear-gradient(90deg,#3a0a1299,#ffffff1a 30%,#ffffff00 55%,#17040799),linear-gradient(#b3233a,#7a0f1e 50%,#5c0c18);
+  box-shadow:inset 0 0 0 2px #17040766,inset 0 3px 0 #d2384c66,0 0 0 3px #8c6c38,0 0 0 4px #f0dcae66,0 18px 22px #000a }
+/* I braccioli, e sotto i piedini d'ottone. */
+.time-block::before,.time-block::after { content:""; position:absolute; bottom:8px; width:11px; height:58px; border-radius:6px 6px 3px 3px; background:linear-gradient(90deg,#3a0a12,#a81c30 45%,#5c0c18); box-shadow:0 0 0 1.5px #8c6c38,0 -1px 0 2px #cdb07a }
+.time-block::before { left:-9px } .time-block::after { right:-9px }
+.pt-seduta { order:9; position:relative; width:calc(100% + 6px); height:26px; margin-top:auto; border-radius:9px 9px 5px 5px; background:linear-gradient(#d2384c,#a81c30 40%,#7a0f1e); box-shadow:0 0 0 1.5px #5c0c18,0 5px 0 #3a0a12 }
+.pt-seduta::after { content:""; position:absolute; left:10%; right:10%; top:calc(100% + 5px); height:12px; background:linear-gradient(90deg,#cdb07a,#8c6c38) left/5px 100% no-repeat,linear-gradient(90deg,#8c6c38,#cdb07a) right/5px 100% no-repeat }
+.number-wrap { display:grid; place-items:center; width:calc(100% - 14px); padding:7px 0 5px; border-radius:20px; background:var(--oro); box-shadow:inset 0 0 0 1px #8c6c38,0 2px 4px #17040799 }
+.number { display:block; font:400 clamp(22px,6.4vw,30px)/1 var(--display); color:var(--nero); transition:opacity .18s }
+.label { margin-top:9px; font:400 clamp(8px,2.3vw,9.5px)/1 var(--caps); letter-spacing:.18em; padding-left:.18em; text-transform:uppercase; color:var(--oro-l) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.45 }
+
+/* Messaggio: la locandina dello spettacolo, appuntata sul velluto, con le stelle, il doppio filetto e i nomi in cartellone. */
+.locandina { position:relative; max-width:400px; margin:0 auto; padding:40px clamp(22px,7vw,38px) 34px; color:var(--ink); background:linear-gradient(160deg,#fbf1ec,#f1dcd5); box-shadow:inset 0 0 0 8px #0000,inset 0 0 0 10px var(--rub),inset 0 0 0 13px #0000,inset 0 0 0 14px var(--rub),0 30px 50px #000a; rotate:-1.2deg }
+.lc-puntina { position:absolute; left:50%; top:-9px; width:20px; height:20px; translate:-50% 0; border-radius:50%; background:radial-gradient(circle at 35% 30%,#f8e9c2,#cdb07a 45%,#8c6c38); box-shadow:0 4px 6px #0008 }
+.lc-testata { display:flex; justify-content:center; gap:14px; margin-bottom:6px; font-size:13px; color:var(--rub) }
+.lc-testata span:nth-child(2) { font-size:19px; translate:0 -3px }
+.locandina .title { margin-bottom:12px; font:400 clamp(26px,7.6vw,34px)/1.15 var(--display); letter-spacing:.02em; color:var(--rub); text-shadow:none }
+.locandina .title::after { display:none }
+.after { margin-top:4px }
+.lettera { font:italic 400 18.5px/1.7 var(--body); text-align:center; color:var(--ink) }
+.lc-filetto { height:9px; margin:20px 8px 16px; background:linear-gradient(var(--rub),var(--rub)) 0 0/100% 3px no-repeat,linear-gradient(var(--rub),var(--rub)) 0 100%/100% 1px no-repeat }
+.lc-nomi { font:400 clamp(38px,11vw,52px)/1.1 var(--script); color:var(--rub) }
+.lc-data { margin-top:10px; font:400 12px/1 var(--caps); letter-spacing:.44em; padding-left:.44em; text-transform:uppercase; color:var(--muted) }
+
+/* Galleria: gli specchi del camerino, ognuno con la sua cornice di lampadine accese. */
+.camerino-sec .card { max-width:560px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 14px; margin:10px 0 0 }
+.us-grid figure { position:relative; margin:0; min-width:0; padding:17px; border-radius:10px; background:linear-gradient(135deg,#3a0a12,#170407); box-shadow:inset 0 0 0 1px #cdb07a99,0 18px 26px #000a }
+.us-grid figure:nth-child(even) { margin-top:34px }
+.us-grid figure::before { content:""; position:absolute; inset:3px; pointer-events:none; --l:radial-gradient(circle,#fffbe8 0 2.5px,#ffd98a 3.5px,#ffb84d55 5px,#0000 6.5px);
+  background:var(--l) 0 0/26px 12px round no-repeat,var(--l) 0 100%/26px 12px round no-repeat,var(--l) 0 0/12px 26px no-repeat round,var(--l) 100% 0/12px 26px no-repeat round;
+  background-repeat:round no-repeat,round no-repeat,no-repeat round,no-repeat round; filter:drop-shadow(0 0 4px #ffcf73) }
+.us-grid img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:3px; box-shadow:0 0 0 1px #17040799 }
+.us-grid figure::after { content:""; position:absolute; inset:17px; border-radius:3px; background:linear-gradient(120deg,#fff3 0,#fff0 28%,#fff0 70%,#ffffff1f 100%); pointer-events:none }
+@media (prefers-reduced-motion:no-preference) {
+  .us-grid figure::before { animation:lampadine 3.4s ease-in-out infinite alternate }
+  .us-grid figure:nth-child(2n)::before { animation-duration:4.2s; animation-delay:-1.6s }
+}
+@keyframes lampadine { 0%,70% { opacity:1 } 78% { opacity:.72 } 84% { opacity:1 } 100% { opacity:.86 } }
+
+/* Immagine: la foto in una sottile cornice d'oro. */
+.img-block { position:relative; max-width:560px; margin-inline:auto !important; padding:7px; background:var(--oro); box-shadow:0 22px 40px #000a }
+.img-block img { border-radius:0 !important }
+.img-block figcaption { padding:16px 8px 8px; margin:0 !important; color:var(--perla); opacity:1 !important; font:italic 400 18px/1.5 var(--body) !important; background:var(--notte) }
+
+/* Programma: il programma di sala. Lungo il fianco scende il cordone d'oro del sipario con la nappa;
+   ogni momento è un atto, col numero romano in un medaglione. */
+.atti { position:relative; max-width:400px; margin:0 auto; padding:6px 0 30px 0 }
+.at-cordone { position:absolute; left:23px; top:-20px; bottom:38px; width:7px; border-radius:4px; background:repeating-linear-gradient(-35deg,#8c6c38 0 3px,#f0dcae 3px 6px,#cdb07a 6px 8px); box-shadow:0 0 6px #000a }
+.at-nappa { position:absolute; left:50%; top:100%; width:22px; height:46px; translate:-50% 0; border-radius:10px 10px 3px 3px; background:linear-gradient(#f0dcae,#cdb07a) 0 0/100% 12px no-repeat,repeating-linear-gradient(90deg,#cdb07a 0 2px,#8c6c38 2px 3.5px); box-shadow:0 5px 8px #0008 }
+.scene { counter-reset:atto; position:relative; text-align:left }
+.t-row { counter-increment:atto; display:grid; grid-template-columns:54px minmax(0,1fr); align-items:center; column-gap:16px; padding:13px 0 }
+.t-dot { justify-self:center; display:grid; place-items:center; width:46px; height:46px; border-radius:50%; background:radial-gradient(circle at 36% 30%,#d2384c,#7a0f1e 60%,#3a0a12); box-shadow:0 0 0 2px #cdb07a,0 0 0 5px #170407,0 0 0 6px #8c6c38,0 6px 10px #000a; font:400 15px/1 var(--display); color:var(--oro-l) }
+.t-dot::before { content:counter(atto,upper-roman) }
+.t-cell { min-width:0 }
+.t-time { font:400 12px/1 var(--caps); letter-spacing:.3em; color:var(--oro-l) }
+.t-name { margin-top:7px; font:400 20px/1.3 var(--body); color:var(--perla); text-wrap:balance }
+
+/* Location: un palchetto del teatro. La foto è la vista dal palco, tra le tende raccolte, sotto la mantovana a festoni
+   e dietro la balaustra d'oro. */
+.palchetto { position:relative; width:min(330px,86vw); margin:8px auto 0; padding:8px 8px 0; border-radius:12px 12px 0 0; background:var(--oro); box-shadow:0 26px 40px #000b }
+.loc-photo { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:6px 6px 0 0 }
+.palchetto:not(:has(.loc-photo))::before { content:""; display:block; aspect-ratio:4/5; background:radial-gradient(ellipse at 50% 70%,#5c0c18,#170407) }
+.pc-tenda { position:absolute; top:8px; bottom:0; width:30%; background:linear-gradient(#17040700 40%,#170407aa),var(--pieghe); filter:drop-shadow(4px 0 6px #000a) }
+.pc-tenda.l { left:8px; clip-path:polygon(0 0,100% 0,84% 26%,52% 52%,34% 60%,50% 68%,66% 100%,0 100%) }
+.pc-tenda.r { right:8px; transform:scaleX(-1); clip-path:polygon(0 0,100% 0,84% 26%,52% 52%,34% 60%,50% 68%,66% 100%,0 100%) }
+/* Il laccio d'oro che raccoglie la tenda. */
+.pc-tenda::after { content:""; position:absolute; left:0; top:57%; width:52%; height:9px; border-radius:4px; background:var(--oro); rotate:8deg }
+.pc-mantovana { position:absolute; left:8px; right:8px; top:8px; height:54px; border-radius:6px 6px 0 0; background:linear-gradient(#17040733,#0000 50%,#17040766),repeating-linear-gradient(90deg,#5c0c18 0,#b3233a 9px,#7a0f1e 16px,#3a0a12 22px); -webkit-mask:radial-gradient(circle 30px at 50% 0,#000 98%,#0000) 0 24px/20% 100% repeat-x,linear-gradient(#000,#000) 0 0/100% 26px no-repeat; mask:radial-gradient(circle 30px at 50% 0,#000 98%,#0000) 0 24px/20% 100% repeat-x,linear-gradient(#000,#000) 0 0/100% 26px no-repeat; filter:drop-shadow(0 4px 4px #000a) }
+.pc-balaustra { position:absolute; left:-10px; right:-10px; bottom:-26px; height:44px; border-radius:6px; background:linear-gradient(#f8e9c2,#cdb07a 60%,#8c6c38) 0 0/100% 9px no-repeat,radial-gradient(circle 2.5px at 50% 50%,#cdb07a 90%,#0000) 0 16px/26px 22px repeat-x,linear-gradient(#a81c30,#7a0f1e 50%,#3a0a12) 0 9px/100% 100% no-repeat; box-shadow:0 12px 18px #000a }
+.pc-targa { margin-top:56px }
+.loc-name { font:400 clamp(28px,8.2vw,40px)/1.15 var(--display); letter-spacing:.02em; background:var(--oro); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--oro-l); text-wrap:balance }
+.loc-addr { margin-top:10px; font:400 10.5px/1.6 var(--caps); letter-spacing:.32em; padding-left:.32em; text-transform:uppercase; color:var(--cipria); opacity:1 !important }
+.loc-via { margin-top:10px; font:italic 400 18.5px/1.5 var(--body); color:var(--perla) }
+
+/* Mappa: in una sottile cornice d'oro. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:6px; background:var(--oro) }
+.map-frame iframe { width:100%; height:300px; border:0; filter:sepia(.25) saturate(.8) brightness(.92) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 0 0 / 30% 30% 0 0; height:360px }
+
+/* Come arrivare: in corsivo, tra due filetti d'oro. */
+.shuttle-box { max-width:500px; margin:0 auto; padding:20px 4px; border-top:1px solid #cdb07a80; border-bottom:1px solid #cdb07a80 }
+.shuttle-sec .body { font-style:italic; font-size:19px; line-height:1.6; color:var(--perla) }
+
+/* Dress code: il nome dell'abito in grande, e i colori come gocce di cristallo appese al lampadario, che oscillano appena. */
+.dress { font:400 clamp(34px,10vw,56px)/1.15 var(--display); color:var(--perla); margin:0 0 30px; text-wrap:balance }
+.lampadario { position:relative; max-width:400px; margin:0 auto }
+.lm-braccio { display:block; height:26px; margin:0 6%; border:solid #cdb07a; border-width:0 0 4px; border-radius:0 0 50% 50% / 0 0 100% 100%; box-shadow:0 3px 0 #8c6c38,0 8px 10px -4px #000a }
+.dress-dots { display:flex; flex-wrap:nowrap; justify-content:center; align-items:flex-start; gap:0; margin:-4px 4% 0 }
+.goccia { display:inline-flex; flex-direction:column; align-items:center; flex:1 1 0; min-width:0; max-width:76px; transform-origin:50% 0 }
+.gc-filo { width:1.5px; height:26px; background:linear-gradient(#cdb07a,#f0dcae) }
+.goccia:nth-child(3n+2) .gc-filo { height:54px } .goccia:nth-child(3n) .gc-filo { height:38px }
+.gc-perla { width:9px; height:9px; margin:-1px 0 9px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,#f0dcae 50%,#8c6c38) }
+.gc-cristallo { display:block; width:30px; height:30px; rotate:45deg; border-radius:4% 52% 52% 52%; background:linear-gradient(135deg,#ffffffb3 0,#ffffff00 32%),linear-gradient(225deg,#0000 50%,#0000004d 50%),linear-gradient(315deg,#ffffff33 0 34%,#0000 34%),var(--c); box-shadow:0 0 0 1px #ffffff59,0 0 14px #ffd9d955,6px 6px 10px #0009 }
+.gc-nome { margin-top:16px; font:400 clamp(7.5px,2.2vw,9.5px)/1.3 var(--caps); letter-spacing:.06em; text-transform:uppercase; color:var(--cipria); white-space:nowrap }
+@media (prefers-reduced-motion:no-preference) {
+  .goccia { animation:pendola 4.6s ease-in-out infinite alternate }
+  .goccia:nth-child(2n) { animation-duration:5.8s; animation-delay:-2s }
+  .goccia:nth-child(3n) { animation-duration:5.2s; animation-delay:-3.4s }
+}
+@keyframes pendola { from { rotate:-3deg } to { rotate:3deg } }
+
+/* Video: in una cornice d'oro. */
+.video-sec .card { padding:0 8px }
+.video-frame { position:relative; max-width:360px; margin:auto; aspect-ratio:9/14; padding:7px; background:var(--oro); box-shadow:0 22px 40px #000a }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--rub); color:var(--perla) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il rubino, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:56px; height:56px; z-index:1000; display:grid; place-items:center; background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 6px 12px #0009; color:#fff; border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:16px; height:16px; fill:currentColor; filter:drop-shadow(0 0 3px #000) }
+
+/* Conferma: un occhio di bue scende dall'alto su una pedana, e nella luce c'è il rubino da toccare. */
+.rsvp-sec .card { padding:0 6px }
+.rsvp-sec .body { max-width:360px; margin:0 auto; font-style:italic; font-size:19px; color:var(--perla) }
+.riflettore { position:relative; width:260px; height:330px; margin:20px auto 6px }
+.rf-faro { position:absolute; left:50%; top:0; width:44px; height:30px; translate:-50% 0; background:linear-gradient(90deg,#0d0204,#4a2a2e 50%,#0d0204); clip-path:polygon(22% 0,78% 0,100% 100%,0 100%); filter:drop-shadow(0 0 2px #cdb07a) }
+.rf-fascio { position:absolute; left:0; right:0; top:28px; bottom:34px; background:linear-gradient(#fff3ef66,#ffd9d92e 60%,#ffd9d914); clip-path:polygon(44% 0,56% 0,100% 100%,0 100%) }
+.rf-pedana { position:absolute; left:6px; right:6px; bottom:6px; height:58px; border-radius:50%; background:radial-gradient(ellipse at 50% 40%,#fff3ef59,#e9c9c426 55%,#0000 72%); box-shadow:inset 0 0 0 1.5px #ffd9d999,0 0 26px #ffd9d966,0 8px 0 -1px #3a0a12 }
+.seal-btn { position:absolute; left:50%; bottom:40px; z-index:1; width:128px; height:128px; translate:-50% 0; display:grid; place-items:center; margin:0; border:0; border-radius:50%; color:var(--perla); background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 14px 20px #000b; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:translateY(-4px) rotate(-6deg) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+@media (prefers-reduced-motion:no-preference) {
+  .seal-btn { animation:scintilla-rubino 3.2s ease-in-out infinite alternate }
+  .rf-fascio { animation:fascio 5s ease-in-out infinite alternate }
+}
+@keyframes scintilla-rubino { from { filter:drop-shadow(0 0 2px #ff8fa000) brightness(1) } to { filter:drop-shadow(0 0 18px #ff6f85cc) brightness(1.15) } }
+@keyframes fascio { from { opacity:.7 } to { opacity:1 } }
+.seal-cue { display:inline-block; color:var(--nero); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase; text-align:center; padding:11px 22px 9px; margin:10px 0 0; background:var(--oro); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--nero); border-left:1px solid var(--nero); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#0d0204e6; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:112px 22px 30px; color:var(--ink); border-radius:2px; box-shadow:0 24px 80px #000c,inset 0 0 0 8px #0000,inset 0 0 0 9px var(--rub); overflow-wrap:anywhere; background:linear-gradient(160deg,#fbf1ec,#f1dcd5) }
+.popup__box::after { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:76px; height:76px; border-radius:50%; background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 6px 12px #3a0a1266 }
+.popup__title { color:var(--rub); font:400 30px/1.15 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--rub); background:#fbf1ec; border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--rub) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 18px/1.4 var(--body); margin-bottom:8px; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffaf8; border-radius:2px; color:var(--ink); padding:12px; font:400 16px/1.4 var(--caps) }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:10px 16px 8px; border:1px solid #7a0f1e80; border-radius:24px; cursor:pointer; font:400 14px/1.3 var(--caps); background:#fffaf8 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; margin-top:-2px; border-radius:50%; border:1px solid var(--rub); background:#fff }
+.radio input:checked+.ind { background:var(--rub); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--rub) }
+.radio:has(input:focus-visible) { outline:3px solid var(--rub); outline-offset:3px }
+.submit { width:100%; min-height:50px; padding:15px 20px 13px; border:0; border-radius:30px; background:var(--rub); color:var(--perla); font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #3a0a1266 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--rub); font:400 13.5px/1.4 var(--caps); font-weight:600; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--rub); box-shadow:0 0 0 3px #7a0f1e1a }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 28px/1.2 var(--display); color:var(--rub) }
+.honey { display:none !important }
+
+/* Firma: il gran finale. Le tende ai lati, una luce dall'alto, i nomi luminosi e la pioggia di glitter che scende. */
+.footer-sec { padding:96px 20px 60px; text-align:center; overflow:hidden; background:radial-gradient(ellipse 70% 60% at 50% 30%,#5c0c1888,#0000),var(--nero) }
+.fn-tenda { position:absolute; top:0; bottom:0; width:clamp(34px,13vw,120px); background:linear-gradient(#17040700 50%,#0d0204cc),var(--pieghe); filter:drop-shadow(0 0 12px #000) }
+.fn-tenda.l { left:0; clip-path:polygon(0 0,100% 0,70% 100%,0 100%) }
+.fn-tenda.r { right:0; clip-path:polygon(0 0,100% 0,100% 100%,30% 100%) }
+.pioggia { position:absolute; inset:0; pointer-events:none }
+.pioggia i { position:absolute; top:-10px; left:var(--x); width:calc(4px * var(--s)); height:calc(4px * var(--s)); border-radius:50%; background:radial-gradient(circle,#fff,#ffb3c0 50%,#0000 72%); box-shadow:0 0 6px #ff8fa0; opacity:0 }
+.footer-in { position:relative; max-width:440px; margin:auto; padding:0 clamp(20px,9vw,40px) }
+.fn-fascio { position:absolute; left:50%; top:-96px; width:300px; height:420px; translate:-50% 0; background:linear-gradient(#fff3ef33,#ffd9d90d 80%,#0000); clip-path:polygon(42% 0,58% 0,100% 100%,0 100%); pointer-events:none }
+.finale-sec .title { font:italic 400 19px/1.4 var(--body); color:var(--cipria); text-shadow:none; margin-bottom:8px }
+.finale-sec .title::after { display:none }
+.fn-nomi { position:relative; font:400 clamp(50px,15vw,84px)/1.08 var(--script); color:#fff; text-shadow:var(--bagliore); text-wrap:balance }
+.fn-data { position:relative; margin-top:20px; font:400 12px/1 var(--caps); letter-spacing:.5em; padding-left:.5em; text-transform:uppercase; color:var(--oro-l) }
+.signature { position:relative; margin-top:20px; font:italic 400 19px/1.5 var(--body); color:var(--cipria) }
+.fn-emblema { position:relative; width:74px; height:auto; margin:26px auto 0 }
+.credits { position:relative; max-width:400px; margin:26px auto 0; padding:0 clamp(20px,9vw,40px); font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:#e9c9c499 }
+@media (prefers-reduced-motion:no-preference) { .pioggia i { animation:cade var(--t) linear var(--r) infinite } }
+@keyframes cade { 0% { opacity:0; transform:translate(0,0) } 10% { opacity:1 } 40% { opacity:.3 } 55% { opacity:1; transform:translate(10px,330px) } 80% { opacity:.4 } 100% { opacity:0; transform:translate(-6px,640px) } }
+
+/* Ingressi: dissolvenze lente. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1s ease,transform 1s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(16px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+}
+@media (min-width:700px) {
+  .sec { padding:90px 40px }
+  .us-grid { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .us-grid figure:nth-child(even) { margin-top:0 }
+  .us-grid figure:nth-child(3n+2) { margin-top:34px }
+  .h-text { left:26%; right:26% }
+  .zone-hero { background-position:center 88% }
+  .zone-hero video { object-position:50% 88% }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

@@ -1,0 +1,25 @@
+<section class="sec date-sec riva-sec">
+  <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+  <div class="riva" data-anim="zoomin" style="--d:.15s">
+    <input class="riva-tg" type="checkbox" id="riva-data">
+    <div class="riva-sabbia">
+      <span class="visually-hidden">{{date.long}}</span>
+      <div class="riva-data" aria-hidden="true">
+        <span class="rv-wd">{{date.weekday}}</span>
+        <span class="rv-day">{{date.day}}</span>
+        <span class="rv-month">{{date.month}}</span>
+        <span class="rv-year">{{date.year}}</span>
+      </div>
+      <span class="rv-dono rv-d1" aria-hidden="true"></span>
+      <span class="rv-dono rv-d2" aria-hidden="true"></span>
+      <span class="rv-dono rv-d3" aria-hidden="true"></span>
+      <span class="rv-bagnato" aria-hidden="true"></span>
+    </div>
+    <label class="riva-onda" for="riva-data">
+      <span class="onda-acqua" aria-hidden="true"></span>
+      <span class="onda-schiuma" aria-hidden="true"></span>
+      <span class="onda-schiuma onda-schiuma-2" aria-hidden="true"></span>
+      <span class="riva-hint"><span class="riva-hint-ico" aria-hidden="true"></span>{{t.revealAll}}</span>
+    </label>
+  </div>
+</section>

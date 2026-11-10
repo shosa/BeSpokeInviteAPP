@@ -1,0 +1,13 @@
+<section class="footer-sec polvere-sec">
+  <div class="polvere" aria-hidden="true"><i style="--x:8%;--y:20%;--t:4s;--r:0s"></i><i style="--x:22%;--y:70%;--t:5s;--r:1.2s"></i><i style="--x:35%;--y:12%;--t:4.5s;--r:2.4s"></i><i style="--x:64%;--y:82%;--t:5.5s;--r:.6s"></i><i style="--x:78%;--y:28%;--t:4s;--r:1.8s"></i><i style="--x:90%;--y:60%;--t:5s;--r:3s"></i><i style="--x:50%;--y:92%;--t:4.8s;--r:2s"></i><i style="--x:14%;--y:45%;--t:5.2s;--r:3.6s"></i><i style="--x:86%;--y:8%;--t:4.4s;--r:.3s"></i><i style="--x:58%;--y:6%;--t:5.6s;--r:2.8s"></i></div>
+  <div class="footer-in">
+    <div class="fn-arco" data-anim="fadein">
+      <img class="fn-emblema" src="assets/emblema.webp" alt="" aria-hidden="true">
+      <h2 class="title">{{t.footerTitle}}</h2>
+      <div class="fn-nomi">{{title}}</div>
+      <div class="fn-data">{{date.day}} · {{date.monthShort}} · {{date.year}}</div>
+    </div>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

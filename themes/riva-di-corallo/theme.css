@@ -1,0 +1,345 @@
+/* Riva di corallo. Matrimonio al mare d'estate: carta di cotone azzurro polvere, sabbia calda come fondo,
+   corallo bianco e ceralacca avorio. Conchiglie incise a linea sottile, mai in rilievo. */
+:root {
+  --bk-cover:#aebfcc;
+  --sand:#e8d7bd; --sand-soft:#f2e7d6; --sand-deep:#cdb491; --sand-groove:#a58a64;
+  --powder:#b4c4cf; --powder-soft:#d3dde4; --powder-deep:#7d95a7; --sea:#93abbc;
+  --ivory:#fbf7ef; --coral:#f5efe4;
+  --ink:#364857; --muted:#5d6c78; --accent:#6c8496; --line:#cfd8de;
+  --panel:rgba(251,247,239,.92);
+  --display:'Bellefair','Spectral',Georgia,serif; --serif:'Spectral',Georgia,serif;
+  --script:'Mrs Saint Delafield','Spectral',cursive; --body:'Figtree',system-ui,sans-serif;
+  --card:600px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--sand) }
+/* Il fondo è la sabbia calda; il cartoncino azzurro resta nell'intestazione. */
+body { margin:0; color:var(--ink); background:transparent; font:16px/1.75 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:radial-gradient(120% 70% at 50% 0%,#fbf3e6aa,#fbf3e600 60%),var(--sand) url(assets/sabbia.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--accent); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--powder-deep); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:48px 16px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+/* Titoli: maiuscoletto Bellefair, inchiostro azzurro scuro, con il filetto e la piccola capasanta incisi. */
+.title { position:relative; margin:0 0 24px; font:400 clamp(25px,7.2vw,38px)/1.25 var(--display); letter-spacing:.2em; padding-left:.2em; text-transform:uppercase; color:var(--ink); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:min(220px,64%); height:30px; margin:8px auto 0; background:url(assets/c-divisore.png) center/contain no-repeat; opacity:.9 }
+.body,.lettera { margin:0; font-size:15px; line-height:1.9; text-wrap:pretty }
+.orn { width:150px; max-width:52%; height:auto; margin:26px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:min(260px,72%); height:auto; margin:0 auto 14px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+/* La carta azzurro polvere dei biglietti (location, come arrivare, video, popup). */
+.loc-sec .card,.shuttle-sec .card,.video-sec .card { background:radial-gradient(120% 60% at 30% 0%,#ffffff33,#ffffff00 60%),var(--powder) url(assets/carta.jpg) center/cover; border-radius:3px; box-shadow:0 1px 0 #ffffff80 inset,0 18px 34px #6e553324,0 3px 6px #6e55331f }
+
+/* Busta-video: dietro, il cartoncino azzurro. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--powder) url(assets/sfondo-fermo.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:400 18px/1.3 var(--display); letter-spacing:.16em; text-transform:uppercase; color:var(--ink); background:var(--panel); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--powder)); border-radius:3px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--powder-deep)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:84%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 26px; max-width:85vw; background:var(--panel); border-radius:40px; text-align:center; box-shadow:0 10px 26px #364a5a2e }
+[data-cover-label] { color:var(--ink); font:500 12px/1.2 var(--body); letter-spacing:.2em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--accent); border-top:1px solid var(--accent); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: i nomi in calligrafia, al centro del cartoncino con le conchiglie incise. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,920px); margin:0; padding:0; background:var(--powder) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+.hero-scene::before,.hero-scene::after,.h-vista,.hero-fl { display:none }
+.h-text { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:26% 13% 34%; text-align:center; background:radial-gradient(ellipse 44% 24% at 50% 48%,#e3ebf099,#e3ebf000) }
+.h-text > div { max-width:100% }
+.occasion { order:-1; margin:0; font:400 15px/1.3 var(--display); letter-spacing:.34em; padding-left:.34em; text-transform:uppercase; color:var(--ink) }
+.occasion::after { content:""; display:block; width:58px; height:46px; margin:14px auto 0; background:url(assets/c-capasanta.png) center/contain no-repeat; opacity:.85 }
+.names { font:400 clamp(58px,17vw,96px)/1.05 var(--script); color:#2f4150; text-wrap:balance; padding:0 .1em; text-shadow:0 0 18px #e6eef2 }
+.welcome { margin:6px 0 0; font:italic 300 17px/1.6 var(--serif); color:var(--ink) }
+.scroll-cue { position:relative; z-index:2; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--ink); font-size:11px; letter-spacing:.2em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-92px }
+.scroll-cue span { display:inline-block; padding:8px 18px; background:var(--panel); border-radius:30px }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid; border-bottom:1px solid; transform:rotate(45deg) }
+
+/* ============ La data sulla battigia ============
+   Il tema sostituisce la data da grattare. Dall'alto si vede la riva: il mare copre la sabbia
+   e la schiuma va e viene. Al tocco (una casella nascosta, niente script) l'onda arriva un po' più su,
+   poi si ritira e lascia la sabbia bagnata con la data tracciata come con un dito,
+   e qualche conchiglia e un rametto di corallo portati dalla marea. */
+.riva-sec { text-align:center }
+.riva { position:relative; isolation:isolate; max-width:420px; margin:4px auto 10px; aspect-ratio:4/5; border-radius:4px; overflow:hidden; box-shadow:0 0 0 6px var(--ivory),0 0 0 7px var(--line),0 22px 40px #6e553333 }
+.riva-tg { position:absolute; left:0; bottom:0; width:1px; height:1px; opacity:0; margin:0 }
+.riva-sabbia { position:absolute; inset:0; z-index:0; background:radial-gradient(90% 60% at 50% 60%,#fff6e940,#fff6e900),var(--sand) url(assets/sabbia.jpg) center/180% auto }
+.riva-data { position:absolute; inset:16% 6% 8%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0 }
+/* La scrittura è un solco nella sabbia: un po' più scura, con la luce sul bordo basso. */
+.riva-data > * { position:relative; color:var(--sand-groove); text-shadow:0 1px 0 #fff8eccc,0 -1px 1px #7a603e66 }
+.rv-wd { font:500 12px/1 var(--body); letter-spacing:.42em; padding-left:.42em; text-transform:uppercase }
+.rv-day { font:400 clamp(118px,37vw,170px)/.95 var(--display); margin-top:10px }
+.rv-month { font:400 clamp(48px,14vw,70px)/1 var(--script); margin-top:-6px; padding:0 .15em }
+.rv-year { font:500 14px/1 var(--body); letter-spacing:.6em; padding-left:.6em; margin-top:14px }
+/* I doni della marea. */
+.rv-dono { position:absolute; z-index:3; pointer-events:none; background:center/contain no-repeat; --r:0deg; transform:rotate(var(--r)) }
+.rv-d1 { width:23%; aspect-ratio:1.8; right:6%; bottom:6%; background-image:url(assets/corallo-piccolo.webp); --r:-14deg; filter:brightness(1.12) drop-shadow(2px 4px 3px #6e553366) }
+.rv-d2 { width:13%; aspect-ratio:1; left:8%; bottom:11%; background-image:url(assets/c-capasanta-avorio.png); --r:18deg; filter:drop-shadow(0 1px 0 #7a603ecc) drop-shadow(0 0 1px #7a603e80) }
+.rv-d3 { width:15%; aspect-ratio:1.25; left:10%; top:27%; background-image:url(assets/c-murice-avorio.png); --r:-28deg; filter:drop-shadow(0 1px 0 #7a603ecc) drop-shadow(0 0 1px #7a603e80) }
+.rv-bagnato { position:absolute; inset:0; z-index:2; pointer-events:none; background:linear-gradient(180deg,#7f6a4fb3 0%,#8e7859a0 55%,#9c856570 82%,#9c856500 100%); mix-blend-mode:multiply; opacity:0 }
+/* L'onda: acqua azzurro polvere trasparente verso la riva e un bordo di schiuma. */
+.riva-onda { position:absolute; inset:0; z-index:4; display:block; cursor:pointer }
+.onda-acqua { position:absolute; inset:0 0 18px; background:radial-gradient(120% 30% at 30% 20%,#ffffff2e,#ffffff00 70%),repeating-radial-gradient(ellipse 90px 20px at 40% 0,#ffffff00 0 14px,#ffffff12 15px 16px,#ffffff00 17px 30px),linear-gradient(180deg,#7f99acf5 0%,#94adbdf0 45%,#adc3d0e0 78%,#d3e1e7c4 100%) }
+.onda-schiuma { position:absolute; left:-12%; right:-12%; bottom:-6px; height:46px; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'%3E%3Cpath d='M0 0H200V20C190 31 177 24 166 31S141 41 129 31 105 27 93 35 67 39 56 29 31 25 19 33 6 30 0 24Z' fill='%23fffdf8' fill-opacity='.92'/%3E%3Cpath d='M0 0H200V12C181 19 161 13 141 19S101 23 81 17 41 21 0 13Z' fill='%23ffffff' fill-opacity='.7'/%3E%3Cg fill='%23fffdf8' fill-opacity='.85'%3E%3Ccircle cx='24' cy='37' r='1.6'/%3E%3Ccircle cx='62' cy='40' r='1.2'/%3E%3Ccircle cx='110' cy='38' r='1.8'/%3E%3Ccircle cx='150' cy='39' r='1.1'/%3E%3Ccircle cx='183' cy='34' r='1.5'/%3E%3C/g%3E%3C/svg%3E") 0 0/230px 100% repeat-x; filter:blur(.4px) drop-shadow(0 3px 2px #7f6a4f40) }
+.onda-schiuma-2 { bottom:4px; height:34px; opacity:.55; background-size:230px 100%; background-position:90px 0; filter:blur(1.2px) }
+.riva-hint { position:absolute; left:50%; top:46%; translate:-50% -50%; display:inline-flex; align-items:center; gap:10px; max-width:86%; padding:10px 20px; font:500 12px/1.3 var(--body); letter-spacing:.18em; text-transform:uppercase; color:var(--ink); background:var(--panel); border-radius:40px; box-shadow:0 8px 20px #364a5a33; white-space:nowrap }
+.riva-hint-ico { flex:none; width:22px; height:22px; background:url(assets/c-capasanta.png) center/contain no-repeat }
+.riva-tg:focus-visible ~ .riva-onda .riva-hint { outline:3px solid var(--powder-deep); outline-offset:3px }
+/* Senza movimento: al tocco l'acqua sparisce e la data è subito scritta. */
+.riva-data > *,.rv-dono { opacity:0 }
+.riva-tg:checked ~ .riva-onda { opacity:0; pointer-events:none }
+.riva-tg:checked ~ .riva-sabbia .riva-data > *,.riva-tg:checked ~ .riva-sabbia .rv-dono { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .riva-onda { animation:respiro 3.6s ease-in-out infinite alternate }
+  .onda-schiuma { animation:spuma 7s linear infinite }
+  .onda-schiuma-2 { animation-duration:12s; animation-direction:reverse }
+  .riva-tg:checked ~ .riva-onda { animation:risacca 3.2s cubic-bezier(.45,0,.25,1) both }
+  .riva-tg:checked ~ .riva-onda .onda-acqua { animation:lambisce 4.5s ease-in-out 3.2s infinite alternate }
+  .riva-tg:checked ~ .riva-onda .onda-schiuma { animation:spuma 7s linear infinite,lambisce 4.5s ease-in-out 3.2s infinite alternate }
+  .riva-tg:checked ~ .riva-onda .riva-hint { animation:svanisce .5s ease both }
+  .riva-tg:checked ~ .riva-sabbia .rv-bagnato { animation:asciuga 5s ease-out .9s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-wd { animation:traccia 1s ease-out 1.5s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-day { animation:traccia 1.3s cubic-bezier(.5,0,.4,1) 1.8s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-month { animation:traccia 1.5s cubic-bezier(.5,0,.4,1) 2.6s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-year { animation:traccia 1s ease-out 3.4s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-d1 { animation:deposito 1.4s ease-out 1.1s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-d2 { animation:deposito 1.4s ease-out 1.3s both }
+  .riva-tg:checked ~ .riva-sabbia .rv-d3 { animation:deposito 1.4s ease-out 2s both }
+}
+@keyframes respiro { from { transform:translateY(-2%) } to { transform:translateY(-9%) } }
+@keyframes spuma { from { background-position-x:0 } to { background-position-x:230px } }
+@keyframes risacca { 0% { opacity:1; transform:translateY(-6%) } 20% { opacity:1; transform:translateY(4%) } 100% { opacity:1; transform:translateY(-84%) } }
+@keyframes lambisce { from { translate:0 0 } to { translate:0 9% } }
+@keyframes svanisce { to { opacity:0; visibility:hidden } }
+@keyframes asciuga { 0% { opacity:1 } 100% { opacity:.18 } }
+@keyframes traccia { from { opacity:1; clip-path:inset(-40% 100% -40% -12%) } to { opacity:1; clip-path:inset(-40% -12% -40% -12%) } }
+@keyframes deposito { from { opacity:0; transform:translateY(-18px) rotate(calc(var(--r) - 20deg)) } 60% { opacity:1 } to { opacity:1; transform:rotate(var(--r)) } }
+
+/* Conto alla rovescia: quattro ciottoli levigati dal mare, coi numeri incisi. */
+.ciottoli-sec { padding-top:30px; padding-bottom:30px }
+.ciottoli-in { max-width:520px; margin:auto; text-align:center }
+.ciottoli-orn { display:block; width:62px; height:52px; margin:0 auto 18px; background:url(assets/c-nautilo.png) center/contain no-repeat }
+.ciottoli { display:flex; justify-content:center; align-items:flex-start; gap:clamp(6px,2.4vw,16px) }
+.ciottolo { flex:1 1 0; min-width:0; max-width:112px; text-align:center }
+.ciottolo:nth-child(even) { margin-top:16px }
+.number-wrap { display:grid; place-items:center; aspect-ratio:1.12; width:100%; border-radius:54% 46% 52% 48% / 58% 52% 48% 42%; background:radial-gradient(ellipse at 34% 28%,#fbf9f5,#e2ddd5 52%,#bfb7ab); box-shadow:inset -5px -8px 12px #5a4a3426,inset 5px 6px 9px #ffffffb3,0 9px 12px #6e553340,0 2px 3px #6e553330 }
+.ciottolo:nth-child(2) .number-wrap { border-radius:46% 54% 44% 56% / 50% 46% 54% 50%; rotate:6deg; background:radial-gradient(ellipse at 34% 28%,#eef2f4,#c3cfd7 55%,#97a8b4) }
+.ciottolo:nth-child(3) .number-wrap { border-radius:58% 42% 55% 45% / 46% 56% 44% 54%; rotate:-5deg; background:radial-gradient(ellipse at 34% 28%,#f8efe1,#dcc8a9 55%,#bba07a) }
+.ciottolo:nth-child(4) .number-wrap { border-radius:50% 50% 42% 58% / 56% 44% 56% 44%; rotate:4deg }
+.number { display:block; rotate:0deg; font:400 clamp(24px,7vw,36px)/1 var(--display); color:#4a5a66; text-shadow:0 1px 0 #ffffffb3,0 -1px 0 #3a2c1a33; transition:opacity .18s }
+.ciottolo:nth-child(2) .number { rotate:-6deg }
+.ciottolo:nth-child(3) .number { rotate:5deg }
+.ciottolo:nth-child(4) .number { rotate:-4deg }
+.label { margin-top:10px; font:500 10px/1.2 var(--body); letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+.number.flip-out,.number.flip-in { opacity:.55 }
+
+/* Messaggio: una cartolina dalla riva, col francobollo della capasanta e il timbro a onde. */
+.cartolina-sec { padding-top:36px }
+.cartolina { position:relative; max-width:560px; margin:auto; padding:34px clamp(22px,6vw,44px) 40px; text-align:left; background:linear-gradient(#fffdf8,#f7f1e6); border-radius:2px; box-shadow:0 1px 0 #fff inset,0 20px 40px #6e553333,0 3px 6px #6e553326; rotate:-1.2deg }
+.cartolina::before { content:""; position:absolute; inset:10px; border:1px solid var(--line); pointer-events:none }
+.cart-francobollo { position:relative; float:right; width:78px; height:94px; margin:0 0 10px 16px; rotate:4deg; background:radial-gradient(circle,#0000 3.2px,#fbf8f1 3.6px) -5px -5px/10px 10px; filter:drop-shadow(0 2px 2px #6e553333) }
+.cart-francobollo span { position:absolute; inset:6px; background:url(assets/c-capasanta.png) center 42%/62% no-repeat,linear-gradient(#c6d4dd,#aebfcb); box-shadow:inset 0 0 0 3px #fbf8f1 }
+.cart-timbro { position:absolute; top:46px; right:22px; width:104px; height:60px; opacity:.5; pointer-events:none; rotate:-8deg;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 112 64' fill='none' stroke='%235d7385' stroke-width='1.2'%3E%3Ccircle cx='30' cy='32' r='24'/%3E%3Ccircle cx='30' cy='32' r='19'/%3E%3Cpath d='M58 20c6-4 12 4 18 0s12 4 18 0 12 4 18 0M58 32c6-4 12 4 18 0s12 4 18 0 12 4 18 0M58 44c6-4 12 4 18 0s12 4 18 0 12 4 18 0'/%3E%3C/svg%3E") center/contain no-repeat }
+.cartolina .title { text-align:left; padding-left:0; font-size:clamp(23px,6.4vw,32px); letter-spacing:.14em; margin:6px 0 18px }
+.cartolina .title::after { margin-left:0 }
+.lettera { font:italic 300 18px/1.85 var(--serif); color:var(--ink); clear:none }
+.cart-righe { clear:both; height:56px; margin-top:22px; background:repeating-linear-gradient(#0000 0 27px,var(--line) 27px 28px); mask:linear-gradient(90deg,#0000 0 45%,#000 45%); -webkit-mask:linear-gradient(90deg,#0000 0 45%,#000 45%) }
+
+/* Galleria: polaroid sparse sulla sabbia, con un rametto di corallo appoggiato. */
+.polaroid-sec { padding-inline:12px }
+.polaroid-spiaggia { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 10px; max-width:560px; margin:14px auto 0; padding:8px 4px 20px }
+.polaroid { position:relative; margin:0; padding:8px 8px 30px; background:#fffdf9; box-shadow:0 14px 22px #6e553338,0 2px 4px #6e553326; rotate:-4deg }
+.polaroid:nth-of-type(2) { rotate:3.5deg; margin-top:26px }
+.polaroid:nth-of-type(3) { rotate:2deg; margin-top:-10px }
+.polaroid:nth-of-type(4) { rotate:-3deg; margin-top:10px }
+.polaroid:nth-of-type(5) { rotate:-1.5deg; margin-top:-12px }
+.polaroid:nth-of-type(6) { rotate:4.5deg; margin-top:6px }
+.polaroid img { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:0 !important; filter:saturate(.92) }
+.pol-corallo { position:absolute; z-index:2; right:-6px; bottom:-14px; width:150px; aspect-ratio:1.8; background:url(assets/corallo-piccolo.webp) center/contain no-repeat; rotate:-18deg; filter:drop-shadow(3px 6px 4px #6e553355); pointer-events:none }
+
+/* Immagine: una stampa grande con la didascalia scritta a mano. */
+.img-sec { padding-inline:20px }
+.img-block { position:relative; max-width:520px; margin-inline:auto !important; padding:12px 12px 16px; background:#fffdf9; box-shadow:0 16px 30px #6e553333; rotate:1.2deg }
+.img-block::after { content:""; position:absolute; top:-26px; left:-18px; width:96px; height:120px; background:url(assets/corallo-alto.webp) center/contain no-repeat; rotate:-24deg; filter:drop-shadow(2px 5px 4px #6e553350); pointer-events:none }
+.img-block img { border-radius:0 !important }
+.img-block figcaption { padding:12px 6px 0; color:var(--ink); opacity:1 !important; font:italic 300 17px/1.5 var(--serif) !important }
+
+/* Programma: la linea della battigia, sinuosa; ogni tappa è una conchiglia sul bordo della schiuma. */
+.battigia-sec { padding-inline:10px }
+.battigia { position:relative; isolation:isolate; max-width:520px; margin:10px auto 0; padding:26px 0 30px }
+.battigia-mare { position:absolute; inset:0; z-index:-1; pointer-events:none; -webkit-mask:linear-gradient(#0000,#000 9%,#000 91%,#0000); mask:linear-gradient(#0000,#000 9%,#000 91%,#0000);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 200' preserveAspectRatio='none'%3E%3Cpath d='M50 0C63 50 37 50 50 100S37 150 50 200H100V0Z' fill='%23c3d3de' fill-opacity='.92'/%3E%3Cpath d='M56 0C69 50 43 50 56 100S43 150 56 200H100V0Z' fill='%23a9bfcd' fill-opacity='.75'/%3E%3Cpath d='M50 0C63 50 37 50 50 100S37 150 50 200' fill='none' stroke='%23fffdf8' stroke-width='4' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M47 0C60 50 34 50 47 100S34 150 47 200' fill='none' stroke='%23fffdf8' stroke-opacity='.6' stroke-width='1.5' stroke-dasharray='2 5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") 0 0/100% 260px repeat-y }
+.tappa { position:relative; display:grid; grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr); align-items:center; min-height:122px }
+.tappa-conchiglia { grid-column:2; grid-row:1; width:70px; height:70px; margin:auto; border-radius:50%; background:url(assets/c-capasanta.png) center/66% no-repeat,radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf); box-shadow:0 0 0 1px var(--line),0 0 0 5px #fffdf899,0 8px 14px #6e553333 }
+.tappa:nth-of-type(8n+2) .tappa-conchiglia { background-image:url(assets/c-murice.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf); background-size:74%,auto }
+.tappa:nth-of-type(8n+3) .tappa-conchiglia { background-image:url(assets/c-stella.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf) }
+.tappa:nth-of-type(8n+4) .tappa-conchiglia { background-image:url(assets/c-nautilo.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf); background-size:70%,auto }
+.tappa:nth-of-type(8n+5) .tappa-conchiglia { background-image:url(assets/c-cuore.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf) }
+.tappa:nth-of-type(8n+6) .tappa-conchiglia { background-image:url(assets/c-conca.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf); background-size:78%,auto }
+.tappa:nth-of-type(8n+7) .tappa-conchiglia { background-image:url(assets/c-ciprea.png),radial-gradient(circle at 40% 35%,#fffdf8,#f2ebdf) }
+.tappa-testo { grid-column:1; grid-row:1; padding:0 14px 0 6px; text-align:right }
+.tappa:nth-of-type(even) .tappa-testo { grid-column:3; text-align:left; padding:0 6px 0 14px }
+.t-time { color:var(--ink); font:400 25px/1.1 var(--display); letter-spacing:.08em }
+.t-name { margin-top:4px; font:italic 300 15.5px/1.45 var(--serif); color:var(--ink) }
+
+/* Location: la villa in una finestra ad arco, sul biglietto azzurro. */
+.loc-sec .card { padding:40px 20px 30px }
+.loc-name { font:400 30px/1.25 var(--display); letter-spacing:.06em; color:var(--ink); margin-bottom:8px }
+.loc-addr { color:var(--ink); font-size:13px; opacity:.85 !important }
+.loc-photo { width:min(100%,340px); margin:26px auto 0; aspect-ratio:3/4; object-fit:cover; border-radius:999px 999px 3px 3px !important; border:8px solid #fffdf8; box-shadow:0 14px 26px #364a5a33 }
+
+/* Mappa: cartolina chiara, coi colori smorzati. */
+.map-sec { padding-inline:18px }
+.map-frame { position:relative; max-width:600px; margin:auto; padding:10px; background:#fffdf9; box-shadow:0 14px 28px #6e553333 }
+.map-frame iframe { width:100%; height:300px; border:0; filter:grayscale(.6) sepia(.15) brightness(1.04) }
+.map-fl { width:120px; height:auto; right:-10px; top:-34px; bottom:auto; z-index:1; rotate:12deg }
+
+/* Come arrivare: un biglietto del traghetto con la matrice staccabile. */
+.shuttle-sec .card { padding:26px 22px 24px 54px; text-align:left; background:linear-gradient(90deg,#fffdf8 0 34px,#0000 34px),radial-gradient(120% 60% at 30% 0%,#ffffff33,#ffffff00 60%),var(--powder) url(assets/carta.jpg) center/cover }
+.shuttle-sec .card::before { content:""; position:absolute; top:10px; bottom:10px; left:34px; border-left:2px dotted var(--powder-deep); opacity:.6 }
+.shuttle-sec .card::after { content:""; position:absolute; top:50%; left:4px; width:26px; height:26px; translate:0 -50%; background:url(assets/c-stella.png) center/contain no-repeat }
+.shuttle-sec .title { text-align:left; padding-left:0; font-size:24px; letter-spacing:.16em }
+.shuttle-sec .title::after { margin-left:0 }
+.shuttle-box .body { font:italic 300 17px/1.7 var(--serif) }
+
+/* Dress code: un campionario di tessuti col bordo a zigzag e il cartellino. */
+.campionario { max-width:560px; margin:auto; text-align:center }
+.dress { font:italic 300 20px/1.5 var(--serif); color:var(--ink); margin:0 auto 26px; max-width:440px }
+.campioni { display:flex; flex-wrap:wrap; justify-content:center; gap:18px 14px }
+.campione { position:relative; margin:0; width:clamp(74px,21vw,100px); rotate:-3deg }
+.campione:nth-child(even) { rotate:3deg; margin-top:12px }
+.tessuto { display:block; aspect-ratio:3/4; background:repeating-linear-gradient(0deg,#ffffff14 0 1px,#0000 1px 3px),repeating-linear-gradient(90deg,#0000000d 0 1px,#0000 1px 3px),linear-gradient(160deg,#ffffff38,#0000 45%,#00000014),var(--c);
+  -webkit-mask:conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/10px 51% repeat-x,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/10px 51% repeat-x;
+  mask:conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/10px 51% repeat-x,conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/10px 51% repeat-x;
+  filter:drop-shadow(0 6px 6px #6e553333) }
+.campione::before { content:""; position:absolute; z-index:1; top:7px; left:50%; width:7px; height:7px; translate:-50% 0; border-radius:50%; background:radial-gradient(circle at 35% 35%,#fff,#cfc6b8); box-shadow:0 2px 2px #0003 }
+.campione figcaption { margin-top:8px; padding:4px 6px; background:#fffdf8; font:500 10.5px/1.3 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); box-shadow:0 3px 6px #6e553326 }
+
+/* Video: finestra sul mare. */
+.video-sec .card { padding:26px 16px 22px }
+.video-frame { position:relative; overflow:hidden; border:8px solid #fffdf8; background:var(--powder-soft); aspect-ratio:9/14; box-shadow:0 10px 22px #364a5a33 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--ivory); color:var(--ink) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+.video-sec .orn { margin-top:22px }
+
+/* Musica: il sigillo avorio, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:var(--ink); border:0; border-radius:50%; filter:drop-shadow(0 6px 8px #364a5a44); visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor; filter:drop-shadow(0 0 3px #fbf7ef) }
+
+/* Conferma: una busta di risposta azzurra, aperta, col biglietto dentro e il sigillo della busta. */
+.risposta-sec { text-align:center }
+.risposta-sec .body { max-width:360px; margin:0 auto; font:italic 300 18px/1.7 var(--serif) }
+.risposta { position:relative; width:min(330px,86vw); aspect-ratio:1/1.02; margin:30px auto 8px }
+.rs-fondo,.rs-tasca,.rs-aletta { position:absolute; left:0; right:0; pointer-events:none }
+.rs-fondo { bottom:0; height:64%; background:linear-gradient(#93a9b8,#a6b9c6); border-radius:3px }
+.rs-aletta { bottom:64%; height:34%; background:linear-gradient(0deg,#9fb3c1,#b5c5d0); clip-path:polygon(0 100%,50% 0,100% 100%); filter:drop-shadow(0 -1px 0 #ffffff60) }
+.rs-biglietto { position:absolute; left:9%; right:9%; top:16%; height:62%; display:flex; flex-direction:column; align-items:center; padding-top:18px; background:linear-gradient(#fffdf8,#f6f0e5); box-shadow:0 4px 10px #364a5a26 }
+.rs-conchiglia { width:44px; height:40px; background:url(assets/c-capasanta.png) center/contain no-repeat }
+.rs-nomi { margin-top:4px; font:400 clamp(30px,9vw,40px)/1.1 var(--script); color:var(--ink); padding:0 8px }
+.rs-tasca { bottom:0; height:64%; background:radial-gradient(120% 70% at 50% 100%,#ffffff26,#ffffff00 60%),var(--powder) url(assets/carta.jpg) center/cover; clip-path:polygon(0 0,50% 50%,100% 0,100% 100%,0 100%); border-radius:0 0 3px 3px; filter:drop-shadow(0 -2px 3px #364a5a33) }
+.rs-tasca { box-shadow:0 20px 34px #6e553333 }
+.risposta::after { content:""; position:absolute; inset:auto 0 0; height:64%; box-shadow:0 22px 34px #6e553338,0 3px 6px #6e553326; border-radius:3px; z-index:-1 }
+.rs-corallo { position:absolute; z-index:3; left:50%; top:calc(36% + 32% - 4px); width:84px; aspect-ratio:1.8; translate:-92% 0; background:url(assets/corallo-piccolo.webp) center/contain no-repeat; rotate:-22deg; pointer-events:none; filter:drop-shadow(1px 4px 3px #364a5a40) }
+.seal-btn { position:absolute; z-index:4; left:50%; top:68%; width:112px; height:112px; translate:-50% -50%; display:grid; place-items:center; margin:0; border:0; border-radius:50%; color:var(--ink); background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 10px 10px #364a5a4d); transition:transform .3s ease, filter .3s ease }
+.seal-btn:hover { transform:translateY(-2px) rotate(-4deg); filter:drop-shadow(0 14px 14px #364a5a4d) drop-shadow(0 0 18px #ffffff) }
+/* Il monogramma resta per gli screen reader; a vista c'è la capasanta nella ceralacca. */
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--ink); font:500 11px/1.3 var(--body); letter-spacing:.16em; text-transform:uppercase; text-align:center; padding:9px 18px; margin:22px 0 10px; background:var(--panel); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid; border-left:1px solid; transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#2c3b46c7; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:clamp(76px,20vw,96px) 22px 30px; background:linear-gradient(#fffdf8,#f7f1e6); border-radius:3px; box-shadow:0 20px 80px #1a242c55; overflow-wrap:anywhere }
+.popup__box::before { content:""; position:absolute; top:20px; left:50%; translate:-50% 0; width:66px; height:56px; background:url(assets/c-capasanta.png) center/contain no-repeat }
+.popup__box::after { content:""; position:absolute; inset:10px; border:1px solid var(--line); pointer-events:none }
+.popup__title { color:var(--ink); font:400 26px/1.3 var(--display); letter-spacing:.14em; text-transform:uppercase; text-align:center; margin:0 10px 28px }
+.popup__close { position:absolute; right:16px; top:16px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:#fffdf8; border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--ink) }
+.form { position:relative; z-index:1; display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font-size:14px; margin-bottom:8px; font-weight:500; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fff; border-radius:10px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:24px; cursor:pointer; font-size:14px; background:#fff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--accent); background:#fff }
+.radio input:checked+.ind { background:var(--powder-deep); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--powder-deep); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:0; border-radius:40px; background:var(--ink); color:var(--ivory); font-size:13px; letter-spacing:.16em; text-transform:uppercase }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--ink); font-weight:600; font-size:13px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--ink); box-shadow:0 0 0 3px var(--powder-soft) }
+.success { position:relative; z-index:1; display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 28px var(--display); letter-spacing:.08em; color:var(--ink) }
+.honey { display:none !important }
+
+/* Firma: la risacca in fondo alla pagina, il sigillo col corallo e la firma in calligrafia. */
+.risacca-sec { isolation:isolate; overflow:hidden; max-width:none; padding:56px 22px 150px; text-align:center }
+.footer-in { position:relative; z-index:1; max-width:480px; margin:auto }
+.footer-sigillo { display:block; width:150px; aspect-ratio:560/506; margin:0 auto 18px; background:url(assets/sigillo-corallo.webp) center/contain no-repeat; filter:drop-shadow(0 10px 10px #6e553340) }
+.footer-in .title { font-size:24px }
+.signature { font:400 clamp(44px,12vw,58px)/1.2 var(--script); color:var(--ink) }
+.credits { margin:22px auto 0; padding:8px 16px; display:inline-block; background:var(--panel); border-radius:30px; font-size:12px; color:var(--muted) }
+.risacca-corallo { top:40px; width:96px; height:170px; background:url(assets/corallo-alto.webp) center/contain no-repeat; opacity:.95; filter:drop-shadow(2px 6px 4px #6e553340) }
+.risacca-corallo.l { left:4%; rotate:-14deg; transform:none }
+.risacca-corallo.r { right:4%; rotate:16deg; transform:scaleX(-1) }
+.risacca { position:absolute; left:0; right:0; bottom:0; height:130px; z-index:0; pointer-events:none }
+.risacca span { position:absolute; left:0; width:200%; bottom:0; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath d='M0 22C50 4 100 4 150 20S250 40 300 22 375 6 400 22V60H0Z' fill='%23b2c5d1'/%3E%3Cpath d='M0 22C50 4 100 4 150 20S250 40 300 22 375 6 400 22' fill='none' stroke='%23fffdf8' stroke-opacity='.9' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/50% 100% repeat-x }
+.risacca .ris-1 { height:120px; opacity:.4 }
+.risacca .ris-2 { height:88px; opacity:.7; background-position:120px 0 }
+.risacca .ris-3 { height:56px; opacity:.85; background-position:60px 0 }
+
+/* Ingressi: dissolvenze leggere; i rametti di corallo oscillano piano, come nell'acqua. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .9s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  [data-anim="fadeinup"] { translate:0 14px; transition-property:opacity,translate }
+  [data-anim="fadeinup"].in { translate:0 0 }
+  img[data-anim="zoomin"] { transform:scale(.97); transition-property:opacity,transform }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .risacca .ris-1 { animation:marea 14s linear infinite,onda 5s ease-in-out infinite alternate }
+  .risacca .ris-2 { animation:marea 10s linear infinite reverse,onda 4s ease-in-out -1s infinite alternate }
+  .risacca .ris-3 { animation:marea 8s linear infinite,onda 3.4s ease-in-out -2s infinite alternate }
+  .risacca-corallo,.pol-corallo { animation:sway 6s ease-in-out infinite alternate }
+  .risacca-corallo.r { animation-delay:-3s }
+}
+@keyframes marea { to { translate:-50% 0 } }
+@keyframes onda { from { transform:translateY(0) } to { transform:translateY(14px) } }
+@keyframes sway { from { rotate:var(--sw1,-16deg) } to { rotate:var(--sw2,-10deg) } }
+.risacca-corallo.r { --sw1:13deg; --sw2:19deg }
+.pol-corallo { --sw1:-20deg; --sw2:-15deg }
+
+@media (min-width:700px) {
+  .sec { padding:64px 40px }
+  .h-text { padding:22% 22% 28% }
+  .names { font-size:110px }
+  .polaroid-spiaggia { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 18px }
+  .popup__box { padding-inline:42px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label { opacity:1 !important; transform:none !important; translate:none !important }
+  .seal-btn:hover { transform:none }
+}

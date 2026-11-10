@@ -1,0 +1,10 @@
+{{#hasPhotos}}
+<section class="sec us-sec ottagoni-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="us-grid" data-anim="fadein" style="--d:.1s">
+      {{#photos}}<figure><img src="{{.}}" loading="lazy" decoding="async" alt=""></figure>{{/photos}}
+    </div>
+  </div>
+</section>
+{{/hasPhotos}}

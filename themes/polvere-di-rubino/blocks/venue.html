@@ -1,0 +1,16 @@
+<section class="sec loc-sec palchetto-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="palchetto" data-anim="fadeinup" style="--d:.1s">
+      {{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}
+      <i class="pc-tenda l" aria-hidden="true"></i><i class="pc-tenda r" aria-hidden="true"></i>
+      <i class="pc-mantovana" aria-hidden="true"></i>
+      <i class="pc-balaustra" aria-hidden="true"></i>
+    </div>
+    <div class="pc-targa" data-anim="fadeinup" style="--d:.2s">
+      <div class="loc-name">{{venue | lines}}</div>
+      {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

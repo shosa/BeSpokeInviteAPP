@@ -1,0 +1,16 @@
+<section class="sec date-sec doratura-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="dg" data-anim="fadein" style="--d:.15s">
+      <input class="dg-tg" type="checkbox" id="doratura-data">
+      <span class="dg-label">{{date.long}}</span>
+      <div class="dg-carta" aria-hidden="true">
+        <div class="dg-testo dg-cieco"><span class="dgd-wd">{{date.weekday}}</span><span class="dgd-day">{{date.day}}</span><span class="dgd-month">{{date.month}}</span><span class="dgd-year">{{date.year}}</span>{{#eventTime}}<span class="dgd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+        <div class="dg-testo dg-oro"><span class="dgd-wd">{{date.weekday}}</span><span class="dgd-day">{{date.day}}</span><span class="dgd-month">{{date.month}}</span><span class="dgd-year">{{date.year}}</span>{{#eventTime}}<span class="dgd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+        <i class="dg-foglia f1"></i><i class="dg-foglia f2"></i><i class="dg-foglia f3"></i><i class="dg-foglia f4"></i><i class="dg-foglia f5"></i><i class="dg-foglia f6"></i>
+        <i class="dg-pennello"><b class="dg-setole"></b><b class="dg-ghiera"></b><b class="dg-manico"></b></i>
+      </div>
+      <label class="dg-tap" for="doratura-data"><span class="dg-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

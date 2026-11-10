@@ -1,0 +1,12 @@
+<section class="footer-sec colophon-sec">
+  <img class="fl l" src="assets/floral.png" alt="" aria-hidden="true">
+  <img class="fl r" src="assets/floral.png" alt="" aria-hidden="true">
+  <div class="footer-in">
+    <span class="cl-sigillo" aria-hidden="true" data-anim="zoomin"></span>
+    <h2 class="title" data-anim="fadein" style="--d:.15s">{{t.footerTitle}}</h2>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <div class="cl-nomi" data-anim="fadein" style="--d:.4s">{{title}}</div>
+    <img class="orn" src="assets/ornament.svg" alt="" data-anim="fadein" style="--d:.5s">
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

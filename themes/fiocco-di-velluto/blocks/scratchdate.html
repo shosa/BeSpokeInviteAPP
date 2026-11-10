@@ -1,0 +1,17 @@
+<section class="sec date-sec scrigno-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="fd" data-anim="fadein" style="--d:.15s">
+      <input class="fd-tg" type="checkbox" id="fiocco-data">
+      <span class="fd-label">{{date.long}}</span>
+      <div class="fd-scena" aria-hidden="true">
+        <div class="fd-carta"><span class="fdd-wd">{{date.weekday}}</span><span class="fdd-day">{{date.day}}</span><span class="fdd-month">{{date.month}}</span><span class="fdd-year">{{date.year}}</span>{{#eventTime}}<span class="fdd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+        <i class="fd-anta l"></i><i class="fd-anta r"><b></b></i>
+        <i class="fd-nastro l"></i><i class="fd-nastro r"></i>
+        <i class="fd-coda l"></i><i class="fd-coda r"></i>
+        <i class="fd-cappio l"></i><i class="fd-cappio r"></i><i class="fd-nodo"></i>
+      </div>
+      <label class="fd-tap" for="fiocco-data"><span class="fd-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

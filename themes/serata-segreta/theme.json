@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "serata-segreta",
+  "name": "Serata segreta",
+  "description": "Si guarda dal buco della serratura: in un salotto a lume di candela una cloche d'argento si solleva e scopre il cartoncino col sigillo di ceralacca, poi si sale lo scalone tra le candele. Dentro: la data che si accende con un fiammifero, le cloche del conto alla rovescia, la galleria di cornici barocche, il programma a lume di candela e il luogo visto dalla serratura.",
+  "models": [],
+  "themeColor": "#2a0810",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Playfair+Display+SC:wght@400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@300;400&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/serratura.mp4",
+    "poster": "assets/serratura-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/scalone-candele.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Vittoria & Edoardo",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-11-20",
+      "eventTime": "19:00",
+      "venue": "Palazzo Barberini Vecchi",
+      "address": "Via dei Coronari 18, Roma"
+    },
+    "hero": {
+      "kicker": "Un segreto per voi",
+      "occasion": "Vi invitiamo al nostro matrimonio",
+      "scrollLabel": "Sali lo scalone"
+    },
+    "message": {
+      "heading": "Cari amici",
+      "body": "abbiamo un segreto da condividere solo con le persone più care:\nil venti novembre ci sposiamo, in una sera di candele e velluto.\nVorremmo tanto avervi accanto."
+    },
+    "gallery": {
+      "heading": "La galleria",
+      "photos": [
+        "assets/fedi-rose.jpg",
+        "assets/bouquet-rosso.jpg",
+        "assets/rose.jpg",
+        "assets/bouquet-bianco.jpg",
+        "assets/rose-pini.jpg",
+        "assets/bouquet-misto.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/salotto.jpg",
+      "caption": "Il salotto rosso del palazzo, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "A lume di candela",
+      "items": [
+        {
+          "time": "19:00",
+          "label": "Lo scambio delle promesse"
+        },
+        {
+          "time": "20:00",
+          "label": "Aperitivo nel salotto rosso"
+        },
+        {
+          "time": "21:00",
+          "label": "Cena sotto le cloche"
+        },
+        {
+          "time": "23:00",
+          "label": "Il primo ballo"
+        },
+        {
+          "time": "00:00",
+          "label": "La torta a mezzanotte"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "Il palazzo",
+      "venue": "Palazzo Barberini Vecchi",
+      "kind": "villa",
+      "photo": "assets/scalone.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il palazzo è nel centro storico, a due passi da piazza Navona: la zona è a traffico limitato.\nUna navetta parte da piazza Cavour alle 18:30 e riparte all'una."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Abito da sera",
+      "colors": [
+        {
+          "hex": "#5A0E1C",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#8A1A2B",
+          "name": "Granata"
+        },
+        {
+          "hex": "#C8A45E",
+          "name": "Oro"
+        },
+        {
+          "hex": "#EADBC3",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#120A0B",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "I nostri momenti",
+      "video": "assets/foto-serata.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Rompi il sigillo e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con affetto, a lume di candela"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "A secret for you",
+      "occasion": "Join us for our wedding",
+      "scrollLabel": "Climb the staircase"
+    },
+    "message": {
+      "heading": "Dear friends",
+      "body": "we have a secret to share only with the people dearest to us:\non the twentieth of November we are getting married, on an evening of candles and velvet.\nWe would love to have you by our side."
+    },
+    "gallery": {
+      "heading": "The gallery"
+    },
+    "image": {
+      "caption": "The red salon of the palazzo, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "By candlelight",
+      "items": [
+        {
+          "time": "19:00",
+          "label": "Exchanging our vows"
+        },
+        {
+          "time": "20:00",
+          "label": "Aperitif in the red salon"
+        },
+        {
+          "time": "21:00",
+          "label": "Dinner under the cloches"
+        },
+        {
+          "time": "23:00",
+          "label": "The first dance"
+        },
+        {
+          "time": "00:00",
+          "label": "Cake at midnight"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The palazzo"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The palazzo is in the historic centre, a short walk from Piazza Navona: the area is closed to traffic.\nA shuttle leaves Piazza Cavour at 6:30 pm and returns at 1 am."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Evening attire",
+      "colors": [
+        {
+          "hex": "#5A0E1C",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#8A1A2B",
+          "name": "Garnet"
+        },
+        {
+          "hex": "#C8A45E",
+          "name": "Gold"
+        },
+        {
+          "hex": "#EADBC3",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#120A0B",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Our moments"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Break the seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With love, by candlelight"
+    }
+  }
+}

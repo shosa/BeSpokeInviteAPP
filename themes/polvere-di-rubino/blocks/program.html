@@ -1,0 +1,18 @@
+{{#hasItems}}
+<section class="sec prog-sec atti-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="atti" data-anim="fadein" style="--d:.1s">
+      <i class="at-cordone" aria-hidden="true"><b class="at-nappa"></b></i>
+      <div class="timeline scene">
+        {{#items}}
+        <div class="t-row">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-cell"><div class="t-time">{{time}}</div><div class="t-name">{{label}}</div></div>
+        </div>
+        {{/items}}
+      </div>
+    </div>
+  </div>
+</section>
+{{/hasItems}}

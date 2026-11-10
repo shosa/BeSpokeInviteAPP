@@ -1,0 +1,10 @@
+<section class="footer-sec colophon-sec">
+  <div class="footer-in">
+    <span class="cl-sigillo" aria-hidden="true"></span>
+    <h2 class="title" data-anim="fadein" style="--d:.15s">{{t.footerTitle}}</h2>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <div class="cl-nomi" data-anim="fadein" style="--d:.4s">{{title}}</div>
+    <img class="orn" src="assets/rosetta.png" alt="" aria-hidden="true" data-anim="fadein" style="--d:.5s">
+    {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+  </div>
+</section>

@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "fiocco-di-velluto",
+  "name": "Fiocco di velluto",
+  "description": "Il cofanetto di velluto carminio a due ante sul marmo, legato da un nastro di velluto col fiocco: il fiocco si scioglie, le ante si aprono su petali di rosa e un cartoncino di acrilico. Dentro: un piccolo cofanetto per la data, una clessidra, cornici appese ai nastri, un carnet de bal e una chiave d'albergo.",
+  "models": [],
+  "themeColor": "#4a0916",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Prata&family=Alex+Brush&family=Sorts+Mill+Goudy:ital@0;1&family=Work+Sans:wght@300;400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/cofanetto.mp4",
+    "poster": "assets/cofanetto-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Beatrice & Federico",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-09-18",
+      "eventTime": "17:30",
+      "venue": "Grand Hotel Villa Rosa",
+      "address": "Lungolago 4, Stresa (Verbania)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Per voi, con amore",
+      "body": "Cari famiglia e amici,\nvorremmo celebrare questo giorno con voi, tra velluti, rose rosse e una lunga sera di settembre sul lago.\nVi aspettiamo per brindare insieme."
+    },
+    "gallery": {
+      "heading": "Appesi a un nastro",
+      "photos": [
+        "assets/bouquet-rosso.jpg",
+        "assets/rose.jpg",
+        "assets/bouquet-bianco.jpg",
+        "assets/fedi-rose.jpg",
+        "assets/rose-pini.jpg",
+        "assets/bouquet-misto.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/salotto.jpg",
+      "caption": "Il salone del Grand Hotel, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il carnet della sera",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "Il rito"
+        },
+        {
+          "time": "18:45",
+          "label": "Aperitivo sul lago"
+        },
+        {
+          "time": "20:30",
+          "label": "Cena di gala"
+        },
+        {
+          "time": "22:30",
+          "label": "Il primo ballo"
+        },
+        {
+          "time": "23:30",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Grand Hotel Villa Rosa",
+      "kind": "hotel",
+      "photo": "assets/scalone.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il Grand Hotel è sul lungolago di Stresa, a pochi passi dall'imbarcadero: il parcheggio è riservato agli ospiti.\nDalle 23:30 le auto aspettano all'ingresso."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Abito da sera",
+      "colors": [
+        {
+          "hex": "#7D1424",
+          "name": "Carminio"
+        },
+        {
+          "hex": "#4A0916",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#C4A064",
+          "name": "Oro"
+        },
+        {
+          "hex": "#E9CFC6",
+          "name": "Cipria"
+        },
+        {
+          "hex": "#1A1A1A",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Una sera di settembre",
+      "video": "assets/foto-fiocco.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca la coccarda e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "For you, with love",
+      "body": "Dear family and friends,\nwe would love to celebrate this day with you, among velvet, red roses and a long September evening on the lake.\nJoin us to raise a glass together."
+    },
+    "gallery": {
+      "heading": "Hanging on a ribbon"
+    },
+    "image": {
+      "caption": "The Grand Hotel salon, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The evening's dance card",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "The ceremony"
+        },
+        {
+          "time": "18:45",
+          "label": "Aperitif by the lake"
+        },
+        {
+          "time": "20:30",
+          "label": "Gala dinner"
+        },
+        {
+          "time": "22:30",
+          "label": "The first dance"
+        },
+        {
+          "time": "23:30",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The Grand Hotel is on the Stresa lakefront, a few steps from the pier: parking is reserved for guests.\nFrom 11:30 pm cars wait at the entrance."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Evening attire",
+      "colors": [
+        {
+          "hex": "#7D1424",
+          "name": "Carmine"
+        },
+        {
+          "hex": "#4A0916",
+          "name": "Bordeaux"
+        },
+        {
+          "hex": "#C4A064",
+          "name": "Gold"
+        },
+        {
+          "hex": "#E9CFC6",
+          "name": "Blush"
+        },
+        {
+          "hex": "#1A1A1A",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "A September evening"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the rosette and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

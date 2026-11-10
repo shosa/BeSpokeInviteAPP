@@ -1,0 +1,16 @@
+<section class="sec date-sec stelle-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="cielo" data-anim="fadein" style="--d:.15s">
+      <input class="cl-tg" type="checkbox" id="cielo-data">
+      <span class="cl-label">{{date.long}}</span>
+      <div class="cl-volta" aria-hidden="true">
+        <i class="cl-p" style="--x:12%;--y:10%;--t:2.4s"></i><i class="cl-p" style="--x:30%;--y:6%;--t:3.1s"></i><i class="cl-p" style="--x:82%;--y:30%;--t:2.7s"></i><i class="cl-p" style="--x:92%;--y:62%;--t:3.5s"></i><i class="cl-p" style="--x:6%;--y:52%;--t:2.9s"></i><i class="cl-p" style="--x:18%;--y:88%;--t:3.3s"></i><i class="cl-p" style="--x:70%;--y:94%;--t:2.6s"></i><i class="cl-p" style="--x:52%;--y:4%;--t:3.8s"></i><i class="cl-p" style="--x:96%;--y:90%;--t:3.0s"></i><i class="cl-p" style="--x:40%;--y:96%;--t:2.2s"></i>
+        <i class="cl-cometa"></i>
+        <svg class="cl-svg" viewBox="0 0 300 330" focusable="false"><path class="cl-linea" d="M150,26 L234,56 L278,140 L258,236 L190,298 L110,302 L40,238 L24,140 L68,58 Z" pathLength="1"></path><circle class="st" cx="150" cy="26" r="4.2" style="--i:0"></circle><circle class="st" cx="234" cy="56" r="3.2" style="--i:1"></circle><circle class="st" cx="278" cy="140" r="3.2" style="--i:2"></circle><circle class="st" cx="258" cy="236" r="4.2" style="--i:3"></circle><circle class="st" cx="190" cy="298" r="3.2" style="--i:4"></circle><circle class="st" cx="110" cy="302" r="3.2" style="--i:5"></circle><circle class="st" cx="40" cy="238" r="4.2" style="--i:6"></circle><circle class="st" cx="24" cy="140" r="3.2" style="--i:7"></circle><circle class="st" cx="68" cy="58" r="3.2" style="--i:8"></circle><circle class="st" cx="270" cy="20" r="4.2" style="--i:9"></circle></svg>
+        <div class="cl-data"><span class="cld-wd">{{date.weekday}}</span><span class="cld-day">{{date.day}}</span><span class="cld-month">{{date.month}}</span><span class="cld-year">{{date.year}}</span></div>
+      </div>
+      <label class="cl-tap" for="cielo-data"><span class="cl-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

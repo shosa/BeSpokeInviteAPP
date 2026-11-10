@@ -1,0 +1,10 @@
+{{#hasPhotos}}
+<section class="sec us-sec quadreria-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="us-grid">
+      {{#photos}}<figure class="quadro" data-anim="fadeinup"><span class="quadro-cornice"><span class="quadro-luce"><img src="{{.}}" loading="lazy" decoding="async" alt=""></span></span></figure>{{/photos}}
+    </div>
+  </div>
+</section>
+{{/hasPhotos}}

@@ -1,0 +1,11 @@
+<section class="footer-sec lume-sec">
+  <div class="footer-in">
+    <img class="fn-sigillo" src="assets/sigillo.webp" alt="" aria-hidden="true" data-anim="fadein">
+    <h2 class="title" data-anim="fadein" style="--d:.1s">{{t.footerTitle}}</h2>
+    <div class="fn-nomi" data-anim="fadeinup" style="--d:.2s">{{title}}</div>
+    <div class="fn-data" data-anim="fadein" style="--d:.3s">{{date.weekday}} {{date.day}} {{date.month}} {{date.year}}</div>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.4s">{{signature}}</div>{{/signature}}
+    <div class="fn-candelabro" aria-hidden="true"><i class="fn-candela" style="--h:70px;--r:0s"><b></b></i><i class="fn-candela" style="--h:110px;--r:0.7s"><b></b></i><i class="fn-candela" style="--h:90px;--r:1.4s"><b></b></i><i class="fn-candela" style="--h:130px;--r:0.3s"><b></b></i><i class="fn-candela" style="--h:90px;--r:1.1s"><b></b></i><i class="fn-candela" style="--h:110px;--r:0.5s"><b></b></i><i class="fn-candela" style="--h:70px;--r:1.8s"><b></b></i></div>
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

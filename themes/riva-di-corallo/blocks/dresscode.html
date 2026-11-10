@@ -1,0 +1,7 @@
+<section class="sec dress-sec campioni-sec">
+  <div class="campionario">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<p class="dress" data-anim="fadeinup" style="--d:.15s">{{dress}}</p>{{/dress}}
+    <div class="campioni" data-anim="fadeinup" style="--d:.25s">{{#colors}}{{#hex}}<figure class="campione" style="--c:{{hex}}"><span class="tessuto" role="img" aria-label="{{name}}"></span>{{#name}}<figcaption>{{name}}</figcaption>{{/name}}</figure>{{/hex}}{{/colors}}</div>
+  </div>
+</section>

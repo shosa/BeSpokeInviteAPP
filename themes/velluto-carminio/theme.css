@@ -1,0 +1,280 @@
+/* Velluto carminio. Una sola tinta per tutta la pagina: carminio profondo, cipria e oro antico.
+   Una serata di gala: busta di velluto col sigillo alla rosa, poi sezioni a tutta larghezza che alternano
+   il velluto carminio e il marmo rosato, con titoli editoriali grandi e corsivi da calligrafo. */
+:root {
+  --bk-cover:#f1e3dc;
+  --carmine:#6e0f22; --carmine-d:#3e0812; --carmine-dd:#2a050c; --wine:#8c1d33;
+  --blush:#f1e3dc; --blush-d:#e4cfc5; --cream:#faf3ee;
+  --gold:#b8925a; --gold-l:#dcc192; --gold-d:#8a6a36;
+  --ink:#3e0812; --muted:#7a5a5e; --cream-m:#d9c3bd;
+  --display:'Gloock',Georgia,serif; --body:'Instrument Serif',Georgia,serif;
+  --script:'Corinthia','Instrument Serif',cursive; --caps:'Manrope',system-ui,sans-serif;
+  --oro:linear-gradient(110deg,#8a6a36 4%,#c9a46a 24%,#f1dcae 40%,#b28a4f 58%,#e3c897 74%,#8a6a36 96%);
+  --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--carmine-d) }
+body { margin:0; color:var(--ink); background:var(--carmine-d); font:400 18px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:inherit; text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--gold); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+/* Sezioni a tutta larghezza: lo sfondo arriva ai bordi, il contenuto resta al centro. */
+.sec,.footer-sec { position:relative; width:100%; max-width:none; margin:0; padding:64px 20px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+/* Due superfici: marmo rosato chiaro e velluto carminio. */
+.sec { background:var(--blush) url(assets/marmo.jpg) center/700px }
+.velluto-sec,.dettagli-sec,.serata-sec,.abito-sec,.finale-sec { color:var(--cream); background:linear-gradient(#2a050c4d,#2a050c80),var(--carmine) url(assets/velluto.jpg) center/cover }
+.serata-sec,.finale-sec { background:linear-gradient(#2a050c99,#2a050cb3),var(--carmine-d) url(assets/velluto.jpg) center/cover }
+/* Titolo: corsivo da calligrafo; il testo importante è nel serif grande. */
+.title { position:relative; margin:0 0 14px; font:700 clamp(40px,12vw,58px)/1 var(--script); color:var(--carmine); text-align:center }
+.velluto-sec .title,.dettagli-sec .title,.serata-sec .title,.abito-sec .title,.finale-sec .title,.sala-sec .title { color:var(--gold-l) }
+.body,.lettera { margin:0; text-wrap:pretty }
+.orn,.fl { display:none }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Busta-video: dietro, il fermo del cartoncino. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--carmine) url(assets/busta-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:84vw; margin:0 auto 36px; padding:0 10px; text-align:center; font:400 clamp(30px,9vw,44px)/1.05 var(--display); color:var(--cream); text-shadow:0 2px 14px #2a050c99 }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--carmine)); border:1px solid var(--gold-d); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--wine)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:86%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 28px; max-width:85vw; background:#2a050cb3; border:1px solid #b8925a99; border-radius:40px; text-align:center; box-shadow:0 10px 26px #0006; -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px) }
+[data-cover-tap][data-tap-plain] { background:none; border-color:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none }
+[data-cover-label] { color:var(--cream); font:400 12px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--gold-l); border-top:1px solid var(--gold-l); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: il cartoncino cipria, i nomi nel serif grande come in una locandina. */
+.zone-hero { background:var(--blush) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip; padding:0; background:none }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); width:48%; max-width:270px; aspect-ratio:3/4; object-fit:cover; z-index:2; outline:1px solid var(--carmine); outline-offset:6px }
+.h-text { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:28% 12% 28%; text-align:center; color:var(--carmine) }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end; padding-bottom:20% }
+.occasion { order:-1; font:700 clamp(36px,11vw,52px)/1 var(--script); color:var(--carmine) }
+.names { font:400 clamp(54px,16vw,96px)/.98 var(--display); color:var(--carmine-d); text-wrap:balance; letter-spacing:-.01em }
+.welcome { margin-top:6px; font:400 11.5px/1.7 var(--caps); letter-spacing:.26em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:120px; height:16px; margin:0 auto 12px; background:url(assets/ornament.svg) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--cream); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:10px 22px; background:var(--carmine); border-radius:30px; box-shadow:0 8px 20px #3e081240 }
+.arrow { width:10px; height:10px; margin:12px auto 0; border-right:1px solid var(--carmine); border-bottom:1px solid var(--carmine); transform:rotate(45deg) }
+
+/* La data dietro il sipario. Il tema sostituisce la data da grattare: un piccolo palcoscenico con la mantovana
+   di velluto e le frange d'oro, le tende chiuse. Al tocco (una casella nascosta, niente script) le tende si aprono
+   raccogliendosi ai lati, un occhio di bue si accende e al centro del palco compare la data. */
+.sipario-sec .title { margin-bottom:22px }
+.sipario { --w:min(330px,86vw); position:relative; width:var(--w); margin:0 auto }
+.sp-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.sp-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.sp-palco { position:relative; width:100%; aspect-ratio:4/5; overflow:hidden; border-radius:4px 4px 2px 2px; background:radial-gradient(ellipse 70% 30% at 50% 100%,#6e0f2299,#0000 70%),linear-gradient(#1a0307,#2a050c 70%,#3e0812); box-shadow:0 0 0 1px var(--gold-d),0 0 0 6px var(--blush),0 0 0 7px #b8925a80,0 30px 60px #3e081255 }
+.sp-luce { position:absolute; inset:0; background:radial-gradient(ellipse 46% 40% at 50% 46%,#fff1d633,#fff1d60d 60%,#0000 75%),conic-gradient(from 166deg at 50% -10%,#0000 0 0,#fff4dc1f 6deg 22deg,#0000 28deg); opacity:0 }
+.sp-data { position:absolute; inset:20% 8% 10%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--cream) }
+.sp-data > span { opacity:0 }
+.spd-wd { font:400 11px/1 var(--caps); letter-spacing:.34em; padding-left:.34em; text-transform:uppercase; color:var(--gold-l) }
+.spd-day { margin-top:8px; font:400 calc(var(--w) * .34)/.95 var(--display); background:var(--oro) 0 0/240% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--gold) }
+.spd-month { margin-top:-2px; font:700 calc(var(--w) * .16)/1 var(--script); color:var(--cream) }
+.spd-year { margin-top:8px; font:400 13px/1 var(--caps); letter-spacing:.5em; padding-left:.5em; color:var(--gold-l) }
+.spd-ora { margin-top:14px; padding-top:10px; border-top:1px solid #b8925a66; font:italic 400 18px/1 var(--body); color:var(--cream-m) }
+/* Le tende: velluto con le pieghe, che si raccolgono verso l'esterno. */
+.sp-tenda { position:absolute; top:0; bottom:0; width:51%; background:repeating-linear-gradient(90deg,#1a030766 0,#ffffff12 4%,#ffffff05 7%,#1a030780 12.5%),linear-gradient(#2a050c40,#0000 30%,#2a050c59),var(--carmine) url(assets/velluto.jpg) center/300% auto; box-shadow:inset 0 -18px 24px #1a030766 }
+.sp-tenda.l { left:0; transform-origin:0 0 }
+.sp-tenda.r { right:0; transform-origin:100% 0 }
+/* La frangia d'oro in fondo alle tende. */
+.sp-tenda b { position:absolute; left:0; right:0; bottom:0; height:8px; background:repeating-linear-gradient(90deg,#dcc192 0 1.5px,#0000 1.5px 4px); opacity:.85 }
+.sp-mantovana { position:absolute; left:-2%; right:-2%; top:0; height:15%; background:radial-gradient(60% 120% at 50% 0,#0000 0,#0000 0) ,repeating-radial-gradient(circle at 50% -30%,#0000 0,#0000 0),linear-gradient(#2a050c,#6e0f22 70%,#8c1d33); -webkit-mask:radial-gradient(28px 22px at 50% 0,#000 98%,#0000) -14px 100%/56px 100% repeat-x,linear-gradient(#000 0 0) top/100% 72% no-repeat; mask:radial-gradient(28px 22px at 50% 0,#000 98%,#0000) -14px 100%/56px 100% repeat-x,linear-gradient(#000 0 0) top/100% 72% no-repeat; box-shadow:0 6px 10px #0006 }
+.sp-mantovana::after { content:""; position:absolute; left:0; right:0; top:68%; height:2px; background:var(--oro) }
+.sp-tap { display:flex; justify-content:center; margin-top:22px; cursor:pointer }
+.sp-hint { white-space:nowrap; padding:11px 24px; font:400 11.5px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--cream); background:var(--carmine); border-radius:30px; box-shadow:0 8px 18px #3e081240 }
+.sp-tg:focus-visible ~ .sp-tap .sp-hint { outline:3px solid var(--carmine); outline-offset:4px }
+/* Aperto: stato finale (anche con «riduci movimento»). */
+.sp-tg:checked ~ .sp-tap { pointer-events:none }
+.sp-tg:checked ~ .sp-tap .sp-hint { opacity:0 }
+.sp-tg:checked ~ .sp-palco .sp-tenda.l { transform:scaleX(.16) }
+.sp-tg:checked ~ .sp-palco .sp-tenda.r { transform:scaleX(.16) }
+.sp-tg:checked ~ .sp-palco .sp-luce { opacity:1 }
+.sp-tg:checked ~ .sp-palco .sp-data > span { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .sp-tg:not(:checked) ~ .sp-palco .sp-tenda { animation:respira 4s ease-in-out infinite alternate }
+  .sp-tg:checked ~ .sp-palco .sp-tenda { animation:apre 2.2s cubic-bezier(.6,0,.2,1) both }
+  .sp-tg:checked ~ .sp-palco .sp-luce { animation:accende 1.6s ease 1.4s both }
+  .sp-tg:checked ~ .sp-tap .sp-hint { animation:svanisce .4s ease both }
+  .sp-tg:checked ~ .sp-palco .spd-wd { animation:appare .9s ease 1.9s both }
+  .sp-tg:checked ~ .sp-palco .spd-day { animation:appare 1.2s ease 2.1s both,lamina 5s ease-in-out 3.3s infinite alternate }
+  .sp-tg:checked ~ .sp-palco .spd-month { animation:appare 1s ease 2.5s both }
+  .sp-tg:checked ~ .sp-palco .spd-year { animation:appare 1s ease 2.8s both }
+  .sp-tg:checked ~ .sp-palco .spd-ora { animation:appare 1s ease 3.1s both }
+}
+@keyframes respira { from { transform:scaleX(1) } to { transform:scaleX(.985) } }
+@keyframes apre { 0% { transform:scaleX(1) } 15% { transform:scaleX(1.02) } 100% { transform:scaleX(.16) } }
+@keyframes accende { 0% { opacity:0 } 30% { opacity:.6 } 45% { opacity:.3 } 100% { opacity:1 } }
+@keyframes appare { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+@keyframes lamina { from { background-position:100% 0 } to { background-position:0 0 } }
+@keyframes svanisce { to { opacity:0 } }
+
+/* Conto alla rovescia: grandi numeri sul velluto, separati da filetti d'oro. */
+.cd-sigillo { width:76px; height:auto; margin:0 auto 18px }
+.conto { max-width:520px; margin:0 auto }
+[data-countdown] { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 }
+.time-block { position:relative; display:flex; flex-direction:column; align-items:center; min-width:0; padding:4px 2px }
+.time-block + .separator + .time-block::before { content:""; position:absolute; left:0; top:12%; bottom:12%; width:1px; background:linear-gradient(#b8925a00,#b8925a,#b8925a00) }
+.number-wrap { display:grid; place-items:center; width:100% }
+.number { display:block; font:400 clamp(40px,12vw,64px)/1 var(--display); color:var(--cream); transition:opacity .18s }
+.label { margin-top:10px; font:400 10px/1.2 var(--caps); letter-spacing:.2em; text-transform:uppercase; color:var(--gold-l) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.5 }
+
+/* Messaggio: una lettera in grande, come una frase stampata su un manifesto, firmata in corsivo. */
+.lettera-sec .title { margin-bottom:22px }
+.lettera { font:400 clamp(27px,7.6vw,40px)/1.18 var(--display); color:var(--carmine-d); text-align:center; text-wrap:balance }
+.after { max-width:560px; margin:0 auto }
+.lt-firma { margin-top:26px; font:700 clamp(34px,10vw,48px)/1 var(--script); color:var(--carmine) }
+
+/* Galleria: un racconto per immagini, foto grandi e piccole con un filetto d'oro all'interno. */
+.dettagli-sec .card { max-width:760px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:0 }
+.us-grid figure { position:relative; margin:0; min-width:0; overflow:hidden }
+.us-grid figure::after { content:""; position:absolute; inset:8px; border:1px solid #dcc19280; pointer-events:none }
+.us-grid img { width:100%; height:100%; aspect-ratio:3/4; object-fit:cover }
+.us-grid figure:nth-child(3n+1) { grid-column:span 2 }
+.us-grid figure:nth-child(3n+1) img { aspect-ratio:4/3.4 }
+
+/* Immagine: la foto con la didascalia in corsivo grande. */
+.img-sec { padding-inline:20px }
+.img-block { position:relative; max-width:560px; margin-inline:auto !important }
+.img-block img { border-radius:0 !important; outline:1px solid var(--carmine); outline-offset:8px }
+.img-block figcaption { padding:24px 6px 0; margin:0 !important; color:var(--carmine); opacity:1 !important; font:italic 400 22px/1.4 var(--body) !important }
+
+/* Programma: la serata scorre di lato, una tappa per volta, con l'ora in corsivo e il nome in grande. */
+.serata-sec { padding-inline:0; overflow:hidden }
+.timeline.serata { animation:none !important }
+.serata-sec .card { padding-inline:20px }
+.sr-cue { display:flex; justify-content:center; margin:-4px 0 18px }
+.sr-cue i { position:relative; display:block; width:56px; height:1px; background:var(--gold-l) }
+.sr-cue i::after { content:""; position:absolute; right:0; top:-4px; width:8px; height:8px; border-top:1px solid var(--gold-l); border-right:1px solid var(--gold-l); transform:rotate(45deg) }
+.serata { display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px max(20px,calc(50vw - 230px)) 14px; scrollbar-width:none; -webkit-overflow-scrolling:touch }
+.serata::-webkit-scrollbar { display:none }
+.t-row { flex:0 0 min(78vw,440px); scroll-snap-align:center; display:flex; flex-direction:column; justify-content:flex-end; min-height:260px; padding:26px 24px 22px; text-align:left; border:1px solid #b8925a66; background:linear-gradient(160deg,#ffffff0d,#ffffff00 60%) }
+.t-time { font:700 clamp(46px,13vw,64px)/1 var(--script); color:var(--gold-l) }
+.t-name { margin-top:6px; font:400 clamp(36px,10.5vw,52px)/1.02 var(--display); color:var(--cream); text-wrap:balance }
+.t-dot { width:100%; height:1px; margin-top:22px; background:linear-gradient(90deg,#dcc192,#dcc19200) }
+
+/* Location: la foto della sala a tutta larghezza, velata di carminio, e sopra il nome in grande. */
+.sala-sec { display:grid; align-items:end; min-height:min(110vw,640px); padding:0; overflow:hidden; color:var(--cream); background:var(--carmine-dd) }
+.sala-sec .loc-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(.55) sepia(.25) contrast(1.05) brightness(.8) }
+.sala-sec::after { content:""; position:absolute; inset:0; background:linear-gradient(#2a050c26,#2a050c33 40%,#2a050ce6 85%),linear-gradient(#6e0f2240,#6e0f2240); mix-blend-mode:multiply; pointer-events:none }
+.sala-testo { z-index:1; width:100%; padding:120px 20px 48px }
+.loc-name { font:400 clamp(48px,14vw,80px)/.98 var(--display); color:var(--cream); text-wrap:balance }
+.loc-addr { margin-top:14px; font:400 10.5px/1.6 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--gold-l); opacity:1 !important }
+.loc-via { margin-top:6px; font:italic 400 19px/1.5 var(--body); color:var(--cream-m) }
+
+/* Mappa: in una cornice sottile carminio. */
+.map-sec { padding-top:48px }
+.map-frame { position:relative; max-width:600px; margin:auto; outline:1px solid var(--carmine); outline-offset:8px }
+.map-frame iframe { width:100%; height:300px; border:0; filter:grayscale(.4) sepia(.2) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 0 0 / 30% 30% 0 0; height:360px }
+
+/* Come arrivare: testo in corsivo, tra due filetti. */
+.shuttle-box { max-width:500px; margin:0 auto; padding:20px 4px; border-top:1px solid #6e0f2259; border-bottom:1px solid #6e0f2259 }
+.shuttle-sec .body { font-style:italic; font-size:20px; line-height:1.6; color:var(--carmine-d) }
+
+/* Dress code: il nome dell'abito in grande e i colori come bottoni di velluto con l'anello d'oro. */
+.dress { font:400 clamp(44px,13vw,72px)/1 var(--display); color:var(--cream); margin:0 0 30px; text-wrap:balance }
+.dress-dots { display:flex; flex-wrap:wrap; justify-content:center; gap:20px 14px; max-width:440px; margin:0 auto }
+.bottone { display:inline-flex; flex-direction:column; align-items:center; gap:10px; width:64px }
+.bt-velluto { display:block; width:48px; height:48px; border-radius:50%; background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 70%,#fff) 0,var(--c) 45%,color-mix(in srgb,var(--c) 75%,#000) 100%); box-shadow:0 0 0 2px #2a050c,0 0 0 3.5px var(--gold-l),0 8px 14px #0007 }
+.bt-nome { font:400 9.5px/1.3 var(--caps); letter-spacing:.14em; text-transform:uppercase; color:var(--cream-m); white-space:nowrap }
+
+/* Video: con il filetto carminio staccato dal bordo. */
+.video-sec .card { padding:0 8px }
+.video-frame { position:relative; max-width:380px; margin:auto; aspect-ratio:9/14; outline:1px solid var(--carmine); outline-offset:8px; background:var(--carmine-dd) }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--carmine); color:var(--cream) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:var(--cream); border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:17px; height:17px; fill:currentColor }
+
+/* Conferma: il sigillo alla rosa, grande, da toccare. */
+.rsvp-sec .card { padding:0 6px }
+.rsvp-sec .body { max-width:360px; margin:0 auto; font-style:italic; font-size:20px; color:var(--carmine-d) }
+.seal-btn { position:relative; width:150px; height:150px; display:grid; place-items:center; margin:26px auto 4px; border:0; border-radius:50%; color:var(--cream); background:url(assets/sigillo.webp) center/contain no-repeat; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:translateY(-3px) rotate(-4deg); filter:drop-shadow(0 0 20px #dcc19280) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--cream); font:400 11px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; text-align:center; padding:11px 22px; margin:10px 0 0; background:var(--carmine); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--gold-l); border-left:1px solid var(--gold-l); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#2a050cd9; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:108px 22px 30px; color:var(--ink); background:var(--blush) url(assets/marmo.jpg) center/700px; border-radius:2px; box-shadow:0 24px 80px #0009,inset 0 0 0 8px var(--blush),inset 0 0 0 9px var(--carmine); overflow-wrap:anywhere }
+.popup__box::after { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:70px; height:70px; background:url(assets/sigillo.webp) center/contain no-repeat }
+.popup__title { color:var(--carmine-d); font:400 30px/1.15 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--carmine); background:var(--cream); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--carmine) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 18px/1.4 var(--body); margin-bottom:8px; color:var(--carmine-d) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffaf7; border-radius:2px; color:var(--ink); padding:12px; font:400 16px/1.4 var(--caps) }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 16px; border:1px solid #6e0f2280; border-radius:24px; cursor:pointer; font:400 14px/1.3 var(--caps); background:#fffaf7 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--carmine); background:#fff }
+.radio input:checked+.ind { background:var(--carmine); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--carmine) }
+.radio:has(input:focus-visible) { outline:3px solid var(--carmine); outline-offset:3px }
+.submit { width:100%; min-height:50px; padding:14px 20px; border:0; border-radius:30px; background:var(--carmine); color:var(--cream); font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #3e081240 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--carmine); font:500 13.5px/1.4 var(--caps); padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--carmine); box-shadow:0 0 0 3px #6e0f221a }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 30px/1.2 var(--display); color:var(--carmine-d) }
+.honey { display:none !important }
+
+/* Firma: «fino ad allora», i nomi in grande e la data come su un'incisione, sul velluto più scuro. */
+.footer-sec { padding:76px 20px 60px; text-align:center }
+.footer-in { position:relative; max-width:520px; margin:auto }
+.fn-nomi { font:400 clamp(52px,15vw,84px)/.98 var(--display); color:var(--cream); text-wrap:balance }
+.signature { margin-top:18px; font:italic 400 20px/1.5 var(--body); color:var(--cream-m) }
+.fn-data { margin-top:20px; font:400 12px/1 var(--caps); letter-spacing:.5em; padding-left:.5em; text-transform:uppercase; color:var(--gold-l) }
+.fn-sigillo { width:78px; height:auto; margin:28px auto 0 }
+.credits { max-width:460px; margin:26px auto 0; font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:#d9c3bd99 }
+
+/* Ingressi: dissolvenze lente. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1s ease,transform 1s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(16px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+}
+@media (min-width:700px) {
+  .sec { padding:90px 40px }
+  .h-text { padding:24% 26% 24% }
+  .us-grid { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .us-grid figure:nth-child(3n+1) { grid-column:auto; grid-row:span 2 }
+  .us-grid figure:nth-child(3n+1) img { aspect-ratio:auto }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

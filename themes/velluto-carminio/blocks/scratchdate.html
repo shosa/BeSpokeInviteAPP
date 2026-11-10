@@ -1,0 +1,16 @@
+<section class="sec date-sec sipario-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="sipario" data-anim="fadein" style="--d:.15s">
+      <input class="sp-tg" type="checkbox" id="sipario-data">
+      <span class="sp-label">{{date.long}}</span>
+      <div class="sp-palco" aria-hidden="true">
+        <i class="sp-luce"></i>
+        <div class="sp-data"><span class="spd-wd">{{date.weekday}}</span><span class="spd-day">{{date.day}}</span><span class="spd-month">{{date.month}}</span><span class="spd-year">{{date.year}}</span>{{#eventTime}}<span class="spd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+        <i class="sp-tenda l"><b></b></i><i class="sp-tenda r"><b></b></i>
+        <i class="sp-mantovana"></i>
+      </div>
+      <label class="sp-tap" for="sipario-data"><span class="sp-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

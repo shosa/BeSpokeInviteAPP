@@ -1,0 +1,10 @@
+<section class="sec dress-sec nastri-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.15s">{{dress}}</div>{{/dress}}
+    <div class="nastri" data-anim="fadeinup" style="--d:.2s">
+      <i class="ns-asta" aria-hidden="true"></i>
+      <div class="dress-dots">{{#colors}}{{#hex}}<span class="nastro"><span class="ns-seta" role="img" aria-label="{{name}}" style="--c:{{hex}}"></span>{{#name}}<span class="ns-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+    </div>
+  </div>
+</section>

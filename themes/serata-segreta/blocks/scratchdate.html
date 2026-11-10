@@ -1,0 +1,17 @@
+<section class="sec date-sec fiammifero-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="fm" data-anim="fadein" style="--d:.15s">
+      <input class="fm-tg" type="checkbox" id="fiammifero-data">
+      <span class="fm-label">{{date.long}}</span>
+      <div class="fm-scena" aria-hidden="true">
+        <i class="fm-alone"></i>
+        <div class="fm-carta"><span class="fmd-wd">{{date.weekday}}</span><span class="fmd-day">{{date.day}}</span><span class="fmd-month">{{date.month}}</span><span class="fmd-year">{{date.year}}</span>{{#eventTime}}<span class="fmd-ora">{{eventTime}}</span>{{/eventTime}}</div>
+        <div class="fm-candela"><i class="fm-fiamma"></i><i class="fm-stoppino"></i><i class="fm-cera"></i><i class="fm-piattino"></i></div>
+        <i class="fm-fiammifero"><b></b></i>
+        <i class="fm-scintilla"></i>
+      </div>
+      <label class="fm-tap" for="fiammifero-data"><span class="fm-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

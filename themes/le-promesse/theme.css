@@ -1,0 +1,339 @@
+/* Le promesse. Una sola tinta per tutta la pagina: bordeaux, avorio e oro.
+   L'apertura è il cofanetto ottagonale di pelle bordeaux coi fregi d'oro e le due fedi, sul velluto rosso:
+   il coperchio si alza, sul cartoncino avorio compaiono due fedi d'oro e si entra nella sala con l'arco dorato.
+   La pagina alterna carta avorio e pelle bordeaux, e ogni sezione è un oggetto da legatoria o da gioielliere. */
+:root {
+  --bk-cover:#3d0a12;
+  --bord:#5c0f1b; --bord-d:#3d0a12; --bord-dd:#250509; --rubino:#8e1b2b;
+  --avorio:#efe7d8; --avorio-l:#f8f3ea; --avorio-m:#d9ccb6;
+  --oro-c:#c9a25e; --oro-l:#e8d3a0; --oro-d:#8f6c32;
+  --ink:#3d0a12; --muted:#7a5a52;
+  --display:'Italiana','Cormorant Garamond',Georgia,serif; --body:'Cormorant Garamond',Georgia,serif;
+  --script:'Pinyon Script','Cormorant Garamond',cursive; --caps:'Jost',system-ui,sans-serif;
+  --oro:linear-gradient(110deg,#8f6c32 4%,#c9a25e 24%,#f5e3b5 40%,#b38b4c 58%,#e8d3a0 74%,#8f6c32 96%);
+  --pelle:linear-gradient(#25050926,#25050966),var(--bord) url(assets/pelle.jpg) center/320px;
+  --raso:linear-gradient(90deg,#3d0a12,#8e1b2b 30%,#b8344a 46%,#7a1524 62%,#4a0c16);
+  --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--bord-d) }
+body { margin:0; color:var(--ink); background:var(--bord-d); font:400 19px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:inherit; text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--oro-c); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+/* Sezioni a tutta larghezza: carta avorio, oppure pelle bordeaux. */
+.sec,.footer-sec { position:relative; width:100%; max-width:none; margin:0; padding:68px 20px; overflow-wrap:anywhere }
+.sec { background:var(--avorio) url(assets/carta.jpg) center/700px }
+.doratura-sec,.ottagoni-sec,.arco-sec,.rocchetti-sec,.polvere-sec { color:var(--avorio); background:var(--pelle) }
+.polvere-sec { background:linear-gradient(#250509aa,#250509dd),var(--bord-d) url(assets/pelle.jpg) center/320px }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 20px; font:400 clamp(40px,11.5vw,58px)/1.1 var(--script); color:var(--bord); text-align:center }
+:is(.doratura-sec,.ottagoni-sec,.arco-sec,.rocchetti-sec,.polvere-sec) .title { color:var(--oro-l) }
+.title::after { content:""; display:block; width:150px; height:9px; margin:10px auto 0; background:linear-gradient(var(--oro-c),var(--oro-c)) left 50%/42% 1px no-repeat,linear-gradient(var(--oro-c),var(--oro-c)) right 50%/42% 1px no-repeat,linear-gradient(45deg,#0000 30%,var(--oro-c) 31% 69%,#0000 70%) center/9px 9px no-repeat }
+.body,.lettera { margin:0; text-wrap:pretty }
+.orn,.fl { display:none }
+.timeline { animation:none !important }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Apertura: il cofanetto ottagonale di pelle sul velluto rosso. I nomi in corsivo sotto il cofanetto. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--bord-dd) url(assets/cofanetto-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:absolute; z-index:2; left:0; right:0; top:78%; max-width:none; margin:0 auto; padding:0 16px; text-align:center; font:400 clamp(34px,10vw,52px)/1.1 var(--script); color:var(--avorio-l); text-shadow:0 2px 12px #250509 }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--bord)); border:1px solid var(--oro-d); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--rubino)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/emblema.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:91%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:6px; margin:0; padding:10px 24px; max-width:88vw; background:#25050999; border:1px solid #c9a25e80; border-radius:40px; text-align:center; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px) }
+[data-cover-tap][data-tap-plain] { background:none; border-color:transparent }
+[data-cover-label] { color:var(--oro-l); font:400 11.5px/1.3 var(--caps); letter-spacing:.28em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--oro-l); border-top:1px solid var(--oro-l); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening .env-top,.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: la sala con l'arco dorato e i fiori rossi; i nomi in oro sul velluto dentro l'arco. */
+.zone-hero { background:var(--bord-d) url(assets/sala.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip; padding:0; background:none }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:60%; transform:translate(-50%,-50%); width:24%; max-width:150px; aspect-ratio:3/4; object-fit:cover; z-index:2; border-radius:50% 50% 0 0 / 36% 36% 0 0; outline:1px solid var(--oro-c); outline-offset:4px }
+.h-text { position:absolute; left:25%; right:25%; top:17%; bottom:52%; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:0 4px; text-align:center; color:var(--oro-l) }
+.occasion { order:-1; font:400 10.5px/1.6 var(--caps); letter-spacing:.32em; text-transform:uppercase; color:var(--oro-l) }
+.occasion::after { content:""; display:block; width:58px; height:1px; margin:10px auto 0; background:var(--oro-c) }
+.names { font:400 clamp(30px,8.6vw,54px)/1.12 var(--display); letter-spacing:.04em; background:var(--oro); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--oro-l); text-wrap:balance; filter:drop-shadow(0 2px 6px #25050999) }
+.welcome { margin-top:2px; font:italic 400 17px/1.4 var(--body); color:var(--avorio-m) }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--oro-l); font:400 11px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:10px 22px; background:#250509b3; border:1px solid #c9a25e80; border-radius:30px; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px) }
+.arrow { width:10px; height:10px; margin:12px auto 0; border-right:1px solid var(--oro-l); border-bottom:1px solid var(--oro-l); transform:rotate(45deg) }
+
+/* La data dorata a foglia. Il tema sostituisce la data da grattare: sul cartoncino avorio la data è solo impressa a secco.
+   Al tocco (una casella nascosta, niente script) un pennello da doratore passa da sinistra a destra, posa la foglia d'oro
+   e le lettere si accendono, mentre qualche scaglia d'oro si stacca e cade. */
+.doratura-sec { overflow:hidden }
+.dg { --w:min(300px,80vw); position:relative; width:var(--w); margin:0 auto }
+.dg-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.dg-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.dg-carta { position:relative; width:100%; aspect-ratio:3/4; background:var(--avorio-l) url(assets/carta.jpg) center/500px; border-radius:2px; box-shadow:inset 0 0 0 10px #0000,inset 0 0 0 11px #c9a25e99,inset 0 0 0 14px #0000,inset 0 0 0 15px #c9a25e55,0 28px 50px #0008 }
+.dg-testo { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 10% }
+.dgd-wd { font:400 11px/1 var(--caps); letter-spacing:.34em; padding-left:.34em; text-transform:uppercase }
+.dgd-day { margin-top:8px; font:400 calc(var(--w) * .34)/1 var(--display) }
+.dgd-month { margin-top:-2px; font:400 calc(var(--w) * .15)/1.15 var(--script) }
+.dgd-year { margin-top:4px; font:400 12.5px/1 var(--caps); letter-spacing:.5em; padding-left:.5em }
+.dgd-ora { margin-top:14px; padding-top:9px; border-top:1px solid; font:italic 400 19px/1 var(--body) }
+/* Impresso a secco: lettere chiare con l'ombra in basso, come carta schiacciata. */
+.dg-cieco { color:#e4d8c3; text-shadow:0 1px 0 #fffaf0,0 -1px 0 #bfae92 }
+.dg-cieco .dgd-ora { border-color:#d8c9ad }
+/* La foglia d'oro: lo stesso testo, rivelato da sinistra a destra. */
+.dg-oro { color:transparent; background:linear-gradient(115deg,#6e4d1f 10%,#a7803d 30%,#e3c98c 44%,#8f6a30 56%,#c4a060 70%,#6e4d1f 90%) 0 0/220% 100%; -webkit-background-clip:text; background-clip:text; clip-path:inset(0 100% 0 0) }
+.dg-oro .dgd-ora { border-color:#c9a25e }
+.dg-foglia { position:absolute; width:9px; height:7px; background:var(--oro); clip-path:polygon(10% 0,100% 18%,84% 100%,0 76%); opacity:0 }
+.f1 { left:20%; top:30% } .f2 { left:34%; top:52% } .f3 { left:48%; top:38% } .f4 { left:60%; top:60% } .f5 { left:72%; top:34% } .f6 { left:84%; top:50% }
+/* Il pennello: setole morbide, ghiera d'oro, manico laccato bordeaux. La punta delle setole è il punto che dora. */
+.dg-pennello { position:absolute; left:74%; top:88%; width:22px; height:150px; translate:-50% -100%; rotate:28deg; transform-origin:50% 100%; filter:drop-shadow(-6px 10px 8px #25050966); z-index:2 }
+.dg-setole { position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:50% 50% 46% 46% / 30% 30% 70% 70%; background:linear-gradient(90deg,#8a6a4c,#e9dccb 40%,#fff8ee 52%,#b99a78 80%) }
+.dg-ghiera { position:absolute; left:2px; right:2px; bottom:32px; height:22px; border-radius:2px; background:linear-gradient(90deg,#8f6c32,#f5e3b5 42%,#b38b4c 70%,#8f6c32) }
+.dg-manico { position:absolute; left:4px; right:4px; bottom:52px; top:0; border-radius:40% 40% 2px 2px / 8% 8% 2px 2px; background:linear-gradient(90deg,#250509,#8e1b2b 38%,#c2475b 48%,#5c0f1b 70%,#250509) }
+.dg-tap { display:flex; justify-content:center; margin-top:24px; cursor:pointer }
+.dg-hint { white-space:nowrap; padding:11px 24px; font:400 11.5px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--bord-d); background:var(--oro); border-radius:30px; box-shadow:0 8px 18px #0006 }
+.dg-tg:focus-visible ~ .dg-tap .dg-hint { outline:3px solid var(--oro-l); outline-offset:4px }
+/* Dorato: stato finale (anche con «riduci movimento»). */
+.dg-tg:checked ~ .dg-tap { pointer-events:none }
+.dg-tg:checked ~ .dg-tap .dg-hint { opacity:0 }
+.dg-tg:checked ~ .dg-carta .dg-oro { clip-path:inset(0 0 0 0) }
+.dg-tg:checked ~ .dg-carta .dg-pennello { opacity:0 }
+@media (prefers-reduced-motion:no-preference) {
+  .dg-tg:not(:checked) ~ .dg-carta .dg-pennello { animation:attende 3s ease-in-out infinite alternate }
+  .dg-tg:checked ~ .dg-carta .dg-pennello { animation:pennellata 3.4s cubic-bezier(.45,0,.4,1) both }
+  .dg-tg:checked ~ .dg-carta .dg-oro { animation:dora 3.4s cubic-bezier(.45,0,.4,1) both,luccica 5s ease-in-out 3.6s infinite alternate }
+  .dg-tg:checked ~ .dg-carta .dg-foglia { animation:scaglia 1.6s ease-in both }
+  .dg-tg:checked ~ .dg-carta .f1 { animation-delay:.9s } .dg-tg:checked ~ .dg-carta .f2 { animation-delay:1.2s } .dg-tg:checked ~ .dg-carta .f3 { animation-delay:1.5s }
+  .dg-tg:checked ~ .dg-carta .f4 { animation-delay:1.8s } .dg-tg:checked ~ .dg-carta .f5 { animation-delay:2.1s } .dg-tg:checked ~ .dg-carta .f6 { animation-delay:2.4s }
+  .dg-tg:checked ~ .dg-tap .dg-hint { animation:svanisce .4s ease both }
+}
+@keyframes attende { from { rotate:28deg } to { rotate:22deg } }
+@keyframes pennellata {
+  0% { left:74%; top:88%; rotate:28deg; opacity:1 }
+  16% { left:6%; top:40%; rotate:34deg }
+  30% { left:28%; top:62% } 44% { left:42%; top:30% } 58% { left:58%; top:64% } 72% { left:76%; top:32% }
+  86% { left:96%; top:52%; rotate:26deg; opacity:1 }
+  100% { left:112%; top:30%; rotate:10deg; opacity:0 }
+}
+@keyframes dora { 0%,16% { clip-path:inset(0 100% 0 0) } 86%,100% { clip-path:inset(0 0 0 0) } }
+@keyframes luccica { from { background-position:0 0 } to { background-position:100% 0 } }
+@keyframes scaglia { 0% { opacity:0; transform:none } 15% { opacity:1 } 100% { opacity:0; transform:translate(10px,70px) rotate(220deg) } }
+@keyframes svanisce { to { opacity:0 } }
+
+/* Conto alla rovescia: quattro libri rilegati in pelle sulla mensola, coi nervi d'oro sul dorso,
+   il tassello scuro col numero dorato e il nome scritto in verticale; a destra un fermalibri d'ottone. */
+.scaffale { position:relative; display:flex; justify-content:center; align-items:flex-end; gap:0; max-width:400px; margin:0 auto; padding:0 0 14px }
+[data-countdown] { display:flex; align-items:flex-end; gap:5px }
+.time-block { --c:var(--bord); --h:236px; position:relative; display:flex; flex-direction:column; align-items:center; width:clamp(62px,17.5vw,78px); height:var(--h); min-width:0; padding:30px 0 0; border-radius:5px 5px 2px 2px;
+  background:
+    linear-gradient(var(--oro-c),var(--oro-c)) 0 13px/100% 1.5px no-repeat,
+    linear-gradient(var(--oro-c),var(--oro-c)) 0 18px/100% 1px no-repeat,
+    linear-gradient(var(--oro-c),var(--oro-c)) 0 calc(100% - 13px)/100% 1.5px no-repeat,
+    linear-gradient(var(--oro-c),var(--oro-c)) 0 calc(100% - 18px)/100% 1px no-repeat,
+    linear-gradient(90deg,#25050999,#ffffff1f 28%,#ffffff00 50%,#25050980),
+    var(--c) url(assets/pelle.jpg) center/320px;
+  box-shadow:inset 0 0 0 1px #25050966,4px 0 8px #25050933 }
+.time-block[data-cd-block="hours"] { --c:var(--rubino); --h:212px }
+.time-block[data-cd-block="minutes"] { --c:#4a0c16; --h:226px }
+.time-block[data-cd-block="seconds"] { --c:#6e1422; --h:198px }
+.lb-fregio { width:14px; height:14px; margin-bottom:10px; background:var(--oro); clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%) }
+.number-wrap { display:grid; place-items:center; width:calc(100% - 12px); padding:10px 0 9px; background:#250509; box-shadow:inset 0 0 0 1px #c9a25e,inset 0 0 0 3px #250509,inset 0 0 0 4px #c9a25e80 }
+.number { display:block; font:400 clamp(24px,7vw,32px)/1 var(--display); background:var(--oro); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--oro-l); transition:opacity .18s }
+.label { margin-top:14px; writing-mode:vertical-rl; rotate:180deg; font:400 10.5px/1 var(--caps); letter-spacing:.3em; text-transform:uppercase; color:var(--oro-l) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.45 }
+.lb-fermalibri { position:relative; width:18px; height:150px; margin-left:4px; border-radius:3px 3px 0 0; background:linear-gradient(90deg,#8f6c32,#f5e3b5 40%,#b38b4c 70%,#8f6c32); box-shadow:2px 0 6px #25050933 }
+.lb-fermalibri::after { content:""; position:absolute; right:0; bottom:0; width:44px; height:5px; background:inherit }
+.lb-mensola { position:absolute; left:-12px; right:-12px; bottom:0; height:14px; border-radius:2px; background:linear-gradient(#e8d3a0,#b38b4c 30%,#8f6c32 70%,#6b4f22); box-shadow:0 12px 18px #3d0a1240 }
+
+/* Messaggio: il biglietto avorio infilato negli angoli di una cartella di pelle bordeaux coi filetti d'oro. */
+.cartella { position:relative; max-width:460px; margin:0 auto; padding:22px; border-radius:6px; background:var(--pelle); box-shadow:inset 0 0 0 8px #0000,inset 0 0 0 9px #c9a25eb3,inset 0 0 0 12px #0000,inset 0 0 0 13px #c9a25e66,0 30px 50px #3d0a1240 }
+.biglietto { position:relative; padding:44px clamp(24px,7vw,40px) 36px; background:var(--avorio-l) url(assets/carta.jpg) center/500px; box-shadow:0 6px 14px #25050966 }
+.cr-angolo { position:absolute; width:42px; height:42px; background:linear-gradient(#25050926,#25050966),var(--bord) url(assets/pelle.jpg) center/320px; filter:drop-shadow(0 2px 2px #25050966) }
+.cr-angolo.tl { left:-4px; top:-4px; clip-path:polygon(0 0,100% 0,0 100%) }
+.cr-angolo.tr { right:-4px; top:-4px; clip-path:polygon(0 0,100% 0,100% 100%) }
+.cr-angolo.bl { left:-4px; bottom:-4px; clip-path:polygon(0 0,100% 100%,0 100%) }
+.cr-angolo.br { right:-4px; bottom:-4px; clip-path:polygon(100% 0,100% 100%,0 100%) }
+.cr-angolo::after { content:""; position:absolute; inset:0; background:linear-gradient(var(--dir,135deg),#0000 calc(50% - 1px),#c9a25e calc(50% - 1px) calc(50% + 0px),#0000 calc(50% + 1px)) }
+.cr-angolo.tl::after,.cr-angolo.br::after { --dir:45deg }
+.cartella .title { font-size:clamp(34px,10vw,48px) }
+.after { margin-top:4px }
+.lettera { font:italic 400 20px/1.75 var(--body); text-align:center; color:var(--ink) }
+.cr-firma { margin-top:18px; font:400 clamp(32px,9.4vw,44px)/1.1 var(--script); color:var(--bord) }
+
+/* Galleria: cornici ottagonali d'oro, come il cofanetto; una luce passa ogni tanto sull'oro. */
+.ottagoni-sec .card { max-width:560px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:10px 0 0; filter:drop-shadow(0 16px 18px #0008) }
+.us-grid figure { --o:polygon(18% 0,82% 0,100% 13%,100% 87%,82% 100%,18% 100%,0 87%,0 13%); position:relative; margin:0; min-width:0; padding:6px; background:var(--oro); clip-path:var(--o); overflow:hidden }
+.us-grid img { width:100%; aspect-ratio:3/4; object-fit:cover; clip-path:var(--o) }
+.us-grid figure:nth-child(3n) { --o:polygon(9% 0,91% 0,100% 15%,100% 85%,91% 100%,9% 100%,0 85%,0 15%); grid-column:span 2 }
+.us-grid figure:nth-child(3n) img { aspect-ratio:16/10 }
+.us-grid figure::after { content:""; position:absolute; inset:0; background:linear-gradient(115deg,#0000 35%,#fff6 50%,#0000 65%) -200% 0/250% 100% no-repeat; pointer-events:none }
+@media (prefers-reduced-motion:no-preference) {
+  .us-grid figure::after { animation:lampo 7s ease-in-out infinite }
+  .us-grid figure:nth-child(2) { --dl:1.2s } .us-grid figure:nth-child(3) { --dl:2.4s } .us-grid figure:nth-child(4) { --dl:3.6s } .us-grid figure:nth-child(5) { --dl:4.8s } .us-grid figure:nth-child(6) { --dl:6s }
+  .us-grid figure::after { animation-delay:var(--dl,0s) }
+}
+@keyframes lampo { 0%,70% { background-position:-200% 0 } 100% { background-position:300% 0 } }
+
+/* Immagine: la foto in una sottile cornice d'oro. */
+.img-block { position:relative; max-width:560px; margin-inline:auto !important; padding:9px; background:var(--oro); box-shadow:0 22px 40px #3d0a1233 }
+.img-block img { border-radius:0 !important }
+.img-block figcaption { padding:16px 8px 6px; margin:0 !important; color:var(--bord-d); opacity:1 !important; font:italic 400 19px/1.5 var(--body) !important; background:var(--avorio-l) }
+
+/* Programma: un segnalibro di raso bordeaux scende lungo la pagina; ogni tappa ha la sua borchia d'oro
+   e le voci si alternano a destra e a sinistra del nastro. */
+.segnalibro { position:relative; max-width:520px; margin:0 auto; padding:10px 0 40px }
+.sg-nastro { position:absolute; left:50%; top:-14px; bottom:0; width:30px; translate:-50% 0; background:var(--raso); clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 18px),0 100%); box-shadow:0 0 0 1px #25050933 }
+.sg-nastro::after { content:""; position:absolute; inset:0; background:linear-gradient(#ffffff00 0%,#ffffff2e 50%,#ffffff00 100%) 0 -100%/100% 40% no-repeat }
+@media (prefers-reduced-motion:no-preference) { .sg-nastro::after { animation:riflesso 6s ease-in-out infinite } }
+@keyframes riflesso { from { background-position:0 -60% } to { background-position:0 160% } }
+.tappe { position:relative }
+.t-row { display:grid; grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr); align-items:center; column-gap:14px; padding:14px 0 }
+.t-dot { grid-column:2; grid-row:1; justify-self:center; width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 36% 32%,#fbecc4,#c9a25e 45%,#8f6c32 80%); box-shadow:0 0 0 3px #3d0a12,0 0 0 4px #c9a25e,0 4px 8px #25050966 }
+.t-cell { grid-row:1; min-width:0 }
+.t-row:nth-child(odd) .t-cell { grid-column:1; text-align:right }
+.t-row:nth-child(even) .t-cell { grid-column:3; text-align:left }
+.t-time { font:400 24px/1 var(--display); color:var(--oro-d); letter-spacing:.04em }
+.t-name { margin-top:5px; font:400 19px/1.3 var(--body); color:var(--bord-d); text-wrap:balance }
+
+/* Location: la foto sotto un arco dorato in stile déco, coi raggi che si aprono come un sole; sotto, la targa. */
+.arco-sec { overflow:hidden }
+.arco { position:relative; width:min(320px,84vw); margin:40px auto 0 }
+.ar-raggi { position:absolute; left:50%; top:-36px; width:150%; aspect-ratio:2/1; translate:-50% 0; background:repeating-conic-gradient(from 270deg at 50% 100%,#c9a25e99 0 .7deg,#0000 .7deg 6deg); -webkit-mask:radial-gradient(farthest-side at 50% 100%,#0000 52%,#000 56%,#0000 100%); mask:radial-gradient(farthest-side at 50% 100%,#0000 52%,#000 56%,#0000 100%) }
+.ar-cornice { position:relative; padding:8px; background:var(--oro); border-radius:999px 999px 0 0; box-shadow:0 0 0 5px var(--bord-dd),0 0 0 6px #c9a25eb3,0 24px 40px #0009 }
+.ar-cornice img { width:100%; aspect-ratio:3/4.1; object-fit:cover; border-radius:999px 999px 0 0 }
+.ar-base { display:block; width:calc(100% + 34px); height:14px; margin:6px -17px 0; background:linear-gradient(#f5e3b5,#c9a25e 40%,#8f6c32); box-shadow:0 10px 16px #0008 }
+.ar-targa { margin-top:28px }
+.loc-name { font:400 clamp(28px,8.4vw,40px)/1.15 var(--display); letter-spacing:.06em; background:var(--oro); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--oro-l); text-wrap:balance }
+.loc-addr { margin-top:8px; font:400 10.5px/1.6 var(--caps); letter-spacing:.3em; text-transform:uppercase; color:var(--oro-l); opacity:1 !important }
+.loc-via { margin-top:12px; font:italic 400 19px/1.5 var(--body); color:var(--avorio-m) }
+
+/* Mappa: in una sottile cornice d'oro. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:7px; background:var(--oro) }
+.map-frame iframe { width:100%; height:300px; border:0; filter:sepia(.2) saturate(.8) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 0 0 / 30% 30% 0 0; height:360px }
+
+/* Come arrivare: in corsivo, tra due filetti d'oro. */
+.shuttle-box { max-width:500px; margin:0 auto; padding:20px 4px; border-top:1px solid #8f6c3280; border-bottom:1px solid #8f6c3280 }
+.shuttle-sec .body { font-style:italic; font-size:20px; line-height:1.6; color:var(--ink) }
+
+/* Dress code: il nome dell'abito in grande e i colori come rocchetti di filo di seta, con le flange d'ottone. */
+.dress { font:400 clamp(40px,11.5vw,64px)/1.1 var(--display); letter-spacing:.03em; color:var(--avorio-l); margin:0 0 34px; text-wrap:balance }
+.dress-dots { display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:26px 18px; max-width:440px; margin:0 auto }
+.rocchetto { display:inline-flex; flex-direction:column; align-items:center; width:58px; filter:drop-shadow(0 10px 10px #0008) }
+.rc-filo { position:relative; display:block; width:36px; height:54px; margin:9px 0; background:repeating-linear-gradient(172deg,#ffffff26 0 1px,#0000 1px 3px),linear-gradient(90deg,#00000066,#ffffff38 34%,#ffffff00 56%,#00000052),var(--c) }
+.rc-filo::before,.rc-filo::after { content:""; position:absolute; left:-9px; right:-9px; height:9px; border-radius:50%; background:linear-gradient(90deg,#8f6c32,#f5e3b5 40%,#b38b4c 70%,#8f6c32); box-shadow:inset 0 -2px 0 #6b4f22 }
+.rc-filo::before { top:-8px }
+.rc-filo::after { bottom:-8px }
+.rc-nome { margin-top:12px; font:400 9.5px/1.3 var(--caps); letter-spacing:.14em; text-transform:uppercase; color:var(--avorio-m); white-space:nowrap }
+
+/* Video: nella cornice d'oro ad arco. */
+.video-sec .card { padding:0 8px }
+.video-frame { position:relative; max-width:360px; margin:auto; aspect-ratio:9/14; padding:8px; background:var(--oro); border-radius:999px 999px 0 0 }
+.video-frame video { width:100%; height:100%; object-fit:cover; border-radius:999px 999px 0 0 }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--bord); color:var(--avorio) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il medaglione con le fedi, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:56px; height:56px; z-index:1000; display:grid; place-items:center; background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 6px 12px #0006; color:var(--avorio-l); border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:16px; height:16px; fill:currentColor; filter:drop-shadow(0 0 3px #000) }
+
+/* Conferma: un piccolo astuccio ottagonale aperto, come quello dell'apertura; sul cuscino avorio il medaglione con le fedi da toccare. */
+.rsvp-sec .card { padding:0 6px }
+.rsvp-sec .body { max-width:360px; margin:0 auto; font-style:italic; font-size:20px; color:var(--ink) }
+.astuccio { --ott:polygon(22% 0,78% 0,100% 22%,100% 78%,78% 100%,22% 100%,0 78%,0 22%); position:relative; display:grid; justify-items:center; width:250px; height:290px; margin:26px auto 4px }
+.as-coperchio,.as-fondo { position:absolute; left:0; right:0; background:var(--pelle); clip-path:var(--ott) }
+.as-coperchio { top:0; height:130px; clip-path:polygon(22% 0,78% 0,100% 30%,100% 100%,0 100%,0 30%) }
+.as-fondo { top:108px; height:182px; filter:drop-shadow(0 18px 20px #3d0a1240) }
+.as-coperchio::before,.as-fondo::before { content:""; position:absolute; inset:9px; background:radial-gradient(ellipse at 50% 40%,#f8f3ea,#e3d7c2 70%,#cdbd9f); clip-path:inherit }
+.as-coperchio::before { bottom:0 }
+.as-coperchio::after { content:""; position:absolute; left:9px; right:9px; bottom:0; height:16px; background:linear-gradient(#0000,#25050933) }
+.as-cuscino { position:absolute; left:50%; top:200px; width:170px; height:40px; translate:-50% -50%; border-radius:50%; background:radial-gradient(ellipse at 50% 45%,#bfae92 0 20%,#e8dcc8 60%,#f3ebdd); box-shadow:inset 0 3px 6px #8f7b5c66 }
+.seal-btn { position:absolute; left:50%; top:199px; z-index:1; width:122px; height:122px; translate:-50% -56%; display:grid; place-items:center; margin:0; border:0; border-radius:50%; color:var(--avorio); background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 12px 18px #25050966; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:translateY(-4px) rotate(-4deg); filter:drop-shadow(0 0 18px #e8d3a080) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+@media (prefers-reduced-motion:no-preference) { .seal-btn { animation:brilla 3.6s ease-in-out infinite alternate } }
+@keyframes brilla { from { filter:drop-shadow(0 0 0 #e8d3a000) } to { filter:drop-shadow(0 0 14px #e8d3a0aa) } }
+.seal-cue { display:inline-block; color:var(--avorio-l); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase; text-align:center; padding:11px 22px; margin:10px 0 0; background:var(--bord); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--oro-l); border-left:1px solid var(--oro-l); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#250509d9; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:112px 22px 30px; color:var(--ink); background:var(--avorio-l) url(assets/carta.jpg) center/700px; border-radius:2px; box-shadow:0 24px 80px #0009,inset 0 0 0 8px #0000,inset 0 0 0 9px var(--oro-c); overflow-wrap:anywhere }
+.popup__box::after { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:76px; height:76px; border-radius:50%; background:url(assets/emblema.webp) center/100% no-repeat; box-shadow:0 6px 12px #3d0a1240 }
+.popup__title { color:var(--bord-d); font:400 32px/1.15 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--bord); background:var(--avorio-l); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--bord) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 19px/1.4 var(--body); margin-bottom:8px; color:var(--bord-d) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffcf6; border-radius:2px; color:var(--ink); padding:12px; font:400 16px/1.4 var(--caps) }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 16px; border:1px solid #5c0f1b80; border-radius:24px; cursor:pointer; font:400 14px/1.3 var(--caps); background:#fffcf6 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--bord); background:#fff }
+.radio input:checked+.ind { background:var(--bord); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--bord) }
+.radio:has(input:focus-visible) { outline:3px solid var(--bord); outline-offset:3px }
+.submit { width:100%; min-height:50px; padding:14px 20px; border:0; border-radius:30px; background:var(--bord); color:var(--avorio-l); font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #3d0a1240 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--bord); font:500 13.5px/1.4 var(--caps); padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--bord); box-shadow:0 0 0 3px #5c0f1b1a }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 30px/1.2 var(--display); color:var(--bord-d) }
+.honey { display:none !important }
+
+/* Firma: sotto un arco d'oro sulla pelle scura, il medaglione, i nomi e la data; intorno brilla un po' di polvere d'oro. */
+.footer-sec { padding:80px 20px 60px; text-align:center; overflow:hidden }
+.polvere { position:absolute; inset:0; pointer-events:none }
+.polvere i { position:absolute; left:var(--x); top:var(--y); width:5px; height:5px; border-radius:50%; background:radial-gradient(circle,#fbecc4,#c9a25e 50%,#0000 72%); opacity:.3 }
+.footer-in { position:relative; max-width:440px; margin:auto }
+.fn-arco { padding:34px 22px 34px; border:1px solid #c9a25eb3; border-bottom:0; border-radius:999px 999px 0 0; box-shadow:inset 0 0 0 6px #0000,inset 0 0 0 7px #c9a25e4d; background:linear-gradient(#25050900 50%,#25050966) }
+.fn-emblema { width:92px; height:auto; margin:6px auto 14px }
+.polvere-sec .title { margin-bottom:10px }
+.polvere-sec .title::after { display:none }
+.fn-nomi { font:400 clamp(36px,10.5vw,62px)/1.1 var(--display); letter-spacing:.04em; color:var(--avorio-l); text-wrap:balance }
+.fn-data { margin-top:18px; font:400 12px/1 var(--caps); letter-spacing:.5em; padding-left:.5em; text-transform:uppercase; color:var(--oro-l) }
+.signature { margin-top:22px; font:italic 400 21px/1.5 var(--body); color:var(--avorio-m) }
+.credits { position:relative; max-width:460px; margin:26px auto 0; font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:#d9ccb699 }
+@media (prefers-reduced-motion:no-preference) { .polvere i { animation:scintilla var(--t) ease-in-out var(--r) infinite alternate } }
+@keyframes scintilla { from { opacity:.15; transform:scale(.6) } to { opacity:1; transform:scale(1.4) } }
+
+/* Ingressi: dissolvenze lente. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1s ease,transform 1s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(16px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+}
+@media (min-width:700px) {
+  .sec { padding:90px 40px }
+  .us-grid { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .us-grid figure:nth-child(3n) { grid-column:auto }
+  .us-grid figure:nth-child(3n) img { aspect-ratio:3/4 }
+  .us-grid figure:nth-child(3n) { --o:polygon(18% 0,82% 0,100% 13%,100% 87%,82% 100%,18% 100%,0 87%,0 13%) }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

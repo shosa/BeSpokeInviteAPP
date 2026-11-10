@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "nodo-di-seta",
+  "name": "Nodo di seta",
+  "description": "Un cofanetto di velluto blu notte a due ante, legato da un nastro di raso champagne col sigillo d'oro: il fiocco si scioglie e le ante si aprono sul cartoncino avorio. Dentro, una notte d'estate: la data in una costellazione, le palette di un tabellone, una pergamena, una giostra di foto e le fasi della luna.",
+  "models": [],
+  "themeColor": "#101a3a",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=MonteCarlo&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;1,7..72,300;1,7..72,400&family=Outfit:wght@300;400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/cofanetto.mp4",
+    "poster": "assets/cofanetto-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Ludovica & Edoardo",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-07-10",
+      "eventTime": "19:00",
+      "venue": "Villa delle Stelle",
+      "address": "Via del Belvedere 21, Fiesole (Firenze)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Sciogli la sera"
+    },
+    "message": {
+      "heading": "Una lettera per voi",
+      "body": "Cari famiglia e amici,\nabbiamo scelto una notte d'estate, sotto le stelle, per dirci sì.\nNon sarebbe la stessa senza di voi: vi aspettiamo per brindare insieme fino a tardi."
+    },
+    "gallery": {
+      "heading": "La giostra della sera",
+      "photos": [
+        "assets/cielo-luci.jpg",
+        "assets/brindisi.jpg",
+        "assets/danza.jpg",
+        "assets/lampadario-luci.jpg",
+        "assets/albero-luci.jpg",
+        "assets/calici.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavolata-luci.jpg",
+      "caption": "La lunga tavola sotto le luci, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "La notte, luna dopo luna",
+      "items": [
+        {
+          "time": "19:00",
+          "label": "Il sì al tramonto"
+        },
+        {
+          "time": "20:00",
+          "label": "Aperitivo in giardino"
+        },
+        {
+          "time": "21:00",
+          "label": "Cena sotto le stelle"
+        },
+        {
+          "time": "23:30",
+          "label": "Taglio della torta"
+        },
+        {
+          "time": "00:30",
+          "label": "Le danze fino a tardi"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa delle Stelle",
+      "kind": "villa",
+      "photo": "assets/viale-luci.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Da Firenze salite verso Fiesole e seguite le indicazioni per il Belvedere: la villa è in fondo al viale illuminato, con il parcheggio riservato agli ospiti.\nAlle 18:15 una navetta partirà da Piazza San Marco."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Black tie",
+      "colors": [
+        {
+          "hex": "#101A3A",
+          "name": "Notte"
+        },
+        {
+          "hex": "#D8B98A",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#F3ECE0",
+          "name": "Avorio"
+        },
+        {
+          "hex": "#5B6380",
+          "name": "Ardesia"
+        },
+        {
+          "hex": "#111111",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Una notte d'estate",
+      "video": "assets/foto-notte.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo sul nastro e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Untie the evening"
+    },
+    "message": {
+      "heading": "A letter for you",
+      "body": "Dear family and friends,\nwe chose a summer night, under the stars, to say yes.\nIt would not be the same without you: join us to raise a glass until late."
+    },
+    "gallery": {
+      "heading": "The evening carousel"
+    },
+    "image": {
+      "caption": "The long table under the lights, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The night, moon by moon",
+      "items": [
+        {
+          "time": "19:00",
+          "label": "Our yes at sunset"
+        },
+        {
+          "time": "20:00",
+          "label": "Aperitif in the garden"
+        },
+        {
+          "time": "21:00",
+          "label": "Dinner under the stars"
+        },
+        {
+          "time": "23:30",
+          "label": "Cutting the cake"
+        },
+        {
+          "time": "00:30",
+          "label": "Dancing until late"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "From Florence drive up to Fiesole and follow the signs to the Belvedere: the villa is at the end of the lit avenue, with parking reserved for guests.\nAt 6:15 pm a shuttle will leave from Piazza San Marco."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Black tie",
+      "colors": [
+        {
+          "hex": "#101A3A",
+          "name": "Night"
+        },
+        {
+          "hex": "#D8B98A",
+          "name": "Champagne"
+        },
+        {
+          "hex": "#F3ECE0",
+          "name": "Ivory"
+        },
+        {
+          "hex": "#5B6380",
+          "name": "Slate"
+        },
+        {
+          "hex": "#111111",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "A summer night"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the seal on the ribbon and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

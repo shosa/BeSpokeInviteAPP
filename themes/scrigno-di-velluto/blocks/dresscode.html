@@ -1,0 +1,7 @@
+<section class="sec dress-sec gemme-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.15s">{{dress}}</div>{{/dress}}
+    <div class="dress-dots" data-anim="fadeinup" style="--d:.2s">{{#colors}}{{#hex}}<span class="gemma"><span class="gm-castone"><span class="gm-pietra" role="img" aria-label="{{name}}" style="--c:{{hex}}"></span></span>{{#name}}<span class="gm-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+  </div>
+</section>

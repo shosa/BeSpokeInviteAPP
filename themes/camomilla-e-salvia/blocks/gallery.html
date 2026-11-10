@@ -1,0 +1,13 @@
+{{#hasPhotos}}
+<section class="sec us-sec fiore-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="fiore-foto" data-anim="fadein" style="--d:.1s">
+      <div class="us-grid">
+        {{#photos}}<figure><img src="{{.}}" loading="lazy" decoding="async" alt=""></figure>{{/photos}}
+      </div>
+      <i class="ff-cuore" aria-hidden="true"></i>
+    </div>
+  </div>
+</section>
+{{/hasPhotos}}

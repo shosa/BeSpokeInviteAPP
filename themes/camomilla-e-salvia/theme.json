@@ -1,0 +1,215 @@
+{
+  "engine": 2,
+  "id": "camomilla-e-salvia",
+  "name": "Camomilla e salvia",
+  "description": "Busta verde salvia a tutto schermo col sigillo avorio e la camomilla in rilievo, cartoncino avorio con camomilla e salvia pressate; la data compare quando una margherita perde i petali, uno dopo l'altro: m'ama, non m'ama.",
+  "models": [],
+  "themeColor": "#f6f3ea",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Cardo:ital,wght@0,400;1,400&family=Ephesis&family=Mulish:wght@300;400;600&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Margherita & Andrea",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-06-05",
+      "eventTime": "17:00",
+      "venue": "Cascina delle Camomille",
+      "address": "Strada di Campagna 3, Pienza (Siena)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "M'ama, non m'ama",
+      "body": "Da bambini sfogliavamo le margherite per sapere la risposta.\nOggi la conosciamo, e vorremmo festeggiarla con voi in un giorno di giugno, tra i campi di camomilla, con la semplicità delle cose che durano."
+    },
+    "gallery": {
+      "heading": "Petalo dopo petalo",
+      "photos": [
+        "assets/centrotavola.jpg",
+        "assets/prato.jpg",
+        "assets/secchiello.jpg",
+        "assets/mazzolino.jpg",
+        "assets/cartocci.jpg",
+        "assets/cespuglio.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavolata.jpg",
+      "caption": "La lunga tavola nel giardino, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "L'aiuola del giorno",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "Il sì nel prato"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitivo in giardino"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena sotto le stelle"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Cascina delle Camomille",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Da Pienza seguite la strada di campagna verso valle per due chilometri: la cascina è in fondo al viale di cipressi, e il parcheggio è riservato agli ospiti.\nAlle 16:15 una navetta partirà da Piazza Pio II."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante e leggero, nei colori di un giardino d'estate",
+      "colors": [
+        {
+          "hex": "#9FAE94",
+          "name": "Salvia"
+        },
+        {
+          "hex": "#E9C860",
+          "name": "Camomilla"
+        },
+        {
+          "hex": "#F4EFE2",
+          "name": "Panna"
+        },
+        {
+          "hex": "#C9D3BF",
+          "name": "Menta"
+        },
+        {
+          "hex": "#D9C4A8",
+          "name": "Lino"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "Bianco"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Un giorno di giugno",
+      "video": "assets/foto-camomilla.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo sul tovagliolo e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Loves me, loves me not",
+      "body": "As children we plucked daisies to find out the answer.\nToday we know it, and we would love to celebrate it with you on a June day, among the chamomile fields, with the simplicity of things that last."
+    },
+    "gallery": {
+      "heading": "Petal by petal"
+    },
+    "image": {
+      "caption": "The long table in the garden, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "The flowerbed of the day",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "Our yes in the meadow"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitif in the garden"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner under the stars"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "From Pienza follow the country road down the valley for two kilometres: the farmhouse is at the end of the cypress avenue, and parking is reserved for guests.\nAt 4:15 pm a shuttle will leave from Piazza Pio II."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant and light, in the colours of a summer garden",
+      "colors": [
+        {
+          "hex": "#9FAE94",
+          "name": "Sage"
+        },
+        {
+          "hex": "#E9C860",
+          "name": "Chamomile"
+        },
+        {
+          "hex": "#F4EFE2",
+          "name": "Cream"
+        },
+        {
+          "hex": "#C9D3BF",
+          "name": "Mint"
+        },
+        {
+          "hex": "#D9C4A8",
+          "name": "Linen"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        }
+      ]
+    },
+    "video": {
+      "heading": "A June day"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the seal on the napkin and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{{#hasItems}}
+<section class="sec prog-sec menu-sec">
+  <div class="card">
+    <div class="mn-foglio" aria-hidden="true"></div>
+    <img class="finial" src="assets/finial.svg" alt="" aria-hidden="true">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="timeline">
+      <div class="rail" aria-hidden="true"></div>
+      {{#items}}
+      <div class="t-row" data-anim="fadeinup">
+        <div class="t-cell"><span class="t-name">{{label}}</span><span class="t-dot" aria-hidden="true"></span><span class="t-time">{{time}}</span></div>
+      </div>
+      {{/items}}
+    </div>
+    <img class="orn" src="assets/ornament.svg" alt="" aria-hidden="true" data-anim="fadein" style="--d:.3s">
+  </div>
+</section>
+{{/hasItems}}

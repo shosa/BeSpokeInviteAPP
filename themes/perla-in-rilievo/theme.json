@@ -1,0 +1,197 @@
+{
+  "engine": 2,
+  "id": "perla-in-rilievo",
+  "name": "Perla in rilievo",
+  "description": "Una busta verticale di carta di cotone bianca, a tutto schermo, con il cartiglio barocco in rilievo a secco e una perla come chiusura, si apre sul cartoncino con gli angoli in rilievo: bianco perla e grigio argento dall'apertura alla firma. La data è sotto una lastra col cartiglio: si tocca la perla, la lastra preme come un torchio e lascia la data impressa nella carta, con il mese in lamina d'argento.",
+  "models": [],
+  "themeColor": "#f3f4f4",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&family=Jost:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Sofia & Edoardo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-05-22",
+      "eventTime": "17:00",
+      "venue": "Villa Perlata",
+      "address": "Via dei Colli 14, Fiesole (Firenze)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Impresso nel cuore",
+      "body": "Ci sono promesse che non hanno bisogno d'inchiostro: restano impresse, come un rilievo sulla carta.\nVorremmo che foste con noi nel giorno in cui la nostra diventa per sempre."
+    },
+    "gallery": {
+      "heading": "Bianco perla",
+      "photos": [
+        "assets/rose-perle.jpg",
+        "assets/fedi-perle.jpg",
+        "assets/scarpe-perle.jpg",
+        "assets/mani.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/ricevimento.jpg",
+      "caption": "Le tavole bianche nel giardino, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "La cerimonia nel giardino"
+        },
+        {
+          "time": "18:00",
+          "label": "Aperitivo in terrazza"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena sotto le luci"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa Perlata",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:15 una navetta partirà da Piazza Mino, a Fiesole."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del bianco e dell'argento",
+      "colors": [
+        {
+          "hex": "#3E434A",
+          "name": "Ardesia"
+        },
+        {
+          "hex": "#9AA0A8",
+          "name": "Argento"
+        },
+        {
+          "hex": "#E1E3E6",
+          "name": "Perla"
+        },
+        {
+          "hex": "#FCFCFC",
+          "name": "Bianco"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Riflessi di perla",
+      "video": "assets/foto-perle.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca la perla e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Pressed into our hearts",
+      "body": "Some promises need no ink: they stay pressed in, like relief on paper.\nWe would love you beside us on the day ours becomes forever."
+    },
+    "gallery": {
+      "heading": "Pearl white"
+    },
+    "image": {
+      "caption": "The white tables in the garden, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "The ceremony in the garden"
+        },
+        {
+          "time": "18:00",
+          "label": "Aperitif on the terrace"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner under the lights"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 4:15 pm a shuttle will leave from Piazza Mino, in Fiesole."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in white and silver tones",
+      "colors": [
+        {
+          "hex": "#3E434A",
+          "name": "Slate"
+        },
+        {
+          "hex": "#9AA0A8",
+          "name": "Silver"
+        },
+        {
+          "hex": "#E1E3E6",
+          "name": "Pearl"
+        },
+        {
+          "hex": "#FCFCFC",
+          "name": "White"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Pearl reflections"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the pearl and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

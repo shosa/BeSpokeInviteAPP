@@ -1,0 +1,139 @@
+{
+  "engine": 2,
+  "id": "malva-luminosa",
+  "name": "Malva luminosa",
+  "description": "Una busta malva ad arco smerlato, con sigillo alla peonia, si apre in un lampo di luce calda su peonie e piselli odorosi ricamati in rilievo: la stessa tinta malva, luminosa e cinematografica, fino alla firma.",
+  "models": [],
+  "themeColor": "#ece2ea",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cormorant+Upright:wght@400;500;600&family=Petit+Formal+Script&family=Quicksand:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Aurora & Filippo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-05-29",
+      "eventTime": "18:00",
+      "venue": "Villa delle Peonie",
+      "address": "Via dei Colli 14, Firenze"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Una luce nuova",
+      "body": "Ci sono incontri che accendono tutto, come la luce che filtra all'alba.\nVorremmo condividere con voi il giorno in cui la nostra si fa promessa."
+    },
+    "gallery": {
+      "heading": "Dettagli in fiore",
+      "photos": [
+        "assets/villa-peonie.jpg",
+        "assets/gazebo.jpg",
+        "assets/vaso-peonie.jpg",
+        "assets/scarpette.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/gazebo.jpg",
+      "caption": "Il gazebo fiorito dove ci diremo sì."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "18:00", "label": "La cerimonia" },
+        { "time": "19:00", "label": "Aperitivo al tramonto" },
+        { "time": "20:30", "label": "Cena tra le peonie" },
+        { "time": "23:00", "label": "Taglio della torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa delle Peonie",
+      "kind": "villa",
+      "photo": "assets/villa-peonie.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 17:15 una navetta partirà da Piazza Santa Croce."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del malva",
+      "colors": [
+        { "hex": "#5B3F5F", "name": "Prugna" },
+        { "hex": "#B896B4", "name": "Malva" },
+        { "hex": "#E6D9E3", "name": "Lilla" },
+        { "hex": "#F8F3F6", "name": "Cipria" }
+      ]
+    },
+    "video": {
+      "heading": "Luce di maggio",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo alla peonia e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A new light",
+      "body": "Some encounters light up everything, like the glow that filters in at dawn.\nWe would love to share with you the day ours becomes a promise."
+    },
+    "gallery": { "heading": "Details in bloom" },
+    "image": { "caption": "The flowered gazebo where we will say yes." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "18:00", "label": "The ceremony" },
+        { "time": "19:00", "label": "Sunset aperitif" },
+        { "time": "20:30", "label": "Dinner among the peonies" },
+        { "time": "23:00", "label": "Cutting the cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 5:15 pm a shuttle will leave from Piazza Santa Croce."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in mauve tones",
+      "colors": [
+        { "hex": "#5B3F5F", "name": "Plum" },
+        { "hex": "#B896B4", "name": "Mauve" },
+        { "hex": "#E6D9E3", "name": "Lilac" },
+        { "hex": "#F8F3F6", "name": "Blush" }
+      ]
+    },
+    "video": { "heading": "May light" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the peony seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

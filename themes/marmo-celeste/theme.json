@@ -1,0 +1,143 @@
+{
+  "engine": 2,
+  "id": "marmo-celeste",
+  "name": "Marmo celeste",
+  "description": "Carta marmorizzata fiorentina azzurra e bianca, sigillo di rame, cartoncino avorio con filigrane d'oro: una bottega di legatoria. La data affiora da una vasca di marmorizzazione.",
+  "models": [],
+  "themeColor": "#cfe0ec",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Playfair+Display+SC:wght@400;700&family=Playfair+Display:ital,wght@0,400;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Tangerine:wght@400;700&family=Josefin+Sans:wght@300;400&display=swap"
+  ],
+  "background": { "kind": "none" },
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Ginevra & Lorenzo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "17:00",
+      "venue": "Villa delle Carte",
+      "address": "Via di San Leonardo 21, Firenze"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "scratchdate": {
+      "dateTitle": "Il nostro giorno",
+      "revealLabel": "Lascia cadere la goccia"
+    },
+    "message": {
+      "heading": "Il primo capitolo",
+      "body": "Nella carta marmorizzata nessuna venatura è uguale a un'altra: nasce da una goccia di colore che si apre sull'acqua, e resta per sempre.\nCosì è stata la nostra storia. Ora vorremmo scriverne il capitolo più bello, a Firenze, insieme a voi."
+    },
+    "gallery": {
+      "heading": "La nostra quadreria",
+      "photos": [
+        "assets/arco.jpg",
+        "assets/fedi.jpg",
+        "assets/bouquet.jpg",
+        "assets/duomo.jpg",
+        "assets/calici.jpg",
+        "assets/fiori-fedi.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola.jpg",
+      "caption": "La tavola apparecchiata in bianco e celeste, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Indice della giornata",
+      "items": [
+        { "time": "17:00", "label": "La cerimonia nel giardino" },
+        { "time": "18:00", "label": "Aperitivo sulla terrazza" },
+        { "time": "20:00", "label": "Cena nella limonaia" },
+        { "time": "23:00", "label": "Taglio della torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa delle Carte",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:15 una navetta partirà da Porta Romana."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del celeste, dell'avorio e del rame",
+      "colors": [
+        { "hex": "#2F4A63", "name": "Notte" },
+        { "hex": "#9DBCD4", "name": "Celeste" },
+        { "hex": "#F3ECDC", "name": "Avorio" },
+        { "hex": "#A85A32", "name": "Rame" }
+      ]
+    },
+    "video": {
+      "heading": "Una sera a Firenze",
+      "video": "assets/foto-firenze.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Rompi il sigillo di rame e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": { "kicker": "Save the date", "occasion": "We're getting married", "scrollLabel": "Discover our day" },
+    "scratchdate": { "dateTitle": "Our day", "revealLabel": "Let the drop fall" },
+    "message": {
+      "heading": "The first chapter",
+      "body": "In marbled paper no two veins are alike: each one is born from a drop of colour opening on the water, and it stays forever.\nSo has our story been. Now we would love to write its most beautiful chapter, in Florence, together with you."
+    },
+    "gallery": { "heading": "Our little gallery" },
+    "image": { "caption": "The table laid in white and sky blue, where we will raise a glass together." },
+    "program": {
+      "heading": "Contents of the day",
+      "items": [
+        { "time": "17:00", "label": "The ceremony in the garden" },
+        { "time": "18:00", "label": "Aperitif on the terrace" },
+        { "time": "20:00", "label": "Dinner in the lemon house" },
+        { "time": "23:00", "label": "Cutting the cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 4:15 pm a shuttle will leave from Porta Romana."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in sky blue, ivory and copper tones",
+      "colors": [
+        { "hex": "#2F4A63", "name": "Night" },
+        { "hex": "#9DBCD4", "name": "Sky blue" },
+        { "hex": "#F3ECDC", "name": "Ivory" },
+        { "hex": "#A85A32", "name": "Copper" }
+      ]
+    },
+    "video": { "heading": "An evening in Florence" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Break the copper seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

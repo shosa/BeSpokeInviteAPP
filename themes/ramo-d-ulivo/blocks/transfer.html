@@ -1,0 +1,11 @@
+<section class="sec shuttle-sec mappa-sec">
+  <div class="card">
+    <div class="mp-disegno" aria-hidden="true" data-anim="fadein"></div>
+    <div class="mp-testo">
+      {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+      {{#body}}<div class="shuttle-box" data-anim="fadeinup" style="--d:.15s">
+        <p class="body">{{body | lines}}</p>
+      </div>{{/body}}
+    </div>
+  </div>
+</section>

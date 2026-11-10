@@ -1,0 +1,12 @@
+<section class="sec invito-sec lettera-sec">
+  <div class="card">
+    <div class="foglio foglio-dietro" aria-hidden="true"><div class="carta carta-scura"></div></div>
+    <div class="foglio foglio-davanti" aria-hidden="true"><div class="carta"></div></div>
+    <img class="lt-conchiglia" src="assets/floral-sprig.png" alt="" aria-hidden="true">
+    <div class="lt-testo">
+      {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+      {{#body}}<div class="after"><p class="lettera" data-anim="fadeinup">{{body | lines}}</p></div>{{/body}}
+      <div class="lt-firma" data-anim="fadein" style="--d:.3s">{{title}}</div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,14 @@
+<section class="sec loc-sec luogo-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="lg-scena">
+      {{#photo}}<figure class="stampa lg-stampa" data-anim="zoomin" style="--d:.1s"><span class="stampa-in"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""></span></figure>{{/photo}}
+      <div class="lg-etichetta" data-anim="fadeinup" style="--d:.3s">
+        <span class="foglio" aria-hidden="true"><span class="carta"></span></span>
+        <div class="loc-name">{{venue | lines}}</div>
+        {{#kindLabel}}<div class="loc-addr lg-tipo">{{kindLabel}}</div>{{/kindLabel}}
+        {{#address}}<div class="loc-addr">{{address | lines}}</div>{{/address}}
+      </div>
+    </div>
+  </div>
+</section>

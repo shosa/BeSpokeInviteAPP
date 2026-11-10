@@ -1,0 +1,284 @@
+/* Camomilla e salvia. Una sola tinta per tutta la pagina, chiara e fresca: avorio, verde salvia e il giallo tenue della camomilla.
+   L'invito è un giardino di campagna a giugno: busta salvia col sigillo avorio, poi bustine di semi, una campana di vetro,
+   una margherita di foto, i segnapiante nell'aiuola, le tazze di camomilla e un tovagliolo di lino. */
+:root {
+  --bk-cover:#e8ede2;
+  --ivory:#fbf8f0; --cream:#f4efe2; --linen:#ece6d6;
+  --sage-ll:#eef1e8; --sage-l:#c9d3bf; --sage:#9fae94; --sage-d:#5f6f57; --sage-dd:#46533f;
+  --ink:#3f4639; --muted:#6f7766;
+  --butter:#e9c860; --butter-l:#f6e7b0; --butter-d:#a88a2c;
+  --display:'Fraunces',Georgia,serif; --body:'Cardo',Georgia,serif;
+  --script:'Ephesis','Cardo',cursive; --caps:'Mulish',system-ui,sans-serif;
+  --card:600px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--ivory) }
+body { margin:0; color:var(--ink); background:transparent; font:400 17px/1.75 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+/* Carta avorio del cartoncino, ferma dietro tutta la pagina, con un velo salvia ai bordi. */
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:radial-gradient(120% 60% at 50% 0%,#eef1e800,#eef1e8 100%),var(--ivory) url(assets/carta.jpg) center/480px; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--sage-d); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--sage-d); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:48px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 24px; font:300 clamp(26px,7.4vw,36px)/1.22 var(--display); letter-spacing:.01em; color:var(--sage-dd); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:120px; height:16px; margin:12px auto 0; background:url(assets/ornament.svg) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:17px; line-height:1.85; text-wrap:pretty }
+.orn,.fl { display:none }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Busta-video: dietro, il fermo del cartoncino. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--sage) url(assets/busta-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 24px; text-align:center; font:300 17px/1.4 var(--display); color:var(--sage-dd); background:#fbf8f0e6; border:1px solid var(--sage-l); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--sage)); border:1px solid var(--sage-l); border-radius:3px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--sage-l)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:86%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 28px; max-width:85vw; background:#fbf8f0e0; border:1px solid var(--sage-l); border-radius:40px; text-align:center; box-shadow:0 10px 26px #46533f1f }
+[data-cover-tap][data-tap-plain] { background:none; border-color:transparent; box-shadow:none }
+[data-cover-label] { color:var(--sage-dd); font:400 12px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--sage-d); border-top:1px solid var(--sage-d); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: il cartoncino con camomilla e salvia pressate, i nomi al centro. */
+.zone-hero { background:var(--ivory) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:45%; transform:translate(-50%,-50%); width:46%; max-width:260px; aspect-ratio:1; object-fit:cover; z-index:2; border-radius:50%; border:5px solid #fff; box-shadow:0 0 0 1px var(--sage-l),0 14px 30px #46533f26 }
+.h-text { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:30% 15% 26%; text-align:center }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end; padding-bottom:20% }
+.occasion { order:-1; font:400 12px/1.5 var(--caps); letter-spacing:.38em; padding-left:.38em; text-transform:uppercase; color:var(--sage-d) }
+.names { font:400 clamp(62px,18vw,104px)/1 var(--script); color:var(--sage-dd); text-wrap:balance; padding:0 .08em }
+.welcome { font:400 11.5px/1.7 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:120px; height:16px; margin:2px auto 10px; background:url(assets/ornament.svg) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--sage-dd); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:9px 20px; background:#fbf8f0eb; border:1px solid var(--sage-l); border-radius:30px; box-shadow:0 8px 20px #46533f14 }
+.arrow { width:10px; height:10px; margin:12px auto 0; border-right:1px solid var(--sage-d); border-bottom:1px solid var(--sage-d); transform:rotate(45deg) }
+
+/* La data: m'ama, non m'ama. Il tema sostituisce la data da grattare: una camomilla aperta gira piano.
+   Al tocco (una casella nascosta, niente script) perde i petali uno dopo l'altro, che cadono leggeri;
+   il cuore giallo sale in alto e, dove c'era il fiore, compare la data. */
+.margherita-sec .title { margin-bottom:6px }
+.margherita { --w:min(310px,82vw); position:relative; width:var(--w); height:calc(var(--w) + 52px); margin:10px auto 0 }
+.mg-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.mg-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.mg-scena { position:absolute; left:0; top:0; width:var(--w); height:var(--w); border-radius:50%; background:radial-gradient(circle,#ffffffd9 0 50%,#ffffff00 70%) }
+.mg-fiore { position:absolute; inset:0 }
+.mg-petalo { --l:calc(var(--w) * .38); position:absolute; left:50%; top:50%; width:var(--l); height:calc(var(--l) * .26); margin-top:calc(var(--l) * -.13); transform-origin:0 50%; transform:rotate(var(--a)) translateX(calc(var(--w) * .08)); border-radius:40% 60% 60% 40% / 50% 50% 50% 50%; background:linear-gradient(#ffffff00 46%,#e7e4d899 50%,#ffffff00 54%),linear-gradient(90deg,#e9e6d6 0,#ffffff 22%,#ffffff 82%,#f1eee3); box-shadow:0 1px 3px #46533f2e,inset 0 0 0 1px #ece8dc }
+.mg-cuore { position:absolute; left:50%; top:50%; z-index:2; width:calc(var(--w) * .27); height:calc(var(--w) * .27); margin:calc(var(--w) * -.135) 0 0 calc(var(--w) * -.135); border-radius:50%; background:url(assets/cuore.webp) center/cover; box-shadow:0 3px 8px #a88a2c40 }
+.mg-data { position:absolute; inset:16%; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center }
+.mg-data > span { opacity:0 }
+.mgd-wd { font:400 10px/1 var(--caps); letter-spacing:.32em; padding-left:.32em; text-transform:uppercase; color:var(--muted) }
+.mgd-day { margin-top:6px; font:300 calc(var(--w) * .26)/1 var(--display); color:var(--sage-dd) }
+.mgd-month { margin-top:-2px; font:400 calc(var(--w) * .14)/1 var(--script); color:var(--butter-d) }
+.mgd-year { margin-top:4px; font:400 12px/1 var(--caps); letter-spacing:.46em; padding-left:.46em; color:var(--sage-d) }
+.mg-tap { position:absolute; inset:0; z-index:3; display:flex; align-items:flex-end; justify-content:center; cursor:pointer }
+.mg-hint { white-space:nowrap; padding:9px 22px; font:400 11.5px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--sage-dd); background:var(--ivory); border:1px solid var(--sage-l); border-radius:30px; box-shadow:0 8px 18px #46533f14 }
+.mg-tg:focus-visible ~ .mg-tap .mg-hint { outline:3px solid var(--sage-d); outline-offset:4px }
+/* Toccata: stato finale (anche con «riduci movimento»). */
+.mg-tg:checked ~ .mg-tap { pointer-events:none }
+.mg-tg:checked ~ .mg-tap .mg-hint { opacity:0 }
+.mg-tg:checked ~ .mg-scena .mg-petalo { opacity:0 }
+.mg-tg:checked ~ .mg-scena .mg-cuore { transform:translateY(calc(var(--w) * -.4)) scale(.36) }
+.mg-tg:checked ~ .mg-scena .mg-data > span { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .mg-fiore { animation:gira 60s linear infinite }
+  .mg-tg:checked ~ .mg-scena .mg-petalo { animation:cade 1.1s cubic-bezier(.4,0,.7,1) calc(.2s + var(--i) * .13s) both }
+  .mg-tg:checked ~ .mg-tap .mg-hint { animation:svanisce .4s ease both }
+  .mg-tg:checked ~ .mg-scena .mg-cuore { animation:sale 1.1s cubic-bezier(.5,0,.2,1) 2.4s both }
+  .mg-tg:checked ~ .mg-scena .mgd-wd { animation:appare .9s ease 2.9s both }
+  .mg-tg:checked ~ .mg-scena .mgd-day { animation:affiora 1.3s ease-out 3.1s both }
+  .mg-tg:checked ~ .mg-scena .mgd-month { animation:appare 1s ease 3.6s both }
+  .mg-tg:checked ~ .mg-scena .mgd-year { animation:appare 1s ease 3.9s both }
+}
+@keyframes gira { to { transform:rotate(360deg) } }
+@keyframes cade { 0% { opacity:1; translate:0 0; rotate:0deg } 25% { opacity:1; translate:6px -6px } 100% { opacity:0; translate:calc(var(--w) * .08) calc(var(--w) * .55); rotate:50deg } }
+@keyframes sale { from { transform:none } to { transform:translateY(calc(var(--w) * -.4)) scale(.36) } }
+@keyframes affiora { 0% { opacity:0; filter:blur(5px) } 70% { opacity:1 } 100% { opacity:1; filter:none } }
+@keyframes appare { from { opacity:0; transform:translateY(5px) } to { opacity:1; transform:none } }
+@keyframes svanisce { to { opacity:0 } }
+
+/* Conto alla rovescia: quattro bustine di semi, con il risvolto salvia e il fiore stampato. */
+.semi { max-width:460px; margin:0 auto }
+[data-countdown] { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px }
+.time-block { position:relative; display:flex; flex-direction:column; align-items:center; min-width:0; padding:36px 4px 12px; background:var(--cream) url(assets/carta.jpg) center/300px; border:1px solid var(--sage-l); border-radius:2px; box-shadow:0 10px 18px #46533f1a,inset 0 0 0 4px var(--ivory),inset 0 0 0 5px #c9d3bf8c }
+/* Il risvolto in alto, con la riga tratteggiata dello strappo. */
+.time-block::before { content:""; position:absolute; left:-1px; right:-1px; top:-1px; height:24px; background:var(--sage-l); border-bottom:1px dashed var(--sage-d); border-radius:2px 2px 0 0 }
+.number-wrap { position:relative; display:grid; place-items:center; width:100% }
+.number-wrap::before { content:""; display:block; width:26px; height:26px; margin:0 auto 6px; background:url(assets/margherita.svg) center/contain no-repeat }
+.number { display:block; font:300 clamp(24px,7vw,34px)/1 var(--display); color:var(--sage-dd); transition:opacity .18s }
+.label { margin-top:8px; font:400 9.5px/1.2 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.5 }
+
+/* Messaggio: sotto una campana di vetro, con un rametto di camomilla appoggiato sul piatto. */
+.campana { position:relative; max-width:440px; margin:0 auto; padding-bottom:12px }
+.cp-vetro { position:relative; z-index:1; padding:100px clamp(26px,8vw,46px) 156px; border-radius:50% 50% 16px 16px / 30% 30% 16px 16px; background:radial-gradient(ellipse 26% 16% at 30% 14%,#ffffffd9,#ffffff00 70%),linear-gradient(100deg,#ffffff00 7%,#ffffff73 12%,#ffffff00 20%,#ffffff00 80%,#ffffff4d 87%,#ffffff00 93%),#f6f9f2b3; border:1px solid #c9d3bfcc; box-shadow:inset 0 0 0 2px #ffffffcc,inset 0 0 32px #c9d3bf8c,0 20px 40px #46533f1a }
+/* Il pomello in cima. */
+.cp-vetro::before { content:""; position:absolute; left:50%; top:-18px; width:34px; height:30px; translate:-50% 0; border-radius:50% 50% 40% 40%; background:radial-gradient(circle at 35% 30%,#ffffff,#e6ede0 60%,#c9d3bf); box-shadow:0 0 0 1px #c9d3bf,0 4px 6px #46533f1f }
+.cp-rametto { position:absolute; left:50%; bottom:14px; width:86px; height:auto; translate:-50% 0; rotate:-8deg }
+.cp-piatto { position:relative; display:block; height:26px; margin:-14px -14px 0; border-radius:50%; background:radial-gradient(ellipse at 50% 30%,#ffffff,#f1ece0 70%,#dcd5c3); box-shadow:0 0 0 1px #d9d3c4,0 12px 18px #46533f1f }
+.after { margin-top:4px }
+.lettera { font:italic 400 18px/1.9 var(--body); text-align:center; color:var(--ink) }
+
+/* Galleria: una margherita di foto. Sei petali intorno al cuore giallo, ognuno con la sua foto. */
+.fiore-foto { --s:min(350px,92vw); position:relative; width:var(--s); height:var(--s); margin:10px auto 0 }
+.us-grid { position:absolute; inset:0; margin:0 }
+.us-grid figure { --a:0deg; position:absolute; left:50%; top:50%; width:calc(var(--s) * .31); height:calc(var(--s) * .43); margin:calc(var(--s) * -.43) 0 0 calc(var(--s) * -.155); transform-origin:50% 100%; transform:rotate(var(--a)) translateY(calc(var(--s) * -.06)); overflow:hidden; border-radius:50% 50% 50% 50% / 58% 58% 42% 42%; background:var(--sage-ll); box-shadow:0 0 0 4px #ffffff,0 0 0 5px #c9d3bf,0 10px 20px #46533f26 }
+.us-grid figure:nth-child(2) { --a:60deg } .us-grid figure:nth-child(3) { --a:120deg } .us-grid figure:nth-child(4) { --a:180deg }
+.us-grid figure:nth-child(5) { --a:240deg } .us-grid figure:nth-child(6) { --a:300deg }
+.us-grid img { position:absolute; left:50%; top:50%; width:150%; height:150%; max-width:none; object-fit:cover; transform:translate(-50%,-50%) rotate(calc(var(--a) * -1)) }
+.fiore-foto { --s:min(360px,94vw) }
+.ff-cuore { position:absolute; left:50%; top:50%; z-index:2; width:calc(var(--s) * .22); height:calc(var(--s) * .22); translate:-50% -50%; border-radius:50%; background:url(assets/cuore.webp) center/cover; box-shadow:0 0 0 4px #ffffff,0 6px 14px #a88a2c4d }
+
+/* Immagine: un foglio d'avorio con la foto e la didascalia scritta sotto. */
+.img-block { position:relative; max-width:540px; margin-inline:auto !important; padding:12px 12px 4px; background:var(--ivory); border:1px solid var(--sage-l); border-radius:3px; box-shadow:0 18px 36px #46533f1a }
+.img-block img { border-radius:2px !important }
+.img-block figcaption { padding:14px 10px 10px; margin:0 !important; color:var(--muted); opacity:1 !important; font:italic 400 16px/1.6 var(--body) !important }
+
+/* Programma: l'aiuola. Ogni tappa è un segnapiante di legno chiaro piantato nella terra, con l'ora e il nome scritti a mano. */
+.aiuola { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px 14px; max-width:440px; margin:0 auto }
+.t-row { position:relative; display:flex; flex-direction:column; align-items:center; padding-bottom:16px }
+.t-row:last-child:nth-child(odd) { grid-column:span 2; width:50%; justify-self:center }
+.t-cell { position:relative; z-index:1; width:100%; padding:20px 10px 14px; background:var(--ivory) url(assets/carta.jpg) center/300px; border:1px solid var(--sage-l); border-radius:44px 44px 6px 6px; box-shadow:inset 0 0 0 4px var(--ivory),inset 0 0 0 5px #c9d3bf8c,0 8px 14px #46533f1a }
+.t-dot { width:12px; height:62px; margin-top:-2px; background:linear-gradient(90deg,#d9cfb8,#fbf8f0 45%,#e2d9c4); clip-path:polygon(0 0,100% 0,100% 84%,50% 100%,0 84%) }
+/* La terra, con un ciuffo di salvia. */
+.t-row::after { content:""; position:absolute; bottom:0; left:50%; width:76%; height:26px; translate:-50% 0; border-radius:50% 50% 40% 40%; background:url(assets/salvia.webp) 50% 0/46px auto no-repeat,radial-gradient(ellipse at 50% 70%,#c9d3bf,#c9d3bf00 70%) }
+.t-time { font:300 22px/1.2 var(--display); color:var(--sage-dd) }
+.t-name { margin-top:3px; font-size:15px; line-height:1.45; color:var(--ink) }
+
+/* Location: la foto tonda e sotto l'insegna di legno chiaro, appesa a due cordini. */
+.insegna-sec .card { max-width:400px }
+.is-foto { width:min(240px,66vw); aspect-ratio:1; margin:0 auto; padding:7px; border-radius:50%; background:#ffffff; box-shadow:0 0 0 1px var(--sage-l),0 16px 32px #46533f1f }
+.loc-photo { width:100%; height:100%; object-fit:cover; border-radius:50% }
+.insegna { position:relative; width:min(320px,88%); margin:-6px auto 0; padding-top:44px }
+.is-corda { position:absolute; top:0; height:50px; width:2px; background:var(--sage) }
+.is-corda.l { left:22% }
+.is-corda.r { right:22% }
+.is-tavola { padding:20px 18px 18px; background:var(--ivory) url(assets/carta.jpg) center/300px; border:1px solid var(--sage-l); border-radius:8px; box-shadow:inset 0 0 0 5px var(--ivory),inset 0 0 0 6px var(--sage-l),0 14px 28px #46533f1f }
+.loc-name { font:300 clamp(24px,7vw,31px)/1.2 var(--display); color:var(--sage-dd); text-wrap:balance }
+.loc-addr { margin-top:4px; font:400 10.5px/1.6 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--muted); opacity:1 !important }
+.loc-via { margin-top:4px; font:italic 400 15px/1.55 var(--body); color:var(--ink) }
+
+/* Mappa: in una cornice d'avorio. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:9px; background:var(--ivory); border:1px solid var(--sage-l); border-radius:8px; box-shadow:0 18px 36px #46533f1a }
+.map-frame iframe { width:100%; height:300px; border:0; border-radius:4px; filter:saturate(.6) sepia(.1) brightness(1.03) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 4px 4px / 30% 30% 4px 4px; height:360px }
+
+/* Come arrivare: un foglio avorio col filetto salvia. */
+.shuttle-box { max-width:460px; margin:0 auto; padding:24px clamp(18px,6vw,34px); background:var(--ivory); border-radius:4px; box-shadow:inset 0 0 0 6px var(--ivory),inset 0 0 0 7px var(--sage-l),0 14px 30px #46533f14 }
+
+/* Dress code: le tazze di camomilla viste dall'alto, ognuna col suo colore nel piattino. */
+.dress { font:italic 400 20px/1.5 var(--body); color:var(--sage-dd); margin:0 0 24px }
+.dress-dots { display:flex; flex-wrap:wrap; justify-content:center; gap:18px 10px; max-width:420px; margin:0 auto }
+.tazza { display:inline-flex; flex-direction:column; align-items:center; gap:9px; width:76px }
+.tz-piattino { position:relative; display:grid; place-items:center; width:70px; height:70px; border-radius:50%; background:radial-gradient(circle,#ffffff 0 52%,#efeadf 53% 57%,#ffffff 58% 86%,#e4ded1 88%,#ffffff 92%); box-shadow:0 6px 12px #46533f26 }
+.tz-tazza { position:relative; display:grid; place-items:center; width:48px; height:48px; border-radius:50%; background:#ffffff; box-shadow:inset 0 0 0 2px #ffffff,inset 0 0 0 3px #e4ded1,0 3px 6px #46533f33 }
+/* Il manico. */
+.tz-tazza::after { content:""; position:absolute; right:-11px; top:50%; width:13px; height:10px; translate:0 -50%; border:3px solid #ffffff; border-left:0; border-radius:0 7px 7px 0; box-shadow:2px 2px 3px #46533f26 }
+.tz-te { display:block; width:36px; height:36px; border-radius:50%; background:radial-gradient(circle at 38% 34%,color-mix(in srgb,var(--c) 60%,#fff) 0 14%,var(--c) 46%,color-mix(in srgb,var(--c) 82%,#46533f)); box-shadow:inset 0 0 0 1px #46533f1a }
+.tz-nome { font:400 9.5px/1.3 var(--caps); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); white-space:nowrap }
+
+/* Video: dentro un ovale d'avorio. */
+.video-sec .card { padding:0 12px }
+.video-frame { position:relative; overflow:hidden; width:min(320px,82vw); margin:auto; aspect-ratio:3/4.2; padding:9px; border-radius:50%; background:#ffffff; box-shadow:0 0 0 1px var(--sage-l),0 20px 40px #46533f1f }
+.video-frame video { width:100%; height:100%; object-fit:cover; border-radius:50% }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--sage-l); border-radius:50%; background:#fbf8f0e6; color:var(--sage-dd) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo avorio, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:var(--sage-dd); border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:17px; height:17px; fill:currentColor }
+
+/* Conferma: il sigillo della busta su un tovagliolo di lino piegato, con un rametto di camomilla. */
+.rsvp-sec .card { padding:0 10px 10px }
+.rsvp-sec .body { max-width:340px; margin:0 auto; font-style:italic }
+.tovagliolo { position:relative; display:grid; place-items:center; width:236px; height:236px; margin:20px auto 4px }
+.tv-lino { position:absolute; inset:14%; transform:rotate(45deg); border-radius:3px; background:linear-gradient(135deg,#0000 49.6%,#d8d1c0 50%,#0000 50.6%),repeating-linear-gradient(0deg,#46533f08 0 1px,#0000 1px 3px),repeating-linear-gradient(90deg,#46533f08 0 1px,#0000 1px 3px),var(--ivory); box-shadow:inset 0 0 0 7px var(--ivory),inset 0 0 0 8px var(--sage-l),0 16px 30px #46533f26 }
+.tv-rametto { position:absolute; left:6%; top:2%; width:92px; height:auto; rotate:-28deg; filter:drop-shadow(0 4px 4px #46533f1f) }
+.seal-btn { position:relative; z-index:1; width:118px; height:118px; display:grid; place-items:center; margin:0; border:0; border-radius:50%; color:var(--sage-dd); background:url(assets/sigillo.webp) center/contain no-repeat; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:translateY(-2px) rotate(-4deg); filter:drop-shadow(0 0 14px #ffffff) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--sage-dd); font:400 11px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; text-align:center; padding:9px 20px; margin:10px 0 20px; background:var(--ivory); border:1px solid var(--sage-l); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--sage-d); border-left:1px solid var(--sage-d); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#46533fb3; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:104px 22px 30px; color:var(--ink); background:var(--ivory) url(assets/carta.jpg) center/420px; border-radius:6px; box-shadow:0 24px 80px #2a32264d,inset 0 0 0 8px var(--ivory),inset 0 0 0 9px var(--sage-l); overflow-wrap:anywhere }
+.popup__box::before { content:""; position:absolute; z-index:-1; top:4px; left:4px; width:110px; height:130px; background:url(assets/rametto.webp) left top/contain no-repeat; rotate:-14deg; opacity:.9 }
+.popup__box::after { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:64px; height:64px; background:url(assets/sigillo.webp) center/contain no-repeat }
+.popup__title { color:var(--sage-dd); font:300 26px/1.35 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:12px; top:12px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--sage-l); background:#ffffff; border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--sage-dd) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 15.5px/1.5 var(--body); margin-bottom:8px; color:var(--sage-dd) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#ffffff; border-radius:4px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 16px; border:1px solid var(--sage); border-radius:24px; cursor:pointer; font-size:15px; background:#ffffff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--sage-d); background:#fff }
+.radio input:checked+.ind { background:var(--sage-dd); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--sage-dd) }
+.radio:has(input:focus-visible) { outline:3px solid var(--sage-dd); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--sage-dd); border-radius:30px; background:var(--sage-dd); color:#ffffff; font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #46533f33 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--sage-dd); font:600 13.5px/1.4 var(--caps); padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--sage-dd); box-shadow:0 0 0 3px var(--sage-ll) }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:300 26px/1.3 var(--display); color:var(--sage-dd) }
+.honey { display:none !important }
+
+/* Firma: il sigillo, la firma in corsivo e in fondo un prato di camomilla e salvia che cresce dal bordo. */
+.footer-sec { padding:54px 0 0; text-align:center; max-width:none; overflow:hidden }
+.footer-in { position:relative; max-width:460px; margin:auto; padding:0 18px }
+.pr-sigillo { width:74px; height:auto; margin:0 auto 12px }
+.footer-in .title { font-size:clamp(22px,6vw,28px) }
+.footer-in .title::after { display:none }
+.signature { font:400 clamp(54px,15vw,80px)/1.1 var(--script); color:var(--sage-dd) }
+.credits { max-width:460px; margin:18px auto 0; padding:0 18px; font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+.prato { display:flex; justify-content:space-around; align-items:flex-end; height:120px; margin-top:20px; padding:0 4px; background:linear-gradient(#e8ede200 60%,#e8ede2) }
+.prato { overflow:hidden }
+.prato img { width:74px; max-width:15%; min-width:0; height:auto; margin-bottom:-14px; transform-origin:50% 100% }
+.prato img:nth-child(2n) { width:56px }
+.prato img:nth-child(3n) { width:64px }
+
+/* Ingressi: dissolvenze lente; i fiori del prato si muovono appena. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .9s ease,transform .9s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(12px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .prato img { animation:brezza 4.5s ease-in-out infinite alternate }
+  .prato img:nth-child(2n) { animation-delay:-2s; animation-duration:5.5s }
+}
+@keyframes brezza { from { rotate:-3deg } to { rotate:3deg } }
+@media (min-width:700px) {
+  .sec { padding:66px 40px }
+  .h-text { padding:26% 26% 24% }
+  .occasion { font-size:14px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

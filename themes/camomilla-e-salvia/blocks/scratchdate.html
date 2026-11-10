@@ -1,0 +1,15 @@
+<section class="sec date-sec margherita-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="margherita" data-anim="fadein" style="--d:.15s">
+      <input class="mg-tg" type="checkbox" id="margherita-data">
+      <span class="mg-label">{{date.long}}</span>
+      <div class="mg-scena" aria-hidden="true">
+        <div class="mg-fiore"><i class="mg-petalo" style="--a:0.0deg;--i:0"></i><i class="mg-petalo" style="--a:22.5deg;--i:8"></i><i class="mg-petalo" style="--a:45.0deg;--i:4"></i><i class="mg-petalo" style="--a:67.5deg;--i:12"></i><i class="mg-petalo" style="--a:90.0deg;--i:2"></i><i class="mg-petalo" style="--a:112.5deg;--i:10"></i><i class="mg-petalo" style="--a:135.0deg;--i:6"></i><i class="mg-petalo" style="--a:157.5deg;--i:14"></i><i class="mg-petalo" style="--a:180.0deg;--i:1"></i><i class="mg-petalo" style="--a:202.5deg;--i:9"></i><i class="mg-petalo" style="--a:225.0deg;--i:5"></i><i class="mg-petalo" style="--a:247.5deg;--i:13"></i><i class="mg-petalo" style="--a:270.0deg;--i:3"></i><i class="mg-petalo" style="--a:292.5deg;--i:11"></i><i class="mg-petalo" style="--a:315.0deg;--i:7"></i><i class="mg-petalo" style="--a:337.5deg;--i:15"></i></div>
+        <i class="mg-cuore"></i>
+        <div class="mg-data"><span class="mgd-wd">{{date.weekday}}</span><span class="mgd-day">{{date.day}}</span><span class="mgd-month">{{date.month}}</span><span class="mgd-year">{{date.year}}</span></div>
+      </div>
+      <label class="mg-tap" for="margherita-data"><span class="mg-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

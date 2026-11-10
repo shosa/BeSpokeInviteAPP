@@ -1,0 +1,9 @@
+<section class="footer-sec punzoni-sec">
+  <div class="footer-in">
+    <img class="pz-sigillo" src="assets/sigillo.webp" alt="" aria-hidden="true" data-anim="fadein">
+    <h2 class="title" data-anim="fadein" style="--d:.15s">{{t.footerTitle}}</h2>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <div class="punzoni" data-anim="fadein" style="--d:.45s" aria-hidden="true"><span class="pz pz-ovale">{{monogram}}</span><span class="pz pz-mughetto"></span><span class="pz pz-rett">{{date.year}}</span></div>
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

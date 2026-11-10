@@ -1,0 +1,384 @@
+/* Carta di cotone. Una sola tinta per tutta la pagina: bianco latte di carta fatta a mano, coi bordi sfrangiati;
+   l'oro antico del sigillo col rametto d'ulivo come unico metallo; rosa cipria e verde salvia solo come accenti
+   (il foglio sotto, il nastro di seta, le erbe pressate). Cartoleria artigianale: lettere piegate, timbri a secco,
+   menu a caratteri mobili, album con gli angolini, cartellini d'erbario. */
+:root {
+  --bk-cover:#efe9df;
+  --latte:#f6f3ec; --foglio:#f9f7f2; --foglio-2:#efe9df; --rosa:#e4cfc8; --rosa-chiaro:#f0e3de;
+  --salvia:#9aa58f; --salvia-scura:#56614d; --oro:#b08f55; --oro-chiaro:#d8c08e; --oro-scuro:#765a2a;
+  --ink:#38312a; --muted:#5b5247; --line:#cdbfa6;
+  --shadow:#4a3b2a29; --panel:rgba(249,247,242,.93);
+  --display:'Italiana','Didot','Bodoni 72',Georgia,serif; --text:'EB Garamond',Garamond,Georgia,serif;
+  --script:'Allura','EB Garamond',cursive; --body:'Montserrat',system-ui,sans-serif;
+  --card:600px;
+  --lamina:linear-gradient(115deg,#7a5c2b 0%,#b8975c 28%,#e6d3a3 45%,#a8864a 62%,#7d602f 82%,#b89a62 100%);
+  /* Bordo sfrangiato della carta di cotone: quattro strisce, quattro angoli e il centro pieno. */
+  --sfr:url(assets/sfrangio-as.png) 0 0/17px 17px no-repeat,url(assets/sfrangio-ad.png) 100% 0/17px 17px no-repeat,url(assets/sfrangio-bs.png) 0 100%/17px 17px no-repeat,url(assets/sfrangio-bd.png) 100% 100%/17px 17px no-repeat,url(assets/sfrangio-alto.png) 50% 0/calc(100% - 34px) 17px no-repeat,url(assets/sfrangio-basso.png) 50% 100%/calc(100% - 34px) 17px no-repeat,url(assets/sfrangio-sx.png) 0 50%/17px calc(100% - 34px) no-repeat,url(assets/sfrangio-dx.png) 100% 50%/17px calc(100% - 34px) no-repeat,linear-gradient(#000 0 0) 50% 50%/calc(100% - 30px) calc(100% - 30px) no-repeat;
+  --sfr-fine:url(assets/sfrangio-as.png) 0 0/11px 11px no-repeat,url(assets/sfrangio-ad.png) 100% 0/11px 11px no-repeat,url(assets/sfrangio-bs.png) 0 100%/11px 11px no-repeat,url(assets/sfrangio-bd.png) 100% 100%/11px 11px no-repeat,url(assets/sfrangio-alto.png) 50% 0/calc(100% - 22px) 11px no-repeat,url(assets/sfrangio-basso.png) 50% 100%/calc(100% - 22px) 11px no-repeat,url(assets/sfrangio-sx.png) 0 50%/11px calc(100% - 22px) no-repeat,url(assets/sfrangio-dx.png) 100% 50%/11px calc(100% - 22px) no-repeat,linear-gradient(#000 0 0) 50% 50%/calc(100% - 18px) calc(100% - 18px) no-repeat;
+  /* Solo i fianchi sfrangiati (pannelli della lettera piegata). */
+  --sfr-lati:url(assets/sfrangio-sx.png) 0 50%/11px 100% no-repeat,url(assets/sfrangio-dx.png) 100% 50%/11px 100% no-repeat,linear-gradient(#000 0 0) 50% 50%/calc(100% - 18px) 100% no-repeat;
+  --sfr-su:url(assets/sfrangio-as.png) 0 0/11px 11px no-repeat,url(assets/sfrangio-ad.png) 100% 0/11px 11px no-repeat,url(assets/sfrangio-alto.png) 50% 0/calc(100% - 22px) 11px no-repeat,url(assets/sfrangio-sx.png) 0 100%/11px calc(100% - 11px) no-repeat,url(assets/sfrangio-dx.png) 100% 100%/11px calc(100% - 11px) no-repeat,linear-gradient(#000 0 0) 50% 100%/calc(100% - 18px) calc(100% - 9px) no-repeat;
+  --sfr-giu:url(assets/sfrangio-bs.png) 0 100%/11px 11px no-repeat,url(assets/sfrangio-bd.png) 100% 100%/11px 11px no-repeat,url(assets/sfrangio-basso.png) 50% 100%/calc(100% - 22px) 11px no-repeat,url(assets/sfrangio-sx.png) 0 0/11px calc(100% - 11px) no-repeat,url(assets/sfrangio-dx.png) 100% 0/11px calc(100% - 11px) no-repeat,linear-gradient(#000 0 0) 50% 0/calc(100% - 18px) calc(100% - 9px) no-repeat;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--latte) }
+/* Il cartoncino di cotone sul foglio rosa: ultimo fotogramma della busta e fondo fermo di tutta la pagina. */
+body { margin:0; color:var(--ink); background:transparent; font:17px/1.7 var(--text); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:var(--latte) url(assets/sfondo-fermo.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--oro-scuro); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--ink); outline-offset:4px }
+button,input,a { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:50px 18px; overflow-wrap:anywhere; overflow-x:clip }
+.card { position:relative; isolation:isolate; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+/* Titoli: Italiana sottile e spaziata, con un filo d'oro e una fogliolina. */
+.title { margin:0 0 20px; font:400 clamp(28px,8vw,42px)/1.2 var(--display); letter-spacing:.08em; color:var(--ink); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:min(190px,60%); height:14px; margin:12px auto 0; background:url(assets/finial.svg) center/10px 10px no-repeat,linear-gradient(90deg,#b08f5500,#b08f55 28%,#b08f5500 45%,#b08f5500 55%,#b08f55 72%,#b08f5500) center/100% 1px no-repeat }
+.body,.lettera { margin:0; font:400 18px/1.8 var(--text); text-wrap:pretty }
+.orn { width:170px; max-width:56%; height:auto; margin:24px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:90px; height:auto; margin:0 auto 12px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Il foglio di cotone: carta latte col bordo sfrangiato (la maschera taglia la carta, l'ombra è sul contenitore). */
+.ms-foglio,.mn-foglio,.lg-foglio { position:absolute; inset:0; z-index:-1; pointer-events:none; filter:drop-shadow(0 8px 14px var(--shadow)) drop-shadow(0 1px 1px #4a3b2a1f) }
+.ms-foglio::before,.mn-foglio::before,.lg-foglio::before { content:""; position:absolute; inset:0; background:var(--foglio) url(assets/carta.jpg) center/420px; -webkit-mask:var(--sfr); mask:var(--sfr) }
+
+/* Blocchi del motore senza sostituzione: un foglio sfrangiato con un'erba pressata (data, come arrivare, dress code, video). */
+.dt-sec .card,.shuttle-sec .card,.dress-sec .card,.video-sec .card { padding:44px 26px 38px; filter:drop-shadow(0 8px 14px var(--shadow)) }
+.dt-sec .card::before,.shuttle-sec .card::before,.dress-sec .card::before,.video-sec .card::before { content:""; position:absolute; inset:0; z-index:-1; background:var(--foglio) url(assets/carta.jpg) center/420px; -webkit-mask:var(--sfr); mask:var(--sfr) }
+.dt-sec .card::after,.shuttle-sec .card::after,.dress-sec .card::after,.video-sec .card::after { content:""; position:absolute; right:-6px; top:-22px; width:66px; height:96px; background:url(assets/e-eucalipto.webp) center/contain no-repeat; rotate:24deg; z-index:2 }
+.shuttle-sec .card::after { background-image:url(assets/e-spiga.webp); rotate:-18deg; right:auto; left:-4px }
+.video-sec .card::after { background-image:url(assets/e-gipsofila.webp) }
+
+/* Busta-video: dietro, il poster della busta chiusa. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--latte) url(assets/busta-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:400 22px/1.3 var(--display); letter-spacing:.1em; color:var(--ink); background:var(--panel); border-radius:2px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--foglio)); border-radius:2px; box-shadow:0 10px 24px var(--shadow) }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--foglio-2)); clip-path:polygon(0 0,100% 0,50% 58%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:42%; transform:translateX(-50%); width:88px; height:88px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #4a3b2a55); font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:84%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:13px 26px; max-width:85vw; background:var(--panel); border-radius:2px; text-align:center; box-shadow:0 8px 24px #4a3b2a26,inset 0 0 0 1px #ffffffa0 }
+[data-cover-label] { color:var(--ink); font:400 12px/1.3 var(--body); letter-spacing:.24em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--oro-scuro); border-top:1px solid var(--oro-scuro); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: solo testo, al centro del cartoncino di cotone del filmato. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); width:54%; aspect-ratio:4/5; object-fit:cover; z-index:2; border-radius:50% 50% 3px 3px / 36% 36% 3px 3px; border:6px solid var(--foglio); box-shadow:0 0 0 1px var(--oro-chiaro),0 12px 30px var(--shadow) }
+.h-text { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:22% 14% 30%; text-align:center }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end; padding-bottom:18% }
+.hero-scene:has(.h-vista) .names { padding:0 14px; background:#f9f7f2e0; border-radius:2px }
+.h-text > div { max-width:100% }
+.occasion { order:-1; margin:0; font:400 clamp(20px,6vw,28px)/1.2 var(--display); letter-spacing:.22em; text-transform:uppercase; color:var(--muted) }
+.occasion::after { content:""; display:block; width:120px; height:1px; margin:16px auto 0; background:linear-gradient(90deg,#b08f5500,#b08f55,#b08f5500) }
+.names { font:400 clamp(58px,16vw,104px)/1.1 var(--script); color:var(--oro-scuro); text-wrap:balance }
+@supports (-webkit-background-clip:text) or (background-clip:text) {
+  .names { background:var(--lamina); background-size:220% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; padding:0 .12em }
+  .hero-scene:has(.h-vista) .names { background:var(--lamina); background-size:220% 100%; -webkit-background-clip:text; background-clip:text }
+}
+.welcome { margin:0; font:300 12px/1.7 var(--body); letter-spacing:.3em; text-transform:uppercase; color:var(--ink) }
+.welcome::before { content:""; display:block; width:40px; height:62px; margin:0 auto 12px; background:url(assets/e-ulivo.webp) center/contain no-repeat; rotate:8deg }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 28px; color:var(--ink); font:400 11px/1.3 var(--body); letter-spacing:.24em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:8px 16px; background:var(--panel); border-radius:2px }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid var(--oro-scuro); border-bottom:1px solid var(--oro-scuro); transform:rotate(45deg) }
+
+/* La lettera piegata in tre. Il tema sostituisce la data da grattare: un foglio di cotone piegato come una lettera,
+   chiuso dal sigillo d'oro. Al tocco (una casella nascosta, niente script) il sigillo si stacca, il pannello di sopra
+   si dispiega verso l'alto, poi quello di sotto verso il basso; sul foglio aperto il giorno compare impresso a secco
+   (solo luce e ombra), un filo d'oro lo sottolinea punto per punto, poi arrivano il mese in lamina e l'anno. */
+.lettera-sec .card { padding:0 }
+.l3 { --w:min(300px,78vw); --p:calc(var(--w)*.47); position:relative; width:var(--w); margin:6px auto 0 }
+.l3-tg { position:absolute; left:50%; top:50%; width:1px; height:1px; opacity:0; margin:0 }
+.l3-scena { position:relative; height:calc(var(--p)*3); perspective:1100px; perspective-origin:50% 50%; transform-style:preserve-3d }
+.l3-ombra { position:absolute; left:4%; right:4%; top:var(--p); height:var(--p); border-radius:4px; box-shadow:0 14px 26px #4a3b2a40,0 2px 4px #4a3b2a26; transform-origin:50% 50% }
+.l3-mezzo,.l3-alto,.l3-basso { position:absolute; left:0; width:100%; height:var(--p); transform-style:preserve-3d }
+.l3-mezzo { top:var(--p) }
+.l3-alto { top:0; transform-origin:50% 100%; transform:translateZ(2px) rotateX(-180deg) }
+.l3-basso { top:calc(var(--p)*2); transform-origin:50% 0; transform:translateZ(1px) rotateX(180deg) }
+.l3-faccia,.l3-dentro,.l3-fuori { position:absolute; inset:0; -webkit-backface-visibility:hidden; backface-visibility:hidden; background:var(--foglio) url(assets/carta.jpg) center/380px; display:flex; flex-direction:column; align-items:center; justify-content:center }
+.l3-faccia { -webkit-mask:var(--sfr-lati); mask:var(--sfr-lati); background-image:linear-gradient(#4a3b2a14,#4a3b2a00 9%,#4a3b2a00 91%,#4a3b2a14),url(assets/carta.jpg) }
+.l3-alto .l3-dentro { -webkit-mask:var(--sfr-su); mask:var(--sfr-su); justify-content:flex-end; padding-bottom:calc(var(--p)*.12) }
+.l3-basso .l3-dentro { -webkit-mask:var(--sfr-giu); mask:var(--sfr-giu); justify-content:flex-start; padding-top:calc(var(--p)*.04) }
+.l3-fuori { transform:rotateX(180deg); background-color:var(--foglio-2) }
+.l3-alto .l3-fuori { -webkit-mask:var(--sfr-su); mask:var(--sfr-su); background-image:linear-gradient(0deg,#4a3b2a1f,#4a3b2a00 30%),url(assets/carta.jpg) }
+.l3-basso .l3-fuori { -webkit-mask:var(--sfr-giu); mask:var(--sfr-giu) }
+/* Sul dorso della lettera chiusa: un'erba pressata, come un francobollo d'erbario. */
+.l3-a-voi { width:calc(var(--w)*.2); height:calc(var(--p)*.62); background:url(assets/e-cosmea.webp) center/contain no-repeat; rotate:-14deg; translate:calc(var(--w)*-.28) calc(var(--p)*-.06); opacity:.92 }
+.l3-rametto { width:calc(var(--w)*.34); height:calc(var(--p)*.34); background:url(assets/floral.png) center/contain no-repeat; margin-bottom:8px }
+.l3-sett { font:400 calc(var(--w)*.044)/1 var(--body); letter-spacing:.42em; padding-left:.42em; text-transform:uppercase; color:var(--muted) }
+/* Il giorno impresso a secco: carta su carta, solo luce e ombra. */
+.l3-giorno { font:400 calc(var(--p)*.74)/1 var(--display); color:#efe9df; text-shadow:-1px -1px 0 #ffffffe6,1px 1px 1px #4a3b2a59,2px 2px 3px #4a3b2a26; letter-spacing:.02em }
+.l3-filo { position:relative; display:block; width:58%; height:8px; margin-top:4px }
+.l3-filo span { position:absolute; left:0; top:3px; width:100%; height:1.5px; background:repeating-linear-gradient(90deg,var(--oro) 0 7px,#b08f5500 7px 10px); box-shadow:0 1px 1px #4a3b2a26 }
+.l3-filo::before,.l3-filo::after { content:""; position:absolute; top:1px; width:5px; height:5px; border-radius:50%; background:var(--oro) }
+.l3-filo::before { left:-6px } .l3-filo::after { right:-6px }
+.l3-mese { font:400 calc(var(--p)*.42)/1.05 var(--script); color:var(--oro-scuro); padding:0 .15em }
+@supports (-webkit-background-clip:text) or (background-clip:text) {
+  .l3-mese { background:var(--lamina); background-size:200% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent }
+}
+.l3-anno { font:400 calc(var(--w)*.05)/1 var(--body); letter-spacing:.5em; padding-left:.5em; color:var(--muted); margin-top:4px }
+.l3-dentro > *,.l3-faccia > * { opacity:0 }
+/* Il sigillo d'oro sul bordo del pannello ripiegato: è il pulsante. */
+.l3-btn { position:absolute; inset:0; z-index:5; display:block; cursor:pointer }
+.l3-sigillo { position:absolute; left:50%; top:calc(var(--p)*2); width:calc(var(--w)*.3); aspect-ratio:560/575; translate:-50% -50%; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 7px 8px #4a3b2a59) }
+.l3-hint { position:absolute; left:50%; top:calc(var(--p)*.5); translate:-50% -50%; width:max-content; max-width:100%; padding:9px 18px; font:italic 400 18px/1.35 var(--text); color:var(--ink); background:var(--panel); border-radius:2px; box-shadow:0 4px 12px #4a3b2a1f }
+.l3-tg:focus-visible ~ .l3-btn .l3-sigillo { outline:3px solid var(--ink); outline-offset:4px; border-radius:50% }
+/* Aperta: stato finale (vale anche con «riduci movimento»). */
+.l3-tg:checked ~ .l3-btn { pointer-events:none }
+.l3-tg:checked ~ .l3-btn .l3-sigillo,.l3-tg:checked ~ .l3-btn .l3-hint { opacity:0 }
+.l3-tg:checked ~ .l3-scena .l3-alto { transform:translateZ(0) rotateX(0) }
+.l3-tg:checked ~ .l3-scena .l3-basso { transform:translateZ(0) rotateX(0) }
+.l3-tg:checked ~ .l3-scena .l3-ombra { top:0; height:calc(var(--p)*3) }
+.l3-tg:checked ~ .l3-scena .l3-dentro > *,.l3-tg:checked ~ .l3-scena .l3-faccia > * { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .l3-tg:not(:checked) ~ .l3-btn .l3-sigillo { animation:chiama 3.4s ease-in-out infinite }
+  .l3-tg:checked ~ .l3-btn .l3-sigillo { animation:stacca .75s cubic-bezier(.5,0,.6,1) both }
+  .l3-tg:checked ~ .l3-btn .l3-hint { animation:svanisci .4s ease both }
+  .l3-tg:checked ~ .l3-scena .l3-alto { animation:dispiega-su 1.35s cubic-bezier(.45,0,.25,1) .55s both }
+  .l3-tg:checked ~ .l3-scena .l3-basso { animation:dispiega-giu 1.35s cubic-bezier(.45,0,.25,1) 1.55s both }
+  .l3-tg:checked ~ .l3-scena .l3-ombra { animation:ombra-apre 2.4s cubic-bezier(.45,0,.25,1) .55s both }
+  .l3-tg:checked ~ .l3-scena .l3-rametto { animation:affiora 1s ease 1.6s both }
+  .l3-tg:checked ~ .l3-scena .l3-sett { animation:affiora 1s ease 1.8s both }
+  .l3-tg:checked ~ .l3-scena .l3-giorno { animation:impressione 1.5s ease-out 2.6s both }
+  .l3-tg:checked ~ .l3-scena .l3-filo { animation:affiora .2s linear 3.3s both }
+  .l3-tg:checked ~ .l3-scena .l3-filo span { animation:cuci 1.3s steps(14,end) 3.3s both }
+  .l3-tg:checked ~ .l3-scena .l3-filo::after { animation:svela .2s linear 4.5s both }
+  .l3-tg:checked ~ .l3-scena .l3-mese { animation:lamina 1.6s ease-out 3.2s both }
+  .l3-tg:checked ~ .l3-scena .l3-anno { animation:affiora 1s ease 3.9s both }
+}
+@keyframes chiama { 0%,72%,100% { transform:none } 80% { transform:scale(1.07) rotate(-5deg) } 90% { transform:scale(1.03) rotate(4deg) } }
+@keyframes stacca { 0% { opacity:1; transform:none } 35% { opacity:1; transform:scale(1.1) } 100% { opacity:0; transform:scale(.6) translateY(-34px) rotate(-16deg) } }
+@keyframes svanisci { to { opacity:0 } }
+@keyframes dispiega-su { 0% { transform:translateZ(2px) rotateX(-180deg) } 12% { transform:translateZ(2px) rotateX(-172deg) } 100% { transform:translateZ(0) rotateX(0) } }
+@keyframes dispiega-giu { 0% { transform:translateZ(1px) rotateX(180deg) } 12% { transform:translateZ(1px) rotateX(172deg) } 100% { transform:translateZ(0) rotateX(0) } }
+@keyframes ombra-apre { 0%,8% { top:var(--p); height:var(--p) } 50% { top:0; height:calc(var(--p)*2) } 100% { top:0; height:calc(var(--p)*3) } }
+@keyframes affiora { from { opacity:0; transform:translateY(6px); filter:blur(2px) } to { opacity:1; transform:none; filter:none } }
+@keyframes impressione { 0% { opacity:0; transform:scale(1.08); text-shadow:0 0 0 #fff0,0 0 0 #4a3b2a00,0 0 0 #4a3b2a00 } 30% { opacity:1 } 100% { opacity:1; transform:none; text-shadow:-1px -1px 0 #ffffffe6,1px 1px 1px #4a3b2a59,2px 2px 3px #4a3b2a26 } }
+@keyframes cuci { from { clip-path:inset(0 100% 0 0) } to { clip-path:inset(0 0 0 0) } }
+@keyframes svela { from { opacity:0 } to { opacity:1 } }
+@keyframes lamina { 0% { opacity:0; background-position:100% 0; filter:blur(2px) } 40% { opacity:1; filter:none } 100% { opacity:1; background-position:0 0 } }
+
+/* Data semplice (se usata al posto della lettera). */
+.dt-row { display:flex; justify-content:center; gap:12px }
+.dt-cell,.dt-col { min-width:0 }
+.dt-num { font:400 42px/1.1 var(--display); color:var(--ink) }
+.dt-lab { font:400 11px var(--body); letter-spacing:.18em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: quattro timbri a secco impressi nella carta, coi numeri in lamina d'oro. */
+.timbri-sec .card { padding:4px 0 6px }
+.tb-rametto { width:44px; height:auto; margin:0 auto 6px; rotate:90deg }
+.tb-intro { margin:0 0 20px; font:300 12px/1.4 var(--body); letter-spacing:.32em; text-transform:uppercase; color:var(--ink) }
+.tb-row { display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(8px,3vw,20px); min-width:0 }
+.tb { position:relative; flex:0 0 auto; width:clamp(72px,20vw,112px); aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,#f9f7f2 0 54%,#f1ece3 55% 60%,#f9f7f2 61%),url(assets/carta.jpg) center/300px;
+  box-shadow:inset 2px 2px 3px #ffffff,inset -2px -2px 4px #4a3b2a2e,0 1px 0 #ffffffb0,-1px -1px 1px #4a3b2a1a,1px 2px 4px #4a3b2a24 }
+/* Il rilievo del timbro: un anello rialzato e una corona di puntini d'oro. */
+.tb::before { content:""; position:absolute; inset:9%; border-radius:50%; box-shadow:inset -1px -1px 1px #ffffff,inset 1px 1px 2px #4a3b2a33,-1px -1px 1px #4a3b2a1f,1px 1px 1px #ffffff }
+.tb::after { content:""; position:absolute; inset:15%; border-radius:50%; border:1.5px dotted var(--oro); opacity:.85 }
+.number-wrap { display:block; position:relative; z-index:1 }
+.number { display:block; font:400 clamp(26px,7.6vw,40px)/1 var(--display); color:var(--oro-scuro); transition:opacity .18s }
+.label { position:relative; z-index:1; margin-top:4px; font:400 10px/1.2 var(--body); letter-spacing:.08em; text-transform:uppercase; color:var(--muted) }
+.separator,.sep1,.sep2,.sep3 { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.55 }
+
+/* Messaggio: una missiva su un solo foglio di cotone, con il capolettera in lamina e un rametto di salvia
+   pressato, fermato all'angolo da una striscia di carta gommata. */
+.missiva-sec .card { padding:62px clamp(28px,8vw,60px) 46px; margin-top:12px }
+.ms-rametto { position:absolute; top:-26px; right:5%; width:84px; height:auto; rotate:28deg; z-index:2; filter:drop-shadow(0 3px 3px #4a3b2a30) }
+.ms-striscia { position:absolute; top:22px; right:calc(5% + 12px); width:62px; height:20px; rotate:-24deg; z-index:3; background:linear-gradient(#f0e3decc,#f0e3decc),url(assets/carta.jpg) center/200px; -webkit-mask:var(--sfr-fine); mask:var(--sfr-fine); box-shadow:0 1px 2px #4a3b2a26 }
+.missiva-sec .title { text-align:left }
+.missiva-sec .title::after { margin-left:0 }
+.after { margin-top:6px }
+.lettera { font:italic 400 19px/1.85 var(--text); color:var(--ink); text-align:left; hyphens:auto }
+.lettera::first-letter { font:400 3.1em/.9 var(--display); float:left; margin:.04em .12em 0 0; color:var(--oro-scuro) }
+.ms-firma { margin-top:22px; text-align:right; font:400 40px/1.2 var(--script); color:var(--oro-scuro) }
+
+/* Galleria: la pagina di un album di cotone, le foto tenute dagli angolini dorati. */
+.album-sec .card { padding:0 }
+.album-pagina { position:relative; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px 18px; margin-top:12px; padding:34px 22px 34px; isolation:isolate }
+.album-pagina::before { content:""; position:absolute; inset:0; z-index:-1; background:var(--rosa-chiaro) url(assets/carta-rosa.jpg) center/360px; -webkit-mask:var(--sfr); mask:var(--sfr) }
+.album-sec .card { filter:drop-shadow(0 8px 14px var(--shadow)) }
+.album-foto { position:relative; margin:0; min-width:0; padding:7px; background:var(--foglio); box-shadow:0 2px 5px #4a3b2a2e }
+.album-foto img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:0 }
+.album-foto:nth-child(3n+1) { grid-column:1 / -1 }
+.album-foto:nth-child(3n+1) img { aspect-ratio:4/3 }
+.ang { position:absolute; width:24px; height:24px; background:var(--lamina); background-size:200% 200%; clip-path:polygon(0 0,100% 0,0 100%); box-shadow:none; filter:drop-shadow(0 1px 1px #4a3b2a55) }
+.ang.a1 { left:-3px; top:-3px }
+.ang.a2 { right:-3px; top:-3px; rotate:90deg }
+.ang.a3 { right:-3px; bottom:-3px; rotate:180deg }
+.ang.a4 { left:-3px; bottom:-3px; rotate:270deg }
+.us-fl { top:-18px; left:2%; width:46px; height:auto; rotate:-24deg; z-index:3 }
+.bk[data-gallery="slider"] .album-pagina { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:16px }
+.bk[data-gallery="slider"] .album-foto { flex:0 0 76%; scroll-snap-align:center }
+.bk[data-gallery="slider"] .album-foto img { aspect-ratio:3/4 }
+.bk[data-gallery="grid"] .album-foto { grid-column:auto }
+.bk[data-gallery="grid"] .album-foto img { aspect-ratio:1 }
+
+/* Immagine: una stampa su cartoncino rosa, appoggiata con un'erba pressata. */
+.img-block { position:relative; max-width:540px; margin-inline:auto !important; padding:12px 12px 0; background:var(--foglio); box-shadow:0 10px 22px var(--shadow) }
+.img-block img { border-radius:0 !important }
+.img-block::after { content:""; position:absolute; left:-14px; bottom:30px; width:60px; height:90px; background:url(assets/e-tralcio.webp) center/contain no-repeat; rotate:-20deg }
+.img-block figcaption { margin:0 !important; padding:14px 18px 16px; color:var(--ink); opacity:1 !important; font:italic 400 18px/1.5 var(--text) !important }
+
+/* Programma: un menu stampato a caratteri mobili, con i puntini di guida tra la voce e l'orario. */
+.menu-sec .card { max-width:470px; padding:56px clamp(24px,7vw,48px) 40px }
+.menu-sec .finial { position:absolute; top:22px; left:50%; translate:-50% 0; width:16px; height:16px }
+.menu-sec .title { margin-bottom:10px }
+.timeline { position:relative; margin:18px auto 0; padding:0 }
+.rail { display:none }
+.t-row { position:relative; padding:12px 0; border-bottom:1px solid #b08f5533 }
+.t-row:last-of-type { border-bottom:0 }
+.t-cell { display:flex; align-items:baseline; gap:8px; text-align:left }
+/* Inchiostro un po' impresso nella carta, come la stampa tipografica. */
+.t-name { flex:0 1 auto; min-width:0; font:400 18px/1.45 var(--text); color:var(--ink); text-shadow:0 1px 0 #ffffffb3,0 -.5px 0 #4a3b2a33 }
+.t-dot { flex:1 1 18px; min-width:18px; height:1px; align-self:flex-end; margin-bottom:.45em; background:radial-gradient(circle,var(--oro) 0 1px,#0000 1.3px) 0 0/6px 2px repeat-x; height:2px }
+.t-time { flex:none; font:400 21px/1.1 var(--display); letter-spacing:.06em; color:var(--oro-scuro); text-shadow:0 1px 0 #ffffffb3 }
+
+/* Location: una tavola d'erbario. La foto fissata con due striscioline, una felce pressata
+   e il cartellino scritto, col timbro tondo d'oro. */
+.erbario-sec .card { padding:0 }
+.eb-tavola { position:relative; isolation:isolate; max-width:460px; margin:14px auto 0; padding:30px 24px 28px; filter:drop-shadow(0 8px 14px var(--shadow)) }
+.eb-tavola::before { content:""; position:absolute; inset:0; z-index:-1; background:var(--foglio) url(assets/carta.jpg) center/420px; -webkit-mask:var(--sfr); mask:var(--sfr) }
+.eb-foto { position:relative; width:82%; margin:0 auto 0 4%; padding:6px; background:#fff; box-shadow:0 2px 6px #4a3b2a29 }
+.loc-photo { width:100%; aspect-ratio:4/5; object-fit:cover; border-radius:0 !important }
+.eb-nastro { position:absolute; width:58px; height:18px; background:linear-gradient(#f0e3ded9,#f0e3ded9),url(assets/carta.jpg) center/200px; -webkit-mask:var(--sfr-fine); mask:var(--sfr-fine); box-shadow:0 1px 2px #4a3b2a26 }
+.eb-nastro.n1 { left:-16px; top:14px; rotate:-38deg }
+.eb-nastro.n2 { right:-16px; bottom:16px; rotate:-38deg }
+.eb-felce { position:absolute; right:-6px; top:36%; width:98px; height:auto; rotate:16deg; z-index:2; filter:drop-shadow(0 3px 3px #4a3b2a26) }
+.eb-cartellino { position:relative; width:80%; margin:-46px 0 0 auto; padding:18px 18px 16px; text-align:left; background:#fbfaf6; border:1px solid var(--line); box-shadow:0 0 0 4px #fbfaf6,0 0 0 5px var(--line),0 6px 14px #4a3b2a24; z-index:3 }
+.eb-timbro { position:absolute; right:12px; top:-20px; width:46px; height:46px; border-radius:50%; background:url(assets/floral-sprig.png) center/42% auto no-repeat,radial-gradient(circle,#fbfaf6 0 56%,#b08f55 57% 60%,#fbfaf6 61% 66%,#b08f55 67% 69%,#fbfaf600 70%); rotate:-12deg }
+.loc-name { font:400 25px/1.25 var(--display); letter-spacing:.04em; color:var(--ink); margin:2px 0 6px; padding-bottom:8px; border-bottom:1px dotted var(--oro) }
+.loc-addr { color:var(--muted); font:400 16px/1.5 var(--text); opacity:1 !important }
+.eb-tipo { font:400 10px/1.3 var(--body); letter-spacing:.26em; text-transform:uppercase; color:var(--muted) }
+
+/* Mappa: una stampa con il passe-partout di cotone. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:14px; background:var(--foglio) url(assets/carta.jpg) center/420px; -webkit-mask:var(--sfr-fine); mask:var(--sfr-fine) }
+.map-frame iframe { width:100%; height:300px; border:0; filter:sepia(.25) saturate(.6) contrast(.95) brightness(1.04) }
+.map-fl { display:none }
+
+/* Come arrivare: biglietto, testo allineato a sinistra. */
+.shuttle-sec .card { text-align:left }
+.shuttle-sec .title { text-align:left; font-size:30px }
+.shuttle-sec .title::after { margin-left:0 }
+.shuttle-box { padding:4px 0 }
+
+/* Dress code: i colori come gocce di ceralacca, lucide e col bordo irregolare. */
+.dress { font:italic 400 21px/1.45 var(--text); color:var(--ink); margin:0 0 18px }
+.dress-dots { gap:14px !important }
+.dress-dots>span { min-width:60px !important; padding:6px 0 }
+.dress-dots [role="img"] { width:46px !important; height:44px !important; margin-bottom:6px; border-radius:48% 52% 46% 54% / 52% 46% 54% 48% !important; box-shadow:0 0 0 1px #4a3b2a26,0 4px 7px #4a3b2a33,inset 3px 3px 5px #ffffff73,inset -4px -5px 8px #0000002e !important }
+.dress-dots>span:nth-child(2n) [role="img"] { border-radius:54% 46% 52% 48% / 46% 54% 48% 52% !important }
+.dress-dots>span>span:last-child { color:var(--ink); opacity:1 !important; font:400 11px/1.3 var(--body) !important; letter-spacing:.12em; text-transform:uppercase }
+
+/* Video: finestra rettangolare, come una stampa. */
+.video-frame { position:relative; overflow:hidden; background:var(--foglio-2); aspect-ratio:9/14; box-shadow:0 0 0 7px #fff,0 0 0 8px var(--line),0 10px 22px #4a3b2a33 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--foglio); color:var(--ink) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo d'oro, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo-piccolo.webp) center/contain no-repeat; color:#fbf6ea; border:0; border-radius:50%; filter:drop-shadow(0 6px 8px #4a3b2a55); visibility:hidden; opacity:0 }
+.music-toggle svg { width:16px; height:16px; fill:currentColor; filter:drop-shadow(0 1px 1px #4a3b2a99) }
+
+/* Conferma: un biglietto legato con un nastro di seta rosa cipria; il sigillo d'oro da toccare. */
+.legato-sec .card { max-width:460px; padding:128px 28px 34px; margin-top:40px }
+.lg-nastro { position:absolute; top:0; bottom:0; left:50%; width:30px; translate:-50% 0; z-index:-1; pointer-events:none;
+  background:linear-gradient(90deg,#d9bdb5,#efdcd6 30%,#f6e8e3 50%,#e6cdc6 72%,#d4b5ac),repeating-linear-gradient(0deg,#ffffff00 0 9px,#ffffff26 9px 10px); opacity:.92; box-shadow:0 1px 2px #4a3b2a24 }
+.lg-fiocco { position:absolute; top:-46px; left:50%; translate:-50% 0; width:112px; height:auto; z-index:2; filter:drop-shadow(0 6px 8px #4a3b2a33) }
+.legato-sec .title,.legato-sec .body { position:relative; background:var(--foglio); }
+.legato-sec .title { display:inline-block; padding:4px 14px 2px }
+.rsvp-sec .body { max-width:360px; margin:0 auto; padding:6px 10px; font-style:italic }
+.seal-btn { position:relative; width:148px; height:148px; display:grid; place-items:center; margin:28px auto 10px; border:0; border-radius:50%; color:var(--ink); background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 12px 14px #4a3b2a59) }
+.seal-btn:hover { filter:drop-shadow(0 12px 14px #4a3b2a59) drop-shadow(0 0 20px #e6d3a3aa) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { position:relative; display:inline-block; color:var(--ink); font:400 12px/1.3 var(--body); letter-spacing:.16em; text-transform:uppercase; text-align:center; padding:8px 16px 10px; margin-bottom:6px; background:var(--foglio) }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--oro-scuro); border-left:1px solid var(--oro-scuro); transform:rotate(45deg); margin:3px auto 8px }
+.rsvp-fl { display:none }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 14px; background:#38312ac2; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:70px 26px 34px; overflow-wrap:anywhere; isolation:isolate }
+.popup__box::before { content:""; position:absolute; inset:0; z-index:-1; background:var(--foglio) url(assets/carta.jpg) center/420px; -webkit-mask:var(--sfr); mask:var(--sfr) }
+.popup__box::after { content:""; position:absolute; top:14px; left:50%; translate:-50% 0; width:58px; height:58px; background:url(assets/sigillo-piccolo.webp) center/contain no-repeat; filter:drop-shadow(0 4px 6px #4a3b2a55) }
+.popup__title { color:var(--ink); font:400 30px/1.25 var(--display); letter-spacing:.06em; text-align:center; margin:14px 10px 26px }
+.popup__close { position:absolute; right:18px; top:18px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:var(--foglio); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--ink) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 13px/1.4 var(--body); letter-spacing:.04em; margin-bottom:8px; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffdf9; border-radius:2px; color:var(--ink); padding:12px; font:400 17px var(--text) }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:2px; cursor:pointer; font:400 17px var(--text); background:#fffdf9 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--oro-scuro); background:#fff }
+.radio input:checked+.ind { background:var(--oro-scuro); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--ink); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:0; border-radius:2px; background:var(--oro-scuro); color:#fffaf0; font:400 13px/1.2 var(--body); letter-spacing:.2em; text-transform:uppercase; box-shadow:0 6px 14px #4a3b2a40 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--ink); font:600 13px var(--body); padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--ink); box-shadow:0 0 0 3px var(--rosa) }
+.success { display:none; padding:20px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 30px var(--display); letter-spacing:.05em; color:var(--ink) }
+.honey { display:none !important }
+
+/* Firma: un colophon, come l'ultima pagina di un libro stampato a mano. */
+.footer-sec { padding:60px 22px 64px; text-align:center; overflow:hidden }
+.footer-in { position:relative; max-width:440px; margin:auto; padding:30px 20px 10px }
+.footer-in::before,.footer-in::after { content:""; display:block; width:64%; height:1px; margin:0 auto; background:linear-gradient(90deg,#b08f5500,#b08f55,#b08f5500) }
+.footer-in::before { margin-bottom:26px } .footer-in::after { margin-top:26px }
+.cl-sigillo { display:block; width:96px; aspect-ratio:560/575; margin:0 auto 18px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 8px 10px #4a3b2a55) }
+.footer-in .title { font-size:clamp(24px,7vw,32px) }
+.footer-in .title::after { display:none }
+.signature { margin-top:2px; font:400 clamp(42px,12vw,60px)/1.2 var(--script); color:var(--oro-scuro) }
+.cl-nomi { margin-top:10px; font:300 12px/1.6 var(--body); letter-spacing:.34em; text-transform:uppercase; color:var(--ink) }
+.footer-in .orn { margin-top:18px }
+.footer-sec>.fl { top:auto; bottom:14px; width:110px; height:auto; opacity:.9 }
+.footer-sec>.fl.l { left:-14px; rotate:-30deg } .footer-sec>.fl.r { right:-14px; rotate:30deg }
+.credits { position:relative; max-width:440px; margin:22px auto 0; padding:8px 14px; font:400 15px/1.5 var(--text); font-style:italic; color:var(--muted) }
+
+/* Ingressi: dissolvenze lente, come inchiostro che si asciuga. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1.1s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  .names { animation:luce-oro 9s ease-in-out infinite alternate }
+  .ms-rametto.in { animation:posa 1.2s ease-out both }
+}
+@keyframes luce-oro { from { background-position:0 0 } to { background-position:100% 0 } }
+@keyframes posa { from { opacity:0; transform:translateY(-10px) rotate(-10deg) } to { opacity:1; transform:none } }
+
+@media (min-width:700px) {
+  .sec { padding:70px 40px }
+  .h-text { padding:22% 24% 28% }
+  .names { font-size:108px }
+  .l3 { --w:340px }
+  .album-pagina { grid-template-columns:repeat(3,minmax(0,1fr)); padding:40px 32px }
+  .album-foto:nth-child(3n+1) { grid-column:auto }
+  .album-foto:nth-child(3n+1) img { aspect-ratio:3/4 }
+  .album-foto:nth-child(4n+2) { translate:0 22px }
+  .missiva-sec .card { padding-inline:66px }
+  .popup__box { padding-inline:44px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+}

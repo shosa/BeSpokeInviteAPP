@@ -1,0 +1,13 @@
+<section class="sec invito-sec locandina-sec">
+  <div class="card">
+    <div class="locandina" data-anim="fadeinup">
+      <i class="lc-puntina" aria-hidden="true"></i>
+      <div class="lc-testata" aria-hidden="true"><span>★</span><span>★</span><span>★</span></div>
+      {{#heading}}<h2 class="title">{{heading}}</h2>{{/heading}}
+      {{#body}}<div class="after"><p class="lettera">{{body | lines}}</p></div>{{/body}}
+      <div class="lc-filetto" aria-hidden="true"></div>
+      <div class="lc-nomi">{{title}}</div>
+      <div class="lc-data">{{date.day}} · {{date.monthShort}} · {{date.year}}</div>
+    </div>
+  </div>
+</section>

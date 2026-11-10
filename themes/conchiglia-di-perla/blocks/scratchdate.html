@@ -1,0 +1,21 @@
+<section class="sec date-sec valva-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="valva" data-anim="zoomin" style="--d:.15s">
+      <input class="valva-tg" type="checkbox" id="valva-data">
+      <div class="valva-scena" aria-hidden="true">
+        <div class="valva-sotto">
+          <div class="vd">
+            <span class="vd-wd">{{date.weekday}}</span>
+            <span class="vd-day">{{date.day}}</span>
+            <span class="vd-month">{{date.month}}</span>
+            <span class="vd-year">{{date.year}}</span>
+          </div>
+        </div>
+        <div class="valva-sopra"><span class="valva-fuori"></span><span class="valva-dentro"></span></div>
+      </div>
+      <span class="vd-label">{{date.long}}</span>
+      <label class="valva-btn" for="valva-data"><span class="valva-sigillo" aria-hidden="true"></span><span class="valva-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

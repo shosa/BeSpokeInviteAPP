@@ -1,0 +1,151 @@
+{
+  "engine": 2,
+  "id": "riva-di-corallo",
+  "name": "Riva di corallo",
+  "description": "Una busta di carta di cotone azzurro polvere, a tutto schermo, con l'aletta a V sfrangiata e un sigillo di ceralacca avorio con la capasanta, un rametto di corallo bianco infilato sotto: scivola via e lascia il cartoncino con le conchiglie incise a linea sottile. Azzurro polvere e sabbia calda, dall'apertura alla firma. La data è scritta sulla battigia: al tocco arriva un'onda di schiuma, si ritira e lascia la data tracciata nella sabbia bagnata, con qualche conchiglia portata dalla marea.",
+  "models": [],
+  "themeColor": "#e8d7bd",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Bellefair&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Mrs+Saint+Delafield&family=Figtree:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Giulia & Matteo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-19",
+      "eventTime": "18:00",
+      "venue": "Villa sul mare",
+      "address": "Via del Faro 3, Ravello (Salerno)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scendi verso il mare"
+    },
+    "message": {
+      "heading": "Saluti dalla riva",
+      "body": "Ci siamo conosciuti in un'estate di sale e di sole, e non abbiamo più smesso di tornare al mare.\nVorremmo che foste con noi il giorno in cui ci diremo sì, con i piedi vicino all'acqua."
+    },
+    "gallery": {
+      "heading": "Sulla sabbia",
+      "photos": [
+        "assets/velo-mare.jpg",
+        "assets/fedi-sabbia.jpg",
+        "assets/tavola-candele.jpg",
+        "assets/fedi-stella.jpg",
+        "assets/velo-vento.jpg",
+        "assets/conchiglie-sabbia.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola-mare.jpg",
+      "caption": "La tavola bianca sulla terrazza, dove brinderemo al tramonto."
+    },
+    "program": {
+      "heading": "Lungo la riva",
+      "items": [
+        { "time": "18:00", "label": "La cerimonia sulla terrazza" },
+        { "time": "19:00", "label": "Aperitivo al tramonto" },
+        { "time": "20:30", "label": "Cena sotto le stelle" },
+        { "time": "23:00", "label": "Taglio della torta e balli" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa sul mare",
+      "kind": "villa",
+      "photo": "assets/arco-mare.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 17:15 una navetta partirà dal porto di Amalfi."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante estivo, lino e seta nei toni del mare e della sabbia",
+      "colors": [
+        { "hex": "#7D95A7", "name": "Azzurro polvere" },
+        { "hex": "#B9C9D4", "name": "Cielo" },
+        { "hex": "#D9C2A0", "name": "Sabbia" },
+        { "hex": "#F4EEE3", "name": "Corallo bianco" }
+      ]
+    },
+    "video": {
+      "heading": "Estate sulla riva",
+      "video": "assets/foto-riva.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo e rispondici: la busta è già pronta.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "A presto, in riva al mare"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Walk down to the sea"
+    },
+    "message": {
+      "heading": "Greetings from the shore",
+      "body": "We met in a summer of salt and sun, and we have never stopped going back to the sea.\nWe would love you beside us on the day we say yes, with our feet close to the water."
+    },
+    "gallery": {
+      "heading": "On the sand"
+    },
+    "image": {
+      "caption": "The white table on the terrace, where we will raise a glass at sunset."
+    },
+    "program": {
+      "heading": "Along the shore",
+      "items": [
+        { "time": "18:00", "label": "The ceremony on the terrace" },
+        { "time": "19:00", "label": "Aperitif at sunset" },
+        { "time": "20:30", "label": "Dinner under the stars" },
+        { "time": "23:00", "label": "Cake cutting and dancing" }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 5:15 pm a shuttle will leave from the port of Amalfi."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Summer elegant, linen and silk in the tones of the sea and the sand",
+      "colors": [
+        { "hex": "#7D95A7", "name": "Powder blue" },
+        { "hex": "#B9C9D4", "name": "Sky" },
+        { "hex": "#D9C2A0", "name": "Sand" },
+        { "hex": "#F4EEE3", "name": "White coral" }
+      ]
+    },
+    "video": {
+      "heading": "Summer on the shore"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the seal and reply: the envelope is ready.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "See you soon, by the sea"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{{#hasPhotos}}
+<section class="sec us-sec finestre-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="facciata" data-anim="fadeinup" style="--d:.1s">
+      <div class="us-grid">
+        {{#photos}}<figure><span class="fn-vano"><img src="{{.}}" loading="lazy" decoding="async" alt=""></span><i class="fn-anta l"></i><i class="fn-anta r"></i><i class="fn-davanzale"></i></figure>{{/photos}}
+      </div>
+    </div>
+  </div>
+</section>
+{{/hasPhotos}}

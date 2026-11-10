@@ -1,0 +1,350 @@
+/* Fiocco di velluto. Una sola tinta per tutta la pagina: carminio, cipria e oro.
+   L'apertura è il cofanetto di velluto carminio sul marmo, col nastro di velluto da sciogliere; dentro, petali di rosa
+   e un cartoncino di acrilico. La pagina alterna marmo rosato e velluto, e ogni sezione è un piccolo oggetto da maison. */
+:root {
+  --bk-cover:#f1e3dc;
+  --carm:#7d1424; --carm-d:#4a0916; --carm-dd:#2e050d; --carm-l:#a3283f;
+  --blush:#f1e3dc; --cream:#faf3ee; --cream-m:#dcc6c0;
+  --oro-c:#c4a064; --oro-l:#e4cc98; --oro-d:#8f6f38;
+  --ink:#4a0916; --muted:#80595e;
+  --display:'Prata',Georgia,serif; --body:'Sorts Mill Goudy',Georgia,serif;
+  --script:'Alex Brush','Sorts Mill Goudy',cursive; --caps:'Work Sans',system-ui,sans-serif;
+  --nastro:linear-gradient(#4a0916,#9c2238 32%,#7d1424 55%,#5c0a1a 80%,#3d0712);
+  --oro:linear-gradient(110deg,#8f6f38 4%,#c4a064 24%,#f3e0b4 40%,#b48f55 58%,#e4cc98 74%,#8f6f38 96%);
+  --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--carm-d) }
+body { margin:0; color:var(--ink); background:var(--carm-d); font:400 18px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:inherit; text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--oro-c); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+/* Sezioni a tutta larghezza: marmo rosato, oppure velluto carminio. */
+.sec,.footer-sec { position:relative; width:100%; max-width:none; margin:0; padding:64px 20px; overflow-wrap:anywhere }
+.sec { background:var(--blush) url(assets/marmo.jpg) center/700px }
+.clessidra-sec,.cornici-sec,.carnet-sec,.rossetti-sec,.petali-sec { color:var(--cream); background:linear-gradient(#2e050d40,#2e050d80),var(--carm) url(assets/velluto.jpg) center/cover }
+.petali-sec { background:linear-gradient(#2e050d99,#2e050dcc),var(--carm-d) url(assets/velluto.jpg) center/cover }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 18px; font:400 clamp(42px,12.5vw,60px)/1.05 var(--script); color:var(--carm); text-align:center }
+.clessidra-sec .title,.cornici-sec .title,.rossetti-sec .title,.petali-sec .title { color:var(--oro-l) }
+.title::after { content:""; display:block; width:120px; height:16px; margin:8px auto 0; background:url(assets/ornament.svg) center/contain no-repeat }
+.body,.lettera { margin:0; text-wrap:pretty }
+.orn,.fl { display:none }
+.timeline { animation:none !important }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Apertura: il cofanetto di velluto col fiocco, sul marmo. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--blush) url(assets/cofanetto-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:absolute; z-index:2; left:0; right:0; top:3.5%; max-width:none; margin:0 auto; padding:0 16px; text-align:center; font:400 clamp(28px,8vw,40px)/1.05 var(--display); color:var(--carm-d) }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--carm)); border:1px solid var(--oro-d); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--carm-l)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/emblema.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:91%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:6px; margin:0; padding:10px 26px; max-width:85vw; background:#faf3eee0; border:1px solid #c4a06499; border-radius:40px; text-align:center; box-shadow:0 10px 26px #4a091626 }
+[data-cover-tap][data-tap-plain] { background:none; border-color:transparent; box-shadow:none }
+[data-cover-label] { color:var(--carm-d); font:400 12px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--carm); border-top:1px solid var(--carm); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening .env-top,.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: il cartoncino di acrilico tra i petali, con i nomi al centro. */
+.zone-hero { background:var(--carm) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip; padding:0; background:none }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:42%; transform:translate(-50%,-50%); width:34%; max-width:200px; aspect-ratio:3/4; object-fit:cover; z-index:2; outline:1px solid var(--oro-c); outline-offset:5px }
+.h-text { position:absolute; left:25%; right:25%; top:30%; bottom:31%; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:0 6px; text-align:center; color:var(--carm-d) }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end }
+.occasion { order:-1; font:400 clamp(28px,8.4vw,44px)/1 var(--script); color:var(--carm) }
+.names { font:400 clamp(30px,8.8vw,52px)/1.08 var(--display); color:var(--carm-d); text-wrap:balance }
+.welcome { margin-top:4px; font:400 9.5px/1.6 var(--caps); letter-spacing:.2em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:90px; height:12px; margin:0 auto 8px; background:url(assets/ornament.svg) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--cream); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-94px }
+.scroll-cue span { display:inline-block; padding:10px 22px; background:var(--carm-d); border:1px solid #c4a06499; border-radius:30px; box-shadow:0 8px 20px #2e050d40 }
+.arrow { width:10px; height:10px; margin:12px auto 0; border-right:1px solid var(--cream); border-bottom:1px solid var(--cream); transform:rotate(45deg) }
+
+/* La data in un piccolo cofanetto. Il tema sostituisce la data da grattare: le due ante di velluto chiuse dal nastro col fiocco.
+   Al tocco (una casella nascosta, niente script) il fiocco si scioglie, il nastro scivola via, le ante si aprono
+   e dentro, sull'acrilico, c'è la data. Lo stesso gesto dell'apertura, in piccolo. */
+.scrigno-sec { overflow:hidden }
+.scrigno-sec .title { margin-bottom:22px }
+.fd { --w:min(290px,78vw); position:relative; width:var(--w); margin:0 auto }
+.fd-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.fd-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.fd-scena { position:relative; width:100%; aspect-ratio:3/4; perspective:1100px; border-radius:6px; background:var(--carm-d) url(assets/velluto.jpg) center/cover; box-shadow:0 0 0 1px var(--oro-d),0 26px 50px #4a091640 }
+.fd-carta { position:absolute; inset:7%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:6px; background:linear-gradient(135deg,#fffaf6f2,#f4e4dcd9); box-shadow:inset 0 0 0 1px #ffffffcc,inset 0 0 0 7px #fffaf600,inset 0 0 0 8px #c4a06466,0 6px 14px #2e050d4d }
+.fd-carta > span { opacity:0 }
+.fdd-wd { font:400 10.5px/1 var(--caps); letter-spacing:.32em; padding-left:.32em; text-transform:uppercase; color:var(--muted) }
+.fdd-day { margin-top:6px; font:400 calc(var(--w) * .3)/1 var(--display); color:var(--carm) }
+.fdd-month { margin-top:-4px; font:400 calc(var(--w) * .15)/1 var(--script); color:var(--carm-d) }
+.fdd-year { margin-top:6px; font:400 12px/1 var(--caps); letter-spacing:.46em; padding-left:.46em; color:var(--oro-d) }
+.fdd-ora { margin-top:12px; padding-top:8px; border-top:1px solid #c4a06480; font:italic 400 17px/1 var(--body); color:var(--muted) }
+.fd-anta { position:absolute; top:0; bottom:0; width:50%; background:linear-gradient(90deg,#2e050d33,#ffffff0d 40%,#2e050d26),var(--carm) url(assets/velluto.jpg) center/cover; border:1px solid #8f6f3899; backface-visibility:hidden }
+.fd-anta.l { left:0; transform-origin:0 50%; border-radius:6px 0 0 6px; box-shadow:inset -2px 0 0 #2e050d66 }
+.fd-anta.r { right:0; transform-origin:100% 50%; border-radius:0 6px 6px 0 }
+.fd-anta b { position:absolute; right:14%; bottom:10%; width:42%; aspect-ratio:747/627; background:url(assets/emblema.webp) center/contain no-repeat; opacity:.9 }
+.fd-nastro { position:absolute; top:40%; height:10%; width:50%; background:var(--nastro); box-shadow:0 3px 5px #2e050d66 }
+.fd-nastro.l { left:0 }
+.fd-nastro.r { right:0 }
+.fd-cappio { position:absolute; top:31%; width:30%; height:19%; border:calc(var(--w) * .035) solid #8d1c31; border-radius:50%; box-shadow:inset 0 3px 6px #2e050d99,0 3px 6px #2e050d80; background:transparent }
+.fd-cappio.l { right:50%; transform-origin:100% 60%; transform:rotate(-14deg) }
+.fd-cappio.r { left:50%; transform-origin:0 60%; transform:rotate(14deg) }
+.fd-nodo { position:absolute; left:50%; top:39%; width:11%; height:12%; translate:-50% 0; border-radius:30%; background:var(--nastro); box-shadow:0 3px 6px #2e050d99 }
+.fd-coda { position:absolute; top:48%; width:8%; height:28%; background:var(--nastro); clip-path:polygon(0 0,100% 0,100% 100%,50% 88%,0 100%); transform-origin:50% 0 }
+.fd-coda.l { left:44%; transform:rotate(16deg) }
+.fd-coda.r { left:48%; transform:rotate(-16deg) }
+.fd-tap { display:flex; justify-content:center; margin-top:22px; cursor:pointer }
+.fd-hint { white-space:nowrap; padding:11px 24px; font:400 11.5px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--cream); background:var(--carm); border-radius:30px; box-shadow:0 8px 18px #4a091640 }
+.fd-tg:focus-visible ~ .fd-tap .fd-hint { outline:3px solid var(--carm); outline-offset:4px }
+/* Aperto: stato finale (anche con «riduci movimento»). */
+.fd-tg:checked ~ .fd-tap { pointer-events:none }
+.fd-tg:checked ~ .fd-tap .fd-hint { opacity:0 }
+.fd-tg:checked ~ .fd-scena :is(.fd-cappio,.fd-nodo,.fd-coda,.fd-nastro,.fd-anta) { opacity:0 }
+.fd-tg:checked ~ .fd-scena .fd-carta > span { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .fd-tg:not(:checked) ~ .fd-scena .fd-cappio { animation:respira 3.6s ease-in-out infinite alternate }
+  .fd-tg:checked ~ .fd-scena .fd-cappio.l { animation:slaccia-l .9s cubic-bezier(.5,0,.7,1) both }
+  .fd-tg:checked ~ .fd-scena .fd-cappio.r { animation:slaccia-r .9s cubic-bezier(.5,0,.7,1) both }
+  .fd-tg:checked ~ .fd-scena .fd-nodo,.fd-tg:checked ~ .fd-scena .fd-coda { animation:cade .8s ease-in .3s both }
+  .fd-tg:checked ~ .fd-scena .fd-nastro.l { animation:scivola-l .9s cubic-bezier(.6,0,.4,1) .6s both }
+  .fd-tg:checked ~ .fd-scena .fd-nastro.r { animation:scivola-r .9s cubic-bezier(.6,0,.4,1) .6s both }
+  .fd-tg:checked ~ .fd-scena .fd-anta.l { animation:anta-l 1.6s cubic-bezier(.5,0,.2,1) 1.3s both }
+  .fd-tg:checked ~ .fd-scena .fd-anta.r { animation:anta-r 1.6s cubic-bezier(.5,0,.2,1) 1.3s both }
+  .fd-tg:checked ~ .fd-tap .fd-hint { animation:svanisce .4s ease both }
+  .fd-tg:checked ~ .fd-scena .fdd-wd { animation:appare .9s ease 2.4s both }
+  .fd-tg:checked ~ .fd-scena .fdd-day { animation:appare 1.1s ease 2.6s both }
+  .fd-tg:checked ~ .fd-scena .fdd-month { animation:appare 1s ease 3s both }
+  .fd-tg:checked ~ .fd-scena .fdd-year { animation:appare 1s ease 3.3s both }
+  .fd-tg:checked ~ .fd-scena .fdd-ora { animation:appare 1s ease 3.6s both }
+}
+@keyframes respira { from { scale:1 } to { scale:1.04 } }
+@keyframes slaccia-l { 0% { opacity:1 } 40% { opacity:1; transform:rotate(-30deg) scale(.9) } 100% { opacity:0; transform:rotate(-70deg) scale(.4) translate(-20%,40%) } }
+@keyframes slaccia-r { 0% { opacity:1 } 40% { opacity:1; transform:rotate(30deg) scale(.9) } 100% { opacity:0; transform:rotate(70deg) scale(.4) translate(20%,40%) } }
+@keyframes cade { from { opacity:1 } to { opacity:0; translate:-50% 40% } }
+@keyframes scivola-l { from { opacity:1; transform:none } 80% { opacity:1 } to { opacity:0; transform:translateX(-110%) } }
+@keyframes scivola-r { from { opacity:1; transform:none } 80% { opacity:1 } to { opacity:0; transform:translateX(110%) } }
+@keyframes anta-l { 0% { opacity:1; transform:none } 75% { opacity:1; transform:rotateY(-105deg) } 100% { opacity:0; transform:rotateY(-110deg) } }
+@keyframes anta-r { 0% { opacity:1; transform:none } 75% { opacity:1; transform:rotateY(105deg) } 100% { opacity:0; transform:rotateY(110deg) } }
+@keyframes appare { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+@keyframes svanisce { to { opacity:0 } }
+
+/* Conto alla rovescia: una clessidra d'oro con la sabbia che scende, e sotto il tempo che manca. */
+.clessidra { position:relative; width:96px; height:150px; margin:0 auto 26px }
+.cs-piano { position:absolute; left:0; right:0; height:10px; border-radius:3px; background:var(--oro); box-shadow:0 3px 5px #0006 }
+.cs-piano.su { top:0 }
+.cs-piano.giu { bottom:0 }
+.cs-colonna { position:absolute; top:8px; bottom:8px; width:4px; background:linear-gradient(90deg,#8f6f38,#f3e0b4,#8f6f38) }
+.cs-colonna.l { left:8px }
+.cs-colonna.r { right:8px }
+.cs-vetro { position:absolute; left:18px; right:18px; top:12px; bottom:12px; clip-path:polygon(0 0,100% 0,58% 50%,100% 100%,0 100%,42% 50%); background:linear-gradient(90deg,#ffffff26,#ffffff0d 40%,#ffffff33) }
+.cs-sabbia-su { position:absolute; left:0; right:0; top:14%; height:36%; background:linear-gradient(#e4cc98,#c4a064); transform-origin:50% 100% }
+.cs-sabbia-giu { position:absolute; left:0; right:0; bottom:0; height:30%; background:linear-gradient(#e4cc98,#b48f55); transform-origin:50% 100%; transform:scaleY(.3) }
+.cs-filo { position:absolute; left:50%; top:50%; width:2px; height:50%; translate:-50% 0; background:#e4cc98 }
+@media (prefers-reduced-motion:no-preference) {
+  .cs-sabbia-su { animation:svuota 9s linear infinite }
+  .cs-sabbia-giu { animation:riempie 9s linear infinite }
+  .cs-filo { animation:filo 9s linear infinite }
+}
+@keyframes svuota { from { transform:scaleY(1) } 92% { transform:scaleY(0) } to { transform:scaleY(0) } }
+@keyframes riempie { from { transform:scaleY(.15) } 92% { transform:scaleY(1) } to { transform:scaleY(1) } }
+@keyframes filo { 0%,90% { opacity:1 } 94%,100% { opacity:0 } }
+.conto { max-width:500px; margin:0 auto }
+[data-countdown] { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 }
+.time-block { position:relative; display:flex; flex-direction:column; align-items:center; min-width:0 }
+.time-block + .separator + .time-block::before { content:""; position:absolute; left:0; top:10%; bottom:10%; width:1px; background:linear-gradient(#c4a06400,#c4a064,#c4a06400) }
+.number-wrap { display:grid; place-items:center; width:100% }
+.number { display:block; font:400 clamp(36px,11vw,58px)/1 var(--display); color:var(--cream); transition:opacity .18s }
+.label { margin-top:10px; font:400 10px/1.2 var(--caps); letter-spacing:.2em; text-transform:uppercase; color:var(--oro-l) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.5 }
+
+/* Messaggio: un cartoncino di acrilico satinato sopra il marmo, tra i petali di rosa. */
+.acrilico-sec { overflow:hidden }
+.petali { position:absolute; inset:0; pointer-events:none }
+.petalo { position:absolute; left:var(--x); top:var(--y); width:calc(48px * var(--s)); height:calc(38px * var(--s)); border-radius:70% 30% 62% 38% / 60% 48% 52% 40%; background:radial-gradient(circle at 30% 28%,#d3384f,#8d1428 55%,#5c0a1a); box-shadow:inset -3px -4px 8px #2e050d59,0 6px 10px #4a091633; rotate:var(--r) }
+.acrilico { position:relative; max-width:440px; margin:0 auto; padding:40px clamp(24px,7vw,40px) 34px; border-radius:14px; background:linear-gradient(135deg,#ffffffd9,#fff6f2b3); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:inset 0 0 0 1px #ffffffe6,inset 0 0 0 9px #ffffff00,inset 0 0 0 10px #c4a06466,0 26px 50px #4a091633 }
+.after { margin-top:4px }
+.lettera { font:italic 400 19px/1.8 var(--body); text-align:center; color:var(--ink) }
+.ac-firma { margin-top:18px; font:400 clamp(32px,9.6vw,44px)/1 var(--script); color:var(--carm) }
+@media (prefers-reduced-motion:no-preference) {
+  .petalo { animation:galleggia 6s ease-in-out infinite alternate }
+  .petalo:nth-child(2n) { animation-duration:7.5s; animation-delay:-2s }
+}
+@keyframes galleggia { from { translate:0 0 } to { translate:4px 8px } }
+
+/* Galleria: cornici d'oro appese ciascuna a un nastro di velluto col fiocco, che oscillano appena. */
+.cornici-sec .card { max-width:560px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:30px 18px; margin:10px 0 0; padding-top:40px }
+.us-grid figure { position:relative; margin:0; min-width:0; padding:7px; background:var(--oro); box-shadow:0 14px 24px #0007; transform-origin:50% -40px }
+.us-grid figure:nth-child(even) { margin-top:46px }
+.us-grid figure:nth-child(4n+1),.us-grid figure:nth-child(4n+4) { border-radius:50%; padding:8px }
+.us-grid figure:nth-child(4n+1) img,.us-grid figure:nth-child(4n+4) img { border-radius:50% }
+.us-grid img { width:100%; aspect-ratio:3/4; object-fit:cover; box-shadow:0 0 0 2px #2e050d80 }
+/* Il nastro che sale fino al chiodo, e il fiocco. */
+.us-grid figure::before { content:""; position:absolute; left:50%; bottom:100%; width:5px; height:40px; translate:-50% 0; background:var(--nastro) }
+.us-grid figure::after { content:""; position:absolute; left:50%; top:-46px; width:34px; height:16px; translate:-50% 0; background:radial-gradient(ellipse 8px 6px at 50% 50%,#7d1424 98%,#0000),radial-gradient(ellipse 9px 7px at 26% 50%,#0000 40%,#9c2238 45% 95%,#0000),radial-gradient(ellipse 9px 7px at 74% 50%,#0000 40%,#9c2238 45% 95%,#0000) }
+.pr-nastro { display:none }
+@media (prefers-reduced-motion:no-preference) {
+  .us-grid figure { animation:oscilla 5s ease-in-out infinite alternate }
+  .us-grid figure:nth-child(2n) { animation-duration:6.5s; animation-delay:-2s }
+}
+@keyframes oscilla { from { rotate:-1.6deg } to { rotate:1.6deg } }
+
+/* Immagine: la foto in una sottile cornice d'oro. */
+.img-block { position:relative; max-width:560px; margin-inline:auto !important; padding:9px; background:var(--oro); box-shadow:0 22px 40px #4a091633 }
+.img-block img { border-radius:0 !important }
+.img-block figcaption { padding:16px 8px 6px; margin:0 !important; color:var(--carm-d); opacity:1 !important; font:italic 400 18px/1.5 var(--body) !important; background:var(--cream) }
+
+/* Programma: un carnet de bal, il libretto dei balli, col cordoncino e il fiocchetto; ogni tappa ha il suo numero romano. */
+.carnet { position:relative; max-width:340px; margin:0 auto; padding:36px 26px 30px; color:var(--ink); background:linear-gradient(135deg,#fffaf6,#f4e6de); border-radius:8px; box-shadow:inset 0 0 0 7px #fffaf600,inset 0 0 0 8px #c4a06499,0 30px 50px #0009 }
+.carnet .title { color:var(--carm); font-size:clamp(36px,10.6vw,50px) }
+.cn-emblema { width:66px; height:auto; margin:0 auto 6px }
+.cn-cordino { position:absolute; left:26px; top:-10px; width:2px; height:120px; background:var(--carm); transform-origin:50% 0; rotate:12deg; z-index:2 }
+.cn-cordino b { position:absolute; left:50%; bottom:-30px; width:12px; height:32px; translate:-50% 0; border-radius:6px 6px 3px 3px; background:repeating-linear-gradient(90deg,#c4a064 0 1.5px,#8f6f38 1.5px 3px) }
+.balli { counter-reset:ballo; text-align:left; margin-top:8px }
+.t-row { counter-increment:ballo; display:flex; align-items:baseline; gap:10px; padding:9px 0; border-bottom:1px solid #c4a06440 }
+.t-row:last-child { border-bottom:0 }
+.t-dot { flex:0 0 32px; font:italic 400 18px/1 var(--display); color:var(--oro-d) }
+.t-dot::before { content:counter(ballo,upper-roman) "." }
+.t-cell { flex:1; min-width:0; display:flex; align-items:baseline }
+.t-cell::before { content:""; order:1; flex:1; min-width:12px; margin:0 6px 5px; border-bottom:1px dotted #8f6f38 }
+.t-name { order:0; font:400 18px/1.3 var(--body); color:var(--carm-d) }
+.t-time { order:2; font:400 12px/1 var(--caps); letter-spacing:.14em; color:var(--muted) }
+
+/* Location: la foto, e sotto la chiave d'albergo d'epoca con la targhetta di velluto e il nome inciso in oro. */
+.chiave-sec .card { max-width:420px }
+.ch-foto { padding:8px; background:var(--oro); box-shadow:0 18px 34px #4a091633 }
+.loc-photo { width:100%; aspect-ratio:4/3; object-fit:cover }
+.chiave { display:flex; flex-direction:column; align-items:center; margin-top:22px }
+.ch-chiave { position:relative; width:60px; height:110px }
+.ch-anello { position:absolute; left:50%; top:0; width:38px; height:38px; translate:-50% 0; border-radius:50%; border:7px solid #c4a064; box-shadow:inset 0 0 0 1px #8f6f38,0 0 0 1px #8f6f38,0 4px 6px #4a091633 }
+.ch-gambo { position:absolute; left:50%; top:34px; width:8px; height:70px; translate:-50% 0; border-radius:2px; background:linear-gradient(90deg,#8f6f38,#f3e0b4 45%,#b48f55) }
+.ch-mappa { position:absolute; left:calc(50% + 4px); top:78px; width:18px; height:24px; background:linear-gradient(90deg,#b48f55,#f3e0b4,#8f6f38); clip-path:polygon(0 0,100% 0,100% 30%,60% 30%,60% 50%,100% 50%,100% 100%,0 100%) }
+.ch-catena { width:2px; height:20px; background:repeating-linear-gradient(#c4a064 0 5px,#0000 5px 7px) }
+.ch-targa { width:min(230px,66vw); aspect-ratio:23/28; padding:4px; background:var(--oro); clip-path:polygon(50% 0,100% 16%,100% 84%,50% 100%,0 84%,0 16%); filter:drop-shadow(0 12px 18px #4a091640) }
+.ch-targa-in { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; width:100%; height:100%; padding:20% 14%; clip-path:inherit; background:linear-gradient(#2e050d33,#2e050d00 40%,#2e050d4d),var(--carm) url(assets/velluto.jpg) center/cover; color:var(--oro-l) }
+.ch-emblema { width:46px; height:auto }
+.loc-name { font:400 clamp(20px,6vw,26px)/1.15 var(--display); background:var(--oro); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--oro-l); text-wrap:balance }
+.loc-addr { font:400 9.5px/1.6 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--oro-l); opacity:1 !important }
+.loc-via { margin-top:16px; font:italic 400 17px/1.5 var(--body); color:var(--ink) }
+
+/* Mappa: in una sottile cornice d'oro. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:7px; background:var(--oro) }
+.map-frame iframe { width:100%; height:300px; border:0; filter:sepia(.2) saturate(.8) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 0 0 / 30% 30% 0 0; height:360px }
+
+/* Come arrivare: in corsivo, tra due filetti. */
+.shuttle-box { max-width:500px; margin:0 auto; padding:20px 4px; border-top:1px solid #8f6f3880; border-bottom:1px solid #8f6f3880 }
+.shuttle-sec .body { font-style:italic; font-size:19px; line-height:1.6; color:var(--ink) }
+
+/* Dress code: il nome dell'abito in grande e i colori come rossetti nel tubetto d'oro. */
+.dress { font:400 clamp(42px,12vw,68px)/1.05 var(--display); color:var(--cream); margin:0 0 30px; text-wrap:balance }
+.dress-dots { display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:22px 18px; max-width:440px; margin:0 auto }
+.rossetto { display:inline-flex; flex-direction:column; align-items:center; width:56px; filter:drop-shadow(0 10px 10px #0008) }
+.rs-stick { display:block; width:24px; height:42px; border-radius:2px 2px 0 0; background:linear-gradient(90deg,#00000033,#ffffff40 35%,#ffffff00 55%,#00000026),var(--c); clip-path:polygon(0 34%,100% 0,100% 100%,0 100%) }
+.rs-ghiera { display:block; width:30px; height:9px; background:var(--oro) }
+.rs-tubo { display:block; width:34px; height:54px; border-radius:2px 2px 4px 4px; background:linear-gradient(90deg,#8f6f38,#e4cc98 30%,#f3e0b4 42%,#b48f55 70%,#8f6f38) }
+.rs-nome { margin-top:10px; font:400 9.5px/1.3 var(--caps); letter-spacing:.14em; text-transform:uppercase; color:var(--cream-m); white-space:nowrap }
+
+/* Video: nella cornice d'oro. */
+.video-sec .card { padding:0 8px }
+.video-frame { position:relative; max-width:380px; margin:auto; aspect-ratio:9/14; padding:8px; background:var(--oro) }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--carm); color:var(--cream) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: la medaglia di velluto con l'emblema, piccola, fissa in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:56px; height:56px; z-index:1000; display:grid; place-items:center; background:url(assets/emblema.webp) center/64% no-repeat,radial-gradient(circle at 40% 35%,#a3283f,#6e0f22 60%,#4a0916); box-shadow:0 0 0 2px #c4a064,0 6px 10px #0006; color:var(--cream); border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:16px; height:16px; fill:currentColor; filter:drop-shadow(0 0 3px #000) }
+
+/* Conferma: una coccarda di velluto plissettato con le code, e al centro la medaglia con l'emblema d'oro. */
+.rsvp-sec .card { padding:0 6px }
+.rsvp-sec .body { max-width:360px; margin:0 auto; font-style:italic; font-size:19px; color:var(--ink) }
+.coccarda { position:relative; display:grid; justify-items:center; width:230px; height:300px; margin:24px auto 0 }
+.cc-pieghe { position:absolute; left:50%; top:0; width:200px; height:200px; translate:-50% 0; border-radius:50%; background:radial-gradient(circle,#0000 0 58%,#2e050d33 60%,#0000 64%),repeating-conic-gradient(#7d1424 0 5deg,#a3283f 5deg 8deg,#5c0a1a 8deg 11deg); box-shadow:0 14px 26px #4a091640 }
+.cc-code { position:absolute; top:150px; width:52px; height:130px; background:var(--nastro); clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%); transform-origin:50% 0; box-shadow:0 6px 10px #0005 }
+.cc-code.l { left:calc(50% - 50px); rotate:14deg }
+.cc-code.r { left:calc(50% - 2px); rotate:-14deg }
+.seal-btn { position:relative; z-index:1; width:126px; height:126px; display:grid; place-items:center; margin:37px 0 0; border:0; border-radius:50%; color:var(--cream); background:url(assets/emblema.webp) center/62% no-repeat,radial-gradient(circle at 40% 35%,#a3283f,#6e0f22 60%,#4a0916); box-shadow:0 0 0 3px #c4a064,0 0 0 6px #4a0916,0 0 0 7px #c4a064,0 10px 20px #0006; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:translateY(-3px) rotate(-4deg); filter:drop-shadow(0 0 18px #e4cc9880) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--cream); font:400 11px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; text-align:center; padding:11px 22px; margin:6px 0 0; background:var(--carm); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--oro-l); border-left:1px solid var(--oro-l); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#2e050dd9; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:110px 22px 30px; color:var(--ink); background:var(--blush) url(assets/marmo.jpg) center/700px; border-radius:2px; box-shadow:0 24px 80px #0009,inset 0 0 0 8px var(--blush),inset 0 0 0 9px var(--oro-c); overflow-wrap:anywhere }
+.popup__box::after { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:72px; height:72px; border-radius:50%; background:url(assets/emblema.webp) center/62% no-repeat,radial-gradient(circle at 40% 35%,#a3283f,#6e0f22 60%,#4a0916); box-shadow:0 0 0 2px #c4a064,0 6px 12px #4a091640 }
+.popup__title { color:var(--carm-d); font:400 30px/1.15 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--carm); background:var(--cream); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--carm) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 18px/1.4 var(--body); margin-bottom:8px; color:var(--carm-d) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffaf7; border-radius:2px; color:var(--ink); padding:12px; font:400 16px/1.4 var(--caps) }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 16px; border:1px solid #7d142480; border-radius:24px; cursor:pointer; font:400 14px/1.3 var(--caps); background:#fffaf7 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--carm); background:#fff }
+.radio input:checked+.ind { background:var(--carm); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--carm) }
+.radio:has(input:focus-visible) { outline:3px solid var(--carm); outline-offset:3px }
+.submit { width:100%; min-height:50px; padding:14px 20px; border:0; border-radius:30px; background:var(--carm); color:var(--cream); font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #4a091640 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--carm); font:500 13.5px/1.4 var(--caps); padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--carm); box-shadow:0 0 0 3px #7d14241a }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 30px/1.2 var(--display); color:var(--carm-d) }
+.honey { display:none !important }
+
+/* Firma: i nomi in grande sul velluto, mentre cadono lenti i petali di rosa. */
+.footer-sec { padding:80px 20px 60px; text-align:center; overflow:hidden }
+.cadono { position:absolute; inset:0; pointer-events:none }
+.cadono i { position:absolute; top:-40px; left:var(--x); width:calc(26px * var(--s)); height:calc(20px * var(--s)); border-radius:70% 30% 62% 38% / 60% 48% 52% 40%; background:radial-gradient(circle at 30% 28%,#d3384f,#8d1428 55%,#5c0a1a); opacity:0 }
+.footer-in { position:relative; max-width:520px; margin:auto }
+.petali-sec .title::after { display:none }
+.fn-nomi { font:400 clamp(46px,13.5vw,80px)/1.02 var(--display); color:var(--cream); text-wrap:balance }
+.signature { margin-top:18px; font:italic 400 20px/1.5 var(--body); color:var(--cream-m) }
+.fn-data { margin-top:20px; font:400 12px/1 var(--caps); letter-spacing:.5em; padding-left:.5em; text-transform:uppercase; color:var(--oro-l) }
+.fn-emblema { width:84px; height:auto; margin:26px auto 0 }
+.credits { position:relative; max-width:460px; margin:26px auto 0; font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:#dcc6c099 }
+@media (prefers-reduced-motion:no-preference) {
+  .cadono i { animation:petalo var(--t) linear var(--r) infinite }
+}
+@keyframes petalo { 0% { opacity:0; transform:translate(0,0) rotate(0) } 8% { opacity:.95 } 50% { transform:translate(26px,360px) rotate(200deg) } 92% { opacity:.8 } 100% { opacity:0; transform:translate(-14px,760px) rotate(400deg) } }
+
+/* Ingressi: dissolvenze lente. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1s ease,transform 1s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(16px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+}
+@media (min-width:700px) {
+  .sec { padding:90px 40px }
+  .us-grid { grid-template-columns:repeat(3,minmax(0,1fr)) }
+  .us-grid figure:nth-child(even) { margin-top:0 }
+  .us-grid figure:nth-child(3n+2) { margin-top:46px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

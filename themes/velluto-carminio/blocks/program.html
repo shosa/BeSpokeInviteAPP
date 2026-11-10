@@ -1,0 +1,16 @@
+{{#hasItems}}
+<section class="sec prog-sec serata-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="sr-cue" aria-hidden="true"><i></i></div>
+  </div>
+  <div class="timeline serata" data-anim="fadein" style="--d:.15s">
+    {{#items}}
+    <div class="t-row">
+      <div class="t-cell"><div class="t-time">{{time}}</div><div class="t-name">{{label}}</div></div>
+      <div class="t-dot" aria-hidden="true"></div>
+    </div>
+    {{/items}}
+  </div>
+</section>
+{{/hasItems}}

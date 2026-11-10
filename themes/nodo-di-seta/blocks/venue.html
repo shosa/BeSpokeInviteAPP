@@ -1,0 +1,20 @@
+<section class="sec loc-sec biglietto-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="biglietto" data-anim="fadeinup" style="--d:.1s">
+      <div class="bg-corpo">
+        {{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}
+        <div class="bg-testo">
+          <div class="loc-name">{{venue | lines}}</div>
+          {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+          {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+        </div>
+      </div>
+      <div class="bg-matrice">
+        <img class="bg-sigillo" src="assets/sigillo.webp" alt="" aria-hidden="true">
+        <div class="bg-data"><span>{{date.day}}</span> {{date.monthShort}} {{date.year}}</div>
+        {{#eventTime}}<div class="bg-ora">{{eventTime}}</div>{{/eventTime}}
+      </div>
+    </div>
+  </div>
+</section>

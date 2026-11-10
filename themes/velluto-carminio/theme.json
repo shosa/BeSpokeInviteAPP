@@ -1,0 +1,207 @@
+{
+  "engine": 2,
+  "id": "velluto-carminio",
+  "name": "Velluto carminio",
+  "description": "Busta di velluto carminio a tutto schermo col sigillo alla rosa velata d'oro, cartoncino cipria col filetto carminio; la data compare quando si apre un sipario di velluto. Velluto e marmo rosato si alternano, con titoli editoriali.",
+  "models": [],
+  "themeColor": "#3e0812",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Gloock&family=Instrument+Serif:ital@0;1&family=Corinthia:wght@400;700&family=Manrope:wght@300;400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Vittoria & Leonardo",
+      "hosts": "Insieme alle loro famiglie",
+      "eventDate": "2027-06-19",
+      "eventTime": "17:00",
+      "venue": "Palazzo Carminati",
+      "address": "Via dei Velluti 7, Firenze"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Entra nella sala"
+    },
+    "message": {
+      "heading": "Una lettera per voi",
+      "body": "Cari famiglia e amici, vorremmo celebrare questo giorno con voi, in una sera di giugno, tra velluti, candele e rose rosse."
+    },
+    "gallery": {
+      "heading": "Dettagli di una sera",
+      "photos": [
+        "assets/tavola-rose.jpg",
+        "assets/lampadario.jpg",
+        "assets/rosa-candela.jpg",
+        "assets/runner.jpg",
+        "assets/rose-libro.jpg",
+        "assets/candele.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/lampadari.jpg",
+      "caption": "Sotto i lampadari, la sala si accende per noi."
+    },
+    "program": {
+      "heading": "La serata",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "Il rito"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitivo"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena"
+        },
+        {
+          "time": "23:00",
+          "label": "Le danze"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Palazzo Carminati",
+      "kind": "villa",
+      "photo": "assets/salone.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Il palazzo è nel centro storico, a pochi passi dal Duomo: l'ingresso è dal cortile, dove il parcheggio è riservato agli ospiti.\nDalle 23:30 le auto aspettano al portone."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Abito da sera",
+      "colors": [
+        {
+          "hex": "#6E0F22",
+          "name": "Carminio"
+        },
+        {
+          "hex": "#2A050C",
+          "name": "Notte"
+        },
+        {
+          "hex": "#B8925A",
+          "name": "Oro"
+        },
+        {
+          "hex": "#F1E3DC",
+          "name": "Cipria"
+        },
+        {
+          "hex": "#111111",
+          "name": "Nero"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Una sera di giugno",
+      "video": "assets/foto-carminio.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Step into the hall"
+    },
+    "message": {
+      "heading": "A letter for you",
+      "body": "Dear family and friends, we would love to celebrate this day with you, on a June evening, among velvet, candles and red roses."
+    },
+    "gallery": {
+      "heading": "Details of an evening"
+    },
+    "image": {
+      "caption": "Beneath the chandeliers, the hall lights up for us."
+    },
+    "program": {
+      "heading": "The evening",
+      "items": [
+        {
+          "time": "17:00",
+          "label": "The ceremony"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitif"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner"
+        },
+        {
+          "time": "23:00",
+          "label": "Dancing"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The palazzo is in the historic centre, a few steps from the Duomo: the entrance is from the courtyard, where parking is reserved for guests.\nFrom 11:30 pm cars wait at the gate."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Evening attire",
+      "colors": [
+        {
+          "hex": "#6E0F22",
+          "name": "Carmine"
+        },
+        {
+          "hex": "#2A050C",
+          "name": "Night"
+        },
+        {
+          "hex": "#B8925A",
+          "name": "Gold"
+        },
+        {
+          "hex": "#F1E3DC",
+          "name": "Blush"
+        },
+        {
+          "hex": "#111111",
+          "name": "Black"
+        }
+      ]
+    },
+    "video": {
+      "heading": "A June evening"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

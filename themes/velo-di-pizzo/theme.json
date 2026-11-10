@@ -1,0 +1,197 @@
+{
+  "engine": 2,
+  "id": "velo-di-pizzo",
+  "name": "Velo di pizzo",
+  "description": "Una busta verticale di carta velina e pizzo guipure, a tutto schermo, chiusa da un sigillo 3D di ceralacca perla, si apre sul cartoncino col bordo di pizzo: bianco, avorio e grigio tortora dall'apertura alla firma. La data è nascosta sotto un velo di tulle: si tocca il sigillo, il velo si solleva e la data appare ricamata.",
+  "models": [],
+  "themeColor": "#f6f3f0",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cormorant+Infant:wght@400;500;600&family=Parisienne&family=Montserrat:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Giulia & Matteo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "17:30",
+      "venue": "Villa delle Rose Bianche",
+      "address": "Via Regina 21, Cernobbio (Como)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Un filo sottile",
+      "body": "Come il pizzo, il nostro amore è nato punto dopo punto, con pazienza e delicatezza.\nVorremmo che foste con noi nel giorno in cui quel filo diventa una promessa."
+    },
+    "gallery": {
+      "heading": "Dettagli di pizzo",
+      "photos": [
+        "assets/villa-rose.jpg",
+        "assets/tavola-pizzo.jpg",
+        "assets/bouquet.jpg",
+        "assets/fedi-pizzo.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola-pizzo.jpg",
+      "caption": "La lunga tavola vestita di pizzo, dove brinderemo insieme."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "La cerimonia nel giardino delle rose"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitivo sotto il loggiato"
+        },
+        {
+          "time": "20:00",
+          "label": "Cena alla lunga tavola"
+        },
+        {
+          "time": "23:00",
+          "label": "Taglio della torta"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa delle Rose Bianche",
+      "kind": "villa",
+      "photo": "assets/villa-rose.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:45 una navetta partirà da Piazza Cavour, a Como."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni del bianco e del tortora",
+      "colors": [
+        {
+          "hex": "#4F4648",
+          "name": "Antracite"
+        },
+        {
+          "hex": "#A79C98",
+          "name": "Tortora"
+        },
+        {
+          "hex": "#E4DDD8",
+          "name": "Perla"
+        },
+        {
+          "hex": "#FDFBF9",
+          "name": "Avorio"
+        }
+      ]
+    },
+    "video": {
+      "heading": "Luce di giugno",
+      "video": "assets/foto-pizzo.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Tocca il sigillo perla e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A fine thread",
+      "body": "Like lace, our love grew stitch by stitch, with patience and tenderness.\nWe would love you beside us on the day that thread becomes a promise."
+    },
+    "gallery": {
+      "heading": "Details in lace"
+    },
+    "image": {
+      "caption": "The long table dressed in lace, where we will raise a glass together."
+    },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        {
+          "time": "17:30",
+          "label": "The ceremony in the rose garden"
+        },
+        {
+          "time": "18:30",
+          "label": "Aperitif under the loggia"
+        },
+        {
+          "time": "20:00",
+          "label": "Dinner at the long table"
+        },
+        {
+          "time": "23:00",
+          "label": "Cutting the cake"
+        }
+      ]
+    },
+    "venue": {
+      "heading": "The venue"
+    },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 4:45 pm a shuttle will leave from Piazza Cavour, in Como."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in white and dove grey tones",
+      "colors": [
+        {
+          "hex": "#4F4648",
+          "name": "Charcoal"
+        },
+        {
+          "hex": "#A79C98",
+          "name": "Dove grey"
+        },
+        {
+          "hex": "#E4DDD8",
+          "name": "Pearl"
+        },
+        {
+          "hex": "#FDFBF9",
+          "name": "Ivory"
+        }
+      ]
+    },
+    "video": {
+      "heading": "June light"
+    },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Tap the pearl seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": {
+      "signature": "With all our love"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<section class="sec date-sec meridiana-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="meridiana" data-anim="fadein" style="--d:.15s">
+      <input class="mr-tg" type="checkbox" id="meridiana-data">
+      <span class="mr-label">{{date.long}}</span>
+      <div class="mr-quadrante" aria-hidden="true">
+        <img class="mr-glicine" src="assets/glicine2.webp" alt="">
+        <div class="mr-ore"><i style="--a:0deg">XII</i><i style="--a:30deg">I</i><i style="--a:60deg">II</i><i style="--a:90deg">III</i><i style="--a:120deg">IV</i><i style="--a:150deg">V</i><i style="--a:180deg">VI</i><i style="--a:210deg">VII</i><i style="--a:240deg">VIII</i><i style="--a:270deg">IX</i><i style="--a:300deg">X</i><i style="--a:330deg">XI</i></div>
+        <div class="mr-giro"><i class="mr-ombra"></i><i class="mr-luce"></i></div>
+        <i class="mr-gnomone"></i>
+        <div class="mr-centro">
+          <div class="mr-data"><span class="md-wd">{{date.weekday}}</span><span class="md-day">{{date.day}}</span><span class="md-month">{{date.month}}</span><span class="md-year">{{date.year}}</span></div>
+          <i class="mr-chiavistello"></i>
+        </div>
+      </div>
+      <label class="mr-tap" for="meridiana-data"><span class="mr-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

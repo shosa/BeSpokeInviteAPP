@@ -1,0 +1,255 @@
+/* Pizzo di mandorla. Una sola tinta per tutta la pagina: mandorla, panna e nocciola, dalla busta di pizzo alla firma. */
+:root { --bk-cover:#cdb19a;
+  --paper:#f1e6d8; --ivory:#faf3ea; --cream:#f3e8dc; --sand:#e6d3c0; --almond:#c9ab92;
+  --ink:#4a3526; --muted:#6b5242; --deep:#5e4331; --accent:#7a5841; --line:#dcc6b0;
+  --panel:rgba(250,243,234,.9); --panel-soft:rgba(250,243,234,.76);
+  --display:'EB Garamond',Georgia,serif; --script:'Allura','EB Garamond',Georgia,serif;
+  --body:'Nunito Sans',system-ui,sans-serif; --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--paper) }
+/* Il fermo della cornice di gelsomino: stesso fotogramma con cui parte l'intestazione. */
+body { margin:0; color:var(--ink); background:transparent; font:16px/1.7 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:var(--paper) url(assets/sfondo-fermo.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--accent); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--deep); outline-offset:4px }
+button,input,a { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:44px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 22px; font:400 clamp(32px,9.4vw,48px)/1.12 var(--display); color:var(--deep); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:120px; height:40px; margin:6px auto 0; background:url(assets/ornament.svg) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:15px; line-height:1.9; text-wrap:pretty }
+.orn { width:140px; max-width:50%; height:auto; margin:26px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:min(300px,82%); height:auto; margin:0 auto 14px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+
+/* Busta-video di pizzo: dietro, il fermo della cornice, per una dissolvenza continua. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--paper) url(assets/sfondo-fermo.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:italic 24px/1.3 var(--display); color:var(--deep); background:var(--panel); border:1px solid var(--line); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--cream)); border:1px solid var(--line); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--sand)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); display:grid; place-items:center; width:84px; height:84px; border-radius:50%; background:var(--seal,var(--almond)); color:var(--ivory); font:italic 28px var(--display) }
+[data-cover-tap] { position:absolute; left:50%; top:78%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 22px; max-width:85vw; background:var(--panel); border:1px solid var(--line); border-radius:30px; text-align:center; box-shadow:0 8px 24px #4a352618 }
+[data-cover-label] { color:var(--deep); font-size:12px; letter-spacing:.16em; text-transform:uppercase }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--accent); border-top:1px solid var(--accent); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: solo testo, al centro della cornice di gelsomino animata. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.h-vista,.hero-fl { display:none }
+.h-text { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:18% 17% 20%; text-align:center }
+.h-text > div { max-width:100%; text-shadow:0 0 18px #faf3ea, 0 0 6px #faf3ea }
+.occasion { order:-1; margin:0; font:italic 400 24px/1.2 var(--display); color:var(--accent); letter-spacing:.02em }
+.names { font:400 clamp(50px,15vw,80px)/1.05 var(--script); color:var(--deep); text-wrap:balance }
+.welcome { margin:0; font-size:12px; line-height:1.6; letter-spacing:.18em; text-transform:uppercase; color:var(--muted) }
+.scroll-cue { position:relative; z-index:2; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--deep); font-size:11px; letter-spacing:.16em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:6px 14px; background:var(--panel); border-radius:20px }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid; border-bottom:1px solid; transform:rotate(45deg) }
+
+/* Data da grattare: carta goffrata color mandorla, tre perle da scoprire. */
+.date-sec .card { padding:30px 18px 28px; background:var(--panel) url(assets/carta-ricamata.jpg) center/cover no-repeat; border-radius:24px; box-shadow:0 0 0 1px var(--line),0 14px 40px #4a352614 }
+.date-sec .card::before { content:""; display:block; width:min(320px,88%); height:60px; margin:-56px auto 8px; background:url(assets/fiocco.webp) center/contain no-repeat }
+.date-sec .title { font-size:clamp(28px,8vw,42px) }
+.hint { font:italic 19px/1.4 var(--display); color:var(--muted); text-align:center }
+.scratch-row,.sc-labels { display:flex; justify-content:center; gap:10px; margin-top:22px }
+.scratch { position:relative; flex:1 1 0; min-width:0; max-width:108px; aspect-ratio:1; border-radius:50%; overflow:hidden; background:var(--ivory); box-shadow:0 0 0 1px var(--line),0 0 0 5px var(--ivory),0 0 0 6px var(--almond); touch-action:none }
+.sc-val { position:absolute; inset:0; display:grid; place-items:center; padding:3px; font:500 clamp(20px,6.4vw,32px)/1 var(--display); color:var(--deep) }
+.scratch canvas { position:absolute; inset:0; width:100%; height:100%; transition:opacity .4s }
+.scratch.done canvas { opacity:0; pointer-events:none }
+.sc-labels { margin-top:14px }
+.sc-labels span { flex:1 1 0; min-width:0; max-width:108px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; text-align:center; color:var(--ink) }
+.reveal-all { display:block; margin:18px auto 0; min-height:44px; padding:10px 18px; background:transparent; border:0; text-decoration:underline; text-underline-offset:5px; font-size:12px; color:var(--accent) }
+.reveal-all.show { background:var(--sand); border-radius:24px }
+
+/* Data semplice: tre perle su un filo. */
+.dt-sec { text-align:center }
+.dt-sec .title { display:inline-block; padding:6px 18px; background:var(--panel-soft); border-radius:30px }
+.dt-row { position:relative; display:flex; justify-content:center; gap:10px; max-width:430px; margin:22px auto 0; padding:14px 0; background:linear-gradient(transparent 49%,var(--almond) 49%,var(--almond) 51%,transparent 51%) }
+.dt-col { flex:1; min-width:0; max-width:120px }
+.dt-cell { display:grid; place-items:center; min-height:80px; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,var(--ivory) 45%,var(--sand)); box-shadow:0 0 0 1px var(--line),0 6px 14px #4a352618 }
+.dt-num { font:500 clamp(24px,7vw,36px) var(--display); color:var(--deep) }
+.dt-lab { display:block; margin-top:10px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: quattro perle di madreperla sotto un fiocco. */
+.countdown-sec .card { padding:clamp(50px,14vw,76px) 6px 30px; background:var(--panel) url(assets/fiocco.webp) top 10px center/min(280px,72%) auto no-repeat; border:1px solid var(--line); border-radius:24px }
+.countdown-sec .orn { margin:0 auto 18px }
+[data-countdown] { display:flex; align-items:flex-start; justify-content:center; gap:4px; min-width:0 }
+.time-block { flex:1 1 0; min-width:0; max-width:100px; text-align:center }
+.number-wrap { display:grid; place-items:center; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,var(--ivory) 40%,var(--sand) 85%); box-shadow:0 0 0 1px var(--line),0 8px 16px #4a35261c; padding:8px 2px }
+.number { display:block; font:500 clamp(22px,6.6vw,38px)/1 var(--display); color:var(--deep); transition:opacity .18s }
+.label { margin-top:8px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted) }
+.separator { align-self:flex-start; margin-top:clamp(12px,5vw,28px); font:26px var(--display); color:var(--almond) }
+.sep1,.sep2,.sep3 { padding-inline:0 }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.6 }
+
+/* Messaggio: la lettera su un centrino di pizzo. */
+.invito-sec .card { isolation:isolate; padding:clamp(60px,17vw,96px) clamp(38px,11vw,74px) clamp(60px,17vw,96px); background:url(assets/centrino.webp) center/100% 100% no-repeat }
+.invito-sec .card::before { content:""; position:absolute; inset:12%; z-index:-1; background:var(--panel); border-radius:8px }
+.after { margin-top:18px }
+.lettera { font:italic 400 20px/1.7 var(--display); text-align:center; color:var(--ink) }
+
+/* Galleria: tondi e ovali, come medaglioni appesi a un filo di perle. */
+.us-sec .card { padding:clamp(70px,19vw,110px) 12px 20px; background:var(--panel-soft) url(assets/ghirlanda-perle.webp) top center/100% auto no-repeat; border-radius:24px }
+.us-fl { display:none }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:18px 14px; margin-top:20px; padding:0 4px 12px }
+.us-grid figure { margin:0; min-width:0; padding:6px; background:var(--ivory); border-radius:999px; box-shadow:0 0 0 1px var(--line),0 10px 22px #4a352616 }
+.us-grid figure:nth-child(even) { margin-top:30px }
+.us-grid img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:999px }
+.us-grid figure:nth-child(3n) { grid-column:1/-1; width:64%; justify-self:center; margin-top:0 }
+.us-grid figure:nth-child(3n) img { aspect-ratio:1 }
+
+/* Immagine: carta panna con un angolo di pizzo. */
+.img-block { position:relative; isolation:isolate; max-width:560px; margin-inline:auto !important; padding:clamp(54px,15vw,80px) 18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.img-block::before { content:""; position:absolute; z-index:3; top:8px; left:50%; translate:-50% 0; width:min(360px,86%); height:clamp(46px,13vw,70px); background:url(assets/floral-corner.png) center/contain no-repeat; pointer-events:none }
+.img-block img { border-radius:14px !important }
+.img-block figcaption { padding:12px 6px 0; color:var(--muted); opacity:1 !important; font:italic 19px/1.5 var(--display) !important }
+
+/* Programma: icone di pizzo bianco su un filo di perle. */
+.prog-sec .card { padding:40px 14px 26px; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.prog-fl { width:70px; top:-34px }
+.prog-fl.l { left:14px }
+.prog-fl.r { right:14px }
+.timeline { position:relative; max-width:440px; margin:26px auto 0; text-align:left; padding:16px 0 }
+.finial { position:absolute; width:22px; height:26px; top:-8px; left:35px }
+.rail { position:absolute; top:18px; bottom:24px; left:46px; width:2px; background:repeating-linear-gradient(var(--almond) 0 4px,transparent 4px 9px) }
+.t-row { position:relative; display:grid; grid-template-columns:94px minmax(0,1fr); align-items:center; padding:10px 0; min-height:100px }
+.t-dot { position:relative; z-index:1; width:84px; height:84px; margin-left:5px; border-radius:50%; background:var(--sand) url(assets/t-cappella.webp) center/78% no-repeat; box-shadow:0 0 0 1px var(--line),0 0 0 5px var(--ivory),0 0 0 6px var(--line) }
+.t-row:nth-of-type(4n+3) .t-dot { background-image:url(assets/t-calici.webp) }
+.t-row:nth-of-type(4n+4) .t-dot { background-image:url(assets/t-cena.webp) }
+.t-row:nth-of-type(4n+5) .t-dot,.t-row:nth-of-type(4n+1) .t-dot { background-image:url(assets/t-fontana.webp) }
+.t-cell { padding:4px 6px 14px 10px; border-bottom:1px solid var(--line) }
+.t-time { color:var(--accent); font:500 24px/1.2 var(--display) }
+.t-name { margin-top:4px; font-size:14px; line-height:1.6 }
+
+/* Location: la villa dentro la cornice ovale. */
+.loc-sec .card { padding:40px 18px 26px; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.loc-name { font:italic 30px/1.2 var(--display); color:var(--deep); margin-bottom:10px }
+.loc-addr { color:var(--muted); font-size:13px; opacity:1 !important }
+.loc-photo { border-radius:50% !important; width:76%; margin:24px auto 0; aspect-ratio:3/4; object-fit:cover; border-radius:50%; padding:10%; background:url(assets/cornice-ovale.webp) center/100% 100% no-repeat }
+
+/* Mappa: cartolina con bordo di pizzo. */
+.map-frame { position:relative; max-width:620px; margin:auto; padding:clamp(40px,11vw,60px) 10px 12px; background:var(--panel) url(assets/floral.png) top center/100% auto no-repeat; border:1px solid var(--line); border-radius:20px; box-shadow:0 12px 30px #4a352614 }
+.map-frame iframe { width:100%; height:300px; border:0; border-radius:12px; filter:sepia(.45) saturate(.8) }
+.map-fl { width:70px; height:auto; right:10px; top:-30px; bottom:auto; z-index:1 }
+
+/* Come arrivare: biglietto con filo di perle a lato. */
+.shuttle-sec .card { padding:22px 20px 22px 30px; text-align:left; background:var(--panel); border-radius:0 20px 20px 0; box-shadow:inset 4px 0 0 var(--almond) }
+.shuttle-sec .title { text-align:left; font-size:34px }
+.shuttle-sec .title::after { margin-left:0; width:96px }
+.shuttle-box { padding:6px 0; border-top:1px solid var(--line) }
+
+/* Dress code: campionario di neutri sotto il pizzo. */
+.dress-sec .card { padding:clamp(60px,16vw,90px) 16px 34px; background:var(--panel) url(assets/floral.png) top center/100% auto no-repeat; border:1px solid var(--line); border-radius:24px }
+.dress { font:italic 26px/1.3 var(--display); color:var(--deep); margin:0 0 20px }
+.dress-dots { gap:18px !important }
+.dress-dots>span { min-width:62px !important; padding:8px 2px }
+.dress-dots [role="img"] { width:40px !important; height:40px !important; outline:1px solid var(--almond); outline-offset:4px; margin-bottom:8px }
+.dress-dots>span>span:last-child { color:var(--ink); opacity:1 !important; font-size:12px !important }
+
+/* Video: i cigni sul lago, nella stessa tinta. */
+.video-sec .card { padding:20px 14px; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.video-frame { position:relative; overflow:hidden; border-radius:200px 200px 14px 14px; background:var(--sand); aspect-ratio:3/4 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--line); border-radius:50%; background:var(--ivory); color:var(--deep) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: perla di madreperla fissa in basso. */
+.music-toggle { position:fixed; left:16px; bottom:20px; width:50px; height:50px; z-index:1000; display:grid; place-items:center; background:var(--ivory) url(assets/perla.webp) center/cover; color:var(--deep); border:1px solid var(--line); border-radius:50%; box-shadow:0 4px 16px #4a352626; visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor }
+
+/* Conferma: busta di madreperla e un sigillo nel medaglione. */
+.rsvp-sec .card { isolation:isolate; padding:40px 20px 42px; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.rsvp-sec .card::before { content:""; display:block; width:150px; height:108px; margin:0 auto 10px; background:url(assets/busta-madreperla.webp) center/contain no-repeat }
+.rsvp-sec .body { max-width:360px; margin:0 auto }
+.rsvp-fl { width:100%; height:auto; left:0; bottom:10px; z-index:-1; opacity:.6 }
+.seal-btn { position:relative; width:112px; height:142px; display:grid; place-items:center; margin:28px auto 16px; border:0; border-radius:50%; color:var(--deep); background:var(--ivory) url(assets/medaglione.webp) center/contain no-repeat; filter:drop-shadow(0 8px 10px #4a352630) }
+.seal-text { font:400 36px var(--script); overflow-wrap:anywhere; max-width:72px }
+.seal-cue { display:inline-block; color:var(--deep); font-size:12px; letter-spacing:.1em; text-align:center; padding:8px 16px; margin-bottom:40px; background:var(--ivory); border:1px solid var(--line); border-radius:20px }
+.arrow-up { width:10px; height:10px; border-top:1px solid; border-left:1px solid; transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#3a2a1ec4; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:clamp(70px,18vw,100px) 22px 30px; background:var(--ivory) url(assets/floral.png) top center/100% auto no-repeat; border:1px solid var(--line); border-radius:24px; box-shadow:0 20px 80px #2a1d1333; overflow-wrap:anywhere }
+.popup__title { color:var(--deep); font:400 34px/1.2 var(--display); text-align:center; margin:0 10px 28px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:var(--ivory); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--deep) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font-size:14px; margin-bottom:8px; font-weight:600; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fff; border-radius:12px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:24px; cursor:pointer; font-size:14px; background:#fff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--accent); background:#fff }
+.radio input:checked+.ind { background:var(--accent); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--deep); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--deep); border-radius:28px; background:var(--deep); color:var(--ivory); font-size:14px; letter-spacing:.08em }
+/* Errori: stessa tinta, ma bordo spesso e testo in grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--deep); font-weight:600; font-size:13px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! "; }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--deep); box-shadow:0 0 0 3px var(--sand) }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 32px var(--display); color:var(--deep) }
+.honey { display:none !important }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Firma: un festone di perle e un bordo di pizzo che chiudono l'invito. */
+.footer-sec { isolation:isolate; overflow:hidden; min-height:380px; padding:clamp(110px,28vw,160px) 22px clamp(80px,20vw,120px); text-align:center; background:var(--panel-soft) url(assets/ghirlanda-perle.webp) top center/min(100%,640px) auto no-repeat; border-radius:40px 40px 0 0 }
+.footer-sec::after { content:""; position:absolute; left:0; right:0; bottom:0; height:clamp(60px,18vw,110px); background:url(assets/floral.png) bottom center/min(100%,640px) auto no-repeat; transform:scaleY(-1); z-index:-1 }
+.footer-in { position:relative; z-index:1; padding:22px 14px; max-width:480px; margin:auto; background:var(--panel); border:1px solid var(--line); border-radius:24px }
+.footer-in .title { font-size:32px }
+.signature { font:400 38px/1.3 var(--script); color:var(--deep) }
+.footer-sec>.fl { width:20%; top:6px; z-index:0 }
+.footer-sec>.fl.l { left:2% }
+.footer-sec>.fl.r { right:2% }
+.credits { position:relative; z-index:1; max-width:480px; margin:22px auto 0; padding:8px 12px; background:var(--panel); border-radius:20px; font-size:12px; color:var(--muted) }
+
+/* Ingressi: solo dissolvenze, nessun testo trasformato. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .8s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  img[data-anim="zoomin"] { transform:scale(.97); transition-property:opacity,transform }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .orn[data-anim],.fl-div[data-anim] { transform:translateY(8px); transition-property:opacity,transform }
+  .orn[data-anim].in,.fl-div[data-anim].in { transform:none }
+  .prog-fl,.map-fl,.footer-sec>.fl { animation:sway 5s ease-in-out infinite alternate; transform-origin:top center }
+  .prog-fl.r,.footer-sec>.fl.r { animation-delay:-2.5s }
+}
+@keyframes sway { from { rotate:-3deg } to { rotate:3deg } }
+
+@media (min-width:700px) {
+  .sec { padding:64px 40px }
+  .h-text { padding:20% 22% 22% }
+  .names { font-size:100px }
+  .occasion { font-size:32px }
+  .welcome { font-size:14px }
+  .hero-scene { min-height:min(100svh,1000px) }
+  .us-grid { gap:28px 24px }
+  .prog-sec .card { padding:50px 60px 34px }
+  .loc-photo { width:56% }
+  .popup__box { padding-inline:42px }
+  .footer-sec { max-width:920px; padding:170px 80px 140px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+}

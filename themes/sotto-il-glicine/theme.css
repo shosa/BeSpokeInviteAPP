@@ -1,0 +1,298 @@
+/* Sotto il glicine. Una sola tinta per tutta la pagina, chiara e luminosa: calce bianca, glicine lilla, argento e un filo di salvia.
+   L'invito è una casa sul mare in primavera: si aprono le persiane, fuori c'è la terrazza sotto il pergolato;
+   ogni sezione è un pezzo di quella casa (maioliche, finestre, scalinata, targa, nastri, meridiana). */
+:root {
+  --bk-cover:#e6dcf0;
+  --calce:#fbf9f8; --lilac-ll:#f4eff8; --lilac-l:#e6dcf0; --lilac:#b9a3d3; --lilac-d:#8a73a8;
+  --plum:#4d4260; --ink:#4a4256; --muted:#7a7088;
+  --silver:#c3c7cf; --silver-d:#8d92a0; --sage:#a8b79c; --sage-d:#6f8263;
+  --display:'Marcellus',Georgia,serif; --body:'Newsreader',Georgia,serif;
+  --script:'Italianno','Newsreader',cursive; --caps:'Questrial',system-ui,sans-serif;
+  --argento:linear-gradient(110deg,#9aa0ab 4%,#e9ebef 24%,#ffffff 38%,#b7bcc6 56%,#f1f2f5 74%,#8f95a1 96%);
+  --card:600px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--calce) }
+body { margin:0; color:var(--ink); background:transparent; font:300 17px/1.75 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+/* La calce bianca della casa, ferma dietro tutta la pagina, con un velo lilla appena accennato. */
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:radial-gradient(90% 50% at 50% 0%,#e6dcf066,#e6dcf000 70%),radial-gradient(80% 40% at 50% 100%,#e6dcf04d,#e6dcf000 70%),var(--calce) url(assets/intonaco.jpg) center/420px; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--lilac-d); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--lilac-d); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:48px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 24px; font:400 clamp(25px,7vw,35px)/1.25 var(--display); letter-spacing:.04em; color:var(--plum); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:120px; height:16px; margin:12px auto 0; background:url(assets/ornament.svg) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:17px; line-height:1.85; text-wrap:pretty }
+.orn,.fl { display:none }
+.bk { color:var(--bk-ink,inherit); background:var(--bk-bg,transparent) }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Apertura: le persiane chiuse, a tutto schermo. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--lilac-ll) url(assets/persiane-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 24px; text-align:center; font:400 17px/1.4 var(--display); letter-spacing:.08em; color:var(--plum); background:#fbf9f8e6; border:1px solid var(--lilac-l); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--lilac-l)); border:1px solid var(--silver); border-radius:4px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--lilac-ll)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:86%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 28px; max-width:85vw; background:#fbf9f8e0; border:1px solid var(--lilac-l); border-radius:40px; text-align:center; box-shadow:0 10px 26px #4d42601f }
+[data-cover-tap][data-tap-plain] { background:none; border-color:transparent; box-shadow:none }
+[data-cover-label] { color:var(--plum); font:400 12px/1.3 var(--caps); letter-spacing:.26em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--lilac-d); border-top:1px solid var(--lilac-d); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: la terrazza sotto il pergolato, con i nomi scritti nella luce del mattino. */
+.zone-hero { background:var(--calce) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,940px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:47%; transform:translate(-50%,-50%); width:46%; max-width:260px; aspect-ratio:3/4; object-fit:cover; z-index:2; border-radius:50% 50% 4px 4px / 34% 34% 4px 4px; border:5px solid #fff; box-shadow:0 0 0 1px var(--silver),0 14px 30px #4d426026 }
+.h-text { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:36% 12% 26%; text-align:center; background:radial-gradient(ellipse 46% 22% at 50% 56%,#ffffffb3,#ffffff00) }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end; padding-bottom:20% }
+.occasion { order:-1; font:400 12px/1.5 var(--caps); letter-spacing:.38em; padding-left:.38em; text-transform:uppercase; color:var(--lilac-d) }
+.names { font:400 clamp(64px,19vw,110px)/.95 var(--script); color:var(--plum); text-wrap:balance; padding:0 .08em; text-shadow:0 0 18px #ffffff }
+.welcome { font:400 11.5px/1.7 var(--caps); letter-spacing:.24em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:120px; height:16px; margin:2px auto 10px; background:url(assets/ornament.svg) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--plum); font:400 11px/1.3 var(--caps); letter-spacing:.24em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-92px }
+.scroll-cue span { display:inline-block; padding:9px 20px; background:#fbf9f8e6; border:1px solid var(--lilac-l); border-radius:30px; box-shadow:0 8px 20px #4d42601a }
+.arrow { width:10px; height:10px; margin:12px auto 0; border-right:1px solid var(--lilac-d); border-bottom:1px solid var(--lilac-d); transform:rotate(45deg) }
+
+/* La data sulla meridiana. Il tema sostituisce la data da grattare: un quadrante di pietra chiara con le ore romane,
+   lo gnomone d'argento e al centro il chiavistello delle persiane. Al tocco (una casella nascosta, niente script)
+   il sole fa il giro del quadrante e l'ombra lo segue; poi il chiavistello si apre e al centro compare la data incisa. */
+.meridiana-sec .title { margin-bottom:10px }
+.meridiana { --w:min(316px,84vw); position:relative; width:var(--w); height:calc(var(--w) + 52px); margin:26px auto 0 }
+.mr-tg { position:absolute; inset:auto 0 0 auto; width:1px; height:1px; opacity:0; margin:0 }
+.mr-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.mr-quadrante { position:absolute; left:0; top:0; width:var(--w); height:var(--w); border-radius:50%; background:radial-gradient(circle at 34% 28%,#ffffff,#f6f3f6 50%,#e9e4ec); box-shadow:inset 0 0 0 7px #fdfcfd,inset 0 0 0 8px var(--silver),inset 0 0 0 11px #fdfcfd00,inset 0 0 0 12px #c3c7cf80,inset 0 -10px 24px #8a73a81f,0 22px 44px #4d426026 }
+/* Le linee delle ore, incise sull'anello. */
+.mr-quadrante::before { content:""; position:absolute; inset:9%; border-radius:50%; background:repeating-conic-gradient(from -.4deg,#a7adb8a6 0 .8deg,#0000 .8deg 15deg); -webkit-mask:radial-gradient(closest-side,#0000 52%,#000 54% 78%,#0000 80%); mask:radial-gradient(closest-side,#0000 52%,#000 54% 78%,#0000 80%) }
+.mr-quadrante::after { content:""; position:absolute; inset:21%; border-radius:50%; box-shadow:0 0 0 1px #c3c7cf99 }
+.mr-ore i { position:absolute; left:50%; top:50%; font:400 calc(var(--w) * .045)/1 var(--display); font-style:normal; color:var(--muted); transform:translate(-50%,-50%) rotate(var(--a)) translateY(calc(var(--w) * -.425)) }
+.mr-giro { position:absolute; inset:0; border-radius:50%; transform:rotate(-100deg); pointer-events:none }
+.mr-ombra { position:absolute; inset:0; border-radius:50%; background:conic-gradient(from -4deg,#4d426066 0 8deg,#0000 8deg); filter:blur(2.5px); -webkit-mask:radial-gradient(closest-side,#0000 38%,#000 42% 84%,#0000 90%); mask:radial-gradient(closest-side,#0000 38%,#000 42% 84%,#0000 90%) }
+.mr-luce { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 50% 90%,#fff7e0d9,#fff7e000 20%); mix-blend-mode:screen }
+.mr-gnomone { position:absolute; left:50%; top:9%; width:5px; height:22%; translate:-50% 0; border-radius:3px 3px 1px 1px; background:var(--argento); box-shadow:0 0 0 1px #8d92a066,2px 3px 4px #4d426033 }
+.mr-centro { position:absolute; inset:29%; border-radius:50%; background:radial-gradient(circle at 40% 32%,#ffffff,#f4f0f5 70%,#ebe5ee); box-shadow:inset 0 2px 7px #4d426026,0 0 0 1px var(--silver),0 0 0 5px #fdfcfd,0 0 0 6px #c3c7cf80 }
+.mr-data { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center }
+.mr-data > span { opacity:0 }
+.md-wd { font:400 calc(var(--w) * .028)/1 var(--caps); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:var(--muted) }
+.md-day { margin-top:4px; font:400 calc(var(--w) * .15)/1 var(--display); color:var(--plum); text-shadow:0 1px 0 #ffffff,0 -1px 0 #4d426033 }
+.md-month { margin-top:-4px; font:400 calc(var(--w) * .1)/1 var(--script); color:var(--lilac-d) }
+.md-year { font:400 calc(var(--w) * .032)/1 var(--caps); letter-spacing:.42em; padding-left:.42em; color:var(--silver-d) }
+.mr-chiavistello { position:absolute; inset:-7%; background:url(assets/sigillo.webp) center/contain no-repeat }
+.mr-glicine { position:absolute; z-index:4; top:-16%; left:-2%; width:24%; height:auto; transform-origin:50% 0; rotate:-4deg; pointer-events:none; filter:drop-shadow(0 8px 8px #4d42601f) }
+.mr-tap { position:absolute; inset:0; z-index:3; display:flex; align-items:flex-end; justify-content:center; cursor:pointer }
+.mr-hint { white-space:nowrap; padding:9px 22px; font:400 11.5px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--plum); background:#fbf9f8; border:1px solid var(--lilac-l); border-radius:30px; box-shadow:0 8px 18px #4d42601a }
+.mr-tg:focus-visible ~ .mr-tap .mr-hint { outline:3px solid var(--lilac-d); outline-offset:4px }
+/* Toccata: stato finale (anche con «riduci movimento»). */
+.mr-tg:checked ~ .mr-tap { pointer-events:none }
+.mr-tg:checked ~ .mr-tap .mr-hint { opacity:0 }
+.mr-tg:checked ~ .mr-quadrante .mr-giro { transform:rotate(112deg) }
+.mr-tg:checked ~ .mr-quadrante .mr-chiavistello { opacity:0; transform:scale(.6) }
+.mr-tg:checked ~ .mr-quadrante .mr-data > span { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .mr-glicine { animation:brezza 5s ease-in-out infinite alternate }
+  .mr-tg:not(:checked) ~ .mr-quadrante .mr-giro { animation:attesa 5s ease-in-out infinite alternate }
+  .mr-tg:not(:checked) ~ .mr-quadrante .mr-chiavistello { animation:chiama 3.2s ease-in-out infinite }
+  .mr-tg:checked ~ .mr-quadrante .mr-giro { animation:giorno 3.2s cubic-bezier(.45,0,.25,1) both }
+  .mr-tg:checked ~ .mr-tap .mr-hint { animation:svanisce .4s ease both }
+  .mr-tg:checked ~ .mr-quadrante .mr-chiavistello { animation:apre 1s cubic-bezier(.5,0,.3,1) 2.7s both }
+  .mr-tg:checked ~ .mr-quadrante .md-wd { animation:appare .9s ease 3.3s both }
+  .mr-tg:checked ~ .mr-quadrante .md-day { animation:incide 1.3s ease-out 3.5s both }
+  .mr-tg:checked ~ .mr-quadrante .md-month { animation:appare 1s ease 4s both }
+  .mr-tg:checked ~ .mr-quadrante .md-year { animation:appare 1s ease 4.3s both }
+}
+@keyframes attesa { from { transform:rotate(-104deg) } to { transform:rotate(-92deg) } }
+@keyframes giorno { from { transform:rotate(-100deg) } to { transform:rotate(112deg) } }
+@keyframes chiama { 0%,72%,100% { transform:none } 82% { transform:rotate(-6deg) scale(1.03) } 92% { transform:rotate(4deg) } }
+@keyframes apre { 0% { opacity:1; transform:none } 35% { transform:rotate(-12deg) scale(1.04) } 100% { opacity:0; transform:rotate(30deg) scale(.6) } }
+@keyframes incide { 0% { opacity:0; filter:blur(5px); letter-spacing:.24em } 70% { opacity:1 } 100% { opacity:1; filter:none; letter-spacing:0 } }
+@keyframes appare { from { opacity:0; transform:translateY(5px) } to { opacity:1; transform:none } }
+@keyframes svanisce { to { opacity:0 } }
+@keyframes brezza { from { rotate:2deg } to { rotate:7deg } }
+
+/* Conto alla rovescia: una fila di maioliche dipinte a mano, smalto bianco e decoro lilla, con le fughe tra le piastrelle. */
+.maioliche { max-width:460px; margin:0 auto }
+[data-countdown] { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:4px; background:#e4dee7; border-radius:3px; box-shadow:0 16px 34px #4d42601f }
+.time-block { display:flex; flex-direction:column; align-items:center; min-width:0 }
+.number-wrap { position:relative; display:grid; place-items:center; width:calc(100% - 4px); margin:2px; aspect-ratio:1; border-radius:2px; background:radial-gradient(circle at 0 0,var(--lilac) 0 13%,#0000 13.5%),radial-gradient(circle at 100% 0,var(--lilac) 0 13%,#0000 13.5%),radial-gradient(circle at 0 100%,var(--lilac) 0 13%,#0000 13.5%),radial-gradient(circle at 100% 100%,var(--lilac) 0 13%,#0000 13.5%),radial-gradient(circle,#0000 0 36%,#cdbde0 37% 39%,#0000 40%),radial-gradient(circle at 50% 0,var(--sage) 0 5%,#0000 5.5%),radial-gradient(circle at 50% 100%,var(--sage) 0 5%,#0000 5.5%),radial-gradient(circle at 0 50%,var(--sage) 0 5%,#0000 5.5%),radial-gradient(circle at 100% 50%,var(--sage) 0 5%,#0000 5.5%),linear-gradient(135deg,#ffffff,#f8f6f9); box-shadow:inset 0 0 0 4px #ffffff,inset 0 0 0 5px #e6dcf0,inset 0 1px 0 6px #ffffff00,inset -2px -3px 6px #4d42600f }
+.number { display:block; font:400 clamp(22px,6.6vw,32px)/1 var(--display); color:var(--plum); transition:opacity .18s }
+.label { width:100%; margin:0; padding:8px 0 6px; background:#fbf9f8; font:400 9.5px/1.2 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+.separator { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.5 }
+
+/* Messaggio: il foglio sotto la trave del pergolato, con i grappoli di glicine che pendono sul testo. */
+.pergolato { max-width:480px; padding-top:8px }
+.pg-trave { position:relative; z-index:3; height:16px; margin:0 -10px; border-radius:3px; background:linear-gradient(#ffffff,#ece6ef); box-shadow:0 1px 0 #c3c7cf,0 6px 10px #4d42601f }
+.pg-g { position:absolute; top:10px; height:auto; transform-origin:50% 0; filter:drop-shadow(0 6px 6px #4d42601a) }
+.pg-g.g1 { left:5%; width:38px }
+.pg-g.g2 { left:17%; width:28px }
+.pg-g.g3 { right:6%; width:36px }
+.pg-foglio { position:relative; margin:0 6px; padding:150px clamp(22px,7vw,44px) 36px; background:#fffefe url(assets/intonaco.jpg) center/420px; border:1px solid var(--lilac-l); border-top:0; border-radius:0 0 4px 4px; box-shadow:0 20px 40px #4d42601a,inset 0 0 0 8px #fffefe,inset 0 0 0 9px #e6dcf0 }
+.after { margin-top:4px }
+.lettera { font:italic 300 18px/1.9 var(--body); text-align:center; color:var(--ink) }
+
+/* Galleria: le finestre della casa, ognuna con le sue persiane lilla socchiuse e il davanzale. */
+.facciata { max-width:520px; margin:0 auto; padding:30px 8px 26px; background:linear-gradient(#f6f1f8,#fbf9f8); border:1px solid #ece5f0; border-radius:4px; box-shadow:0 18px 40px #4d42601a }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:30px 0; margin:0; padding:0 }
+.us-grid figure { position:relative; margin:0 auto; width:62%; min-width:0; perspective:600px }
+.fn-vano { display:block; padding:5px; background:#ffffff; box-shadow:0 0 0 1px #e1d9e6,inset 0 0 0 1px #e1d9e6 }
+.us-grid img { width:100%; aspect-ratio:3/4.3; object-fit:cover }
+.fn-anta { position:absolute; top:0; bottom:9px; width:42%; background:var(--lilac-l) url(assets/anta.jpg) center/cover; border:2px solid #f1ecf4; box-shadow:0 4px 8px #4d42601f }
+.fn-anta.l { right:100%; transform-origin:100% 50%; transform:rotateY(-58deg) }
+.fn-anta.r { left:100%; transform-origin:0 50%; transform:rotateY(58deg) }
+.fn-davanzale { display:block; height:7px; margin:0 -14%; background:linear-gradient(#ffffff,#e6e0ea); border-radius:1px; box-shadow:0 4px 6px #4d42601f }
+
+/* Immagine: una finestra spalancata, con la cornice di calce. */
+.img-block { position:relative; max-width:540px; margin-inline:auto !important; padding:10px; background:#ffffff; border-radius:4px; box-shadow:0 0 0 1px var(--lilac-l),0 20px 40px #4d42601f }
+.img-block img { border-radius:2px !important }
+.img-block figcaption { padding:14px 10px 4px; margin:0 !important; color:var(--muted); opacity:1 !important; font:italic 300 16px/1.6 var(--body) !important }
+
+/* Programma: la scalinata che scende alla terrazza. Ogni tappa è un gradino di pietra chiara,
+   sempre più largo verso il basso, con l'alzata in ombra. */
+.scalinata { position:relative; max-width:440px; margin:0 auto; padding-top:8px }
+.sc-glicine { position:absolute; z-index:2; top:-36px; left:2%; width:52px; height:auto; pointer-events:none; filter:drop-shadow(0 6px 6px #4d42601a) }
+.t-row { --i:0; display:flex; justify-content:center }
+.t-row:nth-child(3) { --i:1 } .t-row:nth-child(4) { --i:2 } .t-row:nth-child(5) { --i:3 } .t-row:nth-child(6) { --i:4 }
+.t-row:nth-child(7) { --i:5 } .t-row:nth-child(8) { --i:6 } .t-row:nth-child(9) { --i:7 }
+.t-cell { width:min(100%,calc(60% + var(--i) * 6.5%)); margin-bottom:18px; padding:14px 14px 12px; background:linear-gradient(#ffffff,#f4f0f5); border-radius:2px; box-shadow:0 1px 0 #ffffff inset,0 12px 0 -2px #e3dce7,0 13px 0 -2px #c3c7cf,0 20px 20px -6px #4d426026 }
+.t-time { font:400 21px/1.2 var(--display); letter-spacing:.06em; color:var(--lilac-d) }
+.t-name { margin-top:3px; font-size:15.5px; line-height:1.5; color:var(--ink) }
+
+/* Location: la foto e sotto la targa di maiolica, smalto bianco col doppio filetto lilla e i puntini agli angoli. */
+.targa-sec .card { max-width:400px }
+.tg-foto { width:min(320px,86%); margin:0 auto; padding:8px; background:#ffffff; box-shadow:0 0 0 1px var(--lilac-l),0 18px 36px #4d42601f }
+.loc-photo { width:100%; aspect-ratio:4/5; object-fit:cover }
+.targa { position:relative; z-index:1; width:92%; margin:-46px auto 0; padding:26px 22px 24px; border-radius:14px; background:radial-gradient(circle 4px at 18px 18px,var(--lilac) 98%,#0000),radial-gradient(circle 4px at calc(100% - 18px) 18px,var(--lilac) 98%,#0000),radial-gradient(circle 4px at 18px calc(100% - 18px),var(--lilac) 98%,#0000),radial-gradient(circle 4px at calc(100% - 18px) calc(100% - 18px),var(--lilac) 98%,#0000),linear-gradient(135deg,#ffffff,#f7f4f9); box-shadow:inset 0 0 0 5px #ffffff,inset 0 0 0 7px var(--lilac),inset 0 0 0 10px #ffffff00,inset 0 0 0 11px #cdbde0,0 16px 32px #4d426026 }
+.targa .title { margin:0 0 6px; font:400 11px/1.4 var(--caps); letter-spacing:.32em; padding-left:.32em; text-transform:uppercase; color:var(--lilac-d) }
+.targa .title::after { display:none }
+.loc-name { font:400 clamp(24px,7vw,32px)/1.2 var(--display); color:var(--plum) }
+.loc-addr { margin-top:4px; font:400 10.5px/1.6 var(--caps); letter-spacing:.22em; text-transform:uppercase; color:var(--muted); opacity:1 !important }
+.loc-via { margin-top:4px; font:italic 300 15px/1.55 var(--body); color:var(--ink) }
+
+/* Mappa: nella cornice di calce. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:9px; background:#ffffff; border-radius:6px; box-shadow:0 0 0 1px var(--lilac-l),0 18px 36px #4d42601f }
+.map-frame iframe { width:100%; height:300px; border:0; border-radius:3px; filter:saturate(.6) hue-rotate(-8deg) brightness(1.03) }
+.map-frame[data-map-shape="circle"] iframe { border-radius:50%; aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"] iframe { border-radius:50% 50% 3px 3px / 30% 30% 3px 3px; height:360px }
+
+/* Come arrivare: un foglio di calce col filetto lilla. */
+.shuttle-box { max-width:460px; margin:0 auto; padding:24px clamp(18px,6vw,34px); background:#fffefe; border-radius:4px; box-shadow:inset 0 0 0 6px #fffefe,inset 0 0 0 7px var(--lilac-l),0 14px 30px #4d42601a }
+
+/* Dress code: i nastri di seta appesi a un'asta d'argento, ognuno nel colore della festa. */
+.dress { font:italic 300 20px/1.5 var(--body); color:var(--plum); margin:0 0 24px }
+.nastri { max-width:400px; margin:0 auto }
+.ns-asta { position:relative; display:block; height:6px; margin:0 6px; border-radius:3px; background:linear-gradient(#ffffff,#b8bdc7 70%,#9aa0ab); box-shadow:0 3px 4px #4d426026 }
+.ns-asta::before,.ns-asta::after { content:""; position:absolute; top:-4px; width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#ffffff,#b7bcc6 60%,#8d92a0) }
+.ns-asta::before { left:-8px }
+.ns-asta::after { right:-8px }
+.dress-dots { display:flex; justify-content:center; gap:8px; padding:0 8px }
+.nastro { display:inline-flex; flex-direction:column; align-items:center; gap:8px; width:46px; transform-origin:50% 0; filter:drop-shadow(0 0 .6px #8d92a0) drop-shadow(0 6px 6px #4d42601f) }
+.ns-seta { display:block; width:34px; height:118px; margin-top:-3px; background:linear-gradient(90deg,color-mix(in srgb,var(--c) 82%,#4d4260),var(--c) 26%,color-mix(in srgb,var(--c) 60%,#fff) 48%,var(--c) 68%,color-mix(in srgb,var(--c) 85%,#4d4260)); clip-path:polygon(0 0,100% 0,100% 100%,50% 88%,0 100%) }
+.nastro:nth-child(2n) .ns-seta { height:100px }
+.nastro:nth-child(3n) .ns-seta { height:128px }
+.ns-nome { font:400 9.5px/1.3 var(--caps); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); white-space:nowrap }
+
+/* Video: dentro una finestra con la cornice di calce. */
+.video-sec .card { padding:0 12px }
+.video-frame { position:relative; overflow:hidden; max-width:360px; margin:auto; aspect-ratio:9/14; padding:9px; background:#ffffff; border-radius:4px; box-shadow:0 0 0 1px var(--lilac-l),0 20px 40px #4d42601f }
+.video-frame video { width:100%; height:100%; object-fit:cover; border-radius:2px }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--lilac-l); border-radius:50%; background:#fbf9f8e6; color:var(--plum) }
+.video-play svg { width:22px; height:22px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il chiavistello, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:var(--plum); border:0; border-radius:50%; visibility:hidden; opacity:0 }
+.music-toggle svg { width:17px; height:17px; fill:currentColor; filter:drop-shadow(0 0 3px #ffffff) }
+
+/* Conferma: due ante di persiana chiuse, col chiavistello d'argento da toccare. */
+.rsvp-sec .card { padding:0 10px 10px }
+.rsvp-sec .body { max-width:340px; margin:0 auto; font-style:italic }
+.ps-ante { position:relative; display:grid; place-items:center; width:230px; height:250px; margin:24px auto 8px }
+.ps-anta { position:absolute; top:0; bottom:0; width:50%; background:var(--lilac-l) url(assets/anta.jpg) center/cover; border:4px solid #f4f0f6; box-shadow:0 12px 24px #4d426026 }
+.ps-anta.l { left:0; border-right-width:1px }
+.ps-anta.r { right:0; border-left-width:1px }
+.seal-btn { position:relative; z-index:1; width:116px; height:116px; display:grid; place-items:center; margin:0; border:0; border-radius:50%; color:var(--plum); background:url(assets/sigillo.webp) center/contain no-repeat; transition:transform .3s ease,filter .3s ease }
+.seal-btn:hover { transform:rotate(-8deg); filter:drop-shadow(0 0 16px #ffffff) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--plum); font:400 11px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; text-align:center; padding:9px 20px; margin:12px 0 20px; background:#fbf9f8; border:1px solid var(--lilac-l); border-radius:30px }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--lilac-d); border-left:1px solid var(--lilac-d); transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#4d4260b3; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; isolation:isolate; width:100%; max-width:520px; margin:auto; padding:100px 22px 30px; color:var(--ink); background:#fffefe url(assets/intonaco.jpg) center/420px; border-radius:6px; box-shadow:0 24px 80px #2b24384d,inset 0 0 0 8px #fffefe,inset 0 0 0 9px var(--lilac-l); overflow-wrap:anywhere }
+.popup__box::before { content:""; position:absolute; z-index:-1; top:-10px; left:12px; width:58px; height:150px; background:url(assets/glicine1.webp) center top/contain no-repeat }
+.popup__box::after { content:""; position:absolute; top:24px; left:50%; translate:-50% 0; width:60px; height:60px; background:url(assets/sigillo.webp) center/contain no-repeat }
+.popup__title { color:var(--plum); font:400 25px/1.35 var(--display); text-align:center; margin:0 10px 26px }
+.popup__close { position:absolute; right:12px; top:12px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--lilac-l); background:#ffffff; border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--plum) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 15px/1.5 var(--body); margin-bottom:8px; color:var(--plum) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#ffffff; border-radius:4px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 16px; border:1px solid var(--lilac); border-radius:24px; cursor:pointer; font-size:15px; background:#ffffff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--lilac-d); background:#fff }
+.radio input:checked+.ind { background:var(--plum); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:checked) { border-color:var(--plum) }
+.radio:has(input:focus-visible) { outline:3px solid var(--plum); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--plum); border-radius:30px; background:var(--plum); color:#ffffff; font:400 13px/1.3 var(--caps); letter-spacing:.22em; text-transform:uppercase; box-shadow:0 8px 20px #4d426033 }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--plum); font-weight:600; font-size:13.5px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--plum); box-shadow:0 0 0 3px var(--lilac-l) }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 26px/1.3 var(--display); color:var(--plum) }
+.honey { display:none !important }
+
+/* Firma: sotto l'ultima trave del pergolato, coi grappoli che pendono sulla firma e il chiavistello d'argento. */
+.footer-sec { padding:30px 0 66px; text-align:center; max-width:none; overflow:hidden }
+.ft-trave { display:flex; justify-content:space-around; align-items:flex-start; height:178px; margin:0 0 10px; border-top:14px solid #ffffff; box-shadow:inset 0 1px 0 #c3c7cf; filter:drop-shadow(0 6px 8px #4d42601a) }
+.ft-trave img { width:40px; height:auto; margin-top:-2px; transform-origin:50% 0 }
+.ft-trave img:nth-child(2n) { width:30px }
+.footer-in { position:relative; max-width:460px; margin:auto; padding:0 18px }
+.footer-in .title { font-size:clamp(21px,5.8vw,27px) }
+.footer-in .title::after { display:none }
+.signature { font:400 clamp(58px,16vw,84px)/1.05 var(--script); color:var(--plum) }
+.ft-sigillo { width:64px; height:auto; margin:16px auto 0 }
+.credits { max-width:460px; margin:22px auto 0; padding:0 18px; font:400 10.5px/1.7 var(--caps); letter-spacing:.16em; text-transform:uppercase; color:var(--muted) }
+
+/* Ingressi: dissolvenze lente; i grappoli e i nastri ondeggiano nella brezza. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .9s ease,transform .9s ease; transition-delay:var(--d,0s) }
+  [data-anim="fadeinup"] { transform:translateY(12px) }
+  [data-anim].in { opacity:1; transform:none }
+  img[data-anim="zoomin"] { transform:scale(.97) }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .pg-g,.ft-trave img,.sc-glicine { animation:brezza 5s ease-in-out infinite alternate }
+  .pg-g.g2,.ft-trave img:nth-child(2n) { animation-duration:6.5s; animation-delay:-2s }
+  .ns-seta { transform-origin:50% 0; animation:brezza 4.5s ease-in-out infinite alternate }
+  .nastro:nth-child(2n) .ns-seta { animation-delay:-1.5s; animation-duration:5.5s }
+}
+@media (min-width:700px) {
+  .sec { padding:66px 40px }
+  .h-text { padding:30% 26% 24% }
+  .occasion { font-size:14px }
+  .nastro { width:54px }
+  .ns-seta { width:40px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

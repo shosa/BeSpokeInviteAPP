@@ -1,0 +1,15 @@
+<section class="sec loc-sec arco-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="arco" data-anim="fadeinup" style="--d:.1s">
+      <i class="ar-raggi" aria-hidden="true"></i>
+      <div class="ar-cornice">{{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}</div>
+      <i class="ar-base" aria-hidden="true"></i>
+    </div>
+    <div class="ar-targa" data-anim="fadeinup" style="--d:.2s">
+      <div class="loc-name">{{venue | lines}}</div>
+      {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

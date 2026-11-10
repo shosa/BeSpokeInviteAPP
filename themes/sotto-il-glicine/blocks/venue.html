@@ -1,0 +1,11 @@
+<section class="sec loc-sec targa-sec">
+  <div class="card">
+    {{#photo}}<div class="tg-foto" data-anim="fadeinup"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""></div>{{/photo}}
+    <div class="targa" data-anim="fadeinup" style="--d:.15s">
+      {{#heading}}<h2 class="title">{{heading}}</h2>{{/heading}}
+      <div class="loc-name">{{venue | lines}}</div>
+      {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

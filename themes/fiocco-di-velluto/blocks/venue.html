@@ -1,0 +1,16 @@
+<section class="sec loc-sec chiave-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#photo}}<div class="ch-foto" data-anim="fadeinup"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""></div>{{/photo}}
+    <div class="chiave" data-anim="fadeinup" style="--d:.15s">
+      <div class="ch-chiave" aria-hidden="true"><i class="ch-anello"></i><i class="ch-gambo"></i><i class="ch-mappa"></i></div>
+      <i class="ch-catena" aria-hidden="true"></i>
+      <div class="ch-targa"><div class="ch-targa-in">
+        <img class="ch-emblema" src="assets/emblema.webp" alt="" aria-hidden="true">
+        <div class="loc-name">{{venue | lines}}</div>
+        {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+      </div></div>
+      {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,150 @@
+{
+  "engine": 2,
+  "id": "conchiglia-di-perla",
+  "name": "Conchiglia di perla",
+  "description": "Carta di cotone azzurro polvere col bordo strappato a mano e un sigillo perla con la capasanta: fogli sovrapposti, quiete di mare d'inverno. La data è custodita in una conchiglia che si apre sulla madreperla.",
+  "models": [],
+  "themeColor": "#9fb3c2",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Bellefair&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Mrs+Saint+Delafield&family=Figtree:wght@400;500&display=swap"
+  ],
+  "background": { "kind": "none" },
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Livia & Tommaso",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-02-13",
+      "eventTime": "16:30",
+      "venue": "Villa degli Scogli",
+      "address": "Lungomare dei Pini 8, Camogli (Genova)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "scratchdate": {
+      "dateTitle": "Il nostro giorno",
+      "revealLabel": "Apri la conchiglia"
+    },
+    "message": {
+      "heading": "Due fogli, una storia",
+      "body": "Ci sono cose che non si tagliano con la riga: si strappano piano, a mano, e il bordo resta vivo.\nCosì è la nostra storia, e così vorremmo cominciarne il capitolo più bello, davanti al mare d'inverno, insieme a voi."
+    },
+    "gallery": {
+      "heading": "Mare d'inverno",
+      "photos": [
+        "assets/conchiglie.jpg",
+        "assets/fedi.jpg",
+        "assets/mare.jpg",
+        "assets/tavola.jpg",
+        "assets/dettagli.jpg",
+        "assets/legni.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/ricevimento.jpg",
+      "caption": "La tavola lunga sulla terrazza, con il mare sullo sfondo."
+    },
+    "program": {
+      "heading": "La giornata",
+      "items": [
+        { "time": "16:30", "label": "La cerimonia sulla terrazza" },
+        { "time": "17:30", "label": "Aperitivo al tramonto" },
+        { "time": "19:30", "label": "Cena nella sala delle vetrate" },
+        { "time": "22:30", "label": "Taglio della torta e brindisi" }
+      ]
+    },
+    "venue": {
+      "heading": "Il luogo",
+      "venue": "Villa degli Scogli",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 15:45 una navetta partirà dalla stazione di Camogli."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni freddi del mare d'inverno",
+      "colors": [
+        { "hex": "#2D4152", "name": "Ardesia" },
+        { "hex": "#6F8798", "name": "Acciaio" },
+        { "hex": "#A9BBC8", "name": "Polvere" },
+        { "hex": "#F1EEE7", "name": "Perla" }
+      ]
+    },
+    "video": {
+      "heading": "Luce d'inverno",
+      "video": "assets/foto-mare.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Rispondici su questa cartolina: tocca il sigillo e dicci se sarai con noi.",
+      "openLabel": "Rispondi alla cartolina",
+      "submitLabel": "Invia la risposta",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "scratchdate": {
+      "dateTitle": "Our day",
+      "revealLabel": "Open the shell"
+    },
+    "message": {
+      "heading": "Two sheets, one story",
+      "body": "Some things are not cut with a ruler: they are torn slowly, by hand, and the edge stays alive.\nSo is our story, and so we would love to begin its most beautiful chapter, by the winter sea, together with you."
+    },
+    "gallery": { "heading": "Winter sea" },
+    "image": { "caption": "The long table on the terrace, with the sea behind it." },
+    "program": {
+      "heading": "The day",
+      "items": [
+        { "time": "4:30 pm", "label": "The ceremony on the terrace" },
+        { "time": "5:30 pm", "label": "Sunset aperitif" },
+        { "time": "7:30 pm", "label": "Dinner in the glass hall" },
+        { "time": "10:30 pm", "label": "Cake and a toast" }
+      ]
+    },
+    "venue": { "heading": "The place" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 3:45 pm a shuttle will leave from Camogli station."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in the cool tones of the winter sea",
+      "colors": [
+        { "hex": "#2D4152", "name": "Slate" },
+        { "hex": "#6F8798", "name": "Steel" },
+        { "hex": "#A9BBC8", "name": "Powder" },
+        { "hex": "#F1EEE7", "name": "Pearl" }
+      ]
+    },
+    "video": { "heading": "Winter light" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Reply on this postcard: tap the seal and tell us if you'll be with us.",
+      "openLabel": "Reply to the postcard",
+      "submitLabel": "Send your reply",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

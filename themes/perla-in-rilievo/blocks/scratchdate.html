@@ -1,0 +1,16 @@
+<section class="sec date-sec torchio-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="torchio" data-anim="zoomin" style="--d:.15s">
+      <input class="torchio-tg" type="checkbox" id="torchio-data">
+      <div class="rd">
+        <span class="rd-label">{{date.long}}</span>
+        <span class="rd-wd" aria-hidden="true">{{date.weekday}}</span>
+        <span class="rd-day" aria-hidden="true">{{date.day}}</span>
+        <span class="rd-month" aria-hidden="true">{{date.month}}</span>
+        <span class="rd-year" aria-hidden="true">{{date.year}}</span>
+      </div>
+      <label class="torchio-lastra" for="torchio-data"><span class="torchio-perla" aria-hidden="true"></span><span class="torchio-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

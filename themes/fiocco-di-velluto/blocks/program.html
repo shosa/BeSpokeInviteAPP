@@ -1,0 +1,19 @@
+{{#hasItems}}
+<section class="sec prog-sec carnet-sec">
+  <div class="card">
+    <div class="carnet" data-anim="fadeinup">
+      <i class="cn-cordino" aria-hidden="true"><b></b></i>
+      <img class="cn-emblema" src="assets/emblema.webp" alt="" aria-hidden="true">
+      {{#heading}}<h2 class="title">{{heading}}</h2>{{/heading}}
+      <div class="timeline balli">
+        {{#items}}
+        <div class="t-row">
+          <div class="t-dot" aria-hidden="true"></div>
+          <div class="t-cell"><div class="t-name">{{label}}</div><div class="t-time">{{time}}</div></div>
+        </div>
+        {{/items}}
+      </div>
+    </div>
+  </div>
+</section>
+{{/hasItems}}

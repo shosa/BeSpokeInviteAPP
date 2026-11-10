@@ -1,0 +1,260 @@
+/* Bellagio ricamato. Lino avorio ricamato in salvia ed edera, con il lago come unico respiro d'azzurro: la stessa tela dalla busta alla firma. */
+:root {
+  --bk-cover:#b4c1a4;
+  --linen:#f3eee2; --ivory:#faf7ef; --cream:#ece5d3; --sage:#9aab86; --ivy:#4f6146; --lake:#8ea2b2; --lemon:#e8d98a;
+  --ink:#33402f; --muted:#56624f; --accent:#4a5f44; --line:#cfd3bd;
+  --panel:rgba(250,247,239,.9); --panel-soft:rgba(250,247,239,.76);
+  --display:'Cormorant SC',Georgia,serif; --script:'Italianno','Cormorant SC',Georgia,serif;
+  --body:'Raleway',system-ui,sans-serif; --card:620px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--linen) }
+/* Dietro la pagina il lino ricamato; l'intestazione parte sull'arco, lo stesso fotogramma con cui finisce la busta. */
+body { margin:0; color:var(--ink); background:transparent; font:16px/1.75 var(--body); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; background:var(--linen) url(assets/sfondo-lino.jpg) center/cover no-repeat; pointer-events:none }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--accent); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--ivy); outline-offset:4px }
+button,input,a { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:44px 18px; overflow-wrap:anywhere }
+.card { position:relative; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+.title { position:relative; margin:0 0 22px; font:500 clamp(30px,9vw,46px)/1.15 var(--display); color:var(--ivy); text-align:center; text-wrap:balance; letter-spacing:.04em }
+.title::after { content:""; display:block; width:min(260px,74%); height:44px; margin:6px auto 0; background:url(assets/floral.png) center/contain no-repeat }
+.body,.lettera { margin:0; font-size:15px; line-height:1.9; text-wrap:pretty }
+.orn { width:150px; max-width:52%; height:auto; margin:26px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:min(300px,82%); height:auto; margin:0 auto 14px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+/* Le carte: lino avorio con l'orlo a punto filza. */
+.date-sec .card,.countdown-sec .card,.invito-sec .card,.us-sec .card,.prog-sec .card,.loc-sec .card,.dress-sec .card,.video-sec .card,.rsvp-sec .card,.footer-in { background:var(--ivory) url(assets/lino.jpg) center/360px auto; border-radius:6px; box-shadow:inset 0 0 0 8px var(--ivory),inset 0 0 0 9px transparent,0 16px 36px #33402f14; outline:1.5px dashed var(--sage); outline-offset:-14px }
+
+/* Busta-video: le ante ricamate. Dietro, l'arco sul lago, per una dissolvenza continua. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--linen) url(assets/sfondo-arco.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:500 22px/1.3 var(--display); color:var(--ivy); background:var(--panel); border:1px solid var(--line); border-radius:30px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--ivory)); border:1px solid var(--line); border-radius:3px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--cream)); clip-path:polygon(0 0,100% 0,50% 56%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:40%; transform:translateX(-50%); width:92px; height:92px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #33402f55); font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:88%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:12px 24px; max-width:85vw; background:var(--panel); border:1px solid var(--line); border-radius:30px; text-align:center; box-shadow:0 8px 24px #33402f20 }
+[data-cover-label] { color:var(--ivy); font-size:12px; letter-spacing:.18em; text-transform:uppercase }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--accent); border-top:1px solid var(--accent); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: i nomi nel cielo dell'arco, sopra il lago che si muove. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.h-vista,.hero-fl { display:none }
+.h-text { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; padding:max(150px,24svh) 20% 0; text-align:center; background:radial-gradient(ellipse 40% 18% at 50% 34%,#f7f9fbd9,#f7f9fb00) }
+.h-text > div { max-width:100%; text-shadow:0 0 14px #f6f8fa,0 0 4px #f6f8fa }
+.occasion { order:-1; margin:0; font:500 14px/1.3 var(--display); color:var(--ivy); letter-spacing:.3em }
+.names { font:400 clamp(48px,13.5vw,80px)/.95 var(--script); color:#2f3d2b; text-wrap:balance }
+.welcome { margin:6px 0 0; font-size:11px; line-height:1.5; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); background:#faf7efcc; padding:4px 10px; border-radius:12px }
+.scroll-cue { position:relative; z-index:2; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--ivy); font-size:11px; letter-spacing:.18em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-86px }
+.scroll-cue span { display:inline-block; padding:6px 14px; background:var(--panel); border:1px solid var(--line); border-radius:20px }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid; border-bottom:1px solid; transform:rotate(45deg) }
+
+/* Data da grattare: tre limoni da scoprire, sotto un ramo. */
+.date-sec .card { padding:44px 22px 36px }
+.date-sec .card::before { content:""; position:absolute; top:-26px; right:-8px; width:120px; height:110px; background:url(assets/floral-corner.png) top right/contain no-repeat; pointer-events:none }
+.date-sec .title { font-size:clamp(28px,8vw,40px) }
+.date-sec .title::after,.fl-div + .title::after { display:none }
+.hint { font:500 19px/1.4 var(--display); color:var(--muted); text-align:center }
+.scratch-row,.sc-labels { display:flex; justify-content:center; gap:10px; margin-top:22px }
+.scratch { position:relative; flex:1 1 0; min-width:0; max-width:104px; aspect-ratio:1; border-radius:50%; overflow:hidden; background:var(--ivory); box-shadow:0 0 0 1px var(--sage),0 0 0 5px var(--ivory),0 0 0 6px var(--line); touch-action:none }
+.sc-val { position:absolute; inset:0; display:grid; place-items:center; padding:3px; font:500 clamp(20px,6.4vw,32px)/1 var(--display); color:var(--ivy) }
+.scratch canvas { position:absolute; inset:0; width:100%; height:100%; transition:opacity .4s }
+.scratch.done canvas { opacity:0; pointer-events:none }
+.sc-labels { margin-top:14px }
+.sc-labels span { flex:1 1 0; min-width:0; max-width:104px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; text-align:center; color:var(--muted) }
+.reveal-all { display:block; margin:18px auto 0; min-height:44px; padding:10px 18px; background:transparent; border:0; text-decoration:underline; text-underline-offset:5px; font-size:12px; color:var(--accent) }
+.reveal-all.show { background:var(--cream); border-radius:24px }
+
+/* Data semplice: tre tondi sotto la ghirlanda. */
+.dt-sec { text-align:center }
+.dt-sec .title { display:inline-block; padding:6px 18px; background:var(--panel-soft); border-radius:30px }
+.dt-row { position:relative; display:flex; justify-content:center; gap:10px; max-width:430px; margin:22px auto 0; padding:14px 0; background:url(assets/floral.png) center/100% auto no-repeat }
+.dt-col { flex:1; min-width:0; max-width:120px }
+.dt-cell { display:grid; place-items:center; min-height:80px; aspect-ratio:1; border-radius:50%; background:var(--ivory); box-shadow:0 0 0 1px var(--sage),inset 0 0 0 5px var(--cream) }
+.dt-num { font:500 clamp(24px,7vw,36px) var(--display); color:var(--ivy) }
+.dt-lab { display:block; margin-top:10px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: ogni numero dentro una corona di limoni ricamata. */
+.countdown-sec .card { padding:34px 6px 32px }
+.countdown-sec .orn { margin:0 auto 18px }
+[data-countdown] { display:flex; align-items:flex-start; justify-content:center; gap:2px; min-width:0 }
+.time-block { flex:1 1 0; min-width:0; max-width:100px; text-align:center }
+.number-wrap { display:grid; place-items:center; aspect-ratio:1; background:url(assets/corona.webp) center/contain no-repeat; padding:8px 2px }
+.number { display:block; font:500 clamp(20px,6vw,32px)/1 var(--display); color:var(--ivy); transition:opacity .18s }
+.label { margin-top:6px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted) }
+.separator { align-self:flex-start; margin-top:clamp(18px,7vw,38px); font:22px var(--display); color:var(--sage) }
+.sep1,.sep2,.sep3 { padding-inline:0 }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.6 }
+
+/* Messaggio: la lettera chiusa dal fiocco di seta della busta. */
+.invito-sec .card { isolation:isolate; padding:clamp(130px,34vw,160px) clamp(26px,8vw,56px) 42px }
+.invito-sec .card::before { content:""; position:absolute; top:22px; left:50%; translate:-50% 0; width:96px; height:120px; background:url(assets/fiocco.webp) center/contain no-repeat; pointer-events:none }
+.after { margin-top:18px }
+.lettera { font:500 20px/1.75 var(--display); text-align:center; color:var(--ink) }
+
+/* Galleria: telai da ricamo tondi. */
+.us-sec .card { padding:40px 14px 22px }
+.us-fl { width:44px; top:-34px; left:20px }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 12px; margin-top:22px; padding:0 2px 10px }
+.us-grid figure { margin:0; min-width:0; padding:7px; aspect-ratio:1; display:grid; overflow:hidden; border-radius:50%; background:#c9b28a; box-shadow:inset 0 0 0 3px #b39a70,0 8px 18px #33402f22 }
+.us-grid figure:nth-child(even) { margin-top:30px }
+.us-grid img { width:100%; height:100%; aspect-ratio:1; object-fit:cover; border-radius:50% !important; border:3px solid var(--ivory) }
+.us-grid figure:last-child:nth-child(odd) { grid-column:1/-1; width:58%; justify-self:center; margin-top:0 }
+
+/* Immagine: tela ricamata con l'angolo di orchidee. */
+.img-block { position:relative; isolation:isolate; max-width:560px; margin-inline:auto !important; padding:14px 14px 22px; background:var(--ivory); border:1px solid var(--line); box-shadow:0 16px 36px #33402f18 }
+.img-block::before { content:""; position:absolute; z-index:3; top:-34px; right:-12px; width:130px; height:116px; background:url(assets/floral-corner.png) top right/contain no-repeat; pointer-events:none }
+.img-block img { border-radius:2px !important }
+.img-block figcaption { padding:12px 6px 0; color:var(--muted); opacity:1 !important; font:500 19px/1.5 var(--display) !important }
+
+/* Programma: icone ricamate su tondi di lino, lungo un filo. */
+.prog-sec .card { padding:44px 16px 28px }
+.prog-fl { width:38px; top:-30px }
+.prog-fl.l { left:14px }
+.prog-fl.r { right:14px }
+.timeline { position:relative; max-width:440px; margin:22px auto 0; text-align:left; padding:16px 0 }
+.finial { position:absolute; width:22px; height:26px; top:-8px; left:39px }
+.rail { position:absolute; top:18px; bottom:24px; left:50px; border-left:1.5px dashed var(--sage) }
+.t-row { position:relative; display:grid; grid-template-columns:104px minmax(0,1fr); align-items:center; padding:10px 0; min-height:106px }
+.t-dot { position:relative; z-index:1; width:92px; height:92px; margin-left:4px; border-radius:50%; background:var(--ivory) url(assets/t-cappella.webp) center/74% no-repeat; box-shadow:0 0 0 1px var(--sage),0 0 0 5px var(--ivory),0 0 0 6px var(--line) }
+.t-row:nth-of-type(4n+3) .t-dot { background-image:url(assets/t-calici.webp); background-size:64% }
+.t-row:nth-of-type(4n+4) .t-dot { background-image:url(assets/t-barca.webp); background-size:80% }
+.t-row:nth-of-type(4n+5) .t-dot,.t-row:nth-of-type(4n+1) .t-dot { background-image:url(assets/t-torta.webp); background-size:62% }
+.t-cell { padding:4px 6px 14px 10px; border-bottom:1px solid var(--line) }
+.t-time { color:var(--accent); font:500 24px/1.2 var(--display) }
+.t-name { margin-top:4px; font-size:14px; line-height:1.6 }
+
+/* Location: la villa ricamata, dentro un arco come quello della busta. */
+.loc-sec .card { padding:42px 18px 28px }
+.loc-name { font:500 30px/1.2 var(--display); color:var(--ivy); margin-bottom:10px }
+.loc-addr { color:var(--muted); font-size:13px; opacity:1 !important }
+.loc-photo { width:100%; margin-top:24px; aspect-ratio:3/4; object-fit:cover; border-radius:999px 999px 4px 4px !important; border:6px solid var(--ivory); outline:1px solid var(--line) }
+
+/* Mappa: cartolina con un limone. */
+.map-frame { position:relative; max-width:620px; margin:auto; padding:10px 10px 12px; background:var(--ivory); border:1px solid var(--line); box-shadow:0 12px 30px #33402f14 }
+.map-frame iframe { width:100%; height:300px; border:0; filter:grayscale(.85) sepia(.25) saturate(.8) }
+.map-fl { width:60px; height:auto; right:10px; top:-34px; bottom:auto; z-index:1 }
+
+/* Come arrivare: biglietto con il rametto di limoni. */
+.shuttle-sec .card { padding:26px 20px 22px; text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:6px }
+.shuttle-sec .card::after { content:""; position:absolute; top:-22px; right:12px; width:62px; height:64px; background:url(assets/limoni.webp) center/contain no-repeat }
+.shuttle-sec .title { text-align:left; font-size:32px }
+.shuttle-sec .title::after { margin-left:0 }
+.shuttle-box { padding:6px 0; border-top:1px solid var(--line) }
+
+/* Dress code: matassine di filo. */
+.dress-sec .card { padding:36px 16px 34px }
+.dress { font:500 23px/1.35 var(--display); color:var(--ivy); margin:0 0 20px }
+.dress-dots { gap:18px !important }
+.dress-dots>span { min-width:62px !important; padding:8px 2px }
+.dress-dots [role="img"] { width:42px !important; height:42px !important; outline:1.5px dashed var(--sage); outline-offset:4px; margin-bottom:8px }
+.dress-dots>span>span:last-child { color:var(--ink); opacity:1 !important; font-size:12px !important }
+
+/* Video: finestra ad arco sul lago. */
+.video-sec .card { padding:22px 16px }
+.video-frame { position:relative; overflow:hidden; border-radius:999px 999px 6px 6px; background:var(--cream); aspect-ratio:9/14 }
+.video-frame video { width:100%; height:100%; object-fit:cover }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:1px solid var(--sage); border-radius:50%; background:var(--ivory); color:var(--ivy) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo ai limoni, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo.webp) center/contain no-repeat; color:#2f3d2b; border:0; border-radius:50%; filter:drop-shadow(0 6px 8px #33402f44); visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor; filter:drop-shadow(0 0 3px #eef2e6) }
+
+/* Conferma: il sigillo di ceralacca 3D ai limoni, sotto il fiocco. */
+.rsvp-sec .card { isolation:isolate; padding:40px 20px 42px }
+.rsvp-sec .body { max-width:360px; margin:0 auto }
+.rsvp-fl { width:100%; height:auto; left:0; bottom:10px; z-index:-1; opacity:.6 }
+.seal-btn { position:relative; width:150px; height:150px; display:grid; place-items:center; margin:26px auto 14px; border:0; border-radius:50%; color:var(--ivy); background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 12px 14px #33402f44) drop-shadow(0 0 1px #4f6146); transition:transform .3s ease }
+.seal-btn:hover { transform:translateY(-2px) rotate(-3deg) }
+/* Il monogramma resta per gli screen reader; a vista c'è il rilievo dei limoni. */
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--ivy); font-size:12px; letter-spacing:.1em; text-align:center; padding:8px 16px; margin-bottom:40px; background:var(--ivory); border:1px solid var(--line); border-radius:20px }
+.arrow-up { width:10px; height:10px; border-top:1px solid; border-left:1px solid; transform:rotate(45deg); margin:3px auto 8px }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 16px; background:#1f281cc4; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:clamp(70px,18vw,92px) 22px 30px; background:var(--ivory) url(assets/floral.png) top 28px center/min(360px,80%) auto no-repeat; border:1px solid var(--line); border-radius:6px; box-shadow:0 20px 80px #141b1233; overflow-wrap:anywhere }
+.popup__title { color:var(--ivy); font:500 32px/1.2 var(--display); text-align:center; margin:0 10px 28px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); background:var(--ivory); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--ivy) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font-size:14px; margin-bottom:8px; font-weight:500; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fff; border-radius:4px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid var(--line); border-radius:24px; cursor:pointer; font-size:14px; background:#fff }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--accent); background:#fff }
+.radio input:checked+.ind { background:var(--accent); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--ivy); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:1px solid var(--ivy); border-radius:28px; background:var(--ivy); color:var(--ivory); font-size:14px; letter-spacing:.1em; text-transform:uppercase }
+/* Errori: stessa tinta, ma bordo spesso e grassetto, così restano evidenti. */
+.err,.invio-ko { display:none; color:var(--ivy); font-weight:600; font-size:13px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--ivy); box-shadow:0 0 0 3px var(--cream) }
+.success { display:none; padding:24px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:500 30px var(--display); color:var(--ivy) }
+.honey { display:none !important }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Firma: corona di limoni con il sigillo, e il glicine che pende ai lati. */
+.footer-sec { isolation:isolate; overflow:hidden; padding:60px 22px 70px; text-align:center }
+.footer-in { position:relative; z-index:1; padding:196px 14px 28px; max-width:480px; margin:auto }
+.footer-in::before { content:""; position:absolute; top:24px; left:50%; translate:-50% 0; width:150px; height:150px; background:url(assets/corona.webp) center/contain no-repeat }
+.footer-in::after { content:""; position:absolute; top:62px; left:50%; translate:-50% 0; width:74px; height:74px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #33402f44) }
+.footer-in .title { font-size:30px }
+.signature { font:400 52px/1.05 var(--script); color:var(--ivy) }
+.footer-sec>.fl { width:48px; top:0; z-index:0 }
+.footer-sec>.fl.l { left:10% }
+.footer-sec>.fl.r { right:10% }
+.credits { position:relative; z-index:1; max-width:480px; margin:22px auto 0; padding:8px 12px; background:var(--panel); border-radius:20px; font-size:12px; color:var(--muted) }
+
+/* Ingressi: solo dissolvenze, nessun testo trasformato. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity .8s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  img[data-anim="zoomin"] { transform:scale(.97); transition-property:opacity,transform }
+  img[data-anim="zoomin"].in { transform:scale(1) }
+  .orn[data-anim],.fl-div[data-anim] { transform:translateY(8px); transition-property:opacity,transform }
+  .orn[data-anim].in,.fl-div[data-anim].in { transform:none }
+  .prog-fl,.us-fl,.map-fl,.footer-sec>.fl { animation:sway 5s ease-in-out infinite alternate; transform-origin:top center }
+  .prog-fl.r,.footer-sec>.fl.r { animation-delay:-2.5s }
+}
+@keyframes sway { from { rotate:-4deg } to { rotate:4deg } }
+
+@media (min-width:700px) {
+  .sec { padding:64px 40px }
+  .h-text { padding:max(190px,25svh) 32% 0 }
+  .names { font-size:110px }
+  .occasion { font-size:16px }
+  .hero-scene { min-height:min(100svh,1000px) }
+  .us-grid { gap:24px 20px }
+  .prog-sec .card { padding:50px 60px 34px }
+  .loc-photo { width:64%; margin-inline:auto }
+  .popup__box { padding-inline:42px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+  .seal-btn:hover { transform:none }
+}

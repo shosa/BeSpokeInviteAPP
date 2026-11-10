@@ -1,0 +1,139 @@
+{
+  "engine": 2,
+  "id": "prato-di-pesca",
+  "name": "Prato di pesca",
+  "description": "Una busta color pesca con sigillo fiorito che si apre su un prato ricamato: rose cipria, cosmee, foglie salvia e accenti d'oro.",
+  "models": [],
+  "themeColor": "#f7efe5",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&family=Lato:wght@400;700&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4",
+    "body": "assets/corpo.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Sofia & Lorenzo",
+      "hosts": "Con le nostre famiglie",
+      "eventDate": "2027-06-12",
+      "eventTime": "17:00",
+      "venue": "Tenuta del Prato",
+      "address": "Strada delle Rose 21, Montepulciano"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Il nostro sì",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Fiorisce un nuovo inizio",
+      "body": "In un prato di rose e cosmee, sotto la luce calda di giugno, diremo il nostro sì.\nVorremmo condividere questa gioia con voi."
+    },
+    "gallery": {
+      "heading": "Il nostro giardino",
+      "photos": [
+        "assets/serra-in-fiore.jpg",
+        "assets/ricamo-cipria.jpg",
+        "assets/bouquet-carta.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/bouquet-carta.jpg",
+      "caption": "Fiori di campo, colti per voi."
+    },
+    "program": {
+      "heading": "Il programma",
+      "items": [
+        { "time": "17:00", "label": "Il sì nella serra" },
+        { "time": "18:00", "label": "Aperitivo nel prato" },
+        { "time": "20:00", "label": "Cena sotto le stelle" },
+        { "time": "22:00", "label": "Musica e festa" }
+      ]
+    },
+    "venue": {
+      "heading": "Dove",
+      "venue": "Tenuta del Prato",
+      "kind": "giardino",
+      "photo": "assets/serra-in-fiore.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La tenuta è a dieci minuti dal centro. Seguite i cartelli con il fiore di pesca.\nParcheggio libero all'ingresso."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Garden party",
+      "colors": [
+        { "hex": "#F2C3A9", "name": "Pesca" },
+        { "hex": "#E8A3A6", "name": "Cipria" },
+        { "hex": "#A6B08F", "name": "Salvia" },
+        { "hex": "#E9D8B4", "name": "Champagne" }
+      ]
+    },
+    "video": {
+      "heading": "Peonie al vento",
+      "video": "assets/peonie.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Ci farebbe felici festeggiare con te.\nConferma la tua presenza.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Our yes",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "A new beginning blooms",
+      "body": "In a meadow of roses and cosmos, under the warm June light, we will say yes.\nWe would love to share this joy with you."
+    },
+    "gallery": { "heading": "Our garden" },
+    "image": { "caption": "Wildflowers, picked for you." },
+    "program": {
+      "heading": "The programme",
+      "items": [
+        { "time": "17:00", "label": "Our yes in the greenhouse" },
+        { "time": "18:00", "label": "Aperitif in the meadow" },
+        { "time": "20:00", "label": "Dinner under the stars" },
+        { "time": "22:00", "label": "Music and party" }
+      ]
+    },
+    "venue": { "heading": "Where" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The estate is ten minutes from the town centre. Follow the signs with the peach flower.\nFree parking at the entrance."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Garden party",
+      "colors": [
+        { "hex": "#F2C3A9", "name": "Peach" },
+        { "hex": "#E8A3A6", "name": "Blush" },
+        { "hex": "#A6B08F", "name": "Sage" },
+        { "hex": "#E9D8B4", "name": "Champagne" }
+      ]
+    },
+    "video": { "heading": "Peonies in the breeze" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "It would make us happy to celebrate with you.\nPlease confirm your attendance.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With love" }
+  }
+}

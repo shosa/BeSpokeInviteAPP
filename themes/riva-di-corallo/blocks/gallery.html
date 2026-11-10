@@ -1,0 +1,9 @@
+{{#hasPhotos}}
+<section class="sec us-sec polaroid-sec">
+  {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+  <div class="polaroid-spiaggia">
+    <span class="pol-corallo" aria-hidden="true"></span>
+    {{#photos}}<figure class="polaroid" data-anim="fadeinup"><img src="{{.}}" loading="lazy" decoding="async" alt=""></figure>{{/photos}}
+  </div>
+</section>
+{{/hasPhotos}}

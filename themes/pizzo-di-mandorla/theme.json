@@ -1,0 +1,140 @@
+{
+  "engine": 2,
+  "id": "pizzo-di-mandorla",
+  "name": "Pizzo di mandorla",
+  "description": "Tutto nel tono della mandorla: una busta di pizzo e perle si apre su una cornice di gelsomino, poi centrini, fiocchi e madreperla nella stessa tinta fino alla firma.",
+  "models": [],
+  "themeColor": "#f1e6d8",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Allura&family=Nunito+Sans:wght@400;600&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4",
+    "body": "assets/corpo.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Chiara & Davide",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-09-11",
+      "eventTime": "16:30",
+      "venue": "Villa delle Perle",
+      "address": "Via dei Gelsomini 3, Lucca"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Punto dopo punto",
+      "body": "Come un pizzo lavorato a mano, ogni filo della nostra storia ha trovato il suo posto.\nVorremmo che foste con noi nel giorno in cui lo annodiamo per sempre."
+    },
+    "gallery": {
+      "heading": "Pizzi e ricordi",
+      "photos": [
+        "assets/villa-pizzo.jpg",
+        "assets/porta-fiocco.jpg",
+        "assets/casa-perle.jpg",
+        "assets/villa-lago.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/porta-fiocco.jpg",
+      "caption": "Un fiocco di seta sulla porta della villa."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "16:30", "label": "La cerimonia" },
+        { "time": "17:30", "label": "Aperitivo in giardino" },
+        { "time": "19:30", "label": "Cena sotto il pergolato" },
+        { "time": "22:00", "label": "Taglio della torta alla fontana" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa delle Perle",
+      "kind": "villa",
+      "photo": "assets/casa-perle.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nDal centro di Lucca partirà una navetta alle 15:45."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni neutri",
+      "colors": [
+        { "hex": "#6E503C", "name": "Nocciola" },
+        { "hex": "#C9AB92", "name": "Mandorla" },
+        { "hex": "#E6D3C0", "name": "Sabbia" },
+        { "hex": "#FAF3EA", "name": "Panna" }
+      ]
+    },
+    "video": {
+      "heading": "Il lago dei cigni",
+      "video": "assets/cigni.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Manca solo il tuo filo per finire il ricamo.\nConferma la tua presenza.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "Stitch by stitch",
+      "body": "Like lace worked by hand, every thread of our story has found its place.\nWe would love you to be with us on the day we tie it forever."
+    },
+    "gallery": { "heading": "Lace and memories" },
+    "image": { "caption": "A silk bow on the villa's door." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "16:30", "label": "The ceremony" },
+        { "time": "17:30", "label": "Aperitif in the garden" },
+        { "time": "19:30", "label": "Dinner under the pergola" },
+        { "time": "22:00", "label": "Cake cutting by the fountain" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nA shuttle will leave Lucca's centre at 3:45 pm."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in neutral tones",
+      "colors": [
+        { "hex": "#6E503C", "name": "Hazelnut" },
+        { "hex": "#C9AB92", "name": "Almond" },
+        { "hex": "#E6D3C0", "name": "Sand" },
+        { "hex": "#FAF3EA", "name": "Cream" }
+      ]
+    },
+    "video": { "heading": "The swan lake" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Only your thread is missing to finish the embroidery.\nPlease confirm your attendance.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

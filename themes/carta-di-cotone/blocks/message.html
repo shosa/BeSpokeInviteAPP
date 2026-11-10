@@ -1,0 +1,10 @@
+<section class="sec invito-sec missiva-sec">
+  <div class="card">
+    <div class="ms-foglio" aria-hidden="true"></div>
+    <img class="ms-rametto" src="assets/e-salvia.webp" alt="" aria-hidden="true" data-anim="fadein" style="--d:.3s">
+    <span class="ms-striscia" aria-hidden="true"></span>
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#body}}<div class="after"><p class="lettera" data-anim="fadeinup" style="--d:.15s">{{body | lines}}</p></div>{{/body}}
+    <div class="ms-firma" data-anim="fadein" style="--d:.35s">{{title}}</div>
+  </div>
+</section>

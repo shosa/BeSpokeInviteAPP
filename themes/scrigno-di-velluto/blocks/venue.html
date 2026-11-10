@@ -1,0 +1,16 @@
+<section class="sec loc-sec medaglione-sec">
+  <div class="card">
+    <div class="medaglione" data-anim="fadeinup">
+      <div class="md-valva md-foto">{{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}{{^photo}}<img class="md-vuoto" src="assets/sigillo.webp" alt="">{{/photo}}</div>
+      <div class="md-cerniera" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="md-valva md-testo">
+        <div class="md-in">
+          {{#heading}}<h2 class="title">{{heading}}</h2>{{/heading}}
+          <div class="loc-name">{{venue | lines}}</div>
+          {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+          {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

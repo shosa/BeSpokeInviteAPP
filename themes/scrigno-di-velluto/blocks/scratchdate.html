@@ -1,0 +1,19 @@
+<section class="sec date-sec fede-sec">
+  <div class="card">
+    <h2 class="title" data-anim="fadeinup">{{t.dateTitle}}</h2>
+    <div class="fede" data-anim="fadein" style="--d:.15s">
+      <input class="fede-tg" type="checkbox" id="fede-data">
+      <span class="fede-label">{{date.long}}</span>
+      <div class="fede-scena" aria-hidden="true">
+        <div class="fede-alone"></div>
+        <div class="fede-anello">
+          <i class="fede-oro"></i>
+          <svg class="fede-incisione" viewBox="0 0 300 300" focusable="false"><defs><path id="fede-giro" d="M150,150 m0,-138 a138,138 0 1,1 0,276 a138,138 0 1,1 0,-276"></path></defs><text textLength="860" lengthAdjust="spacing"><textPath href="#fede-giro">{{date.weekday}} · {{date.day}} {{date.month}} {{date.year}} · {{title}} · {{date.weekday}} · {{date.day}} {{date.month}} {{date.year}} · {{title}} ·</textPath></text></svg>
+          <i class="fede-luce"></i>
+        </div>
+        <div class="fede-data"><span class="fd-wd">{{date.weekday}}</span><span class="fd-day">{{date.day}}</span><span class="fd-month">{{date.month}}</span><span class="fd-year">{{date.year}}</span></div>
+      </div>
+      <label class="fede-tap" for="fede-data"><span class="fede-hint">{{t.revealAll}}</span></label>
+    </div>
+  </div>
+</section>

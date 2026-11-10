@@ -1,0 +1,18 @@
+{{#hasItems}}
+<section class="sec prog-sec indice-sec">
+  <div class="card">
+    <div class="ix-pagina">
+      {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+      <ol class="timeline">
+        {{#items}}
+        <li class="t-row" data-anim="fadeinup">
+          <span class="t-dot" aria-hidden="true"></span>
+          <div class="t-cell"><span class="t-name">{{label}}</span><span class="t-punti" aria-hidden="true"></span><span class="t-time">{{time}}</span></div>
+        </li>
+        {{/items}}
+      </ol>
+      <img class="ix-fregio" src="assets/floral.png" alt="" aria-hidden="true">
+    </div>
+  </div>
+</section>
+{{/hasItems}}

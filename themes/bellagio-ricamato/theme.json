@@ -1,0 +1,139 @@
+{
+  "engine": 2,
+  "id": "bellagio-ricamato",
+  "name": "Bellagio ricamato",
+  "description": "Due ante di lino ricamato si aprono con un fiocco di seta su un arco affacciato sul lago di Como: glicine, edera, limoni e orchidee ricamati accompagnano l'invito sullo stesso lino avorio.",
+  "models": [],
+  "themeColor": "#f3eee2",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;500&family=Italianno&family=Raleway:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Ginevra & Edoardo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-06-05",
+      "eventTime": "16:30",
+      "venue": "Villa sul Lago",
+      "address": "Lungolago Manzoni 3, Bellagio"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "Sul lago, finalmente",
+      "body": "Abbiamo aperto le porte su questo panorama tante volte, sognando il giorno giusto.\nQuel giorno è arrivato: festeggiatelo con noi tra limoni, glicine e acqua blu."
+    },
+    "gallery": {
+      "heading": "Ricordi dal lago",
+      "photos": [
+        "assets/terrazza-limoni.jpg",
+        "assets/motoscafo.jpg",
+        "assets/scalinata.jpg",
+        "assets/vaso-orchidee.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/villa-lago.jpg",
+      "caption": "La villa e il suo pontile, sotto le montagne."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "16:30", "label": "La cerimonia in riva al lago" },
+        { "time": "17:30", "label": "Brindisi in terrazza" },
+        { "time": "19:00", "label": "Giro in motoscafo al tramonto" },
+        { "time": "20:30", "label": "Cena e torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Villa sul Lago",
+      "kind": "villa",
+      "photo": "assets/villa-lago.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "Bellagio si raggiunge in auto o in battello da Como e da Varenna.\nAlle 15:45 un motoscafo privato partirà dal pontile di Varenna."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Eleganza estiva sul lago",
+      "colors": [
+        { "hex": "#4F6146", "name": "Edera" },
+        { "hex": "#9AAB86", "name": "Salvia" },
+        { "hex": "#8EA2B2", "name": "Lago" },
+        { "hex": "#F3EEE2", "name": "Lino" }
+      ]
+    },
+    "video": {
+      "heading": "Il lago dall'arco",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Rompi il sigillo ai limoni e dicci se sarai con noi sul lago.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "On the lake, at last",
+      "body": "We have opened the doors onto this view so many times, dreaming of the right day.\nThat day has come: celebrate it with us among lemons, wisteria and blue water."
+    },
+    "gallery": { "heading": "Memories from the lake" },
+    "image": { "caption": "The villa and its pier, beneath the mountains." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "16:30", "label": "The lakeside ceremony" },
+        { "time": "17:30", "label": "A toast on the terrace" },
+        { "time": "19:00", "label": "A sunset motorboat ride" },
+        { "time": "20:30", "label": "Dinner and cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "Bellagio can be reached by car or by ferry from Como and Varenna.\nAt 3:45 pm a private motorboat will leave from the Varenna pier."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Summer elegance by the lake",
+      "colors": [
+        { "hex": "#4F6146", "name": "Ivy" },
+        { "hex": "#9AAB86", "name": "Sage" },
+        { "hex": "#8EA2B2", "name": "Lake" },
+        { "hex": "#F3EEE2", "name": "Linen" }
+      ]
+    },
+    "video": { "heading": "The lake through the arch" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Break the lemon seal and tell us if you'll join us on the lake.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

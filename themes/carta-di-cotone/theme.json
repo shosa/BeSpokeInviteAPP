@@ -1,0 +1,150 @@
+{
+  "engine": 2,
+  "id": "carta-di-cotone",
+  "name": "Carta di cotone",
+  "description": "Busta di carta di cotone bianco latte coi bordi sfrangiati, chiusa da un sigillo d'oro antico col rametto d'ulivo; accenti rosa cipria e salvia. La data è in una lettera piegata in tre che si dispiega.",
+  "models": [],
+  "themeColor": "#f6f3ec",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Italiana&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Allura&family=Montserrat:wght@300;400;600&display=swap"
+  ],
+  "background": { "kind": "none" },
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Bianca & Leonardo",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-05-22",
+      "eventTime": "17:00",
+      "venue": "Villa degli Ulivi",
+      "address": "Strada di Pievescola 4, Casole d'Elsa (Siena)"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "scratchdate": {
+      "dateTitle": "Il nostro giorno",
+      "revealLabel": "Apri la lettera"
+    },
+    "message": {
+      "heading": "Una lettera per voi",
+      "body": "Certe parole meritano la carta buona, quella fatta a mano, con i bordi che nessuna forbice ha toccato.\nCosì vi scriviamo: per dirvi che abbiamo deciso di sposarci, e che il nostro giorno non sarebbe completo senza di voi."
+    },
+    "gallery": {
+      "heading": "Il nostro album",
+      "photos": [
+        "assets/fedi.jpg",
+        "assets/tavola.jpg",
+        "assets/rametto-oro.jpg",
+        "assets/rose.jpg",
+        "assets/nastri.jpg",
+        "assets/ulivo.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/bouquet.jpg",
+      "caption": "Rose cipria e rami d'ulivo, raccolti per il nostro giorno."
+    },
+    "program": {
+      "heading": "Il menu del giorno",
+      "items": [
+        { "time": "17:00", "label": "La cerimonia sotto gli ulivi" },
+        { "time": "18:15", "label": "Aperitivo nel giardino" },
+        { "time": "20:00", "label": "Cena alla lunga tavola" },
+        { "time": "23:00", "label": "Taglio della torta e brindisi" }
+      ]
+    },
+    "venue": {
+      "heading": "Dove",
+      "venue": "Villa degli Ulivi",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La villa si raggiunge in auto, con parcheggio riservato agli ospiti.\nAlle 16:15 una navetta partirà da Piazza del Campo, a Siena."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegante, nei toni della carta e della salvia",
+      "colors": [
+        { "hex": "#F4F0E8", "name": "Latte" },
+        { "hex": "#E4CFC8", "name": "Cipria" },
+        { "hex": "#9AA58F", "name": "Salvia" },
+        { "hex": "#B08F55", "name": "Oro antico" }
+      ]
+    },
+    "video": {
+      "heading": "Carta, fiori e luce",
+      "video": "assets/foto-cotone.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Sciogli il nastro: tocca il sigillo d'oro e dicci se sarai con noi.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "scratchdate": {
+      "dateTitle": "Our day",
+      "revealLabel": "Open the letter"
+    },
+    "message": {
+      "heading": "A letter for you",
+      "body": "Some words deserve the good paper, handmade, with edges no scissors have ever touched.\nSo this is how we write to you: to say that we have decided to marry, and that our day would not be complete without you."
+    },
+    "gallery": { "heading": "Our album" },
+    "image": { "caption": "Blush roses and olive branches, gathered for our day." },
+    "program": {
+      "heading": "The menu of the day",
+      "items": [
+        { "time": "17:00", "label": "The ceremony under the olive trees" },
+        { "time": "18:15", "label": "Aperitif in the garden" },
+        { "time": "20:00", "label": "Dinner at the long table" },
+        { "time": "23:00", "label": "Cutting the cake and a toast" }
+      ]
+    },
+    "venue": { "heading": "Where" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The villa can be reached by car, with parking reserved for guests.\nAt 4:15 pm a shuttle will leave from Piazza del Campo, in Siena."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Elegant, in paper and sage tones",
+      "colors": [
+        { "hex": "#F4F0E8", "name": "Milk" },
+        { "hex": "#E4CFC8", "name": "Blush" },
+        { "hex": "#9AA58F", "name": "Sage" },
+        { "hex": "#B08F55", "name": "Antique gold" }
+      ]
+    },
+    "video": { "heading": "Paper, flowers and light" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "Untie the ribbon: tap the gold seal and tell us if you'll be with us.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

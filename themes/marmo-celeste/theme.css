@@ -1,0 +1,362 @@
+/* Marmo celeste. Una bottega di legatoria fiorentina: carta marmorizzata azzurra e bianca, cartoncino avorio
+   con filigrane d'oro, il rame del sigillo come unico accento caldo. Una sola tinta (celeste venato) per tutta la pagina. */
+:root {
+  --bk-cover:#cfe0ec;
+  --marmo:#cfe0ec; --marmo-chiaro:#e6eff5; --marmo-scuro:#9dbcd4; --nuvola:#b9d0e1;
+  --avorio:#f6f1e5; --carta:#f1e9d8; --carta-ombra:#e2d6bd;
+  --ink:#22364a; --muted:#3e566c; --rame:#984c27; --rame-chiaro:#c47a4a; --bronzo:#5c2f17; --oro:#a8833f;
+  --ombra:#22364a33; --panel:rgba(246,241,229,.94);
+  --oro-cornice:linear-gradient(135deg,#7a5a24,#d8b56a 20%,#8c6a2c 38%,#f0d690 52%,#9a7632 70%,#d2ae62 86%,#7a5a24);
+  --rame-nastro:linear-gradient(180deg,#d08c5c,#a85a32 30%,#7c3e1e 62%,#b8693c 88%,#8c4724);
+  --display:'Playfair Display SC','Playfair Display',Georgia,serif; --serif:'Playfair Display',Georgia,serif;
+  --text:'Crimson Pro',Georgia,serif; --script:'Tangerine','Playfair Display',cursive; --small:'Josefin Sans',system-ui,sans-serif;
+  --card:600px;
+}
+* { box-sizing:border-box }
+html { -webkit-text-size-adjust:100%; background:var(--marmo) }
+/* Fondo della pagina: il cartoncino avorio appoggiato sulla carta marmorizzata, che resta visibile ai lati.
+   Il fermo della busta (cartoncino con le filigrane agli angoli) sta dietro l'intestazione: gli angoli dorati
+   non restano fissi sopra i testi mentre si scorre. */
+body { margin:0; color:var(--ink); background:transparent; font:300 17px/1.7 var(--text); -webkit-font-smoothing:antialiased; overflow-x:clip }
+body::before { content:""; position:fixed; inset:0; z-index:-2; border-inline:clamp(10px,3.4vw,30px) solid transparent; background:url(assets/carta.jpg) center/300px padding-box,url(assets/marmo-nuvola.jpg) center/420px border-box; box-shadow:inset 10px 0 14px -10px #22364a40,inset -10px 0 14px -10px #22364a40; pointer-events:none }
+.zone-hero { background:var(--avorio) url(assets/sfondo-fermo.jpg) center/cover no-repeat }
+body.is-locked { overflow:hidden }
+img,video,iframe { display:block; max-width:100% }
+button,input { font:inherit }
+button { cursor:pointer; color:inherit; min-height:44px }
+button:disabled { cursor:wait; opacity:.65 }
+a { color:var(--rame); text-underline-offset:4px }
+:focus-visible { outline:3px solid var(--rame); outline-offset:4px }
+button,input,a,label { -webkit-tap-highlight-color:transparent }
+
+.sec,.footer-sec { position:relative; width:100%; max-width:820px; margin-inline:auto; padding:46px 26px; overflow-wrap:anywhere; overflow-x:clip }
+.card { position:relative; isolation:isolate; max-width:var(--card); margin-inline:auto; min-width:0; text-align:center }
+/* Titoli: Playfair in maiuscoletto, con il fregio d'oro sotto. */
+.title { margin:0 0 22px; font:400 clamp(25px,7.2vw,36px)/1.25 var(--display); letter-spacing:.07em; color:var(--ink); text-align:center; text-wrap:balance }
+.title::after { content:""; display:block; width:min(190px,64%); height:30px; margin:8px auto 0; background:url(assets/floral.png) center/contain no-repeat }
+.body,.lettera { margin:0; font:300 18px/1.8 var(--text); text-wrap:pretty }
+.orn { width:150px; max-width:52%; height:auto; margin:22px auto 0 }
+.fl { position:absolute; pointer-events:none; user-select:none; object-fit:contain; z-index:0 }
+.fl.l { left:0 }
+.fl.r { right:0; transform:scaleX(-1) }
+.fl-div { width:150px; height:auto; margin:0 auto 12px }
+.bk { color:var(--bk-ink,var(--ink)); background:var(--bk-bg,transparent) }
+
+/* Busta-video: dietro, il fotogramma della busta chiusa. */
+[data-cover] { position:fixed; inset:0; z-index:10000; display:grid; place-content:center; background:var(--marmo) url(assets/busta-poster.jpg) center/cover no-repeat; overflow:hidden; cursor:pointer; transition:opacity .6s ease }
+[data-cover-video] { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.env-top { position:relative; z-index:2; max-width:80vw; margin:0 auto 36px; padding:10px 22px; text-align:center; font:400 20px/1.3 var(--display); letter-spacing:.08em; color:var(--ink); background:var(--panel); border-radius:2px }
+.env-card { width:min(320px,80vw) }
+.env { position:relative; height:210px; background:var(--env,var(--marmo)) url(assets/marmo-nuvola.jpg) center/300px; background-blend-mode:multiply; border-radius:2px }
+.env-flap { position:absolute; inset:0; background:var(--env,var(--marmo-chiaro)) url(assets/marmo-nuvola.jpg) center/300px; background-blend-mode:multiply; clip-path:polygon(0 0,100% 0,50% 58%); transform-origin:top; transition:transform .65s ease }
+.env-seal { position:absolute; left:50%; top:42%; transform:translateX(-50%); width:88px; height:88px; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 6px 8px #5c2f1766); font-size:0 }
+[data-cover-tap] { position:absolute; left:50%; top:86%; transform:translate(-50%,-50%); z-index:3; display:grid; justify-items:center; gap:8px; margin:0; padding:13px 26px; max-width:85vw; background:var(--panel); border-radius:2px; text-align:center; box-shadow:0 8px 24px #22364a2e,inset 0 0 0 1px #a8833f66 }
+[data-cover-label] { color:var(--ink); font:400 12px/1.3 var(--small); letter-spacing:.24em; text-transform:uppercase; white-space:nowrap }
+.wei-chevron { width:10px; height:10px; border-left:1px solid var(--rame); border-top:1px solid var(--rame); transform:rotate(45deg) }
+.wei-opening .env-flap { transform:rotateX(170deg) }
+.wei-opening .env-seal { opacity:0; transition:opacity .25s }
+.wei-opening [data-cover-tap] { opacity:0; transition:opacity .3s }
+
+/* Intestazione: solo testo, al centro del cartoncino avorio del filmato. */
+.hero { max-width:none; overflow:clip }
+.hero-scene { position:relative; min-height:min(100svh,900px); margin:0; padding:0; background:none }
+.hero-scene::before,.hero-scene::after,.hero-fl { display:none }
+.h-vista { display:block; position:absolute; left:50%; top:45%; transform:translate(-50%,-50%); width:50%; aspect-ratio:4/5; object-fit:cover; z-index:2; border-radius:50%; border:7px solid transparent; background:var(--oro-cornice) border-box; box-shadow:0 0 0 1px #7a5a24,0 12px 28px var(--ombra) }
+.h-text { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:26% 15% 30%; text-align:center }
+.hero-scene:has(.h-vista) .h-text { justify-content:flex-end; padding-bottom:19% }
+.hero-scene:has(.h-vista) .names { padding:0 14px; background:#f6f1e5e0; border-radius:2px }
+.h-text > div { max-width:100% }
+.occasion { order:-1; margin:0; font:italic 400 21px/1.2 var(--serif); letter-spacing:.03em; color:var(--rame) }
+.names { font:700 clamp(66px,19vw,112px)/1.02 var(--script); color:var(--ink); text-wrap:balance }
+.welcome { margin:0; font:300 12px/1.6 var(--small); letter-spacing:.26em; text-transform:uppercase; color:var(--muted) }
+.welcome::before { content:""; display:block; width:150px; height:26px; margin:2px auto 12px; background:url(assets/floral.png) center/contain no-repeat }
+.scroll-cue { position:relative; z-index:3; text-align:center; margin:0 auto; padding:0 22px 26px; color:var(--ink); font:400 11px/1.3 var(--small); letter-spacing:.22em; text-transform:uppercase }
+.hero .scroll-cue { margin-top:-96px }
+.scroll-cue span { display:inline-block; padding:9px 16px 7px; background:var(--panel); border-radius:2px; box-shadow:inset 0 0 0 1px #a8833f55 }
+.arrow { width:11px; height:11px; margin:12px auto 0; border-right:1px solid var(--rame); border-bottom:1px solid var(--rame); transform:rotate(45deg) }
+
+/* La data nella vasca di marmorizzazione. Sostituisce la data da grattare: una goccia di colore pende sopra il bagno
+   avorio. Al tocco (casella nascosta, niente script) la goccia cade, l'acqua fa tre cerchi, il colore si apre a spirale
+   in venature di carta marmorizzata e al centro torna la quiete: lì affiorano giorno, mese e anno. */
+.vasca-sec .card { padding:6px 0 0 }
+.vasca { --w:min(320px,82vw); position:relative; width:var(--w); margin:0 auto; padding-bottom:78px }
+.vasca-tg { position:absolute; left:50%; top:40%; width:1px; height:1px; opacity:0; margin:0 }
+.vasca-scena { position:relative; width:100%; aspect-ratio:1; border-radius:50%; box-shadow:0 18px 30px -10px #22364a59 }
+.vasca-bagno { position:absolute; inset:0; border-radius:50%; background:url(assets/vasca.jpg) center/116% no-repeat }
+.vasca-marmo { position:absolute; inset:8.6%; border-radius:50%; overflow:hidden; clip-path:circle(0% at 50% 50%) }
+.vasca-marmo span { position:absolute; inset:-30%; border-radius:50% }
+.vm-a { background:url(assets/marmo.jpg) center/62% }
+.vm-b { background:repeating-conic-gradient(from 0deg at 50% 50%,#ffffff00 0 9deg,#ffffffa6 9deg 10.2deg,#ffffff00 10.2deg 20deg); -webkit-mask:radial-gradient(closest-side,#000 30%,#0000 92%); mask:radial-gradient(closest-side,#000 30%,#0000 92%); opacity:.55; mix-blend-mode:soft-light }
+.vm-c { background:url(assets/marmo.jpg) center/40%; opacity:.42; mix-blend-mode:multiply; transform:scaleX(-1) }
+.vasca-marmo::after { content:""; position:absolute; inset:0; border-radius:50%; box-shadow:inset 0 0 18px 4px #22364a40; pointer-events:none }
+.vasca-onda { position:absolute; left:50%; top:50%; width:60%; aspect-ratio:1; translate:-50% -50%; border-radius:50%; border:1.5px solid #6f98bbcc; opacity:0; scale:0 }
+.vasca-quiete { position:absolute; left:50%; top:50%; width:58%; aspect-ratio:1; translate:-50% -50%; border-radius:50%; background:radial-gradient(closest-side,#f8f4ea 0 62%,#f8f4eacc 78%,#f8f4ea00); scale:0 }
+.vasca-bordo { position:absolute; inset:0; border-radius:50%; pointer-events:none; background:radial-gradient(closest-side,#ffffff00 82%,#ffffff26 87%,#ffffff00 90%) }
+.vd { position:absolute; left:50%; top:50%; width:52%; translate:-50% -50%; display:flex; flex-direction:column; align-items:center; color:var(--ink); z-index:2 }
+.vd-wd { font:300 calc(var(--w)*.036)/1 var(--small); letter-spacing:.3em; padding-left:.3em; text-transform:uppercase; color:var(--muted) }
+.vd-day { font:400 calc(var(--w)*.22)/1 var(--display); color:var(--ink); margin-top:4px }
+.vd-month { font:700 calc(var(--w)*.13)/.8 var(--script); color:var(--rame); margin-top:-2px }
+.vd-year { font:300 calc(var(--w)*.04)/1 var(--small); letter-spacing:.42em; padding-left:.42em; color:var(--muted); margin-top:8px }
+.vd > * { opacity:0 }
+.vd-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+/* La goccia di colore, sospesa sul bagno: è il pulsante. */
+.vasca-btn { position:absolute; inset:0; z-index:4; display:block; cursor:pointer }
+.vasca-goccia { position:absolute; left:50%; top:calc(var(--w)*.5); width:calc(var(--w)*.1); aspect-ratio:1; translate:-50% -50% }
+.vasca-goccia span { position:absolute; inset:0; border-radius:0 50% 50% 50%; rotate:45deg; background:radial-gradient(circle at 62% 62%,#dbe9f3 0 8%,#8fb4d1 28%,#4f7799 78%); box-shadow:0 7px 10px -2px #22364a66 }
+.vasca-hint { position:absolute; left:50%; top:calc(var(--w) + 22px); translate:-50% 0; width:max-content; max-width:100%; padding:10px 20px 8px; font:400 12px/1.35 var(--small); letter-spacing:.2em; text-transform:uppercase; color:var(--ink); background:var(--panel); border-radius:2px; box-shadow:inset 0 0 0 1px #a8833f66,0 4px 12px #22364a1f }
+.vasca-tg:focus-visible ~ .vasca-btn .vasca-hint { outline:3px solid var(--rame); outline-offset:4px }
+/* Aperta: stato finale (vale anche con «riduci movimento»). */
+.vasca-tg:checked ~ .vasca-btn { pointer-events:none }
+.vasca-tg:checked ~ .vasca-btn .vasca-goccia,.vasca-tg:checked ~ .vasca-btn .vasca-hint { opacity:0 }
+.vasca-tg:checked ~ .vasca-scena .vasca-marmo { clip-path:circle(71% at 50% 50%) }
+.vasca-tg:checked ~ .vasca-scena .vasca-quiete { scale:1 }
+.vasca-tg:checked ~ .vasca-scena .vd > * { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  .vasca-tg:not(:checked) ~ .vasca-btn .vasca-goccia span { animation:pende 3.4s ease-in-out infinite }
+  .vasca-tg:checked ~ .vasca-btn .vasca-goccia { animation:cade .75s cubic-bezier(.55,0,.9,.6) both }
+  .vasca-tg:checked ~ .vasca-btn .vasca-hint { animation:svanisci .35s ease both }
+  .vasca-tg:checked ~ .vasca-scena .o1 { animation:onda 1.6s ease-out .62s both }
+  .vasca-tg:checked ~ .vasca-scena .o2 { animation:onda 1.8s ease-out .86s both }
+  .vasca-tg:checked ~ .vasca-scena .o3 { animation:onda 2s ease-out 1.1s both }
+  .vasca-tg:checked ~ .vasca-scena .vasca-marmo { animation:fiorisce 2.8s cubic-bezier(.3,.1,.25,1) .75s both }
+  .vasca-tg:checked ~ .vasca-scena .vm-a { animation:spirale 3.6s cubic-bezier(.2,.6,.25,1) .75s both, deriva 40s linear 4.35s infinite }
+  .vasca-tg:checked ~ .vasca-scena .vm-c { animation:spirale-inv 3.8s cubic-bezier(.2,.6,.25,1) .75s both }
+  .vasca-tg:checked ~ .vasca-scena .vm-b { animation:spirale 3.2s cubic-bezier(.2,.6,.25,1) .75s both, deriva 26s linear 3.95s infinite reverse }
+  .vasca-tg:checked ~ .vasca-scena .vasca-quiete { animation:quiete 1.6s cubic-bezier(.3,.1,.3,1) 2.7s both }
+  .vasca-tg:checked ~ .vasca-scena .vd-wd { animation:affiora 1s ease 3.2s both }
+  .vasca-tg:checked ~ .vasca-scena .vd-day { animation:affiora 1.3s ease 3.4s both }
+  .vasca-tg:checked ~ .vasca-scena .vd-month { animation:affiora 1.2s ease 3.8s both }
+  .vasca-tg:checked ~ .vasca-scena .vd-year { animation:affiora 1s ease 4.2s both }
+}
+@keyframes pende { 0%,100% { transform:translateY(0) scale(1,1) } 50% { transform:translateY(-5px) scale(.96,1.04) } }
+@keyframes cade { 0% { transform:translateY(-70px) scale(1); opacity:1 } 15% { transform:translateY(-78px) scale(1.04,.96) } 88% { transform:translateY(0) scale(.85,1.12); opacity:1 } 100% { transform:translateY(0) scale(1.6,.2); opacity:0 } }
+@keyframes svanisci { to { opacity:0 } }
+@keyframes onda { 0% { opacity:.9; scale:.05 } 100% { opacity:0; scale:1.55 } }
+@keyframes fiorisce { from { clip-path:circle(0% at 50% 50%) } to { clip-path:circle(71% at 50% 50%) } }
+@keyframes spirale { from { transform:rotate(-320deg) scale(.35) } to { transform:rotate(0) scale(1) } }
+@keyframes spirale-inv { from { transform:scaleX(-1) rotate(260deg) scale(.4) } to { transform:scaleX(-1) rotate(0) scale(1) } }
+@keyframes deriva { to { rotate:360deg } }
+@keyframes quiete { from { scale:0; opacity:0 } to { scale:1; opacity:1 } }
+@keyframes affiora { from { opacity:0; transform:translateY(8px) scale(.96); filter:blur(4px) } to { opacity:1; transform:none; filter:none } }
+
+/* Data semplice (se usata al posto della vasca): tre tasselli di carta marmorizzata. */
+.dt-row { display:flex; justify-content:center; gap:12px }
+.dt-col { display:grid; justify-items:center; gap:8px; min-width:0 }
+.dt-cell { min-width:84px; padding:14px 10px; background:var(--avorio); box-shadow:inset 0 0 0 1px var(--oro),inset 0 0 0 4px var(--avorio),inset 0 0 0 5px #a8833f88,0 6px 14px var(--ombra) }
+.dt-num { font:400 34px/1.1 var(--display); color:var(--ink) }
+.dt-lab { font:300 11px var(--small); letter-spacing:.2em; text-transform:uppercase; color:var(--muted) }
+
+/* Conto alla rovescia: quattro dorsi di libri rilegati in carta marmorizzata, in piedi su una mensola,
+   con il tassello di pelle e i nervi dorati. */
+.dorsi-sec .card { padding:4px 0 0 }
+.ds-intro { margin:0 0 18px; font:300 12px/1.4 var(--small); letter-spacing:.26em; text-transform:uppercase; color:var(--ink) }
+.ds-scaffale { display:flex; align-items:flex-end; justify-content:center; gap:4px; min-width:0; padding:0 6px }
+.ds { position:relative; flex:1 1 0; min-width:0; max-width:96px; height:236px; display:flex; flex-direction:column; justify-content:space-between; align-items:stretch; padding:12px 0; border-radius:3px 3px 1px 1px;
+  background:linear-gradient(90deg,#22364a40,#ffffff26 22%,#ffffff00 40%,#22364a14 78%,#22364a4d),url(assets/marmo.jpg) 30% 20%/340px; box-shadow:0 6px 10px -4px #22364a66 }
+.ds:nth-child(3) { height:258px; background-position:0 0,70% 60% }
+.ds:nth-child(5) { height:222px; background-position:0 0,10% 80% }
+.ds:nth-child(7) { height:246px; background-position:0 0,90% 30% }
+.ds-nervo { display:block; height:22px; background:linear-gradient(90deg,#00000040,#ffffff1a 30%,#00000000 60%,#00000040),var(--bronzo); box-shadow:inset 0 2px 0 -1px #d8b56a,inset 0 -2px 0 -1px #d8b56a }
+.ds-tassello { margin:0 7%; padding:14px 2px 12px; background:linear-gradient(90deg,#00000033,#ffffff12 35%,#00000000 60%,#0000003d),var(--bronzo); box-shadow:inset 0 0 0 2px var(--bronzo),inset 0 0 0 3px #d8b56a }
+.number-wrap { display:block }
+.number { display:block; font:400 clamp(25px,7.4vw,36px)/1 var(--display); color:#f3dfb0; text-shadow:0 1px 0 #00000066; transition:opacity .18s }
+.label { margin-top:8px; font:300 9.5px/1.2 var(--small); letter-spacing:.12em; text-transform:uppercase; color:#f6ead0 }
+.separator,.sep1,.sep2,.sep3 { display:none }
+.number.revealed,.label.revealed,.separator.revealed { opacity:1 }
+.number.flip-out,.number.flip-in { opacity:.5 }
+.ds-mensola { height:16px; margin:0 -4px; border-radius:2px; background:linear-gradient(180deg,#d9b58c,#b48a5e 45%,#8d6640); box-shadow:0 10px 16px -6px #5c2f1766 }
+
+/* Messaggio: un libro rilegato in carta marmorizzata con il dorso di pelle, aperto sulla pagina avorio;
+   un segnalibro di seta color rame scende tra le pagine. Su schermi larghi si vede anche il risguardo. */
+.libro-sec .card { padding:0 }
+.lb-libro { position:relative; display:grid; grid-template-columns:1fr; padding:12px 12px 12px 24px; border-radius:4px 8px 8px 4px; background:url(assets/marmo.jpg) center/420px; box-shadow:0 18px 30px -12px #22364a80,inset 0 0 0 1px #22364a33 }
+.lb-libro::before { content:""; position:absolute; left:0; top:0; bottom:0; width:20px; border-radius:4px 0 0 4px; background:linear-gradient(90deg,#00000040,#ffffff1f 40%,#00000000 70%,#00000059),var(--bronzo);
+  box-shadow:inset 0 30px 0 -28px #d8b56a,inset 0 -30px 0 -28px #d8b56a }
+.lb-risguardo { display:none }
+.lb-pagina { position:relative; padding:56px 26px 34px; background:var(--avorio) url(assets/carta.jpg) center/300px; border-radius:1px 4px 4px 1px; text-align:left;
+  box-shadow:2px 0 0 #e7dcc4,3px 0 0 #f6f1e5,5px 0 0 #e2d6bd,6px 0 0 #f1e9d8,8px 0 0 #d9ccb0,inset 14px 0 18px -14px #22364a40 }
+.lb-segnalibro { position:absolute; top:-12px; right:12px; width:18px; height:calc(100% + 40px); background:var(--rame-nastro); background-size:100% 100%; clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 12px),0 100%); filter:drop-shadow(0 3px 3px #00000040); opacity:.96 }
+.libro-sec .title { text-align:left; padding-right:34px; font-size:clamp(24px,6.6vw,32px) }
+.libro-sec .title::after { margin-left:0; background-position:left center }
+.after { margin-top:4px; padding-right:12px }
+.lettera { font:300 19px/1.8 var(--text); color:var(--ink); hyphens:auto }
+.lettera::first-letter { font:400 3.1em/.9 var(--display); float:left; margin:.04em .1em 0 0; color:var(--rame) }
+.lb-firma { margin-top:16px; padding-right:30px; text-align:right; font:700 46px/1.1 var(--script); color:var(--rame) }
+.lb-folio { margin-top:18px; text-align:center; font:300 11px/1 var(--small); letter-spacing:.3em; color:var(--muted) }
+
+/* Galleria: una quadreria fiorentina, cornici dorate rettangolari e ovali appese fitte come in un salotto. */
+.quadreria-sec .card { padding:0 }
+.us-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:18px 16px; margin-top:8px }
+.quadro { margin:0; min-width:0; filter:drop-shadow(0 12px 14px #22364a47) }
+.quadro-cornice { display:block; padding:11px; background:var(--oro-cornice); box-shadow:inset 0 0 0 1px #5e4317,inset 0 0 0 4px #e9cf8a55,inset 0 0 0 6px #6e4f1d,inset 2px 2px 0 6px #f6e3a8 }
+.quadro-luce { display:block; padding:9px; background:var(--avorio); box-shadow:inset 0 0 0 1px #a8833f,inset 0 3px 8px #22364a40 }
+.quadro img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:0 }
+.us-grid .quadro:nth-child(6n+1),.us-grid .quadro:nth-child(6n) { grid-column:1/-1; width:86%; margin-inline:auto }
+.us-grid .quadro:nth-child(6n+1) img { aspect-ratio:4/3 }
+.us-grid .quadro:nth-child(6n) img { aspect-ratio:16/10 }
+.us-grid .quadro:nth-child(3n+2) .quadro-cornice,.us-grid .quadro:nth-child(3n+2) .quadro-luce,.us-grid .quadro:nth-child(3n+2) img { border-radius:50% }
+.us-grid .quadro:nth-child(3n+2) .quadro-cornice { padding:10px }
+.us-grid .quadro:nth-child(3n+2) img { aspect-ratio:4/5 }
+.bk[data-gallery="slider"] .us-grid { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:14px; padding:6px 4px 18px }
+.bk[data-gallery="slider"] .quadro { flex:0 0 74%; width:auto !important; scroll-snap-align:center }
+.bk[data-gallery="grid"] .quadro { grid-column:auto !important; width:auto !important }
+.bk[data-gallery="grid"] .quadro img { aspect-ratio:1 !important }
+
+/* Immagine: una sola cornice dorata con il passe-partout. */
+.img-block { position:relative; max-width:540px; margin-inline:auto !important; padding:12px; background:var(--oro-cornice); box-shadow:inset 0 0 0 1px #5e4317,inset 0 0 0 5px #6e4f1d88,0 14px 24px -6px #22364a59 }
+.img-block img { border-radius:0 !important; outline:8px solid var(--avorio); outline-offset:-8px }
+.img-block figcaption { margin:12px -12px -12px !important; padding:12px 18px; color:var(--ink); opacity:1 !important; font:italic 300 18px/1.5 var(--text) !important; background:var(--avorio) }
+
+/* Programma: l'indice di un libro antico, con i capitoli in numeri romani e i puntini fino all'ora. */
+.indice-sec .card { padding:0 }
+.ix-pagina { position:relative; padding:46px 26px 34px; background:var(--avorio) url(assets/carta.jpg) center/300px; box-shadow:0 14px 26px -12px #22364a66,inset 0 0 0 1px #a8833f55 }
+.ix-pagina::before,.ix-pagina::after { content:""; position:absolute; width:64px; height:64px; background:url(assets/floral-corner.png) center/contain no-repeat; pointer-events:none }
+.ix-pagina::before { left:8px; top:8px }
+.ix-pagina::after { right:8px; bottom:8px; transform:rotate(180deg) }
+.timeline { list-style:none; margin:6px auto 0; padding:0; max-width:460px; counter-reset:capitolo }
+.t-row { position:relative; display:grid; grid-template-columns:44px minmax(0,1fr); align-items:baseline; padding:12px 0; counter-increment:capitolo; text-align:left }
+.t-row + .t-row { border-top:1px solid #a8833f33 }
+.t-dot::before { content:counter(capitolo,upper-roman) "."; font:400 17px/1 var(--display); color:var(--rame) }
+.t-cell { display:flex; align-items:baseline; gap:8px; min-width:0 }
+.t-name { font:400 19px/1.35 var(--text); color:var(--ink); min-width:0 }
+.t-punti { flex:1 1 20px; min-width:20px; border-bottom:2px dotted #3e566c80; translate:0 -5px }
+.t-time { font:400 18px/1 var(--display); letter-spacing:.04em; color:var(--ink); white-space:nowrap }
+.ix-fregio { width:140px; height:auto; margin:22px auto 0 }
+.rail,.finial,.prog-fl { display:none }
+
+/* Location: un ex libris inciso, con la foto nel cartiglio ovale e il nome sul nastro di rame. */
+.exlibris-sec .card { padding:0 }
+.xl-lastra { position:relative; max-width:420px; margin:0 auto; padding:24px 26px 30px; background:var(--avorio) url(assets/carta.jpg) center/300px;
+  box-shadow:inset 0 0 0 1px var(--oro),inset 0 0 0 6px var(--avorio),inset 0 0 0 7px #a8833f99,0 16px 28px -12px #22364a66 }
+.xl-motto { font:700 52px/1 var(--script); color:var(--rame); margin-bottom:6px }
+.xl-ovale { position:relative; width:78%; margin:0 auto; aspect-ratio:285/337 }
+.xl-ovale::after { content:""; position:absolute; inset:0; background:url(assets/cartiglio.png) center/100% 100% no-repeat; filter:drop-shadow(0 2px 2px #5c2f1740); pointer-events:none }
+.loc-photo { position:absolute; left:19%; right:19%; top:15.5%; bottom:15.5%; width:62%; height:69%; object-fit:cover; border-radius:50% !important }
+.xl-nastro { position:relative; margin:-26px -10px 14px; padding:12px 34px; background:var(--rame-nastro); clip-path:polygon(0 0,100% 0,94% 50%,100% 100%,0 100%,6% 50%); filter:drop-shadow(0 4px 4px #00000033) }
+.loc-name { font:400 clamp(19px,5.4vw,24px)/1.25 var(--display); letter-spacing:.06em; color:#fbf3e2 }
+.loc-addr { color:var(--muted); font:300 16px/1.55 var(--text); opacity:1 !important }
+.xl-tipo { font:300 11px/1.4 var(--small); letter-spacing:.24em; text-transform:uppercase; margin-bottom:4px }
+
+/* Mappa: in una cornice dorata sottile. */
+.map-frame { position:relative; max-width:600px; margin:auto; padding:10px; background:var(--oro-cornice); box-shadow:inset 0 0 0 1px #5e4317,0 14px 24px -8px #22364a59 }
+.map-frame iframe { width:100%; height:300px; border:0; filter:grayscale(.55) sepia(.12) brightness(1.03) }
+.map-frame[data-map-shape="circle"],.map-frame[data-map-shape="circle"] iframe { border-radius:50% }
+.map-frame[data-map-shape="circle"] iframe { aspect-ratio:1; height:auto }
+.map-frame[data-map-shape="arch"],.map-frame[data-map-shape="arch"] iframe { border-radius:999px 999px 0 0 }
+.map-frame[data-map-shape="rounded"],.map-frame[data-map-shape="rounded"] iframe { border-radius:18px }
+.map-fl { display:none }
+
+/* Come arrivare: un foglietto di carta marmorizzata con l'etichetta avorio. */
+.shuttle-sec .card { padding:16px; background:url(assets/marmo-nuvola.jpg) center/360px; box-shadow:0 12px 22px -10px #22364a59 }
+.shuttle-sec .card > * { position:relative }
+.shuttle-sec .card::before { content:""; position:absolute; inset:16px; background:var(--avorio); box-shadow:inset 0 0 0 1px var(--oro),inset 0 0 0 4px var(--avorio),inset 0 0 0 5px #a8833f88 }
+.shuttle-sec .title { padding-top:28px }
+.shuttle-box { padding:0 22px 30px }
+
+/* Dress code: i colori della bottega, in ciotoline di porcellana per i pigmenti viste dall'alto. */
+.dress { font:italic 300 21px/1.45 var(--text); color:var(--ink); margin:0 0 22px }
+.pg-tavolozza { display:flex; flex-wrap:wrap; justify-content:center; gap:18px 12px; margin-top:4px }
+.pg-vasetto { display:flex; flex-direction:column; align-items:center; gap:10px; width:66px }
+.pg-colore { position:relative; display:block; width:54px; height:54px; border-radius:50%; box-shadow:0 0 0 7px #fbfaf6,0 0 0 8px #d8d2c4,0 8px 0 7px #e8e2d4,0 12px 16px 6px #22364a33,inset 0 4px 8px #00000059 }
+.pg-colore::after { content:""; position:absolute; left:18%; top:14%; width:34%; height:22%; border-radius:50%; background:radial-gradient(closest-side,#ffffffb3,#ffffff00); rotate:-24deg }
+.pg-nome { margin-top:10px; color:var(--ink); font:300 11px/1.3 var(--small); letter-spacing:.14em; text-transform:uppercase }
+
+/* Video: in una cornice dorata. */
+.video-frame { position:relative; overflow:hidden; aspect-ratio:9/14; background:var(--marmo-scuro); border:11px solid transparent; background:var(--oro-cornice) border-box; box-shadow:inset 0 0 0 1px #5e4317,0 14px 24px -8px #22364a59 }
+.video-frame video { width:100%; height:100%; object-fit:cover; outline:6px solid var(--avorio); outline-offset:-6px }
+.video-play { display:none; position:absolute; inset:0; margin:auto; width:64px; height:64px; border:0; border-radius:50%; background:var(--avorio); color:var(--ink) }
+.video-play svg { width:24px; height:24px; fill:currentColor; margin:auto }
+.video-frame.is-paused .video-play { display:grid; place-items:center }
+
+/* Musica: il sigillo di rame, piccolo, fisso in basso. */
+.music-toggle { position:fixed; left:14px; bottom:18px; width:58px; height:58px; z-index:1000; display:grid; place-items:center; background:url(assets/sigillo-piccolo.webp) center/contain no-repeat; color:#fbf3e2; border:0; border-radius:50%; filter:drop-shadow(0 6px 8px #5c2f1766); visibility:hidden; opacity:0 }
+.music-toggle svg { width:18px; height:18px; fill:currentColor; filter:drop-shadow(0 1px 1px #00000080) }
+
+/* Conferma: una cartella di carta marmorizzata con l'etichetta avorio incollata e un nastro di seta color rame,
+   chiuso dal sigillo: si rompe il sigillo per rispondere. */
+.cartella-sec .card { padding:30px 22px 26px }
+.ct-cartella { position:absolute; inset:0; z-index:-1; border-radius:3px; background:url(assets/marmo.jpg) 40% 30%/380px; box-shadow:0 18px 30px -12px #22364a80,inset 0 0 0 1px #22364a33,inset 0 0 0 7px #ffffff22 }
+.ct-nastro { position:absolute; left:0; right:0; bottom:118px; height:26px; background:var(--rame-nastro); box-shadow:0 3px 4px #00000033 }
+.ct-etichetta { position:relative; max-width:380px; margin:0 auto; padding:30px 22px 26px; background:var(--avorio) url(assets/carta.jpg) center/300px; box-shadow:inset 0 0 0 1px var(--oro),inset 0 0 0 5px var(--avorio),inset 0 0 0 6px #a8833f99,0 6px 12px #22364a33 }
+.rsvp-sec .body { max-width:340px; margin:0 auto; font-style:italic }
+.seal-btn { position:relative; width:136px; height:136px; display:grid; place-items:center; margin:30px auto 6px; border:0; border-radius:50%; color:#fbf3e2; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 12px 12px #3a1d0e66) }
+.seal-btn:hover { filter:drop-shadow(0 12px 12px #3a1d0e66) drop-shadow(0 0 18px #f0d69099) }
+.seal-text { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap }
+.seal-cue { display:inline-block; color:var(--ink); font:400 12px/1.3 var(--small); letter-spacing:.16em; text-transform:uppercase; text-align:center; padding:8px 16px 7px; margin-top:6px; background:var(--panel); border-radius:2px; box-shadow:inset 0 0 0 1px #a8833f66 }
+.arrow-up { width:10px; height:10px; border-top:1px solid var(--rame); border-left:1px solid var(--rame); transform:rotate(45deg); margin:3px auto 8px }
+.rsvp-fl { display:none }
+.popup { position:fixed; inset:0; z-index:9000; display:none; overflow:auto; padding:24px 14px; background:#22364acc; overscroll-behavior:contain }
+.popup.is-open { display:grid; align-items:start; justify-items:center }
+.popup__box { position:relative; width:100%; max-width:520px; margin:auto; padding:72px 26px 34px; overflow-wrap:anywhere; background:var(--avorio) url(assets/carta.jpg) center/300px; border:12px solid transparent; border-image:url(assets/marmo.jpg) 80 / 12px round; box-shadow:inset 0 0 0 1px var(--oro),inset 0 0 0 5px var(--avorio),inset 0 0 0 6px #a8833f99,0 20px 40px #0000004d }
+.popup__box::before { content:""; position:absolute; top:14px; left:50%; translate:-50% 0; width:60px; height:60px; background:url(assets/sigillo-piccolo.webp) center/contain no-repeat; filter:drop-shadow(0 4px 6px #5c2f1766) }
+.popup__title { color:var(--ink); font:400 26px/1.3 var(--display); letter-spacing:.06em; text-align:center; margin:12px 10px 26px }
+.popup__close { position:absolute; right:14px; top:14px; z-index:1; width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--oro); background:var(--avorio); border-radius:50% }
+.popup__close svg { width:15px; height:15px; fill:var(--ink) }
+.form { display:grid; gap:22px }
+.field { min-width:0 }
+.lab { font:400 17px/1.4 var(--text); margin-bottom:8px; color:var(--ink) }
+.field input[type="text"] { width:100%; min-height:48px; border:1px solid var(--muted); background:#fffdf8; border-radius:2px; color:var(--ink); padding:12px; font-size:16px }
+.radio-wrap { display:flex; flex-wrap:wrap; gap:8px }
+.radio { position:relative; display:flex; align-items:center; gap:9px; min-height:48px; padding:9px 14px; border:1px solid #a8833f99; border-radius:2px; cursor:pointer; font-size:16px; background:#fffdf8 }
+.radio input { position:absolute; opacity:0; width:20px; height:20px; margin:0 }
+.ind { flex-shrink:0; width:19px; height:19px; border-radius:50%; border:1px solid var(--rame); background:#fff }
+.radio input:checked+.ind { background:var(--rame); box-shadow:inset 0 0 0 4px #fff }
+.radio:has(input:focus-visible) { outline:3px solid var(--rame); outline-offset:3px }
+.submit { width:100%; min-height:48px; padding:14px 20px; border:0; border-radius:2px; background:var(--rame-nastro); color:#fffaf0; font:400 14px/1.2 var(--small); letter-spacing:.18em; text-transform:uppercase; text-shadow:0 1px 1px #00000066; box-shadow:0 6px 14px #5c2f1740 }
+.err,.invio-ko { display:none; color:var(--rame); font-weight:600; font-size:15px; padding-top:8px }
+.err::before,.invio-ko::before { content:"! " }
+.has-error .err,.invio-ko.is-on { display:block }
+.has-error input[type="text"] { border:2px solid var(--rame) }
+.success { display:none; padding:20px 8px; text-align:center; color:var(--ink) }
+.success.is-on { display:block }
+.success h3 { font:400 28px var(--display); letter-spacing:.04em; color:var(--ink) }
+.honey { display:none !important }
+.visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+/* Firma: il colophon dell'ultima pagina, con il sigillo di rame come marca della bottega. */
+.footer-sec { padding:60px 26px 70px; text-align:center }
+.footer-in { position:relative; max-width:420px; margin:0 auto; padding:84px 22px 34px; border-top:1px solid #a8833f80; border-bottom:1px solid #a8833f80 }
+.footer-in::before { content:""; position:absolute; inset:4px 0; border-top:1px solid #a8833f4d; border-bottom:1px solid #a8833f4d; pointer-events:none }
+.cl-sigillo { position:absolute; top:-46px; left:50%; translate:-50% 0; width:108px; aspect-ratio:1; background:url(assets/sigillo.webp) center/contain no-repeat; filter:drop-shadow(0 10px 12px #3a1d0e59) }
+.footer-in .title { font-size:22px; margin-bottom:6px }
+.footer-in .title::after { display:none }
+.signature { font:700 clamp(46px,13vw,64px)/1.15 var(--script); color:var(--rame) }
+.cl-nomi { margin-top:8px; font:400 15px/1.4 var(--display); letter-spacing:.16em; color:var(--ink) }
+.footer-in .orn { width:56px; margin-top:18px }
+.footer-sec .fl { display:none }
+.credits { margin-top:16px; font:300 12px/1.6 var(--small); letter-spacing:.08em; color:var(--muted) }
+
+/* Ingressi: dissolvenze lente; i dorsi e le cornici salgono appena. */
+[data-anim] { opacity:1 }
+@media (prefers-reduced-motion:no-preference) {
+  [data-anim] { opacity:0; transition:opacity 1s ease; transition-delay:var(--d,0s) }
+  [data-anim].in { opacity:1 }
+  .ds-scaffale.in .ds { animation:sfila .9s cubic-bezier(.3,.2,.2,1) both }
+  .ds-scaffale.in .ds:nth-child(3) { animation-delay:.12s } .ds-scaffale.in .ds:nth-child(5) { animation-delay:.24s } .ds-scaffale.in .ds:nth-child(7) { animation-delay:.36s }
+  .libro-sec .lb-libro.in .lb-segnalibro { animation:scende 1.4s cubic-bezier(.3,.2,.2,1) .3s both }
+}
+@keyframes sfila { from { transform:translateY(18px) } to { transform:none } }
+@keyframes scende { from { clip-path:polygon(0 0,100% 0,100% 0,50% 0,0 0) } to { clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 12px),0 100%) } }
+
+@media (min-width:700px) {
+  .sec { padding:68px 40px }
+  .h-text { padding:24% 24% 28% }
+  .names { font-size:120px }
+  .occasion { font-size:26px }
+  .hero-scene { min-height:min(100svh,1000px) }
+  .vasca { --w:380px }
+  .ds { max-width:110px; height:270px } .ds:nth-child(3) { height:292px } .ds:nth-child(5) { height:256px } .ds:nth-child(7) { height:280px }
+  .lb-libro { grid-template-columns:1fr 1.25fr; padding:14px 14px 14px 14px; border-radius:6px }
+  .lb-libro::before { display:none }
+  .lb-risguardo { display:block; position:relative; background:url(assets/marmo.jpg) 70% 40%/360px; border-radius:4px 1px 1px 4px; box-shadow:inset -14px 0 18px -12px #22364a66,inset 0 0 0 1px #22364a26 }
+  .lb-risguardo::after { content:""; position:absolute; left:50%; top:50%; width:150px; aspect-ratio:285/337; translate:-50% -50%; background:url(assets/cartiglio.png) center/contain no-repeat,radial-gradient(closest-side,#f6f1e5 0 74%,#f6f1e500 76%) center/62% 70% no-repeat }
+  .lb-pagina { padding:60px 44px 38px }
+  .us-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px 22px }
+  .us-grid .quadro:nth-child(6n+1),.us-grid .quadro:nth-child(6n) { grid-column:span 2; width:100% }
+  .ix-pagina { padding:56px 52px 40px }
+  .popup__box { padding-inline:44px }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important }
+  [data-anim],.number,.label,.separator { opacity:1 !important; transform:none !important }
+}

@@ -1,0 +1,9 @@
+<section class="sec loc-sec sala-sec">
+  {{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}
+  <div class="card sala-testo">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="loc-name" data-anim="fadeinup" style="--d:.1s">{{venue | lines}}</div>
+    {{#kindLabel}}<div class="loc-addr" data-anim="fadeinup" style="--d:.15s">{{kindLabel}}</div>{{/kindLabel}}
+    {{#address}}<div class="loc-via" data-anim="fadeinup" style="--d:.2s">{{address | lines}}</div>{{/address}}
+  </div>
+</section>

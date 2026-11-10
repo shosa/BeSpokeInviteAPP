@@ -1,0 +1,16 @@
+<section class="sec loc-sec frontone-sec">
+  <div class="card">
+    <div class="fr-timpano" aria-hidden="true"><span></span></div>
+    <div class="fr-trabeazione">
+      {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+      <div class="loc-name" data-anim="fadeinup" style="--d:.1s">{{venue | lines}}</div>
+    </div>
+    <div class="fr-portico">
+      {{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="" data-anim="zoomin" style="--d:.3s">{{/photo}}
+    </div>
+    <div class="fr-zoccolo">
+      {{#kindLabel}}<div class="loc-addr" data-anim="fadeinup" style="--d:.15s">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-addr loc-via" data-anim="fadeinup" style="--d:.2s">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>

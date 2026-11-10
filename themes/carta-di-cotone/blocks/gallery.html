@@ -1,0 +1,11 @@
+{{#hasPhotos}}
+<section class="sec us-sec album-sec">
+  <div class="card">
+    <img class="fl us-fl" src="assets/floral-sprig.png" alt="" aria-hidden="true">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="us-grid album-pagina">
+      {{#photos}}<figure class="album-foto" data-anim="fadeinup"><img src="{{.}}" loading="lazy" decoding="async" alt=""><span class="ang a1" aria-hidden="true"></span><span class="ang a2" aria-hidden="true"></span><span class="ang a3" aria-hidden="true"></span><span class="ang a4" aria-hidden="true"></span></figure>{{/photos}}
+    </div>
+  </div>
+</section>
+{{/hasPhotos}}

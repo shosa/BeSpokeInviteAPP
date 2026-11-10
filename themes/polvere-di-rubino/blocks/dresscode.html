@@ -1,0 +1,10 @@
+<section class="sec dress-sec lampadario-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#dress}}<div class="dress" data-anim="fadeinup" style="--d:.1s">{{dress}}</div>{{/dress}}
+    <div class="lampadario" data-anim="fadeinup" style="--d:.2s">
+      <i class="lm-braccio" aria-hidden="true"></i>
+      <div class="dress-dots">{{#colors}}{{#hex}}<span class="goccia"><span class="gc-filo"></span><span class="gc-perla"></span><span class="gc-cristallo" role="img" aria-label="{{name}}" style="--c:{{hex}}"></span>{{#name}}<span class="gc-nome">{{name}}</span>{{/name}}</span>{{/hex}}{{/colors}}</div>
+    </div>
+  </div>
+</section>

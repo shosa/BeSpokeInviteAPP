@@ -1,0 +1,11 @@
+<section class="footer-sec portale-sec">
+  <img class="fl l" src="assets/floral.png" alt="" aria-hidden="true">
+  <img class="fl r" src="assets/floral.png" alt="" aria-hidden="true">
+  <div class="footer-in">
+    <span class="pt-ramo" aria-hidden="true"></span>
+    <h2 class="title" data-anim="fadein" style="--d:.15s">{{t.footerTitle}}</h2>
+    {{#signature}}<div class="signature" data-anim="fadein" style="--d:.3s">{{signature}}</div>{{/signature}}
+    <span class="pt-sigillo" aria-hidden="true"></span>
+  </div>
+  {{#venue}}<div class="credits">{{venue}}{{#address}} · {{address}}{{/address}}</div>{{/venue}}
+</section>

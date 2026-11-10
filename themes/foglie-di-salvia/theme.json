@@ -1,0 +1,140 @@
+{
+  "engine": 2,
+  "id": "foglie-di-salvia",
+  "name": "Foglie di salvia",
+  "description": "Tutto in verde salvia su carta di cotone: una busta con sigillo d'ulivo si apre su rami di ulivo ed eucalipto all'acquerello, e la stessa tinta accompagna l'invito fino alle colline del finale.",
+  "models": [],
+  "themeColor": "#f2f2ea",
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Marcellus&family=Corinthia:wght@400;700&family=Karla:wght@400;500&display=swap"
+  ],
+  "envelope": {
+    "video": "assets/busta.mp4",
+    "poster": "assets/busta-poster.jpg"
+  },
+  "backgroundVideo": {
+    "hero": "assets/intestazione.mp4"
+  },
+  "demo": {
+    "event": {
+      "title": "Anna & Pietro",
+      "hosts": "Insieme alle nostre famiglie",
+      "eventDate": "2027-09-25",
+      "eventTime": "16:00",
+      "venue": "Tenuta degli Ulivi",
+      "address": "Strada delle Colline 21, Montalcino"
+    },
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "Ci sposiamo",
+      "scrollLabel": "Scopri il nostro giorno"
+    },
+    "message": {
+      "heading": "All'ombra degli ulivi",
+      "body": "Gli ulivi crescono piano e durano per sempre: così vorremmo il nostro amore.\nSaremo felici di festeggiarlo con voi, tra le colline che ci hanno visti diventare una cosa sola."
+    },
+    "gallery": {
+      "heading": "Cartoline dalla tenuta",
+      "photos": [
+        "assets/uliveto.jpg",
+        "assets/fontana.jpg",
+        "assets/tavola.jpg",
+        "assets/vaso.jpg",
+        "assets/sentiero.jpg"
+      ]
+    },
+    "image": {
+      "photo": "assets/tavola.jpg",
+      "caption": "La cena sotto il pergolato, tra candele e rami d'ulivo."
+    },
+    "program": {
+      "heading": "Il nostro giorno",
+      "items": [
+        { "time": "16:00", "label": "La cerimonia nella cappella" },
+        { "time": "17:30", "label": "Brindisi tra gli ulivi" },
+        { "time": "20:00", "label": "Cena sotto il pergolato" },
+        { "time": "22:30", "label": "Taglio della torta" }
+      ]
+    },
+    "venue": {
+      "heading": "La location",
+      "venue": "Tenuta degli Ulivi",
+      "kind": "villa",
+      "photo": "assets/villa.jpg"
+    },
+    "transfer": {
+      "heading": "Come arrivare",
+      "body": "La tenuta si raggiunge in auto, con parcheggio riservato agli ospiti.\nDalla piazza di Montalcino partirà una navetta alle 15:15."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Eleganza di campagna, nei toni del verde",
+      "colors": [
+        { "hex": "#3A5140", "name": "Bosco" },
+        { "hex": "#8FA58C", "name": "Salvia" },
+        { "hex": "#C9D5C3", "name": "Eucalipto" },
+        { "hex": "#F2F2EA", "name": "Lino" }
+      ]
+    },
+    "video": {
+      "heading": "Foglie nel vento",
+      "video": "assets/intestazione.mp4"
+    },
+    "rsvp": {
+      "heading": "Ci sarai?",
+      "intro": "Abbiamo già apparecchiato un posto per te sotto il pergolato.\nConferma la tua presenza.",
+      "openLabel": "Conferma la presenza",
+      "submitLabel": "Invia la conferma",
+      "thanksLabel": "Grazie, risposta ricevuta"
+    },
+    "footer": {
+      "signature": "Con tutto il nostro amore"
+    }
+  },
+  "demoEn": {
+    "hero": {
+      "kicker": "Save the date",
+      "occasion": "We're getting married",
+      "scrollLabel": "Discover our day"
+    },
+    "message": {
+      "heading": "In the shade of the olive trees",
+      "body": "Olive trees grow slowly and last forever: that is how we want our love to be.\nWe would be happy to celebrate it with you, among the hills that saw us become one."
+    },
+    "gallery": { "heading": "Postcards from the estate" },
+    "image": { "caption": "Dinner under the pergola, among candles and olive branches." },
+    "program": {
+      "heading": "Our day",
+      "items": [
+        { "time": "16:00", "label": "The ceremony in the chapel" },
+        { "time": "17:30", "label": "A toast among the olive trees" },
+        { "time": "20:00", "label": "Dinner under the pergola" },
+        { "time": "22:30", "label": "Cutting the cake" }
+      ]
+    },
+    "venue": { "heading": "The venue" },
+    "transfer": {
+      "heading": "How to get there",
+      "body": "The estate can be reached by car, with parking reserved for guests.\nA shuttle will leave Montalcino's main square at 3:15 pm."
+    },
+    "dresscode": {
+      "heading": "Dress code",
+      "dress": "Countryside elegance, in shades of green",
+      "colors": [
+        { "hex": "#3A5140", "name": "Forest" },
+        { "hex": "#8FA58C", "name": "Sage" },
+        { "hex": "#C9D5C3", "name": "Eucalyptus" },
+        { "hex": "#F2F2EA", "name": "Linen" }
+      ]
+    },
+    "video": { "heading": "Leaves in the wind" },
+    "rsvp": {
+      "heading": "Will you be there?",
+      "intro": "We have already set a place for you under the pergola.\nPlease confirm your attendance.",
+      "openLabel": "Confirm attendance",
+      "submitLabel": "Send confirmation",
+      "thanksLabel": "Thank you, reply received"
+    },
+    "footer": { "signature": "With all our love" }
+  }
+}

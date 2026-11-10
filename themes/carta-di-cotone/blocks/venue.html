@@ -1,0 +1,15 @@
+<section class="sec loc-sec erbario-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="eb-tavola" data-anim="fadeinup" style="--d:.1s">
+      {{#photo}}<div class="eb-foto"><img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt=""><span class="eb-nastro n1" aria-hidden="true"></span><span class="eb-nastro n2" aria-hidden="true"></span></div>{{/photo}}
+      <img class="eb-felce" src="assets/e-felce.webp" alt="" aria-hidden="true">
+      <div class="eb-cartellino">
+        <span class="eb-timbro" aria-hidden="true"></span>
+        {{#kindLabel}}<div class="loc-addr eb-tipo">{{kindLabel}}</div>{{/kindLabel}}
+        <div class="loc-name">{{venue | lines}}</div>
+        {{#address}}<div class="loc-addr">{{address | lines}}</div>{{/address}}
+      </div>
+    </div>
+  </div>
+</section>

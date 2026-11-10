@@ -1,0 +1,15 @@
+<section class="sec loc-sec bocchetta-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    <div class="bocchetta" data-anim="fadeinup" style="--d:.1s">
+      <i class="bc-vite su" aria-hidden="true"></i>
+      <div class="bc-foro">{{#photo}}<img class="loc-photo" src="{{photo}}" loading="lazy" decoding="async" alt="">{{/photo}}</div>
+      <i class="bc-vite giu" aria-hidden="true"></i>
+    </div>
+    <div class="bc-targa" data-anim="fadeinup" style="--d:.2s">
+      <div class="loc-name">{{venue | lines}}</div>
+      {{#kindLabel}}<div class="loc-addr">{{kindLabel}}</div>{{/kindLabel}}
+      {{#address}}<div class="loc-via">{{address | lines}}</div>{{/address}}
+    </div>
+  </div>
+</section>
