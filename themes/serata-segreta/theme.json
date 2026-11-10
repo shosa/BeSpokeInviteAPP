@@ -16,6 +16,10 @@
     "hero": "assets/scalone-candele.mp4"
   },
   "demo": {
+    "scratchdate": {
+      "dateTitle": "La data",
+      "revealLabel": "Scopri la data"
+    },
     "event": {
       "title": "Vittoria & Edoardo",
       "hosts": "Insieme alle loro famiglie",
@@ -125,6 +129,10 @@
     }
   },
   "demoEn": {
+    "scratchdate": {
+      "dateTitle": "The date",
+      "revealLabel": "Reveal the date"
+    },
     "hero": {
       "kicker": "A secret for you",
       "occasion": "Join us for our wedding",

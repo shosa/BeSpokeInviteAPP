@@ -463,7 +463,14 @@ export function templateBlocks(demo: Record<string, unknown> | undefined, featur
   const dropped = new Set<string>(["date", ...Object.values(swap)]);
   const out = BLOCKS.filter((d) => !dropped.has(d.type) && (d.locked || d.anchored || d.type in demo))
     .filter((d) => has(d.feature))
-    .map((d) => makeBlock((swap[d.type] ?? d.type) as BlockType));
+    .map((d) => {
+      // Stesse proprietà della pagina demo: foto, testi e voci dichiarati dallo stile per quel blocco.
+      const type = (swap[d.type] ?? d.type) as BlockType;
+      const block = makeBlock(type);
+      const styled = demo[type];
+      if (styled && typeof styled === "object") block.props = { ...block.props, ...JSON.parse(JSON.stringify(styled)) };
+      return block;
+    });
   return out.length ? out : defaultBlocks(features);
 }
 

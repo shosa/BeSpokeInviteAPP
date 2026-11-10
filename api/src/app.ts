@@ -227,7 +227,7 @@ export async function buildApp() {
     const theme = requested ?? enabledThemes(c, model.id)[0];
     if (!theme) return reply.code(400).send({ error: "Nessun tema disponibile per questo modello" });
     const eventType = EVENT_TYPES.find((e) => e.id === b.eventType)?.id ?? "wedding";
-    const config = defaultConfig(theme, model.id, eventType, activeFeatures(c, model.id, []));
+    const config = await importStyleMedia(defaultConfig(theme, model.id, eventType, activeFeatures(c, model.id, [])), theme.id);
     const id = randomUUID();
     // Slug provvisorio: l'ID. Il link vero si sceglie solo alla pubblicazione.
     const slug = id;
@@ -992,7 +992,7 @@ export async function buildApp() {
     // Stesso contenuto dell'anteprima: la configurazione di esempio del template, senza cambiare modello.
     const config = sample
       ? await importStyleMedia({ ...sampleConfig(theme, "it"), addons: sampleAddons }, theme.id)
-      : { ...defaultConfig(theme, d.model, eventType, activeFeatures(c, d.model, addons)), addons: [...ADDON_KEYS] };
+      : await importStyleMedia({ ...defaultConfig(theme, d.model, eventType, activeFeatures(c, d.model, addons)), addons: [...ADDON_KEYS] }, theme.id);
     const id = randomUUID();
     // Slug provvisorio: l'ID. Il cliente sceglie il link al momento di pubblicare.
     const slug = id;

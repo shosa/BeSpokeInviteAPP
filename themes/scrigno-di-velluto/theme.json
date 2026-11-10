@@ -24,6 +24,10 @@
       "venue": "Villa Smeralda",
       "address": "Via dei Mughetti 4, Lucca"
     },
+    "scratchdate": {
+      "dateTitle": "La data",
+      "revealLabel": "Scopri la data"
+    },
     "hero": {
       "kicker": "Save the date",
       "occasion": "Ci sposiamo",
@@ -95,6 +99,10 @@
     }
   },
   "demoEn": {
+    "scratchdate": {
+      "dateTitle": "The date",
+      "revealLabel": "Reveal the date"
+    },
     "hero": {
       "kicker": "Save the date",
       "occasion": "We're getting married",

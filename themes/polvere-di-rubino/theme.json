@@ -16,6 +16,10 @@
     "hero": "assets/palco.mp4"
   },
   "demo": {
+    "scratchdate": {
+      "dateTitle": "La data",
+      "revealLabel": "Scopri la data"
+    },
     "event": {
       "title": "Aurora & Leonardo",
       "hosts": "Insieme alle loro famiglie",
@@ -125,6 +129,10 @@
     }
   },
   "demoEn": {
+    "scratchdate": {
+      "dateTitle": "The date",
+      "revealLabel": "Reveal the date"
+    },
     "hero": {
       "kicker": "Save the date",
       "occasion": "On stage tonight",

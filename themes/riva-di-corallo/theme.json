@@ -16,6 +16,10 @@
     "hero": "assets/intestazione.mp4"
   },
   "demo": {
+    "scratchdate": {
+      "dateTitle": "La data",
+      "revealLabel": "Scopri la data"
+    },
     "event": {
       "title": "Giulia & Matteo",
       "hosts": "Insieme alle nostre famiglie",
@@ -93,6 +97,10 @@
     }
   },
   "demoEn": {
+    "scratchdate": {
+      "dateTitle": "The date",
+      "revealLabel": "Reveal the date"
+    },
     "hero": {
       "kicker": "Save the date",
       "occasion": "We're getting married",
