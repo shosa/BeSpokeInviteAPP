@@ -27,7 +27,10 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
   .device iframe { width: 100%; height: 100%; border: 0; border-radius: 38px; background: #fff; display: block; }
   .stage[data-mode="desktop"] .device { width: min(1040px, 100%); height: min(680px, 100%); border-radius: 14px; padding: 0; background: #fff; overflow: hidden; border: 1px solid #C9CED6; box-shadow: 0 24px 50px -28px rgba(0,0,0,0.35); }
   .stage[data-mode="desktop"] .device iframe { border-radius: 0; }
+  .back { display: none; }
   @media (max-width: 720px) {
+    .back { position: fixed; z-index: 5; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 8px 24px -10px rgba(0,0,0,0.45); color: #2a2119; cursor: pointer; }
+    html.is-top .back { display: grid; place-items: center; }
     .bar { display: none; }
     .stage { height: 100%; padding: 0; }
     .device, .stage[data-mode="desktop"] .device { width: 100%; height: 100%; border-radius: 0; padding: 0; border: 0; box-shadow: none; }
@@ -36,6 +39,7 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 </style>
 </head>
 <body>
+<button type="button" class="back" aria-label="${lang === "en" ? "Back" : "Indietro"}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
 <div class="bar" role="group" aria-label="${l.title}">
   <button type="button" data-mode="phone" aria-pressed="true">${l.phone}</button>
   <button type="button" data-mode="desktop" aria-pressed="false">${l.desktop}</button>
@@ -46,6 +50,11 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 </main>
 <script>
   (function () {
+    // Indietro galleggiante solo quando l'anteprima è la pagina principale (non dentro la modale del sito).
+    if (window.top === window) document.documentElement.classList.add('is-top');
+    document.querySelector('.back').addEventListener('click', function () {
+      if (history.length > 1) history.back(); else location.href = '/admin';
+    });
     var stage = document.querySelector('.stage');
     var frame = document.querySelector('.device iframe');
     var cover = document.querySelector('[data-cover]');

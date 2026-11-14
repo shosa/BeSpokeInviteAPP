@@ -12,10 +12,9 @@ export default async function Editor({ params }: { params: Promise<{ id: string 
   try {
     const manage = await apiServer<Manage>(`/api/invitations/${id}/manage`);
     if (manage.status !== "paid") redirect(`/planner/${id}`);
-    const ev = (manage.config.event ?? {}) as { title?: string; eventDate?: string; venue?: string };
     const setupDone = Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone);
     return (
-      <SetupGate id={id} setupDone={setupDone} initial={{ title: ev.title ?? "", eventDate: ev.eventDate ?? "", venue: ev.venue ?? "" }}>
+      <SetupGate id={id} setupDone={setupDone} config={manage.config}>
         <Builder initial={manage} lang={await getLang()} />
       </SetupGate>
     );

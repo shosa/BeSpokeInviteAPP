@@ -61,7 +61,7 @@ export default async function Planner({ params }: { params: Promise<{ id: string
             decor={decor}
           />
           <div className="wrap idash-body">
-            <SetupGate id={id} setupDone={Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone)} initial={{ title: String(manage.config.event.title ?? ""), eventDate: String(manage.config.event.eventDate ?? ""), venue: String(manage.config.event.venue ?? "") }}>
+            <SetupGate id={id} setupDone={Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone)} config={manage.config}>
               <PremiumPlanner id={id} initial={premium} lang={lang} sharePath={(manage.editCount ?? 0) >= 1 && manage.slug ? `/i/${manage.slug}` : null} />
             </SetupGate>
           </div>
@@ -97,7 +97,7 @@ export default async function Planner({ params }: { params: Promise<{ id: string
             decor={decor}
           />
           <div className="wrap idash-body">
-            <SetupGate id={id} setupDone={Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone)} initial={{ title: String(manage.config.event.title ?? ""), eventDate: String(manage.config.event.eventDate ?? ""), venue: String(manage.config.event.venue ?? "") }}>
+            <SetupGate id={id} setupDone={Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone)} config={manage.config}>
               <PlannerPanel data={{ manage, summary }} lang={lang} />
             </SetupGate>
           </div>

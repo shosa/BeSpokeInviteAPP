@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FOLDER, FOLDER_GROUPS, type FolderSection } from "@inviteme/shared";
-import { Armchair, Car, Building2, Cake, Camera, Church, Clock, FileText, Flower2, Gift, Heart, Hotel, Images, ListChecks, Luggage, MapPin, Mic, Music, Package, Palette, PartyPopper, Phone, Shield, Shirt, Sparkles, Store, Tent, Users, Utensils, Wallet, Wine, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Armchair, Car, Building2, Cake, Camera, Church, Clock, FileText, Flower2, Gift, Heart, Hotel, Images, ListChecks, Luggage, MapPin, Mic, Music, Package, Palette, PartyPopper, Phone, Shield, Shirt, Sparkles, Store, Tent, Users, Utensils, Wallet, Wine, type LucideIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 
 // Icona di ogni sezione della cartella.
@@ -93,9 +93,16 @@ export function Folder({
   onSave: (next: Record<string, FolderValue>) => Promise<void>;
 }) {
   const [local, setLocal] = useState<Record<string, FolderValue>>(docs);
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpenState] = useState<string | null>(null);
+  // Direzione dell'animazione: avanti (la sezione entra da destra) o indietro (torna l'elenco da sinistra).
+  const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
+  const top = useRef<HTMLDivElement>(null);
+  // Bozza della sezione aperta non ancora salvata: si salva da sola quando si torna indietro.
+  const draft = useRef<{ key: string; value: FolderValue } | null>(null);
+  const localRef = useRef(local);
+  localRef.current = local;
 
   const written = FOLDER.filter((s) => s.key === "fornitori" ? vendors.length > 0 : filled(s, local[s.key])).length;
   const readyItems = FOLDER.reduce((n, s) => n + (s.kind === "text" ? (textOf(local[s.key]).trim() ? 1 : 0) : itemsOf(local[s.key]).length), 0);
@@ -118,8 +125,88 @@ export function Folder({
 
   const current = open ? FOLDER.find((s) => s.key === open) : undefined;
 
+  function scrollTop() {
+    const el = top.current;
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 140;
+    if (window.scrollY > y) window.scrollTo({ top: Math.max(0, y) });
+  }
+
+  async function flushDraft() {
+    const d = draft.current;
+    draft.current = null;
+    if (d) await persist({ ...localRef.current, [d.key]: d.value });
+  }
+
+  // Apre una sezione come pagina a sé. La voce nella cronologia fa funzionare il tasto indietro del telefono.
+  async function openSection(key: string) {
+    await flushDraft();
+    setDir("fwd");
+    if (!open) window.history.pushState({ folder: key }, "");
+    else window.history.replaceState({ folder: key }, "");
+    setOpenState(key);
+    scrollTop();
+  }
+
+  function back() {
+    if (window.history.state?.folder) window.history.back(); // chiude tramite popstate
+    else void closeSection();
+  }
+
+  async function closeSection() {
+    await flushDraft();
+    setDir("back");
+    setOpenState(null);
+    scrollTop();
+  }
+
+  useEffect(() => {
+    const onPop = () => { if (!window.history.state?.folder) void closeSection(); };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Uscendo dal planner con una sezione aperta, la voce aggiunta alla cronologia non deve restare.
+  useEffect(() => () => { if (window.history.state?.folder) window.history.replaceState(null, ""); }, []);
+
+  if (current) {
+    const idx = FOLDER.findIndex((s) => s.key === current.key);
+    const prev = FOLDER[idx - 1];
+    const next = FOLDER[idx + 1];
+    return (
+      <div className="fo fo-page is-fwd" ref={top} key={current.key}>
+        <button type="button" className="fo-back pp-noprint" onClick={back}>
+          <ArrowLeft size={18} aria-hidden="true" />
+          Cartella
+        </button>
+        <FolderEditor
+          section={current}
+          value={local[current.key]}
+          vendors={vendors}
+          busy={busy}
+          onDraft={(value) => { draft.current = { key: current.key, value }; }}
+          onSave={async (v) => { draft.current = null; await persist({ ...local, [current.key]: v }); }}
+        />
+        <nav className="fo-pager pp-noprint" aria-label="Altre sezioni">
+          {prev ? (
+            <button type="button" className="fo-pager-btn" onClick={() => openSection(prev.key)}>
+              <ChevronLeft size={18} aria-hidden="true" />
+              <span><small>Precedente</small>{prev.title}</span>
+            </button>
+          ) : <span />}
+          {next && (
+            <button type="button" className="fo-pager-btn is-next" onClick={() => openSection(next.key)}>
+              <span><small>Successiva</small>{next.title}</span>
+              <ChevronRight size={18} aria-hidden="true" />
+            </button>
+          )}
+        </nav>
+      </div>
+    );
+  }
+
   return (
-    <div className="fo">
+    <div className={`fo fo-page${dir === "back" ? " is-back" : ""}`} ref={top}>
       <header className="fo-head pp-noprint">
         <div>
           <p className="pp-kicker">La cartella del matrimonio</p>
@@ -134,7 +221,7 @@ export function Folder({
           <span className="pp-kicker">Utile adesso</span>
           <div className="fo-chips">
             {urgent.map((s) => (
-              <button key={s.key} type="button" className="fo-chip" onClick={() => setOpen(s.key)}>{s.title}</button>
+              <button key={s.key} type="button" className="fo-chip" onClick={() => openSection(s.key)}>{s.title}</button>
             ))}
           </div>
         </section>
@@ -143,18 +230,6 @@ export function Folder({
       <div className="fo-search pp-noprint">
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca nella cartella" aria-label="Cerca nella cartella" />
       </div>
-
-      {current && (
-        <FolderEditor
-          key={current.key}
-          section={current}
-          value={local[current.key]}
-          vendors={vendors}
-          busy={busy}
-          onClose={() => setOpen(null)}
-          onSave={(v) => persist({ ...local, [current.key]: v })}
-        />
-      )}
 
       {FOLDER_GROUPS.map((group) => {
         const sections = FOLDER.filter((s) => s.group === group && matches(s));
@@ -167,9 +242,9 @@ export function Folder({
                 <button
                   key={s.key}
                   type="button"
-                  className={`fo-card${filled(s, local[s.key]) || (s.key === "fornitori" && vendors.length) ? " is-filled" : ""}${open === s.key ? " is-open" : ""}`}
+                  className={`fo-card${filled(s, local[s.key]) || (s.key === "fornitori" && vendors.length) ? " is-filled" : ""}`}
                   style={{ animationDelay: `${i * 35}ms` }}
-                  onClick={() => setOpen(open === s.key ? null : s.key)}
+                  onClick={() => openSection(s.key)}
                 >
                   <span className="fo-card-ico">{(() => { const I = iconFor(s.key); return <I size={20} strokeWidth={1.5} aria-hidden="true" />; })()}</span>
                   <strong>{s.title}</strong>
@@ -190,14 +265,14 @@ function FolderEditor({
   value,
   vendors,
   busy,
-  onClose,
+  onDraft,
   onSave,
 }: {
   section: FolderSection;
   value: FolderValue | undefined;
   vendors: FolderVendor[];
   busy: boolean;
-  onClose: () => void;
+  onDraft: (v: FolderValue) => void;
   onSave: (v: FolderValue) => Promise<void>;
 }) {
   const [items, setItems] = useState<FolderRow[]>(itemsOf(value));
@@ -207,9 +282,18 @@ function FolderEditor({
   // Riga vuota per tipo: programma (orario, cosa), contatti (nome, ruolo, telefono), checklist (voce, fatto).
   const blank = (): FolderRow => (section.kind === "timeline" ? { time: "", item: "" } : section.kind === "contacts" ? { name: "", role: "", phone: "" } : { text: "", done: false });
   const setRow = (i: number, patch: FolderRow) => { setItems((rows) => rows.map((r, j) => (j === i ? { ...r, ...patch } : r))); setSaved(false); };
+  const valueOf = (rows: FolderRow[], t: string): FolderValue =>
+    section.kind === "text" ? t : { items: rows.filter((r) => Object.values(r).some((v) => v === true || (typeof v === "string" && v.trim()))) };
+
+  // Ogni modifica diventa la bozza della sezione: tornando indietro si salva da sola.
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (section.key !== "fornitori") onDraft(valueOf(items, text));
+  }, [items, text]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save() {
-    await onSave(section.kind === "text" ? text : { items: items.filter((r) => Object.values(r).some((v) => v === true || (typeof v === "string" && v.trim()))) });
+    await onSave(valueOf(items, text));
     setSaved(true);
   }
 
@@ -222,7 +306,6 @@ function FolderEditor({
           <h3>{section.title}</h3>
           <p className="hint">{section.hint}</p>
         </div>
-        <button type="button" className="pp-link" onClick={onClose}>Chiudi</button>
       </header>
 
       {section.key === "fornitori" ? (

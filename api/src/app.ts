@@ -28,6 +28,7 @@ import {
   type RsvpQuestion,
   attendanceOf,
   partySizeOf,
+  applySetup,
   normalizeSlug,
   blockDef,
 } from "@inviteme/shared";
@@ -633,13 +634,28 @@ export async function buildApp() {
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     if (editRules({ status: inv.status, edit_count: inv.edit_count }).readOnly) return reply.code(409).send({ error: "Modifica già confermata: l'invito non si modifica più" });
-    const b = (req.body ?? {}) as { title?: unknown; eventDate?: unknown; venue?: unknown };
-    const title = typeof b.title === "string" ? b.title.trim().slice(0, 120) : "";
+    // Wizard a passi: dati dell'evento, ringraziamento, conferma di presenza e domande. Dalle risposte
+    // si aggiungono o tolgono Location, Mappa, Firma e Conferma (shared/src/setup.ts).
+    const b = (req.body ?? {}) as Record<string, unknown>;
+    const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+    const title = text(b.title, 80);
     const eventDate = typeof b.eventDate === "string" ? b.eventDate : "";
-    const venue = typeof b.venue === "string" ? b.venue.trim().slice(0, 160) : "";
     if (!title) return reply.code(400).send({ error: "Scrivete i nomi o il titolo dell'evento" });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || Number.isNaN(Date.parse(eventDate + "T00:00:00"))) return reply.code(400).send({ error: "Inserite una data valida" });
-    const config = { ...inv.config, event: { ...(inv.config.event ?? {}), title, eventDate, venue } };
+    const venue = text(b.venue, 120);
+    const applied = applySetup(inv.config as InviteConfig, {
+      title,
+      eventDate,
+      venue,
+      address: text(b.address, 200),
+      signature: text(b.signature, 80),
+      rsvp: b.rsvp === true,
+      questions: Array.isArray(b.questions) ? (b.questions as RsvpQuestion[]) : [],
+    });
+    const clean = sanitizeConfig(await loadCatalog(), applied);
+    if (!clean) return reply.code(400).send({ error: "Configurazione non valida" });
+    // Il luogo resta anche tra i dati dell'evento: il planner lo legge da lì.
+    const config = { ...clean, event: { ...clean.event, venue } };
     const planner = { ...(inv.planner ?? {}), setupDone: true };
     await pool.query("UPDATE invitations SET config = $2, published_config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
     return { ok: true };

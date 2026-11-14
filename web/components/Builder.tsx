@@ -130,7 +130,8 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   // Schede in alto nel pannello dei controlli, come nel riferimento: ciascuna apre una funzione del builder.
   const [tab, setTab] = useState<string>("dettagli");
   const [device, setDevice] = useState<Device>("mobile");
-  const [mobileTab, setMobileTab] = useState<MobileTab>("anteprima");
+  // Telefono: si parte dai blocchi; l'anteprima è l'invito a tutto schermo con «indietro».
+  const [mobileTab, setMobileTab] = useState<MobileTab>("blocchi");
   const [save, setSave] = useState<Save>("saved");
   const [preview, setPreview] = useState("");
   const [previewState, setPreviewState] = useState<"ready" | "loading" | "error">("loading");
@@ -509,6 +510,11 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       </aside>
 
       <main className="bl-center" aria-label={L.previewAria}>
+        {!isDesktop && (
+          <button type="button" className="bl-preview-back" aria-label={lang === "en" ? "Back" : "Indietro"} onClick={() => setMobileTab("blocchi")}>
+            <ArrowLeft size={20} aria-hidden="true" />
+          </button>
+        )}
         <section className={`bl-preview-card${previewFull ? " is-expanded" : ""}`} aria-label={lang === "en" ? "Live preview" : "Anteprima dal vivo"}>
         <header className="bl-preview-head">
           <span className="bl-preview-title"><Eye size={16} aria-hidden="true" />{lang === "en" ? "Live preview" : "Anteprima dal vivo"}</span>

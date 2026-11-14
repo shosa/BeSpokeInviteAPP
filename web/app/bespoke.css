@@ -285,6 +285,22 @@ h3 { font-size: 1.5rem; }
 .fo-text { width: 100%; min-height: 140px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: #fff; font: 400 15px/1.6 var(--font-text), sans-serif; color: var(--ink); resize: vertical; }
 .fo-editor-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .fo-print { display: none; }
+/* Cartella come pagine: la sezione entra da destra come una pagina a sé, l'elenco torna da sinistra. */
+.fo-page { display: grid; gap: 16px; }
+.fo-page.is-fwd { animation: fo-in-right 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.fo-page.is-back { animation: fo-in-left 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes fo-in-right { from { opacity: 0; transform: translateX(48px); } to { opacity: 1; transform: none; } }
+@keyframes fo-in-left { from { opacity: 0; transform: translateX(-48px); } to { opacity: 1; transform: none; } }
+.fo-back { justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); font: 500 14px var(--font-text), sans-serif; cursor: pointer; box-shadow: var(--iv-shadow); }
+.fo-back:hover { border-color: var(--inv, var(--brass-light)); }
+.fo-pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fo-pager-btn { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 18px; background: #fff; color: var(--ink); text-align: left; cursor: pointer; font: 400 15px var(--font-display), serif; min-width: 0; }
+.fo-pager-btn span { display: grid; gap: 2px; min-width: 0; }
+.fo-pager-btn small { font: 500 11px var(--font-text), sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.fo-pager-btn.is-next { justify-content: flex-end; text-align: right; grid-column: 2; }
+.fo-pager-btn:hover { border-color: var(--inv, var(--brass-light)); }
+.fo-pager-btn svg { flex: none; color: var(--inv-text, var(--brass)); }
+@media (prefers-reduced-motion: reduce) { .fo-page.is-fwd, .fo-page.is-back { animation: none; } }
 @media (max-width: 720px) { .fo-row, .fo-row:has(.pp-check), .fo-row:has(input[aria-label="Telefono"]) { grid-template-columns: 1fr; } }
 
 /* Documento da stampare: pagine A4, copertina, indice, una pagina per sezione. */
@@ -456,6 +472,15 @@ img {
 .tp-phone { width: 300px; height: 620px; border-radius: 42px; border: 10px solid #1d1b18; background: #1d1b18; box-shadow: var(--iv-shadow); overflow: hidden; }
 .tp-phone iframe { width: 100%; height: 100%; border: 0; background: #fff; }
 .tp-side { display: grid; gap: 16px; align-content: center; }
+.tp-back { display: none; }
+@media (max-width: 720px) {
+  .demo-backdrop:has(> .tp-modal) { padding: 0; }
+  .tp-modal { width: 100%; height: 100dvh; max-height: none; padding: 0; border: 0; border-radius: 0; display: block; overflow: hidden; }
+  .tp-modal .tp-head, .tp-modal .tp-side { display: none; }
+  .tp-modal .tp-body { display: block; height: 100%; }
+  .tp-modal .tp-phone { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .tp-back { display: grid; place-items: center; position: fixed; z-index: 1001; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--ink); box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); cursor: pointer; }
+}
 .tp-toggle { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 16px; }
 @media (max-width: 720px) {
   .tp-body { grid-template-columns: 1fr; justify-items: center; }

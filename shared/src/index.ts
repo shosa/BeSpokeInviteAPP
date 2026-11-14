@@ -12,3 +12,4 @@ export * from "./categories";
 export * from "./assistant/actions";
 export * from "./planner";
 export * from "./folder";
+export * from "./setup";
