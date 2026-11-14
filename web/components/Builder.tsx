@@ -25,7 +25,7 @@ import {
 } from "@inviteme/shared";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
-import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Music, Palette, Redo2, RotateCw, Smartphone, Sparkles, Undo2, Users, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Music, Redo2, RotateCw, Smartphone, Sparkles, Undo2, Users, X } from "lucide-react";
 import { Canvas } from "./builder/Canvas";
 import { Inspector } from "./builder/Inspector";
 import { AssistantPanel } from "./builder/AssistantPanel";
@@ -35,6 +35,7 @@ import { parseFragments } from "@/lib/blockFragments";
 import { ui, type Lang } from "@/lib/ui";
 import { blockCopy, modelCopy, themeCopy } from "@/lib/catalogCopy";
 import { StockContext } from "./builder/PixabayDialog";
+import { PublishedPanel } from "./builder/PublishedPanel";
 import { PublishDialog } from "@/components/PublishDialog";
 
 export type Manage = {
@@ -63,19 +64,18 @@ const PATCHABLE = new Set(["hero", "message", "program", "venue", "map", "transf
 // Tutto ciò che, cambiando, rende la pagina diversa nel suo insieme: se cambia uno di questi, l'anteprima si ricarica.
 function pageKey(c: InviteConfig, envelopeOn: boolean): string {
   return JSON.stringify({
-    t: c.themeId, m: c.model, a: [...c.addons].sort(), l: c.locale, e: c.eventType, q: c.rsvpQuestions, env: envelopeOn, bg: c.background ?? null,
+    t: c.themeId, m: c.model, a: [...c.addons].sort(), l: c.locale, e: c.eventType, q: c.rsvpQuestions, env: envelopeOn ?? null,
     ids: c.blocks.map((b) => `${b.id}:${b.type}:${b.hidden ? 1 : 0}`),
   });
 }
 
 // L'invito aperto è disponibile a tutto l'editor (ricerca foto Pixabay nei campi).
 // Schede che mostrano il pannello generale (senza blocco selezionato).
-const GENERAL_TABS = ["tema", "dettagli", "lingua", "link"];
+const GENERAL_TABS = ["dettagli", "lingua", "link"];
 
 // Schede del pannello dei controlli: ciascuna apre una funzione già presente nel builder.
 const BUILDER_TABS: { id: string; it: string; en: string; type?: string; guests?: boolean; blocks?: boolean; icon: LucideIcon }[] = [
   { id: "blocchi", it: "Blocchi", en: "Blocks", blocks: true, icon: LayoutList },
-  { id: "tema", it: "Tema", en: "Theme", icon: Palette },
   { id: "busta", it: "Busta", en: "Envelope", type: "cover", icon: Mail },
   { id: "dettagli", it: "Dettagli", en: "Details", icon: CalendarDays },
   { id: "audio", it: "Audio", en: "Audio", type: "music", icon: Music },
@@ -509,20 +509,22 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   );
 
   return (
-    <div className={`bl-app is-${device} is-tab-${mobileTab}`}>
+    <div className={`bl-app is-${device} is-tab-${mobileTab}${locked ? " is-published" : ""}`}>
       <header className="bl-top">
         <a href="/account" className="back-link" aria-label={L.back}><ArrowLeft size={16} aria-hidden="true" /><span className="bl-back-text">{L.back}</span></a>
         <h1 className="bl-title">{title}</h1>
         <button type="button" className="bl-burger" aria-expanded={topMenu} aria-label={lang === "en" ? (topMenu ? "Close menu" : "Open menu") : (topMenu ? "Chiudi il menu" : "Apri il menu")} onClick={() => setTopMenu((o) => !o)}>{topMenu ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}</button>
         <div className={`bl-top-tools${topMenu ? " is-menu-open" : ""}`}>
-          <button type="button" className="bl-icon" aria-label={L.undo} data-label={L.undo} title={`${L.undo} (Ctrl+Z)`} disabled={locked || !history.canUndo} onClick={history.undo}><Undo2 size={17} /></button>
-          <button type="button" className="bl-icon" aria-label={L.redo} data-label={L.redo} title={`${L.redo} (Ctrl+Shift+Z)`} disabled={locked || !history.canRedo} onClick={history.redo}><Redo2 size={17} /></button>
+          {!locked && <>
+          <button type="button" className="bl-icon" aria-label={L.undo} data-label={L.undo} title={`${L.undo} (Ctrl+Z)`} disabled={!history.canUndo} onClick={history.undo}><Undo2 size={17} /></button>
+          <button type="button" className="bl-icon" aria-label={L.redo} data-label={L.redo} title={`${L.redo} (Ctrl+Shift+Z)`} disabled={!history.canRedo} onClick={history.redo}><Redo2 size={17} /></button>
           <span className="bl-sep" aria-hidden="true" />
+          </>}
           <div className="bl-device" role="group" aria-label="Anteprima">
             <button type="button" aria-pressed={device === "desktop"} className="bl-icon" aria-label={L.desktopPreview} data-label={L.desktopPreview} onClick={() => setDevice("desktop")}><Monitor size={17} /></button>
             <button type="button" aria-pressed={device === "mobile"} className="bl-icon" aria-label={L.phonePreview} data-label={L.phonePreview} onClick={() => setDevice("mobile")}><Smartphone size={17} /></button>
           </div>
-          {locked && <button type="button" className="bl-icon" aria-label={L.guests} data-label={L.guests} onClick={() => setPanel(panel === "ospiti" ? "proprieta" : "ospiti")}><Users size={17} /></button>}
+          {locked && <span className="bl-published-badge"><span aria-hidden="true" />{lang === "en" ? "Published" : "Pubblicato"}</span>}
           {!locked && (
             <button type="button" className="btn solid small bl-desktop-save" disabled={save === "saving"} onClick={() => persist(config)}>{L.saveNow}</button>
           )}
@@ -530,17 +532,24 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </div>
       </header>
 
-      <nav className="bl-mobile-tabs" role="tablist" aria-label="Sezioni">
+      {!locked && <nav className="bl-mobile-tabs" role="tablist" aria-label="Sezioni">
         <button role="tab" aria-selected={mobileTab === "blocchi"} onClick={() => setMobileTab("blocchi")}>{L.tabBlocks}</button>
         <button role="tab" aria-selected={mobileTab === "anteprima"} onClick={() => setMobileTab("anteprima")}><Eye size={15} aria-hidden="true" /> {L.tabPreview}</button>
         <button role="tab" aria-selected={mobileTab === "proprieta"} onClick={() => setMobileTab("proprieta")}>{L.tabProps}</button>
-      </nav>
+      </nav>}
 
-      <aside className={`bl-left${locked ? " is-locked" : ""}`} inert={locked || undefined} aria-label={initial.assistant && isDesktop ? "BeSpoke AI" : "Blocchi"}>
+      {/* Invito pubblicato: al posto di assistente, blocchi e proprietà, solo link, risposte e planner. */}
+      {locked ? (
+      <aside className="bl-left bl-published" aria-label={lang === "en" ? "Your invitation" : "Il tuo invito"}>
+        <PublishedPanel id={initial.id} slug={slug} title={title} lang={lang} onPreview={isDesktop ? undefined : () => setMobileTab("anteprima")} />
+      </aside>
+      ) : (
+      <aside className="bl-left" aria-label={initial.assistant && isDesktop ? "BeSpoke AI" : "Blocchi"}>
         {!isDesktop && blocksPanel}
         {/* Desktop: l'assistente sta nella colonna a destra dell'anteprima. Su telefono la colonna è nascosta. */}
         {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} config={config} catalog={catalog} />}
       </aside>
+      )}
 
       <main className="bl-center" aria-label={L.previewAria}>
         {!isDesktop && (
@@ -607,6 +616,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </section>
       </main>
 
+      {!locked && (
       <aside className="bl-right" aria-label="Proprietà">
         <div className="bl-tabs-head">
           <span className="bl-kicker">{lang === "en" ? "Invitation sections" : "Sezioni dell'invito"}</span>
@@ -669,10 +679,6 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             locked={locked}
             onSetLocale={(locale) => edit((c) => ({ ...c, locale }))}
             onSetEventType={(eventType: EventType) => edit((c) => ({ ...c, eventType }))}
-            onSetBackground={(background) => edit((c) => {
-              const { background: _previous, ...rest } = c;
-              return background ? { ...rest, background } : rest;
-            })}
             onSetQuestions={(rsvpQuestions: RsvpQuestion[]) => edit((c) => ({ ...c, rsvpQuestions }), "questions")}
             onToggle={toggleBlock}
             onRemove={removeBlock}
@@ -685,6 +691,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           <p className="hint bl-locked">{L.lockedNote}</p>
         )}
       </aside>
+      )}
 
       {error && <p role="alert" className="form-error bl-error">{error}</p>}
 
