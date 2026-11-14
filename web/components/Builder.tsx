@@ -311,9 +311,13 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
+  // Anteprima a tutto schermo su telefono: la pagina si comporta come l'invito vero. Lo si dice anche all'anteprima,
+  // che smette di evidenziare e selezionare i blocchi al tocco.
+  const previewOnly = !isDesktop && mobileTab === "anteprima";
   useEffect(() => {
-    viewOnly.current = !isDesktop && mobileTab === "anteprima";
-  }, [isDesktop, mobileTab]);
+    viewOnly.current = previewOnly;
+    frame.current?.contentWindow?.postMessage({ type: "viewonly", on: previewOnly }, "*");
+  }, [previewOnly]);
 
   // Anteprima desktop: la pagina è larga come uno schermo vero (1280 px) e scalata per entrare nel riquadro.
   useEffect(() => {
@@ -578,6 +582,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
               sandbox="allow-scripts"
               style={device === "desktop" && isDesktop && deskScale ? { width: DESK_W, height: deskScale.h, transform: `scale(${deskScale.s})`, transformOrigin: "0 0" } : undefined}
               onLoad={() => {
+                frame.current?.contentWindow?.postMessage({ type: "viewonly", on: viewOnly.current }, "*");
                 frame.current?.contentWindow?.postMessage({ type: "restore", id: selected, y: scrollY.current }, "*");
                 frame.current?.contentWindow?.postMessage({ type: "highlight", id: hover }, "*");
                 setRefreshing(false);

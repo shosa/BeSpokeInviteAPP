@@ -212,13 +212,15 @@ function blockFontIds(v: unknown): Record<string, FontId> {
 }
 
 // Solo nell'anteprima del builder: evidenzia il blocco sotto il mouse (o quello scelto nella lista) e lo segnala al builder.
-// Messaggi: dal builder {type:"highlight", id}, {type:"scrollTo", y}, {type:"restore", id, y}; dall'anteprima {type:"hover", id}, {type:"select", id}, {type:"scroll", y} e {type:"max", max}.
+// Messaggi: dal builder {type:"highlight", id}, {type:"scrollTo", y}, {type:"restore", id, y}, {type:"viewonly", on}; dall'anteprima {type:"hover", id}, {type:"select", id}, {type:"scroll", y} e {type:"max", max}.
+// viewonly: anteprima a tutto schermo su telefono, la pagina si comporta come l'invito vero (niente evidenziazione né selezione).
 const BUILDER_JS = `(function () {
   var box = document.createElement('div');
   box.setAttribute('aria-hidden', 'true');
   box.style.cssText = 'position:fixed;pointer-events:none;display:none;z-index:2147483000;border:2px solid #14b8a6;border-radius:6px;background:rgba(20,184,166,.10)';
   document.body.appendChild(box);
   var current = null;
+  var viewOnly = false;
   // Aggiornamento di un solo blocco: il builder manda solo il suo HTML, la pagina resta com'è (scorrimento compreso).
   window.addEventListener('message', function (e) {
     var d = e.data;
@@ -257,6 +259,7 @@ const BUILDER_JS = `(function () {
     box.style.height = (r.b - r.t + 8) + 'px';
   }
   function setCurrent(id, notify) {
+    if (viewOnly) return;
     if (id === current) return;
     current = id;
     paint();
@@ -268,6 +271,7 @@ const BUILDER_JS = `(function () {
   });
   document.addEventListener('mouseout', function (e) { if (!e.relatedTarget) setCurrent(null, true); });
   document.addEventListener('click', function (e) {
+    if (viewOnly) return;
     var w = owner(e.target);
     if (w) parent.postMessage({ type: 'select', id: w.getAttribute('data-blk') }, '*');
   }, true);
@@ -285,9 +289,10 @@ const BUILDER_JS = `(function () {
   window.addEventListener('resize', paint);
   window.addEventListener('message', function (e) {
     var d = e.data;
-    if (d && d.type === 'highlight') { current = d.id || null; paint(); }
+    if (d && d.type === 'viewonly') { viewOnly = !!d.on; if (viewOnly) { current = null; paint(); } }
+    if (d && d.type === 'highlight') { if (viewOnly) return; current = d.id || null; paint(); }
     if (d && d.type === 'scrollTo') window.scrollTo(0, d.y);
-    if (d && d.type === 'focus' && d.id) {
+    if (d && d.type === 'focus' && d.id && !viewOnly) {
       var f = document.querySelector('[data-blk="' + d.id + '"]');
       if (f) (f.firstElementChild || f).scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
