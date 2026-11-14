@@ -211,19 +211,41 @@ h3 { font-size: 1.5rem; }
 .pp-row:hover { transform: translateY(-2px); box-shadow: 0 18px 30px -24px rgba(110, 78, 28, 0.5); }
 .pp-row.resp-yes { border-left: 3px solid var(--inv, #5b7a4a); }
 .pp-row.resp-no { opacity: 0.7; }
+/* Barra delle sezioni del planner su telefono, come in un'app: quattro voci e «Altro». */
+.pp-tabbar { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: rgba(255, 253, 249, 0.94); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%); border-top: 1px solid var(--line); box-shadow: 0 -10px 30px -22px rgba(70, 48, 18, 0.45); }
+.pp-tabbar-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px; padding: 4px 2px; border: 0; border-radius: 14px; background: transparent; color: var(--ink-soft); font: 500 11px/1.1 var(--font-text), sans-serif; letter-spacing: 0.01em; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pp-tabbar-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-tabbar-item svg { transition: transform 0.25s ease; }
+.pp-tabbar-item.is-on { color: var(--inv-text, var(--brass)); }
+.pp-tabbar-item.is-on svg { transform: translateY(-1px) scale(1.08); }
+.pp-tabbar-item { position: relative; }
+.pp-tabbar-item.is-on::after { content: ""; position: absolute; top: 2px; left: 50%; width: 22px; height: 3px; border-radius: 999px; background: var(--inv, var(--brass)); transform: translateX(-50%); }
+.pp-sheet-backdrop { position: fixed; inset: 0; z-index: 45; background: rgba(42, 33, 25, 0.32); display: flex; align-items: flex-end; animation: pp-fade 0.2s ease both; }
+.pp-sheet { width: 100%; background: #fffdf9; border-radius: 24px 24px 0 0; padding: 14px 16px calc(96px + env(safe-area-inset-bottom)); box-shadow: 0 -20px 50px -20px rgba(70, 48, 18, 0.45); animation: pp-sheet-up 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.pp-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pp-sheet-head strong { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; color: var(--ink); }
+.pp-sheet-close { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; }
+.pp-sheet-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pp-sheet-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 88px; padding: 10px 6px; border: 1px solid var(--line); border-radius: 18px; background: #fff; color: var(--ink); font: 500 13px var(--font-text), sans-serif; cursor: pointer; }
+.pp-sheet-item.is-on { border-color: var(--inv, var(--brass)); color: var(--inv-text, var(--brass)); box-shadow: 0 0 0 1px var(--inv, var(--brass)) inset; }
+@keyframes pp-sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pp-sheet, .pp-sheet-backdrop { animation: none; } .pp-tabbar-item svg { transition: none; } }
+@media print { .pp-tabbar, .pp-sheet-backdrop { display: none !important; } }
 @keyframes pp-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes pp-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 860px) {
   .pp-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .pp-rail { position: static; display: block; padding: 6px; border-radius: 18px; overflow-x: auto; scrollbar-width: none; }
-  .pp-rail-nav { display: flex; gap: 6px; }
-  .pp-rail-item { flex: none; min-height: 40px; padding: 0 12px; }
-  .pp-rail-item:hover { transform: none; }
-  .pp-rail-print { display: none; }
-  .pp-share { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 30; grid-template-columns: 1fr 1fr; margin: 0; padding: 8px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 14px 34px -16px rgba(60, 40, 15, 0.45); }
+  /* Telefono: la colonna resta solo come barretta fissa in alto con Condividi e Copia link;
+     le sezioni passano alla barra in basso (.pp-tabbar). */
+  .pp-rail { position: sticky; top: 58px; z-index: 20; display: block; padding: 8px; border-radius: 18px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .pp-rail-nav, .pp-rail-print { display: none; }
+  .pp-share { grid-template-columns: 1fr 1fr; padding: 0; margin: 0; border: 0; }
   .pp-share-btn.is-primary { grid-column: auto; }
   .pp-share:has(> a.pp-share-btn) { grid-template-columns: 1fr; }
+  .pp-shell { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .pp-tabbar { display: grid; }
 }
+@media (min-width: 750px) and (max-width: 860px) { .pp-rail { top: 62px; } }
 @media (prefers-reduced-motion: reduce) {
   .pp-content, .pp-stagger > *, .pp-enter, .pp-bar span { animation: none !important; transition: none !important; }
 }
@@ -370,24 +392,6 @@ h3 { font-size: 1.5rem; }
 .pdf-parts:last-of-type { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .pdf-parts:last-of-type .pdf-part { padding: 8px 10px; }
 .pdf-modal { padding: 20px; gap: 12px; }
-
-/* Planner premium: il pulsante negli inviti attivi si distingue dagli altri */
-.invite-actions .btn.planner-cta {
-  background: var(--iv-grad-gold);
-  color: var(--ink);
-  font-weight: 600;
-  box-shadow: 0 8px 20px -10px rgba(138, 100, 39, 0.7);
-  padding-left: 14px;
-}
-.invite-actions .btn.planner-cta::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: var(--ink);
-  display: inline-block;
-}
 
 /* Selezione del testo disattivata nel sito. Restano selezionabili i campi di input, dove serve scrivere e incollare. */
 html, body, body * {

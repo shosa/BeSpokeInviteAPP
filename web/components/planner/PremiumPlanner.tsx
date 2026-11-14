@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import { FOLDER, FOLDER_KEYS } from "@inviteme/shared";
 import { Folder, type FolderValue } from "./Folder";
-import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, MailCheck, Printer, Store, Users, Wallet, type LucideProps } from "lucide-react";
+import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, MailCheck, MoreHorizontal, Printer, Store, Users, Wallet, X, type LucideProps } from "lucide-react";
 import { Seating } from "./Seating";
 import { PdfDialog } from "./PdfDialog";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -45,6 +45,10 @@ const TABS: { key: Tab; label: string; icon: Icon }[] = [
   { key: "cartella", label: "Cartella", icon: FolderOpen },
 ];
 
+// Telefono: barra in basso come un'app, con le sezioni principali e «Altro» per tutte le altre.
+const MAIN_TABS: Tab[] = ["riepilogo", "conferme", "invitati", "budget"];
+const MORE_TABS = TABS.filter((t) => !MAIN_TABS.includes(t.key));
+
 const STANDARD_TASKS: { title: string; days_before: number }[] = [
   { title: "Scegliere la location", days_before: 365 },
   { title: "Prenotare fotografo e video", days_before: 300 },
@@ -79,6 +83,22 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
   const [weather, setWeather] = useState<Weather | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  // Cambio di sezione: come in un'app, la pagina riparte dall'alto.
+  function go(next: Tab) {
+    setTab(next);
+    setMoreOpen(false);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 860px)").matches) window.scrollTo({ top: 0 });
+  }
+
+  // Il pannello «Altro» si chiude con Esc.
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMoreOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [moreOpen]);
   const [rsvp, setRsvp] = useState<RsvpSummary | null>(null);
   const [rsvpFailed, setRsvpFailed] = useState(false);
 
@@ -165,7 +185,7 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
           <ShareInvite path={sharePath} title={data.event.title || "Il nostro invito"} editHref={`/editor/${id}`} lang={lang} />
           <nav className="pp-rail-nav" role="tablist" aria-orientation="vertical">
             {TABS.map(({ key, label, icon: Icon }) => (
-              <button key={key} type="button" role="tab" aria-selected={tab === key} className={`pp-rail-item${tab === key ? " is-on" : ""}`} onClick={() => setTab(key)}>
+              <button key={key} type="button" role="tab" aria-selected={tab === key} className={`pp-rail-item${tab === key ? " is-on" : ""}`} onClick={() => go(key)}>
                 <Icon size={18} strokeWidth={1.6} aria-hidden="true" />
                 <span>{label}</span>
               </button>
@@ -176,6 +196,48 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
             <span>Crea PDF</span>
           </button>
         </aside>
+
+        {/* Telefono: barra delle sezioni in basso */}
+        <nav className="pp-tabbar" aria-label="Sezioni del planner">
+          {TABS.filter((t) => MAIN_TABS.includes(t.key)).map(({ key, label, icon: Icon }) => (
+            <button key={key} type="button" className={`pp-tabbar-item${tab === key ? " is-on" : ""}`} aria-current={tab === key ? "page" : undefined} onClick={() => go(key)}>
+              <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
+              <span>{label}</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`pp-tabbar-item${MORE_TABS.some((t) => t.key === tab) || moreOpen ? " is-on" : ""}`}
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((o) => !o)}
+          >
+            <MoreHorizontal size={22} strokeWidth={1.6} aria-hidden="true" />
+            <span>{MORE_TABS.find((t) => t.key === tab)?.label ?? "Altro"}</span>
+          </button>
+        </nav>
+        {moreOpen && (
+          <div className="pp-sheet-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setMoreOpen(false); }}>
+            <div className="pp-sheet" role="dialog" aria-modal="true" aria-label="Altre sezioni">
+              <header className="pp-sheet-head">
+                <strong>Altro</strong>
+                <button type="button" className="pp-sheet-close" aria-label="Chiudi" onClick={() => setMoreOpen(false)} autoFocus><X size={20} aria-hidden="true" /></button>
+              </header>
+              <div className="pp-sheet-grid">
+                {MORE_TABS.map(({ key, label, icon: Icon }) => (
+                  <button key={key} type="button" className={`pp-sheet-item${tab === key ? " is-on" : ""}`} aria-current={tab === key ? "page" : undefined} onClick={() => go(key)}>
+                    <Icon size={24} strokeWidth={1.5} aria-hidden="true" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+                <button type="button" className="pp-sheet-item" onClick={() => { setMoreOpen(false); setPdfOpen(true); }}>
+                  <Printer size={24} strokeWidth={1.5} aria-hidden="true" />
+                  <span>Crea PDF</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {pdfOpen && <PdfDialog id={id} onClose={() => setPdfOpen(false)} />}
         <div className="pp-content" key={tab}>
