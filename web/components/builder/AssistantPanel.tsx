@@ -89,7 +89,6 @@ export function AssistantPanel({
       venueConfirmed: Boolean(address),
       dress: s2(dress?.props.dress),
       colors: Array.isArray(dress?.props.colors) ? (dress!.props.colors as { hex?: string }[]).map((c) => String(c.hex ?? "").toLowerCase()).filter(Boolean) : [],
-      background: config.background?.kind ?? "",
       music: Boolean(s2(music?.props.music)),
     };
   }, [config]);

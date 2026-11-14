@@ -4,7 +4,6 @@ import { sanitizeValues } from "./engine/values";
 import { sanitizeQuestions, type RsvpQuestion, type ThemeManifest } from "./engine/manifest";
 import { BLOCK_TYPES, EVENT_DEFAULTS, EVENT_FIELDS, HERO_EVENT_KEYS, blockDef, defaultBlocks, makeBlock, newBlockId, templateBlocks, type BlockInstance, type BlockType } from "./blocks";
 import { sanitizeFontMap } from "./fonts";
-import { sanitizeBackground, type BackgroundSpec } from "./background";
 
 export type { RsvpQuestion } from "./engine/manifest";
 export type { BlockInstance, BlockType } from "./blocks";
@@ -20,7 +19,6 @@ export type InviteConfig = {
   event: Record<string, unknown>; // titolo, nomi, data, ora, luogo, indirizzo
   blocks: BlockInstance[];
   rsvpQuestions: RsvpQuestion[];
-  background?: BackgroundSpec; // sfondo animato scelto dal cliente; assente = quello proposto dallo stile
 };
 
 // Regole dell'invito acquistato: si modifica finché non si conferma; dopo l'acquisto il template non cambia più.
@@ -135,7 +133,6 @@ export function sanitizeConfig(c: Catalog, input: unknown): InviteConfig | null 
   const blocks = sanitizeBlocks(x.blocks, features);
   const hasForm = blocks.some((b) => b.type === "rsvp") && features.has("rsvp");
   const questions = hasForm ? sanitizeQuestions(x.rsvpQuestions, "rsvpQuestions") : [];
-  const background = sanitizeBackground(x.background);
 
   return {
     themeId: theme.id,
@@ -146,7 +143,6 @@ export function sanitizeConfig(c: Catalog, input: unknown): InviteConfig | null 
     event: sanitizeValues(EVENT_FIELDS, x.event, features),
     blocks,
     rsvpQuestions: questions.length ? questions : hasForm ? defaultRsvp(locale) : [],
-    ...(background ? { background } : {}),
   };
 }
 

@@ -1,6 +1,6 @@
 # Motore di InviteMe
 
-Un invito è una **lista ordinata di blocchi**. Ogni blocco ha un tipo, delle proprietà e può essere nascosto. Uno **stile** (tema) decide l'aspetto: colori, font, CSS, asset, ed eventualmente uno sfondo animato. I blocchi decidono cosa c'è nella pagina. Il motore compone la pagina ogni volta, dalla configurazione salvata: non ci sono pagine statiche da aggiornare.
+Un invito è una **lista ordinata di blocchi**. Ogni blocco ha un tipo, delle proprietà e può essere nascosto. Uno **stile** (tema) decide l'aspetto: colori, font, CSS, asset, ed I blocchi decidono cosa c'è nella pagina. Il motore compone la pagina ogni volta, dalla configurazione salvata: non ci sono pagine statiche da aggiornare.
 
 Questo documento descrive il motore così com'è oggi. Per scrivere uno stile (anche con un agente), leggi `docs/TEMI.md`.
 
@@ -13,7 +13,7 @@ config (jsonb)  →  sanitizeConfig              tutti i dati ripuliti: nessun c
                      renderTemplate(template, dati globali + proprietà del blocco, { fonts })
                      template = themes/<stile>/blocks/<tipo>.html se esiste, altrimenti engine/blocks/<tipo>.html
                 →  pagina HTML                 testata (font, CSS dello stile + CSS dei blocchi), busta, blocchi,
-                                               sfondo animato, runtime.js
+                                               runtime.js
 ```
 
 ## Dove sta il codice
@@ -26,10 +26,10 @@ config (jsonb)  →  sanitizeConfig              tutti i dati ripuliti: nessun c
 | `shared/src/engine/manifest.ts` | Manifest dello stile (`theme.json`): validazione e demo |
 | `shared/src/engine/values.ts` | Validazione dei valori (testi, date, colori, liste, URL dei media) |
 | `shared/src/fonts.ts` | Libreria dei font per i testi (solo id ammessi) |
-| `shared/src/background.ts` | Sfondi animati: tipi ammessi e validazione |
+| `shared/src/background.ts` | Validazione della chiave `background` dei temi (ignorata: sfondo animato rimosso) |
 | `api/src/engine/page.ts` | Compone la pagina: blocchi, CSS, runtime, sfondo, font, builder, busta-video del tema |
 | `api/src/engine/themes.ts` | Carica e valida gli stili da `themes/`, sostituzioni di blocco, esempi della demo |
-| `engine/runtime.js` | Comportamenti nel browser: busta (anche busta-video), audio, gratta, countdown, video, popup RSVP, sfondo animato |
+| `engine/runtime.js` | Comportamenti nel browser: busta (anche busta-video), audio, gratta, countdown, video, popup RSVP |
 | `engine/blocks/*.html` | Un template per tipo di blocco (il default, usato da tutti gli stili) |
 | `themes/<id>/` | Uno stile: `theme.json`, `theme.css`, `assets/`, eventualmente `blocks/` |
 
@@ -45,7 +45,6 @@ type InviteConfig = {
   event: Record<string, unknown>;   // title, hosts, eventDate, eventTime, address
   blocks: BlockInstance[];          // { id, type, hidden, props }
   rsvpQuestions: RsvpQuestion[];
-  background?: BackgroundSpec;      // sfondo animato scelto dal cliente; assente = quello dello stile
 };
 ```
 
@@ -111,15 +110,9 @@ Un segnaposto senza dato viene segnalato dalla validazione (`segnaposto senza da
 
 **Font per campo**: se il cliente ha scelto un font per un campo di testo, il renderer avvolge il valore di quel campo (solo il `{{campo}}` del template) in uno `<span style="font-family:…">`. Il template non deve fare nulla: basta usare `{{campo}}`.
 
-## Sfondi animati
+## Sfondi animati (rimossi)
 
-Un livello di movimento dietro tutto il contenuto della pagina. Tipi (in `shared/src/background.ts`): `confetti`, `bubbles`, `petals`, `sparkles`, `waves`, `snow`, più `none` (spento).
-
-- **Il cliente** sceglie lo sfondo nel pannello generale del builder (sezione «stile»): «Predefinito dello stile», uno dei tipi, o «Nessuno». Con un tipo attivo compare il colore del movimento (facoltativo: senza colore vale la tavolozza del tema).
-- **Lo stile** può proporre un predefinito con la chiave `background` del `theme.json` (vedi `docs/TEMI.md`). Il cliente può sempre cambiarlo o spegnerlo.
-- **Il motore** inserisce `<canvas class="bg-fx" data-bg="…" data-bg-color="#RRGGBB">` come primo elemento del `<body>`, con `position: fixed`, `z-index: -1` e `pointer-events: none`. Il template non deve inserire nulla.
-- **Il runtime** (`engine/runtime.js`, sezione 7) disegna le particelle su canvas, senza librerie. Il movimento si ferma quando il canvas esce dallo schermo o la scheda è nascosta. Con «riduci movimento» il runtime disegna un solo fotogramma fermo.
-- Nell'anteprima del builder e nella demo lo sfondo è attivo come nella pagina pubblica.
+Lo sfondo animato è stato tolto dal prodotto: niente canvas nella pagina, niente scelta nel builder né in BeSpoke AI, niente azione `setBackground`. `sanitizeConfig` non salva più `background`, quindi un vecchio valore sparisce al primo salvataggio dell'invito, e il motore lo ignora comunque. `shared/src/background.ts` resta solo perché il validatore dei temi accetta ancora la chiave `background` (ignorata).
 
 ## Sicurezza
 

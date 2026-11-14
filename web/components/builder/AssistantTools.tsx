@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BACKGROUND_KINDS, EVENT_TYPES, blockDef, newBlockId, presetQuestions, type Action, type BackgroundKind, type BlockInstance, type BlockType, type Catalog, type EventType, type InviteConfig, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
+import { EVENT_TYPES, blockDef, newBlockId, presetQuestions, type Action, type BlockInstance, type BlockType, type Catalog, type EventType, type InviteConfig, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
 import {
   ArrowDown, ArrowLeft, ArrowUp, X, Baby, Briefcase, CalendarDays, Cake, Check, ClipboardCheck, Eye, EyeOff, GraduationCap, Heart, ImagePlus, LayoutList, Loader2, MapPin, Music, Pause,
   PenLine, Play, Plus, Search, Shirt, Sparkles, Trash2, Wand2, type LucideIcon,
@@ -19,11 +19,10 @@ type Lang = "it" | "en";
 export type ApplyFn = (actions: Action[], allowed?: { mediaAllowed?: string[]; placesAllowed?: string[] }) => number;
 export type ToolCtx = { lang: Lang; config: InviteConfig; catalog: Catalog; invitationId: string; apply: ApplyFn; ask: (prompt: string) => void; disabled: boolean; close?: () => void };
 
-export type CommandId = "date" | "place" | "background" | "dress" | "questions" | "music" | "photo" | "blocks" | "event" | "write";
+export type CommandId = "date" | "place" | "dress" | "questions" | "music" | "photo" | "blocks" | "event" | "write";
 export const COMMANDS: { id: CommandId; icon: LucideIcon; it: string; en: string; itHint: string; enHint: string; keys: string; ai?: boolean }[] = [
   { id: "date", icon: CalendarDays, it: "Data e ora", en: "Date & time", itHint: "Calendario e orario", enHint: "Calendar and time", keys: "data ora giorno date time" },
   { id: "place", icon: MapPin, it: "Luogo", en: "Venue", itHint: "Nome e indirizzo reale", enHint: "Name and real address", keys: "luogo indirizzo mappa venue address map" },
-  { id: "background", icon: Sparkles, it: "Sfondo animato", en: "Animated background", itHint: "Petali, scintille, neve…", enHint: "Petals, sparkles, snow…", keys: "sfondo animato petali background" },
   { id: "dress", icon: Shirt, it: "Dress code", en: "Dress code", itHint: "Stile e palette", enHint: "Style and palette", keys: "dress code colori palette" },
   { id: "questions", icon: ClipboardCheck, it: "Domande RSVP", en: "RSVP questions", itHint: "Cosa chiedere agli ospiti", enHint: "What to ask guests", keys: "domande conferma rsvp questions" },
   { id: "music", icon: Music, it: "Musica", en: "Music", itHint: "Ascolta e scegli", enHint: "Listen and pick", keys: "musica brano canzone music song" },
@@ -129,41 +128,6 @@ function PlaceTool({ ctx }: { ctx: ToolCtx }) {
       <div className="ax-label">{T(ctx.lang, "Indirizzo reale", "Real address")}{picked && address ? <b className="ax-ok"><Check size={13} aria-hidden="true" />{T(ctx.lang, "agganciato", "linked")}</b> : null}</div>
       <PlaceSearch lang={ctx.lang} initial={address} onType={(t) => { setAddress(t); setPicked(false); }} onPick={(a) => { setAddress(a); setPicked(true); }} />
       <button type="button" className="ax-go" disabled={ctx.disabled || (!name.trim() && !picked)} onClick={go}><Sparkles size={16} aria-hidden="true" />{T(ctx.lang, "Applica", "Apply")}</button>
-      {done !== null && <Done lang={ctx.lang} n={done} />}
-    </Shell>
-  );
-}
-
-// ───────────── Sfondo animato ─────────────
-const BG_LABEL: Record<BackgroundKind, [string, string]> = { none: ["Nessuno", "None"], confetti: ["Coriandoli", "Confetti"], bubbles: ["Bolle", "Bubbles"], petals: ["Petali", "Petals"], sparkles: ["Scintille", "Sparkles"], waves: ["Onde", "Waves"], snow: ["Neve", "Snow"] };
-const BG_COLORS = ["", "#b8893f", "#e2b7b0", "#ffffff", "#a9b29b", "#7a1f2b", "#1f2a44"];
-function BackgroundTool({ ctx }: { ctx: ToolCtx }) {
-  const [kind, setKind] = useState<BackgroundKind>(ctx.config.background?.kind ?? "petals");
-  const [color, setColor] = useState(ctx.config.background?.color ?? "");
-  const [done, setDone] = useState<number | null>(null);
-  return (
-    <Shell onClose={ctx.close} lang={ctx.lang} icon={Sparkles} title={T(ctx.lang, "Sfondo animato", "Animated background")} sub={T(ctx.lang, "Si muove dietro tutto l'invito", "It moves behind the whole invitation")}>
-      <div className="ax-bg-grid" role="radiogroup" aria-label={T(ctx.lang, "Sfondo", "Background")}>
-        {BACKGROUND_KINDS.map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={k === kind} className={`ax-bg${k === kind ? " is-on" : ""}`} onClick={() => setKind(k)} style={{ ["--fx" as string]: color || "#b8893f" }}>
-            <span className={`ax-bg-fx fx-${k}`} aria-hidden="true">{Array.from({ length: 7 }, (_, i) => <i key={i} style={{ ["--i" as string]: i }} />)}</span>
-            <span className="ax-bg-name">{T(ctx.lang, BG_LABEL[k][0], BG_LABEL[k][1])}</span>
-          </button>
-        ))}
-      </div>
-      {kind !== "none" && (
-        <>
-          <div className="ax-label">{T(ctx.lang, "Colore del movimento", "Motion colour")}</div>
-          <div className="ax-swatches">
-            {BG_COLORS.map((c) => (
-              <button key={c || "theme"} type="button" className={`ax-swatch${c === color ? " is-on" : ""}${c ? "" : " is-auto"}`} style={c ? { background: c } : undefined} aria-pressed={c === color} aria-label={c || T(ctx.lang, "Colori del tema", "Theme colours")} onClick={() => setColor(c)}>
-                {!c && "A"}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-      <button type="button" className="ax-go" disabled={ctx.disabled} onClick={() => setDone(ctx.apply([{ tool: "setBackground", kind, ...(color && kind !== "none" ? { color } : {}) }]))}><Sparkles size={16} aria-hidden="true" />{T(ctx.lang, "Applica", "Apply")}</button>
       {done !== null && <Done lang={ctx.lang} n={done} />}
     </Shell>
   );
@@ -452,7 +416,6 @@ export function CommandWidget({ id, ctx }: { id: CommandId; ctx: ToolCtx }) {
   switch (id) {
     case "date": return <DateTool ctx={ctx} />;
     case "place": return <PlaceTool ctx={ctx} />;
-    case "background": return <BackgroundTool ctx={ctx} />;
     case "dress": return <DressTool ctx={ctx} />;
     case "questions": return <QuestionsTool ctx={ctx} />;
     case "music": return <MusicTool ctx={ctx} />;

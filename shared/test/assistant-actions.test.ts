@@ -227,15 +227,19 @@ describe("azioni dell'assistente: id dei blocchi nuovi", () => {
   });
 });
 
-describe("azioni dell'assistente: sfondo, tipo di evento, blocchi e immagini", () => {
+describe("azioni dell'assistente: tipo di evento, blocchi e immagini", () => {
   const URL_A = "/api/media/11111111-2222-3333-4444-555555555555.jpg";
   const URL_B = "/api/media/66666666-7777-8888-9999-000000000000.jpg";
 
-  it("cambia lo sfondo animato e il tipo di evento", () => {
-    const r = validateActions(base(), [{ tool: "setBackground", kind: "petals", color: "#C8A2C8" }, { tool: "setEventType", eventType: "birthday" }], ctx());
+  it("cambia il tipo di evento", () => {
+    const r = validateActions(base(), [{ tool: "setEventType", eventType: "birthday" }], ctx());
     assert.equal(r.rejected.length, 0, JSON.stringify(r.rejected));
-    assert.deepEqual(r.config.background, { kind: "petals", color: "#c8a2c8" });
     assert.equal(r.config.eventType, "birthday");
+  });
+
+  it("lo sfondo animato non esiste più: l'azione viene scartata", () => {
+    const r = validateActions(base(), [{ tool: "setBackground", kind: "petals" } as never], ctx());
+    assert.equal(r.actions.length, 0);
   });
 
   it("nasconde e mostra un blocco", () => {

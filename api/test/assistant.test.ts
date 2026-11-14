@@ -175,7 +175,7 @@ describe("assistente: risposte del modello", () => {
     const { d } = deps({ model });
     await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
     const tools = model.calls[0].tools as Array<{ name: string; strict: boolean; input_schema: { additionalProperties: boolean; required: string[]; properties: object } }>;
-    assert.equal(tools.length, 19);
+    assert.equal(tools.length, 18); // setBackground tolto con lo sfondo animato
     for (const t of tools) {
       assert.equal(t.strict, true, t.name);
       assert.equal(t.input_schema.additionalProperties, false, t.name);

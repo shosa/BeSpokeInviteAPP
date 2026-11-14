@@ -1,6 +1,6 @@
 # Creare uno stile per InviteMe
 
-Uno **stile** (tema) è una cartella in `themes/<id>/` con `theme.json`, `theme.css` e, se serve, `assets/` e `blocks/`. Non contiene testi né struttura: quelli sono dei blocchi, già pronti nel motore. Lo stile decide colori, font, forme, ornamenti, animazioni, uno sfondo animato facoltativo, e l'esempio che i clienti vedono nella demo.
+Uno **stile** (tema) è una cartella in `themes/<id>/` con `theme.json`, `theme.css` e, se serve, `assets/` e `blocks/`. Non contiene testi né struttura: quelli sono dei blocchi, già pronti nel motore. Lo stile decide colori, font, forme, ornamenti, animazioni, e l'esempio che i clienti vedono nella demo.
 
 Questa guida è il contratto per chi scrive uno stile, anche un agente. Il funzionamento del motore è in `docs/MOTORE.md`. Il riferimento completo è `themes/invitereference`.
 
@@ -39,7 +39,6 @@ themes/<id>/
   "models": [],
   "themeColor": "#f7eae7",
   "fonts": ["https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500&display=swap"],
-  "background": { "kind": "sparkles", "color": "#c9a24b" },
   "demo": {
     "hero": { "couplePhoto": "assets/foto-esempio.jpg" },
     "gallery": { "photos": ["assets/g1.jpg", "assets/g2.jpg", "assets/g3.jpg"] },
@@ -59,7 +58,7 @@ Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, 
 | `models` | no | elenco di modelli del catalogo che offrono lo stile; vuoto = tutti |
 | `themeColor` | sì | `#RRGGBB`, colore della barra del browser |
 | `fonts` | no | solo URL `https://fonts.googleapis.com/css2?…` (non altri host) |
-| `background` | no | sfondo animato proposto: `{ "kind": …, "color": "#RRGGBB" }`. `kind` è uno di `confetti`, `bubbles`, `petals`, `sparkles`, `waves`, `snow`, `none`. `color` è facoltativo. Vedi «Sfondi animati» |
+| `background` | no | **ignorata**: lo sfondo animato è stato rimosso (vedi «Sfondi animati (rimossi)»). Non usarla negli stili nuovi |
 | `demo` | no | per ogni tipo di blocco, i valori dell'esempio (vedi sotto) |
 | `envelope` | no | busta-video: `{ "video": "assets/busta.mp4", "poster": "assets/busta-poster.jpg" }`. Il filmato apre l'invito al posto della busta disegnata; `poster` è il fotogramma fermo mostrato prima del tocco. Vedi «Busta-video» |
 | `backgroundVideo` | no | video di sfondo per zona: `{ "hero": "assets/intestazione.mp4", "body": "assets/corpo.mp4" }`, ciascuno facoltativo. Vedi «Video di sfondo per zona» |
@@ -195,26 +194,9 @@ Il CSS di base dello stile deve convivere con queste scelte: non fissare dimensi
 - Il cliente può cambiare il font di ogni singolo testo con il pulsante «Aa». Lo stile non deve dipendere da un font fisso per leggere il testo: scegli font con un fallback chiaro (`Georgia, serif` o `system-ui, sans-serif`).
 - La libreria dei font scelti dal cliente è in `shared/src/fonts.ts` (Google Fonts, licenza OFL). Non è necessario dichiararla nello stile.
 
-## Sfondi animati
+## Sfondi animati (rimossi)
 
-Lo sfondo animato è un livello di movimento dietro tutti i contenuti: confetti, bolle, petali, scintille, onde, neve. Il motore lo inserisce; lo stile decide solo se proporne uno e con quale colore.
-
-| `kind` | Effetto | Quando sceglierlo |
-|---|---|---|
-| `confetti` | coriandoli che cadono e ruotano | feste, compleanni, ricorrenze allegre |
-| `bubbles` | bolle che salgono e ondeggiano | battesimi, estate, atmosfera leggera |
-| `petals` | petali che scendono dolcemente | nozze, primavera, campagna |
-| `sparkles` | piccole luci che pulsano | eleganza, anniversari, sere stellate |
-| `waves` | onde lente in fondo alla pagina | mare, spiaggia, estate |
-| `snow` | fiocchi che scendono lenti | inverno, feste natalizie |
-| `none` | spento | per uno stile sobrio che non deve muoversi |
-
-Regole per lo stile:
-- Proponi uno sfondo solo se si accorda con l'atmosfera: lo sfondo è un tratto dello stile, non un decoro qualsiasi.
-- `color` (facoltativo, `#RRGGBB`): colore d'accento delle particelle. Scegli un colore che resti visibile sul fondo dello stile e non compete con il testo. Senza `color` il movimento usa una tavolozza calda neutra.
-- Le sezioni e le schede del tema devono avere lo sfondo **trasparente o semitrasparente** dove vuoi che il movimento si veda. Una scheda opaca lo nasconde: è una scelta voluta per i testi, ma va bilanciata.
-- Non aggiungere un proprio canvas o script per simulare il movimento: il motore lo fa già, e il runtime lo ferma quando non è visibile.
-- Il movimento è decorativo: non deve mai contenere informazioni (date, nomi, indirizzi) né distrarre dal testo.
+Lo sfondo animato (coriandoli, bolle, petali, scintille, onde, neve) **non esiste più**: il motore non lo disegna, il builder e BeSpoke AI non lo propongono. La chiave `background` del `theme.json` è ancora accettata dal validatore per compatibilità, ma **viene ignorata**: non aggiungerla agli stili nuovi. Il movimento di uno stile si fa con il CSS (animazioni d'ingresso), con la busta-video o con i video di sfondo per zona.
 
 ## Busta-video
 
@@ -321,7 +303,7 @@ Il validatore controlla, in ordine: il manifest (chiavi ammesse, tipi, `themeCol
 ## Flusso di lavoro
 
 1. Scegli il punto di partenza: `themes/invitereference` per uno stile ricco, `themes/minimo` per uno sobrio.
-2. Copia la cartella con il nuovo `id`, poi scrivi `theme.json` (incluso `background`, se lo proponi).
+2. Copia la cartella con il nuovo `id`, poi scrivi `theme.json`.
 3. Scrivi `theme.css` per tutte le classi dei blocchi (tabella sopra), mobile first, con il movimento ridotto e il focus visibile.
 4. Aggiungi le eventuali sostituzioni in `blocks/`, solo dove serve davvero.
 5. Sostituisci gli asset con quelli del nuovo stile, senza dati di persone.
@@ -423,8 +405,7 @@ Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge 
 - [ ] il popup RSVP si apre, valida i campi obbligatori e si chiude con Esc
 - [ ] il Dress code mostra i pallini e i nomi dei colori
 - [ ] 390 px senza scorrimento orizzontale; contrasto AA
-- [ ] movimento ridotto rispettato (CSS e sfondo animato)
-- [ ] lo sfondo animato, se presente, si vede dietro i contenuti e non copre i testi
+- [ ] movimento ridotto rispettato
 - [ ] font e mappe solo dagli host ammessi
 - [ ] nessun `<script>`, `<style>` o gestore inline nei file
 - [ ] se va caricato dalla console: ZIP esportato come in «Esportare lo stile per la console», controllato con `unzip -l`
@@ -433,11 +414,11 @@ Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge 
 
 Per uno stile semplice:
 
-> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`. Parti da `themes/invitereference`. Lo stile è [descrizione: colori, atmosfera, font]. Sfondo animato proposto: [tipo e colore, o nessuno]. Asset: [elenco, senza dati di persone]. Esempi per blocco: [elenco]. Esempi in inglese (`demoEn`, facoltativo: solo le frasi proprie dello stile). Copri tutte le classi dei blocchi, anche il mobile. Rispetta le regole non negoziabili 1–11 di `docs/TEMI.md`: in particolare ogni blocco con foto nella demo ha una foto stock dello stile, mai vuota. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e non consegnare finché non passa. Riporta i problemi trovati e come li hai risolti.
+> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`. Parti da `themes/invitereference`. Lo stile è [descrizione: colori, atmosfera, font]. Asset: [elenco, senza dati di persone]. Esempi per blocco: [elenco]. Esempi in inglese (`demoEn`, facoltativo: solo le frasi proprie dello stile). Copri tutte le classi dei blocchi, anche il mobile. Rispetta le regole non negoziabili 1–11 di `docs/TEMI.md`: in particolare ogni blocco con foto nella demo ha una foto stock dello stile, mai vuota. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e non consegnare finché non passa. Riporta i problemi trovati e come li hai risolti.
 
 Per uno stile complesso e animato:
 
-> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, in particolare la sezione «Sfondi animati» e il contratto delle classi. Atmosfera: [descrizione]. Obiettivi: (1) tutti i blocchi con una loro identità visiva, non un'unica griglia; (2) animazioni CSS decorative di ingresso con `data-anim` e `--d` per ritardi, senza alterare il testo; (3) sfondo animato `[tipo]` con colore `[#RRGGBB]`, con i pannelli semitrasparenti dove serve; (4) layout mobile first a 390 px senza scorrimento orizzontale, e movimento ridotto rispettato. Vincoli: nessun codice nuovo, nessun `<script>`, nessun gestore inline, nessun dato di persone. Se lo stile ha video di sfondo, l'intestazione resta solo testo e i video sono in loop (vedi «Video di sfondo per zona»), con l'eccezione della foto principale: `.h-vista` va posizionato sopra il video, senza nasconderlo né nascondere il video. Non animare `.scroll-cue`: il rimbalzo lo fa il motore. Non creare file o cartelle fuori da `themes/<id>/`. Ogni blocco con foto (hero, gallery, image, venue) ha una foto stock nella demo, mai vuota. Rispetta le regole non negoziabili 1–11. Non inventare classi o attributi del runtime che non sono in `docs/TEMI.md`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e correggi finché non passa; poi elenca cosa hai fatto per ogni punto e le scelte che hai dovuto prendere.
+> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, in particolare il contratto delle classi. Atmosfera: [descrizione]. Obiettivi: (1) tutti i blocchi con una loro identità visiva, non un'unica griglia; (2) animazioni CSS decorative di ingresso con `data-anim` e `--d` per ritardi, senza alterare il testo; (3) layout mobile first a 390 px senza scorrimento orizzontale, e movimento ridotto rispettato. Vincoli: nessun codice nuovo, nessun `<script>`, nessun gestore inline, nessun dato di persone. Se lo stile ha video di sfondo, l'intestazione resta solo testo e i video sono in loop (vedi «Video di sfondo per zona»), con l'eccezione della foto principale: `.h-vista` va posizionato sopra il video, senza nasconderlo né nascondere il video. Non animare `.scroll-cue`: il rimbalzo lo fa il motore. Non creare file o cartelle fuori da `themes/<id>/`. Ogni blocco con foto (hero, gallery, image, venue) ha una foto stock nella demo, mai vuota. Rispetta le regole non negoziabili 1–11. Non inventare classi o attributi del runtime che non sono in `docs/TEMI.md`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e correggi finché non passa; poi elenca cosa hai fatto per ogni punto e le scelte che hai dovuto prendere.
 
 Per uno stile da caricare dalla console (ZIP):
 

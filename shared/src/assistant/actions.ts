@@ -4,7 +4,6 @@ import type { AddonKey } from "../addons";
 import { MAX_BLOCKS, type InviteConfig } from "../invitation";
 import { emptyValue, sanitizeValues } from "../engine/values";
 import { isRecord, sanitizeQuestions, type FieldDef } from "../engine/manifest";
-import { BACKGROUND_KINDS, sanitizeBackground, type BackgroundKind } from "../background";
 import { EVENT_TYPES, type EventType } from "../catalog";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
@@ -14,7 +13,7 @@ const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 export const ASSISTANT_TOOLS = [
   "setEvent", "setBlockProp", "setBlockList", "setBlockMedia", "setBlockHidden", "setBlockLook", "addBlock", "removeBlock", "moveBlock",
-  "setTheme", "setRsvpQuestions", "setBackground", "setEventType",
+  "setTheme", "setRsvpQuestions", "setEventType",
 ] as const;
 export type AssistantTool = (typeof ASSISTANT_TOOLS)[number];
 
@@ -27,7 +26,6 @@ export type Action =
   | { tool: "setBlockList"; blockId: string; key: string; itemsJson: string }
   | { tool: "setTheme"; themeId: string }
   | { tool: "setRsvpQuestions"; questionsJson: string }
-  | { tool: "setBackground"; kind: BackgroundKind; color?: string }
   | { tool: "setEventType"; eventType: EventType }
   | { tool: "setBlockHidden"; blockId: string; hidden: boolean }
   | { tool: "setBlockLook"; blockId: string; lookBg: string; lookInk: string; lookCover: string }
@@ -82,11 +80,6 @@ export function parseAction(raw: unknown): { action: Action } | { error: string 
       const key = str(x.key);
       const itemsJson = typeof x.itemsJson === "string" && x.itemsJson.length <= 4000 ? x.itemsJson : null;
       return blockId && key !== null && itemsJson !== null ? { action: { tool: "setBlockList", blockId, key, itemsJson } } : { error: "setBlockList: blocco, elenco o voci mancanti" };
-    }
-    case "setBackground": {
-      const kind = BACKGROUND_KINDS.find((k) => k === x.kind);
-      const color = typeof x.color === "string" && x.color !== "" ? x.color : undefined;
-      return kind ? { action: { tool: "setBackground", kind, ...(color ? { color } : {}) } } : { error: "setBackground: tipo di sfondo sconosciuto" };
     }
     case "setEventType": {
       const eventType = EVENT_TYPES.map((e) => e.id).find((t) => t === x.eventType);
@@ -234,11 +227,6 @@ function applyAction(config: InviteConfig, action: Action, ctx: ActionContext): 
       const questions = sanitizeQuestions(raw.map((q, i) => (isRecord(q) ? { ...q, id: `q${i + 1}` } : q)), "domande", errors);
       if (errors.length > 0 || questions.length === 0) return { error: errors[0] ?? "nessuna domanda valida" };
       return { config: { ...config, rsvpQuestions: questions } };
-    }
-    case "setBackground": {
-      const bg = sanitizeBackground(action.color ? { kind: action.kind, color: action.color } : { kind: action.kind });
-      if (!bg) return { error: "sfondo non valido" };
-      return { config: { ...config, background: bg } };
     }
     case "setEventType": {
       return { config: { ...config, eventType: action.eventType } };

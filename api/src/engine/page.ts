@@ -152,9 +152,6 @@ export function renderInvitePage(input: PageInput): string {
   const fontLink = fontSheet ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="${escapeHtml(fontSheet)}">` : "";
   const payload = JSON.stringify({ slug, locale: config.locale, title, rsvp: globals.rsvp }).replace(/</g, "\\u003c");
   // Sfondo animato: scelto dal cliente, oppure quello proposto dallo stile. Il canvas sta dietro i contenuti (runtime.js lo anima).
-  const bg = config.background ?? m.background;
-  const bgLayer = bg && bg.kind !== "none" ? `<canvas class="bg-fx" data-bg="${bg.kind}"${bg.color ? ` data-bg-color="${bg.color}"` : ""} aria-hidden="true"></canvas>\n` : "";
-  const bgCss = bgLayer ? BG_CSS : "";
 
   return `<!doctype html>
 <html lang="${config.locale}" data-theme="${escapeHtml(m.id)}" data-assets="${base}"${input.preview ? " data-preview" : ""}>
@@ -170,11 +167,11 @@ export function renderInvitePage(input: PageInput): string {
 ${fonts ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n${fonts}` : ""}
 ${fontLink}
 <style>
-${css}${bgCss}${REVEAL_CSS}${m.envelope ? ENVELOPE_CSS : DRAWN_ENVELOPE_CSS}${m.backgroundVideo ? BGVIDEO_CSS : ""}${input.builder ? "" : SCROLL_CSS}${SCROLL_CUE_CSS}${TAP_CSS}${MOBILE_CSS}
+${css}${REVEAL_CSS}${m.envelope ? ENVELOPE_CSS : DRAWN_ENVELOPE_CSS}${m.backgroundVideo ? BGVIDEO_CSS : ""}${input.builder ? "" : SCROLL_CSS}${SCROLL_CUE_CSS}${TAP_CSS}${MOBILE_CSS}
 </style>
 </head>
 <body class="theme-${escapeHtml(m.id)}">
-${bodyVideo}${bgLayer}${html}
+${bodyVideo}${html}
 <script type="application/json" id="inv-data">${payload}</script>
 <script>
 ${runtime}
@@ -385,7 +382,6 @@ const ENVELOPE_CSS = `[data-cover-video]{pointer-events:none}
 [data-cover-video]::-webkit-media-controls-start-playback-button{display:none!important}`;
 
 // Sfondo animato: un livello fisso dietro tutto il contenuto, senza interazione. Il movimento ridotto lo ferma nel runtime.
-const BG_CSS = `.bg-fx{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}`;
 
 const LOOK_CSS = `
 .bk{background:var(--bk-bg,transparent)}

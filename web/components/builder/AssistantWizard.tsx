@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PlaceSearch } from "./PlaceSearch";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { ArrowLeft, ArrowRight, Baby, CalendarDays, Check, CircleDot, ClipboardCheck, Heart, ImagePlus, MapPin, Music, Shirt, Snowflake, Sparkles, Users, Wand2, Waves, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Baby, CalendarDays, Check, ClipboardCheck, Heart, ImagePlus, MapPin, Music, Shirt, Sparkles, Users, Wand2, type LucideIcon } from "lucide-react";
 
 // Percorso guidato «Creiamolo insieme»: fa le domande una alla volta e compone un unico messaggio per l'assistente.
 // L'assistente riceve tutto insieme e applica le modifiche in un solo giro (Ctrl+Z le ritira tutte).
@@ -23,16 +23,6 @@ const COLORS = [
   { hex: "#B9A8D4", it: "Lavanda", en: "Lavender" },
   { hex: "#E9DCC0", it: "Champagne", en: "Champagne" },
   { hex: "#8C8C8C", it: "Grigio perla", en: "Pearl grey" },
-];
-
-const BACKGROUNDS: { kind: string; icon: LucideIcon; it: string; en: string }[] = [
-  { kind: "petals", icon: Sparkles, it: "Petali", en: "Petals" },
-  { kind: "sparkles", icon: Wand2, it: "Scintille", en: "Sparkles" },
-  { kind: "confetti", icon: Heart, it: "Coriandoli", en: "Confetti" },
-  { kind: "snow", icon: Snowflake, it: "Neve", en: "Snow" },
-  { kind: "waves", icon: Waves, it: "Onde", en: "Waves" },
-  { kind: "bubbles", icon: CircleDot, it: "Bolle", en: "Bubbles" },
-  { kind: "none", icon: Check, it: "Niente", en: "None" },
 ];
 
 const GUEST_QUESTIONS = [
@@ -73,13 +63,12 @@ export type Answers = {
   venueConfirmed: boolean; // true se il luogo è stato scelto dalla ricerca
   dress: string;
   colors: string[];
-  background: string;
   questions: string[];
   photo: string;
   music: boolean;
 };
 
-const EMPTY: Answers = { names: "", date: "", time: "", venue: "", venueConfirmed: false, dress: "", colors: [], background: "", questions: [], photo: "", music: false };
+const EMPTY: Answers = { names: "", date: "", time: "", venue: "", venueConfirmed: false, dress: "", colors: [], questions: [], photo: "", music: false };
 
 const STEPS = [
   { it: "Evento", en: "Event", icon: CalendarDays },
@@ -102,8 +91,6 @@ export function composeBrief(a: Answers, lang: Lang): string {
   }
   const colorNames = COLORS.filter((c) => a.colors.includes(c.hex)).map((c) => (it ? c.it : c.en));
   if (a.dress || colorNames.length) lines.push(`Dress code: ${[a.dress, colorNames.join(", ")].filter(Boolean).join(" · ")}`);
-  const bg = BACKGROUNDS.find((b) => b.kind === a.background);
-  if (bg && bg.kind !== "none") lines.push(`${it ? "Sfondo" : "Background"}: ${it ? bg.it : bg.en}`);
   const qs = GUEST_QUESTIONS.filter((q) => a.questions.includes(q.id)).map((q) => (it ? q.it : q.en));
   if (qs.length) lines.push(`${it ? "Domande per chi risponde (nel modulo, come domande vere)" : "Questions for guests (as real form questions)"}: ${qs.join("; ")}`);
   if (a.photo) lines.push(`${it ? "Foto nell'intestazione" : "Header photo"}: ${a.photo}`);
@@ -125,7 +112,6 @@ export function AssistantWizard({ lang, onCompose, onCancel, initial }: { lang: 
   const [pool] = useState(() => ({
     // I colori già scelti restano tra quelli mostrati.
     colors: [...COLORS.filter((c) => initial?.colors?.includes(c.hex.toLowerCase())), ...pickN(COLORS.filter((c) => !initial?.colors?.includes(c.hex.toLowerCase())), 6)].slice(0, Math.max(6, initial?.colors?.length ?? 0)),
-    backgrounds: shuffled(BACKGROUNDS),
     questions: pickN(GUEST_QUESTIONS, 6),
     names: pick(NAME_HINTS),
     dress: pick(DRESS_HINTS),
@@ -186,7 +172,7 @@ export function AssistantWizard({ lang, onCompose, onCancel, initial }: { lang: 
 
         {step === 2 && (
           <>
-            <h3 className="aw-q">{it ? "Che atmosfera vuoi?" : "What atmosphere do you want?"}</h3>
+            <h3 className="aw-q">{it ? "Che stile per il dress code?" : "What dress code style?"}</h3>
             <label className="aw-field">
               <span>{it ? "Dress code" : "Dress code"}</span>
               <input value={a.dress} placeholder={it ? pool.dress : "E.g. formal, casual, themed"} onChange={(e) => set("dress", e.target.value)} />
@@ -198,19 +184,6 @@ export function AssistantWizard({ lang, onCompose, onCancel, initial }: { lang: 
                   <button key={c.hex} type="button" className={`aw-swatch${on ? " is-on" : ""}`} aria-pressed={on} onClick={() => set("colors", toggle(a.colors, c.hex))}>
                     <span className="aw-color" style={{ background: c.hex }} aria-hidden="true" />
                     {it ? c.it : c.en}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="aw-sub">{it ? "Sfondo animato" : "Animated background"}</p>
-            <div className="aw-chips" role="radiogroup" aria-label={it ? "Sfondo" : "Background"}>
-              {pool.backgrounds.map((b) => {
-                const Icon = b.icon;
-                const on = a.background === b.kind;
-                return (
-                  <button key={b.kind} type="button" role="radio" aria-checked={on} className={`aw-pick${on ? " is-on" : ""}`} onClick={() => set("background", b.kind)}>
-                    <Icon size={16} aria-hidden="true" />
-                    {it ? b.it : b.en}
                   </button>
                 );
               })}

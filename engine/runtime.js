@@ -15,8 +15,6 @@
  *   data-rsvp-open / data-rsvp-close / data-rsvp-dialog  popup della conferma di presenza
  *   data-rsvp-form data-slug                         modulo: campi data-rsvp-field data-id data-type (vedi sotto)
  *   data-rsvp-error, data-rsvp-success               messaggi di esito
- *   canvas.bg-fx data-bg="confetti|bubbles|petals|sparkles|waves|snow"  sfondo animato (lo inserisce il motore, non il template)
- *     data-bg-color="#RRGGBB"                        colore d'accento delle particelle (facoltativo)
  *
  * Niente dipendenze, niente build: un file, ES2017. Ogni comportamento è indipendente e si attiva solo se il DOM lo richiede.
  */
@@ -583,151 +581,6 @@
     });
   }
 
-  /* ---------- 7. Sfondo animato ---------- */
-  // Un canvas fisso dietro i contenuti (data-bg = confetti|bubbles|petals|sparkles|waves|snow, data-bg-color facoltativo).
-  // Solo canvas, niente librerie: il movimento si ferma fuori schermo, a scheda nascosta, e con «riduci movimento» resta un solo fotogramma.
-  var BG_PALETTE = ['#e8cda2', '#d4ae7c', '#f0dcb8', '#c9a070', '#ffffff'];
-  var BG_COUNT = { confetti: [16, 70, 9000], petals: [10, 40, 16000], bubbles: [8, 30, 20000], snow: [20, 70, 10000], sparkles: [10, 40, 12000], waves: [0, 0, 1] };
-
-  function bgParticle(kind, w, h, first, colors) {
-    var r = Math.random, c = colors[(r() * colors.length) | 0];
-    if (kind === 'confetti') return { x: r() * w, y: first ? r() * h : -20, vx: (r() - 0.5) * 0.8, vy: 0.7 + r() * 1.1, rot: r() * 6.28, vr: (r() - 0.5) * 0.12, w: 6 + r() * 5, h: 3 + r() * 3, c: c };
-    if (kind === 'petals') return { x: r() * w, y: first ? r() * h : -24, vx: (r() - 0.5) * 0.3, vy: 0.4 + r() * 0.6, rot: r() * 6.28, vr: (r() - 0.5) * 0.03, w: 10 + r() * 6, h: 6 + r() * 4, t: r() * 6.28, c: c };
-    if (kind === 'bubbles') return { x: r() * w, y: first ? r() * h : h + 20, r: 4 + r() * 11, vy: 0.25 + r() * 0.6, t: r() * 6.28, sp: 0.01 + r() * 0.02, c: c };
-    if (kind === 'snow') return { x: r() * w, y: first ? r() * h : -6, r: 1 + r() * 2.6, vy: 0.3 + r() * 0.6, t: r() * 6.28, sp: 0.01 + r() * 0.02 };
-    return { x: r() * w, y: r() * h, r: 1.5 + r() * 3, ph: r() * 6.28, sp: 0.02 + r() * 0.03, c: c };
-  }
-
-  function bgUpdate(kind, p, dt, w, h) {
-    if (kind === 'confetti' || kind === 'petals') {
-      p.t = (p.t || 0) + 0.02 * dt;
-      p.x += (p.vx + Math.sin(p.t) * 0.25) * dt;
-      p.y += p.vy * dt;
-      p.rot += p.vr * dt;
-      if (p.y > h + 30) { p.y = -24; p.x = Math.random() * w; }
-    } else if (kind === 'bubbles') {
-      p.t += p.sp * dt;
-      p.y -= p.vy * dt;
-      if (p.y < -p.r * 2) { p.y = h + p.r; p.x = Math.random() * w; }
-    } else if (kind === 'snow') {
-      p.t += p.sp * dt;
-      p.y += p.vy * dt;
-      if (p.y > h + 6) { p.y = -6; p.x = Math.random() * w; }
-    } else {
-      p.ph += p.sp * dt;
-    }
-  }
-
-  function bgDraw(ctx, kind, p, now) {
-    ctx.save();
-    if (kind === 'confetti') {
-      ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-    } else if (kind === 'petals') {
-      ctx.globalAlpha = 0.8; ctx.fillStyle = p.c;
-      ctx.beginPath(); ctx.ellipse(p.x + Math.sin(p.t) * 6, p.y, p.w / 2, p.h / 2, p.rot, 0, 6.2832); ctx.fill();
-    } else if (kind === 'bubbles') {
-      var bx = p.x + Math.sin(p.t) * 12;
-      ctx.globalAlpha = 0.22; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(bx, p.y, p.r, 0, 6.2832); ctx.fill();
-      ctx.globalAlpha = 0.6; ctx.strokeStyle = p.c; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.globalAlpha = 0.75; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(bx - p.r * 0.35, p.y - p.r * 0.35, p.r * 0.22, 0, 6.2832); ctx.fill();
-    } else if (kind === 'snow') {
-      ctx.globalAlpha = 0.85; ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(p.x + Math.sin(p.t) * 8, p.y, p.r, 0, 6.2832); ctx.fill();
-    } else {
-      var a = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(p.ph));
-      ctx.globalAlpha = a; ctx.fillStyle = p.c;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
-      ctx.fillRect(p.x - p.r * 2.5, p.y - 0.5, p.r * 5, 1);
-      ctx.fillRect(p.x - 0.5, p.y - p.r * 2.5, 1, p.r * 5);
-    }
-    ctx.restore();
-  }
-
-  // Onde: tre strati di curve lente in fondo alla pagina, del colore d'accento.
-  function bgWaves(ctx, w, h, t, colors) {
-    for (var layer = 0; layer < 3; layer++) {
-      ctx.globalAlpha = 0.2 - layer * 0.05;
-      ctx.fillStyle = colors[layer % colors.length];
-      ctx.beginPath();
-      ctx.moveTo(0, h);
-      for (var x = 0; x <= w; x += 8) {
-        var y = h - h * (0.12 + layer * 0.06) + Math.sin(x * 0.012 + t * 0.0006 * (layer + 1) + layer) * (10 + layer * 6);
-        ctx.lineTo(x, y);
-      }
-      ctx.lineTo(w, h);
-      ctx.closePath();
-      ctx.fill();
-    }
-  }
-
-  function initBackgrounds(root) {
-    all(root, 'canvas.bg-fx').forEach(function (canvas) {
-      var kind = canvas.getAttribute('data-bg');
-      if (!BG_COUNT[kind]) return;
-      var accent = /^#[0-9a-fA-F]{6}$/.test(canvas.getAttribute('data-bg-color') || '') ? canvas.getAttribute('data-bg-color') : '';
-      var colors = accent ? [accent, accent, '#ffffff', '#f5efe6'] : BG_PALETTE;
-      var ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var w = 0, h = 0, parts = [], raf = 0, last = 0, running = false, visible = true, t = 0;
-
-      function count() {
-        var c = BG_COUNT[kind];
-        return Math.round(Math.min(c[1], Math.max(c[0], (w * h) / c[2])));
-      }
-      function size() {
-        w = canvas.clientWidth; h = canvas.clientHeight;
-        canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        parts = [];
-        for (var i = 0, n = count(); i < n; i++) parts.push(bgParticle(kind, w, h, true, colors));
-      }
-      function paint(dt) {
-        ctx.clearRect(0, 0, w, h);
-        if (kind === 'waves') { bgWaves(ctx, w, h, t, colors); ctx.globalAlpha = 1; return; }
-        for (var i = 0; i < parts.length; i++) {
-          if (dt) bgUpdate(kind, parts[i], dt, w, h);
-          bgDraw(ctx, kind, parts[i], t);
-        }
-        ctx.globalAlpha = 1;
-      }
-      function frame(now) {
-        var dt = Math.min(3, (now - last) / 16.67);
-        last = now; t += dt;
-        paint(dt);
-        raf = running ? requestAnimationFrame(frame) : 0;
-      }
-      function play() {
-        if (running || reduced() || !visible || document.hidden) return;
-        running = true; last = performance.now();
-        raf = requestAnimationFrame(frame);
-      }
-      function pause() {
-        running = false;
-        if (raf) cancelAnimationFrame(raf);
-        raf = 0;
-      }
-
-      size();
-      if (reduced()) { paint(0); return; }
-      paint(0);
-      var resizeTimer = 0;
-      window.addEventListener('resize', function () {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () { if (canvas.isConnected) size(); }, 150);
-      });
-      document.addEventListener('visibilitychange', function () { if (document.hidden) pause(); else play(); });
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (entries) {
-          visible = entries[0].isIntersecting;
-          if (visible) play(); else pause();
-        }).observe(canvas);
-      }
-      play();
-      live.push({ node: canvas, stop: pause });
-    });
-  }
-
   /* ---------- Avvio ---------- */
   // Galleria con frecce: carosello e slider scorrono di una foto alla volta.
   document.addEventListener('click', function (e) {
@@ -763,7 +616,6 @@
     initCountdown(root);
     initLoopVideo(root);
     initRsvp(root);
-    initBackgrounds(root);
     markScrollers(root);
   }
 
