@@ -1,8 +1,8 @@
 // Planner premium: raccolte dell'organizzatore (invitati, budget, attività, fornitori), cartella del matrimonio e meteo.
 // Qui sta la validazione dei dati, senza accesso al database: così è testabile da sola.
-import { CONTRACT_STATUSES, FOLDER, FOLDER_KEYS, ROW_FIELDS, ROW_LIMIT, RSVP_STATUSES, TEXT_LIMIT } from "@inviteme/shared";
+import { BUDGET_CATEGORY_KEYS, CONTRACT_STATUSES, FOLDER, FOLDER_KEYS, ROW_FIELDS, ROW_LIMIT, RSVP_STATUSES, TEXT_LIMIT } from "@inviteme/shared";
 
-export type CollectionKind = "guests" | "budget" | "tasks" | "vendors" | "tables";
+export type CollectionKind = "guests" | "budget" | "tasks" | "vendors" | "tables" | "quotes";
 
 type Field = { column: string; type: "text" | "int" | "bool" | "date" | "enum" | "ref"; max?: number; values?: readonly string[] };
 
@@ -33,6 +33,24 @@ export const COLLECTIONS: Record<CollectionKind, { table: string; fields: Record
       amount_cents: { column: "amount_cents", type: "int", max: 100_000_000 },
       due_date: { column: "due_date", type: "date" },
       paid: { column: "paid", type: "bool" },
+      quote_id: { column: "quote_id", type: "ref" },
+    },
+  },
+  // Preventivi del budget: si confrontano per categoria e si prenotano; prenotati, hanno contratto, mancia e pagamenti.
+  quotes: {
+    table: "planner_quotes",
+    fields: {
+      category: { column: "category", type: "enum", values: BUDGET_CATEGORY_KEYS },
+      name: { column: "name", type: "text", max: 120 },
+      amount_cents: { column: "amount_cents", type: "int", max: 100_000_000 },
+      rating: { column: "rating", type: "int", max: 5 },
+      notes: { column: "notes", type: "text", max: 400 },
+      booked: { column: "booked", type: "bool" },
+      signed: { column: "signed", type: "bool" },
+      arrival: { column: "arrival", type: "text", max: 40 },
+      contact: { column: "contact", type: "text", max: 120 },
+      tip_cents: { column: "tip_cents", type: "int", max: 10_000_000 },
+      envelope: { column: "envelope", type: "bool" },
     },
   },
   tasks: {
@@ -99,7 +117,7 @@ export function sanitizeItem(kind: CollectionKind, body: unknown, partial: boole
           values[def.column] = null;
           break;
         }
-        if (typeof v !== "string" || !/^[0-9a-f-]{36}$/i.test(v)) return { ok: false, error: `Tavolo non valido: ${key}` };
+        if (typeof v !== "string" || !/^[0-9a-f-]{36}$/i.test(v)) return { ok: false, error: `Riferimento non valido: ${key}` };
         values[def.column] = v;
         break;
       case "enum":
@@ -113,7 +131,7 @@ export function sanitizeItem(kind: CollectionKind, body: unknown, partial: boole
 }
 
 function primaryField(kind: CollectionKind): string {
-  return kind === "guests" ? "name" : kind === "budget" ? "label" : kind === "tasks" ? "title" : "name";
+  return kind === "guests" ? "name" : kind === "budget" ? "label" : kind === "tasks" ? "title" : "name"; // quotes, vendors, tables: name
 }
 
 // Cartella del matrimonio: ogni sezione è un testo oppure un elenco di righe tipizzate (orari, contatti, spunte).

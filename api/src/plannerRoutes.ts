@@ -61,11 +61,19 @@ async function plannerStats(id: string) {
   const { rows } = await pool.query(
     `SELECT (SELECT count(*)::int FROM planner_tasks WHERE planner_id = $1) AS tasks,
             (SELECT count(*)::int FROM planner_tasks WHERE planner_id = $1 AND done) AS tasks_done,
-            (SELECT COALESCE(SUM(amount_cents), 0)::bigint FROM planner_budget_items WHERE planner_id = $1) AS spent,
+            ((SELECT COALESCE(SUM(amount_cents), 0) FROM planner_quotes WHERE planner_id = $1 AND booked)
+             + (SELECT COALESCE(SUM(amount_cents), 0) FROM planner_budget_items WHERE planner_id = $1 AND quote_id IS NULL))::bigint AS spent,
             (SELECT count(*)::int FROM planner_guests WHERE planner_id = $1) AS guests`,
     [id],
   );
   return { tasks: rows[0].tasks, tasksDone: rows[0].tasks_done, spentCents: Number(rows[0].spent), guests: rows[0].guests };
+}
+
+// Un pagamento può riferirsi solo a un preventivo dello stesso planner.
+async function quoteBelongs(quoteId: unknown, plannerId: string): Promise<boolean> {
+  if (quoteId === undefined || quoteId === null) return true;
+  const { rows } = await pool.query("SELECT 1 FROM planner_quotes WHERE id = $1 AND planner_id = $2", [quoteId, plannerId]);
+  return rows.length > 0;
 }
 
 export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
@@ -150,12 +158,13 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     const p = await plannerOf(req, reply);
     if (!p) return;
     const catalog = await deps.loadCatalog();
-    const [guests, budget, tasks, vendors, tables, linkable] = await Promise.all([
+    const [guests, budget, tasks, vendors, tables, quotes, linkable] = await Promise.all([
       pool.query("SELECT id, name, group_name, party_size, response, table_id FROM planner_guests WHERE planner_id = $1 ORDER BY group_name, name", [p.id]),
-      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
+      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid, quote_id FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
       pool.query("SELECT id, title, done, days_before FROM planner_tasks WHERE planner_id = $1 ORDER BY days_before DESC, created_at", [p.id]),
       pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE planner_id = $1 ORDER BY created_at", [p.id]),
       pool.query("SELECT id, name, seats FROM planner_tables WHERE planner_id = $1 ORDER BY created_at", [p.id]),
+      pool.query("SELECT id, category, name, amount_cents, rating, notes, booked, signed, arrival, contact, tip_cents, envelope FROM planner_quotes WHERE planner_id = $1 ORDER BY category, amount_cents", [p.id]),
       // Inviti del cliente che si possono collegare: quelli senza un altro planner.
       pool.query(
         "SELECT i.id, i.config->'event'->>'title' AS title FROM invitations i WHERE i.user_id = $1 AND i.status = 'paid' AND NOT EXISTS (SELECT 1 FROM planners x WHERE x.invitation_id = i.id AND x.id <> $2) ORDER BY i.created_at DESC",
@@ -170,6 +179,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       invitation,
       linkable: linkable.rows.map((r) => ({ id: r.id, title: r.title || "Invito senza titolo" })),
       tables: tables.rows,
+      quotes: quotes.rows,
       guests: guests.rows,
       budget: budget.rows,
       tasks: tasks.rows,
@@ -283,6 +293,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     const clean = sanitizeItem(kind, req.body, false);
     if (!clean.ok) return reply.code(400).send({ error: clean.error });
     if ("table_id" in clean.values) return reply.code(400).send({ error: "Assegna il posto dopo aver creato l'invitato" });
+    if (!(await quoteBelongs(clean.values.quote_id, p.id))) return reply.code(404).send({ error: "Fornitore non trovato" });
     const cols = Object.keys(clean.values);
     const table = COLLECTIONS[kind].table;
     const { rows } = await pool.query(
@@ -301,6 +312,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     if (!clean.ok) return reply.code(400).send({ error: clean.error });
     const cols = Object.keys(clean.values);
     if (cols.length === 0) return reply.code(400).send({ error: "Nessun dato da salvare" });
+    if (!(await quoteBelongs(clean.values.quote_id, p.id))) return reply.code(404).send({ error: "Fornitore non trovato" });
     // Posti: il tavolo deve essere del planner e non superare la capienza.
     if (kind === "guests" && clean.values.table_id) {
       const t = await pool.query("SELECT seats FROM planner_tables WHERE id = $1 AND planner_id = $2", [clean.values.table_id, p.id]);

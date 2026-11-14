@@ -9,6 +9,7 @@ import { Seating } from "./Seating";
 import { PdfDialog } from "./PdfDialog";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ShareInvite } from "./ShareInvite";
+import { BudgetSection, type Payment, type Quote } from "./BudgetSection";
 
 // Planner: servizio a sé (si compra a parte) per organizzare un evento: riepilogo, budget, invitati, tavoli,
 // attività, fornitori e cartella. Si può collegare a un invito del cliente: allora ne usa i colori e il link da condividere.
@@ -23,7 +24,8 @@ export type PremiumData = {
   linkable: { id: string; title: string }[];
   guests: { id: string; name: string; group_name: string; party_size: number; response: "pending" | "yes" | "no"; table_id: string | null }[];
   tables: { id: string; name: string; seats: number }[];
-  budget: { id: string; category: string; label: string; amount_cents: number; due_date: string | null; paid: boolean }[];
+  budget: Payment[];
+  quotes: Quote[];
   tasks: { id: string; title: string; done: boolean; days_before: number }[];
   vendors: { id: string; name: string; role: string; contact: string; contract_status: "unsigned" | "signed" }[];
   rsvpResponses: number;
@@ -147,7 +149,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
     const today = todayIso();
     const overdue = data.budget.filter((b) => !b.paid && validIso(b.due_date) && b.due_date < today).length;
     if (overdue) list.push(`${overdue} ${overdue === 1 ? "pagamento scaduto" : "pagamenti scaduti"}`);
-    const spent = data.budget.reduce((n, b) => n + b.amount_cents, 0);
+    const spent = data.quotes.filter((q) => q.booked).reduce((n, q) => n + q.amount_cents, 0) + data.budget.filter((b) => !b.quote_id).reduce((n, b) => n + b.amount_cents, 0);
     if (data.budgetCents && spent > data.budgetCents) list.push(`Budget superato di ${euro(spent - data.budgetCents)}`);
     return list;
   }, [data]);
@@ -156,8 +158,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
   const docsWritten = FOLDER.filter((s) => (s.kind === "text" ? typeof data.docs[s.key] === "string" && (data.docs[s.key] as string).trim() : ((data.docs[s.key] as { items?: unknown[] } | undefined)?.items?.length ?? 0) > 0)).length;
   const tasksDone = data.tasks.filter((t) => t.done).length;
   const taskPct = data.tasks.length ? Math.round((tasksDone / data.tasks.length) * 100) : 0;
-  const budgetSpent = data.budget.reduce((n, b) => n + b.amount_cents, 0);
-  const budgetPaid = data.budget.filter((b) => b.paid).reduce((n, b) => n + b.amount_cents, 0);
+  const budgetSpent = data.quotes.filter((q) => q.booked).reduce((n, q) => n + q.amount_cents, 0) + data.budget.filter((b) => !b.quote_id).reduce((n, b) => n + b.amount_cents, 0);
   const budgetPct = data.budgetCents ? Math.min(100, Math.round((budgetSpent / data.budgetCents) * 100)) : 0;
   const yesPersons = data.guests.filter((g) => g.response === "yes").reduce((n, g) => n + g.party_size, 0);
   const pendingGroups = data.guests.filter((g) => g.response === "pending").length;
@@ -283,38 +284,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
           )}
 
           {tab === "budget" && (
-            <section className="pp-stagger" aria-label="Budget">
-              <div className="pp-card">
-                <BudgetSettings initial={data.budgetCents} onSave={(cents) => act(() => call("PUT", "", { budgetCents: cents }))} />
-                <p className="hint">Speso {euro(budgetSpent)} · pagato {euro(budgetPaid)}{data.budgetCents ? ` · rimasti ${euro(Math.max(0, data.budgetCents - budgetSpent))}` : ""}</p>
-              </div>
-              <div className="pp-card">
-                <form className="pp-form" onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = e.currentTarget;
-                  const f = new FormData(form);
-                  const amount = Math.round(Number(String(f.get("amount")).replace(",", ".")) * 100);
-                  const due = String(f.get("due") || "") || null;
-                  void act(async () => { await call("POST", "/budget", { category: String(f.get("category") || "Varie"), label: String(f.get("label")), amount_cents: amount, due_date: due }); form.reset(); });
-                }}>
-                  <input name="category" placeholder="Categoria (es. Location)" maxLength={60} />
-                  <input name="label" placeholder="Voce" required maxLength={120} />
-                  <input name="amount" placeholder="Importo €" inputMode="decimal" required />
-                  <input name="due" type="date" aria-label="Scadenza" />
-                  <button type="submit" className="btn solid small">Aggiungi voce</button>
-                </form>
-              </div>
-              <ul className="pp-rows">
-                {data.budget.map((b, i) => (
-                  <li key={b.id} className={`pp-row pp-enter${!b.paid && validIso(b.due_date) && b.due_date < todayIso() ? " is-late" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
-                    <Checkbox className="pp-check" checked={b.paid} onChange={(v) => act(() => call("PATCH", `/budget/${b.id}`, { paid: v }))} label={<span>{b.label}</span>} />
-                    <small>{b.category}{validIso(b.due_date) ? ` · entro il ${shortDate(b.due_date)}` : ""}</small>
-                    <strong>{euro(b.amount_cents)}</strong>
-                    <button type="button" className="pp-link" onClick={() => act(() => call("DELETE", `/budget/${b.id}`))}>Elimina</button>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <BudgetSection quotes={data.quotes} payments={data.budget} budgetCents={data.budgetCents} guestQuota={data.guestQuota} call={call} act={act} />
           )}
 
           {tab === "invitati" && (
@@ -496,16 +466,6 @@ function Bar({ value }: { value: number }) {
     <div className="pp-bar" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
       <span style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
     </div>
-  );
-}
-
-function BudgetSettings({ initial, onSave }: { initial: number; onSave: (cents: number) => void }) {
-  const [value, setValue] = useState(initial ? String(initial / 100) : "");
-  return (
-    <form className="pp-inline" onSubmit={(e) => { e.preventDefault(); onSave(Math.round(Number(value.replace(",", ".") || 0) * 100)); }}>
-      <label>Budget totale € <input value={value} onChange={(e) => setValue(e.target.value)} inputMode="decimal" /></label>
-      <button type="submit" className="btn outline small">Salva budget</button>
-    </form>
   );
 }
 

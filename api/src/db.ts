@@ -233,6 +233,26 @@ FROM orders o
 WHERE o.draft->>'tier' = 'premium' AND o.invitation_id IS NULL AND o.status = 'paid' AND o.user_id IS NOT NULL
 ON CONFLICT (id) DO NOTHING;
 UPDATE orders SET draft = jsonb_set(draft, '{tier}', '"rsvp"') WHERE draft->>'tier' = 'premium';
+-- Budget del planner: preventivi per categoria (da confrontare e prenotare), con i dati del contratto
+-- e della mancia. I pagamenti sono le righe di planner_budget_items collegate a un preventivo.
+CREATE TABLE IF NOT EXISTS planner_quotes (
+  id uuid PRIMARY KEY,
+  planner_id uuid NOT NULL REFERENCES planners(id) ON DELETE CASCADE,
+  category text NOT NULL DEFAULT 'altro',
+  name text NOT NULL,
+  amount_cents integer NOT NULL DEFAULT 0,
+  rating integer NOT NULL DEFAULT 0,
+  notes text NOT NULL DEFAULT '',
+  booked boolean NOT NULL DEFAULT false,
+  signed boolean NOT NULL DEFAULT false,
+  arrival text NOT NULL DEFAULT '',
+  contact text NOT NULL DEFAULT '',
+  tip_cents integer NOT NULL DEFAULT 0,
+  envelope boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS planner_quotes_planner_idx ON planner_quotes(planner_id);
+ALTER TABLE planner_budget_items ADD COLUMN IF NOT EXISTS quote_id uuid REFERENCES planner_quotes(id) ON DELETE CASCADE;
 `;
 
 // Crea lo schema all'avvio. Il lock evita che due istanze lo eseguano insieme.
