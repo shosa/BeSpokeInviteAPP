@@ -284,7 +284,9 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
           )}
 
           {tab === "budget" && (
-            <BudgetSection quotes={data.quotes} payments={data.budget} budgetCents={data.budgetCents} guestQuota={data.guestQuota} call={call} act={act} />
+            <section className="pp-stagger pp-panel" aria-label="Budget">
+              <BudgetSection quotes={data.quotes} payments={data.budget} budgetCents={data.budgetCents} guestQuota={data.guestQuota} call={call} act={act} />
+            </section>
           )}
 
           {tab === "invitati" && (

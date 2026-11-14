@@ -64,7 +64,7 @@ export default async function Planner({ params }: { params: Promise<{ id: string
           backLabel={lang === "en" ? "My account" : "La mia area"}
           decor={theme ? themeDecor(theme) : undefined}
         />
-        <div className="wrap idash-body">
+        <div className="wrap idash-body pp-body">
           <PremiumPlanner id={id} initial={data} lang={lang} />
         </div>
       </main>

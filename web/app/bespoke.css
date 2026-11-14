@@ -754,3 +754,18 @@ img {
   .bg-kpis strong { font-size: 1.4rem; }
 }
 @media (prefers-reduced-motion: reduce) { .bg-panel { animation: none; } .bg-gauge circle + circle { transition: none; } }
+
+/* Planner: la colonna di navigazione (stile invariato) sta al bordo sinistro; il contenuto resta centrato e contenuto. */
+@media (min-width: 861px) {
+  .pp-page .pp-body.wrap { max-width: none; padding-left: 24px; padding-right: 32px; }
+  .pp-page .pp-content { width: 100%; max-width: 1120px; margin: 0 auto; }
+}
+
+/* Budget: campi di aggiunta larghi e arrotondati come il resto del sito */
+.bg-add { grid-template-columns: minmax(200px, 1.3fr) minmax(220px, 2fr) minmax(150px, 1fr) minmax(170px, 1fr) auto; gap: 10px; padding: 14px; border-radius: 22px; }
+.bg-add input, .bg-add select, .bg-vendor-form input, .bg-vendor-form textarea, .bg-quote-form input, .bg-quote-form textarea, .bg-quote-new input, .bg-quote-new textarea, .bg-total-form input { min-height: 48px; padding: 10px 16px; border-radius: 16px; font-size: 15px; }
+.bg-add select { appearance: none; -webkit-appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b6a57' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center; padding-right: 36px; }
+.bg-add input:focus, .bg-add select:focus, .bg-vendor-form input:focus, .bg-vendor-form textarea:focus, .bg-quote-form input:focus, .bg-quote-form textarea:focus, .bg-quote-new input:focus, .bg-quote-new textarea:focus, .bg-total-form input:focus { outline: none; border-color: var(--inv, var(--brass-light)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--inv, #b8893f) 16%, transparent); }
+.bg-add .btn { min-height: 48px; }
+.bg-total-form input { width: 180px; }
+@media (max-width: 1100px) { .bg-add { grid-template-columns: 1fr 1fr; } .bg-add .btn { grid-column: 1 / -1; } }

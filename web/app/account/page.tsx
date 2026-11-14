@@ -22,7 +22,7 @@ type Theme = { enabled: boolean; manifest: ThemeManifest & { models: string[] } 
 
 const COPY = {
   it: {
-    hello: "Bentornati",
+    hello: "Ciao",
     summary: (live: number, prep: number, planners: number, pending: number) =>
       [`${live} ${live === 1 ? "invito online" : "inviti online"}`, `${prep} in preparazione`, `${planners} ${planners === 1 ? "planner" : "planner"}`].join(", ") + (pending ? `. ${pending} ${pending === 1 ? "acquisto aspetta" : "acquisti aspettano"} di essere aperti.` : "."),
     buyInvite: "Acquista un invito",
@@ -55,7 +55,7 @@ const COPY = {
     draft: "Bozza",
   },
   en: {
-    hello: "Welcome back",
+    hello: "Hi",
     summary: (live: number, prep: number, planners: number, pending: number) =>
       [`${live} live ${live === 1 ? "invitation" : "invitations"}`, `${prep} in progress`, `${planners} ${planners === 1 ? "planner" : "planners"}`].join(", ") + (pending ? `. ${pending} ${pending === 1 ? "purchase is" : "purchases are"} waiting to be opened.` : "."),
     buyInvite: "Buy an invitation",

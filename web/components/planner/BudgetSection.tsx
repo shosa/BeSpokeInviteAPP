@@ -76,7 +76,7 @@ export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call,
   const bestValue = inCat.length > 1 ? [...inCat].filter((q) => q.rating > 0 && q.amount_cents > 0).sort((a, b) => b.rating / b.amount_cents - a.rating / a.amount_cents)[0] : undefined;
 
   return (
-    <section className="bg" aria-label="Budget">
+    <div className="bg">
       <header className="bg-head">
         <div>
           <span className="pp-kicker">Budget</span>
@@ -282,6 +282,6 @@ export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call,
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }
