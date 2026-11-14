@@ -313,7 +313,8 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
 
   // Anteprima a tutto schermo su telefono: la pagina si comporta come l'invito vero. Lo si dice anche all'anteprima,
   // che smette di evidenziare e selezionare i blocchi al tocco.
-  const previewOnly = !isDesktop && mobileTab === "anteprima";
+  // Anche un invito pubblicato si guarda soltanto: niente evidenziazione al passaggio del mouse né selezione.
+  const previewOnly = locked || (!isDesktop && mobileTab === "anteprima");
   useEffect(() => {
     viewOnly.current = previewOnly;
     frame.current?.contentWindow?.postMessage({ type: "viewonly", on: previewOnly }, "*");
