@@ -36,6 +36,8 @@
 
 /* ───────────── Barra in alto ───────────── */
 .bl-app .bl-top {
+  /* Sopra al contenuto: l'effetto vetro crea un livello proprio e senza z-index il menu finiva sotto le sezioni. */
+  position: relative; z-index: 70;
   grid-area: top; display: flex; align-items: center; gap: 16px; padding: 12px 20px;
   background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
@@ -155,7 +157,8 @@
 .bl-app .bl-tpl-chip { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .bl-app .bl-tpl-kicker { font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
 .bl-app .bl-tpl-chip strong { font-family: var(--font-display); font-size: 17px; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bl-app .bl-preview-tools { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.bl-app .bl-preview-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: 1 1 auto; min-width: 0; }
+.bl-app .bl-preview-tools .bl-preview-state:empty { display: none; }
 .bl-app .bl-tools-col { display: grid; gap: 8px; justify-items: start; }
 .bl-app .bl-history { display: inline-flex; gap: 4px; }
 .bl-app .bl-history .bl-icon { width: 32px; height: 32px; }
@@ -165,10 +168,18 @@
 .bl-app .bl-frame.is-refreshing iframe { filter: blur(6px); opacity: 0.6; }
 .bl-app .bl-frame.is-desktop { width: min(100% - 40px, 960px); }
 .bl-app .bl-preview-card > .bl-frame { margin: auto; flex: 0 0 auto; }
+/* Anteprima desktop: riempie il riquadro; dentro, la pagina è larga 1280 px e ridotta in scala (Builder.tsx). */
+.bl-app .bl-preview-card > .bl-frame.is-desktop { flex: 1 1 auto; align-self: stretch; width: auto; min-height: 0; margin: 0 16px 16px; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: 0 30px 60px -40px rgba(110, 78, 28, 0.45); }
+.bl-app .bl-frame.is-desktop iframe { max-width: none; border-radius: 0; box-shadow: none; }
 .bl-app .bl-veil { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
 .bl-app .bl-spin { width: 30px; height: 30px; border-radius: 50%; border: 3px solid rgba(138, 100, 39, 0.18); border-top-color: var(--brass-light); animation: bl-spin 0.8s linear infinite; }
 @keyframes bl-spin { to { transform: rotate(360deg); } }
-.bl-app .bl-scroll { position: absolute; right: -30px; top: 24px; bottom: 24px; width: 16px; writing-mode: vertical-lr; appearance: auto; accent-color: var(--brass-light); cursor: pointer; }
+/* Cursore di scorrimento dell'anteprima, accanto al telefono: una linea sottile con una maniglia d'oro. */
+.bl-app .bl-scroll { position: absolute; right: -30px; top: 24px; bottom: 24px; width: 14px; margin: 0; writing-mode: vertical-lr; -webkit-appearance: none; appearance: none; background: linear-gradient(to right, transparent 6px, rgba(42, 33, 25, 0.12) 6px, rgba(42, 33, 25, 0.12) 8px, transparent 8px); cursor: pointer; }
+.bl-app .bl-scroll::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 44px; border-radius: 999px; background: var(--brass-light); box-shadow: 0 4px 10px -4px rgba(138, 100, 39, 0.8); }
+.bl-app .bl-scroll::-moz-range-thumb { width: 14px; height: 44px; border: 0; border-radius: 999px; background: var(--brass-light); }
+.bl-app .bl-scroll::-moz-range-track { background: transparent; }
+.bl-app .bl-scroll:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 4px; border-radius: 999px; }
 /* Telefono su schermi larghi: porcellana bianca con filo oro, proporzioni 390 × 844. */
 @media (min-width: 901px) {
   .bl-app .bl-frame.is-mobile { position: relative; width: 390px; max-width: 100%; padding: 9px; border-radius: 48px; background: #fff; border: 1px solid var(--line); box-shadow: var(--iv-shadow); }
@@ -377,13 +388,17 @@ button.bl-crumb:hover { color: var(--brass); }
   /* Anteprima a tutto schermo, come dentro l'invito, con il pulsante indietro galleggiante in alto a sinistra. */
   .bl-app.is-tab-anteprima .bl-center { position: fixed; inset: 0; z-index: 80; background: #fff; animation: blFullIn 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .bl-app.is-tab-anteprima .bl-preview-card { height: 100%; }
+  .bl-app.is-tab-anteprima .bl-frame, .bl-app.is-tab-anteprima .bl-frame iframe { width: 100%; height: 100%; max-height: none; aspect-ratio: auto; flex: 1 1 auto; }
   .bl-app.is-tab-anteprima .bl-preview-head { display: none; }
   .bl-app.is-tab-anteprima .bl-fab-row { display: none; }
   .bl-app .bl-preview-back { display: none; }
   .bl-app.is-tab-anteprima .bl-preview-back {
-    display: grid; place-items: center; position: fixed; z-index: 81; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--ink); box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); cursor: pointer;
+    position: fixed; z-index: 81; top: calc(12px + env(safe-area-inset-top)); left: 12px; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--ink); font: 500 14px var(--font-text), sans-serif; box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); cursor: pointer;
   }
+  /* «Mostra la busta» galleggia in alto a destra, lontano da «Indietro»; annulla/ripristina restano negli altri pannelli. */
+  .bl-app.is-tab-anteprima .bl-preview-bar { display: flex; position: fixed; z-index: 81; top: calc(12px + env(safe-area-inset-top)); right: 12px; padding: 0 14px; height: 44px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); }
+  .bl-app.is-tab-anteprima .bl-preview-bar .bl-history, .bl-app.is-tab-anteprima .bl-preview-bar .bl-preview-state { display: none; }
+  .bl-app.is-tab-anteprima .bl-preview-bar .bl-switch { color: var(--ink); }
   @keyframes blFullIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
 }
 @media (min-width: 901px) {

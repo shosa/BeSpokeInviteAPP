@@ -85,6 +85,9 @@ const BUILDER_TABS: { id: string; it: string; en: string; type?: string; guests?
   { id: "link", it: "Link", en: "Custom URL", icon: Link2 },
 ];
 
+// Larghezza della pagina nell'anteprima desktop: uno schermo di computer, ridotto per stare nel riquadro.
+const DESK_W = 1280;
+
 export function Builder({ initial, lang = "it" }: { initial: Manage; lang?: Lang }) {
   return (
     <StockContext.Provider value={initial.id}>
@@ -171,6 +174,11 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   const [hover, setHover] = useState<string | null>(null);
   const [scroll, setScroll] = useState({ y: 0, max: 0 });
   const frame = useRef<HTMLIFrameElement>(null);
+  // Contenitore dell'anteprima: in modalità desktop la pagina si disegna larga 1280 px e si riduce per stare nel riquadro.
+  const frameBox = useRef<HTMLDivElement>(null);
+  const [deskScale, setDeskScale] = useState<{ s: number; h: number } | null>(null);
+  // Anteprima a tutto schermo su telefono: i tocchi non selezionano i blocchi, si scorre l'invito e basta.
+  const viewOnly = useRef(false);
   const scrollY = useRef(0);
 
   const model = getModel(catalog, config.model);
@@ -293,6 +301,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         setScroll((s) => ({ ...s, max }));
       }
       if (d?.type === "select" && typeof d.id === "string") {
+        if (viewOnly.current) return;
         setSelected(d.id);
         setPanel("proprieta");
         setMobileTab("proprieta");
@@ -301,6 +310,26 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
+
+  useEffect(() => {
+    viewOnly.current = !isDesktop && mobileTab === "anteprima";
+  }, [isDesktop, mobileTab]);
+
+  // Anteprima desktop: la pagina è larga come uno schermo vero (1280 px) e scalata per entrare nel riquadro.
+  useEffect(() => {
+    const el = frameBox.current;
+    if (!el || device !== "desktop" || !isDesktop || typeof ResizeObserver === "undefined") { setDeskScale(null); return; }
+    const fit = () => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const s = Math.min(1, r.width / DESK_W);
+      setDeskScale({ s, h: Math.round(r.height / s) });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [device, isDesktop, previewFull]);
 
   // Annulla e ripristina dalla tastiera (Ctrl/⌘+Z e Ctrl/⌘+Shift+Z) quando non si scrive in un campo.
   useEffect(() => {
@@ -511,8 +540,9 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
 
       <main className="bl-center" aria-label={L.previewAria}>
         {!isDesktop && (
-          <button type="button" className="bl-preview-back" aria-label={lang === "en" ? "Back" : "Indietro"} onClick={() => setMobileTab("blocchi")}>
-            <ArrowLeft size={20} aria-hidden="true" />
+          <button type="button" className="bl-preview-back" onClick={() => setMobileTab("blocchi")}>
+            <ArrowLeft size={18} aria-hidden="true" />
+            <span>{lang === "en" ? "Back" : "Indietro"}</span>
           </button>
         )}
         <section className={`bl-preview-card${previewFull ? " is-expanded" : ""}`} aria-label={lang === "en" ? "Live preview" : "Anteprima dal vivo"}>
@@ -525,29 +555,28 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </header>
         <div className="bl-preview-bar">
           <div className="bl-preview-tools">
-            <div className="bl-tools-col">
-              {hasCover && (
-                <label className={`bl-switch${showCover ? " is-on" : ""}`}>
-                  <input type="checkbox" role="switch" checked={showCover} onChange={(e) => setShowCover(e.target.checked)} />
-                  <span className="bl-switch-track" aria-hidden="true"><span className="bl-switch-knob" /></span>
-                  <span>{L.showEnvelope}</span>
-                </label>
-              )}
-              <div className="bl-history">
-                <button type="button" className="bl-icon" aria-label={L.undo} title={`${L.undo} (Ctrl+Z)`} disabled={locked || !history.canUndo} onClick={history.undo}><Undo2 size={16} /></button>
-                <button type="button" className="bl-icon" aria-label={L.redo} title={`${L.redo} (Ctrl+Shift+Z)`} disabled={locked || !history.canRedo} onClick={history.redo}><Redo2 size={16} /></button>
-              </div>
+            <div className="bl-history">
+              <button type="button" className="bl-icon" aria-label={L.undo} title={`${L.undo} (Ctrl+Z)`} disabled={locked || !history.canUndo} onClick={history.undo}><Undo2 size={16} /></button>
+              <button type="button" className="bl-icon" aria-label={L.redo} title={`${L.redo} (Ctrl+Shift+Z)`} disabled={locked || !history.canRedo} onClick={history.redo}><Redo2 size={16} /></button>
             </div>
+            {hasCover && (
+              <label className={`bl-switch${showCover ? " is-on" : ""}`}>
+                <input type="checkbox" role="switch" checked={showCover} onChange={(e) => setShowCover(e.target.checked)} />
+                <span className="bl-switch-track" aria-hidden="true"><span className="bl-switch-knob" /></span>
+                <span>{L.showEnvelope}</span>
+              </label>
+            )}
             <span className="bl-preview-state">{previewState === "error" ? "—" : ""}</span>
           </div>
         </div>
-        <div className={`bl-frame is-${device}${refreshing ? " is-refreshing" : ""}`}>
+        <div ref={frameBox} className={`bl-frame is-${device}${refreshing ? " is-refreshing" : ""}`}>
           {preview ? (
             <iframe
               ref={frame}
               title={L.previewTitle}
               srcDoc={preview}
               sandbox="allow-scripts"
+              style={device === "desktop" && isDesktop && deskScale ? { width: DESK_W, height: deskScale.h, transform: `scale(${deskScale.s})`, transformOrigin: "0 0" } : undefined}
               onLoad={() => {
                 frame.current?.contentWindow?.postMessage({ type: "restore", id: selected, y: scrollY.current }, "*");
                 frame.current?.contentWindow?.postMessage({ type: "highlight", id: hover }, "*");

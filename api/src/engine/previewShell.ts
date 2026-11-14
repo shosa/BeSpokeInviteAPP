@@ -29,8 +29,8 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
   .stage[data-mode="desktop"] .device iframe { border-radius: 0; }
   .back { display: none; }
   @media (max-width: 720px) {
-    .back { position: fixed; z-index: 5; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 8px 24px -10px rgba(0,0,0,0.45); color: #2a2119; cursor: pointer; }
-    html.is-top .back { display: grid; place-items: center; }
+    .back { position: fixed; z-index: 5; top: calc(12px + env(safe-area-inset-top)); left: 12px; height: 44px; padding: 0 16px 0 12px; gap: 6px; border: 0; border-radius: 999px; background: rgba(255,255,255,0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 8px 24px -10px rgba(0,0,0,0.45); color: #2a2119; font: 500 14px system-ui, sans-serif; cursor: pointer; }
+    html.is-top .back { display: inline-flex; align-items: center; }
     .bar { display: none; }
     .stage { height: 100%; padding: 0; }
     .device, .stage[data-mode="desktop"] .device { width: 100%; height: 100%; border-radius: 0; padding: 0; border: 0; box-shadow: none; }
@@ -39,7 +39,7 @@ export function previewShell(themeId: string, name: string, lang: "it" | "en", s
 </style>
 </head>
 <body>
-<button type="button" class="back" aria-label="${lang === "en" ? "Back" : "Indietro"}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+<button type="button" class="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg><span>${lang === "en" ? "Back" : "Indietro"}</span></button>
 <div class="bar" role="group" aria-label="${l.title}">
   <button type="button" data-mode="phone" aria-pressed="true">${l.phone}</button>
   <button type="button" data-mode="desktop" aria-pressed="false">${l.desktop}</button>

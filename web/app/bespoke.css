@@ -479,7 +479,7 @@ img {
   .tp-modal .tp-head, .tp-modal .tp-side { display: none; }
   .tp-modal .tp-body { display: block; height: 100%; }
   .tp-modal .tp-phone { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
-  .tp-back { display: grid; place-items: center; position: fixed; z-index: 1001; top: calc(12px + env(safe-area-inset-top)); left: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.85); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--ink); box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); cursor: pointer; }
+  .tp-back { position: fixed; z-index: 1001; top: calc(12px + env(safe-area-inset-top)); left: 12px; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--ink); font: 500 14px var(--font-text), sans-serif; box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.45); cursor: pointer; }
 }
 .tp-toggle { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 16px; }
 @media (max-width: 720px) {

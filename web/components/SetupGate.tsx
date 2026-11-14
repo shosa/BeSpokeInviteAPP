@@ -4,6 +4,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { presetQuestions, setupDefaults, type InviteConfig, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, Heart, ListChecks, MailCheck, MapPin, PenLine, Plus, Trash2, type LucideIcon } from "lucide-react";
+import { AddressField } from "./builder/AddressField";
+import { DatePicker } from "./ui/DatePicker";
 import "./setup.css";
 
 // Wizard iniziale: i dati di base dell'invito, chiesti a passi la prima volta che si apre il builder o il planner.
@@ -145,10 +147,7 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
             {current.key === "date" && (<>
               <h2 id="sw-title">Quando sarà?</h2>
               <p className="hint">La data serve alla data dell&apos;invito, al conto alla rovescia e al planner.</p>
-              <label className="demo-field">
-                <span>Data dell&apos;evento</span>
-                <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} autoFocus />
-              </label>
+              <DatePicker id="sw-date" label="Data dell'evento" value={eventDate} onChange={setEventDate} lang={locale} inline autoFocus />
             </>)}
 
             {current.key === "venue" && (<>
@@ -158,10 +157,8 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
                 <span>Luogo dell&apos;evento</span>
                 <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Villa Aurelia" maxLength={120} autoFocus />
               </label>
-              <label className="demo-field">
-                <span>Indirizzo per la mappa (facoltativo)</span>
-                <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Via Leone XIII 461, Roma" maxLength={200} />
-              </label>
+              <AddressField className="demo-field" label="Indirizzo per la mappa (facoltativo)" value={address} onChange={setAddress} placeholder="Inizia a scrivere: via, città…" />
+              <p className="hint sw-addr-hint">Sceglietelo dai suggerimenti: così la mappa trova il punto giusto.</p>
             </>)}
 
             {current.key === "signature" && (<>

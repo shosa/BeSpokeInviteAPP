@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Indirizzo con suggerimenti mentre si scrive: i luoghi arrivano dal server, dopo una breve pausa di digitazione.
-export function AddressField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+// Indirizzo con suggerimenti mentre si scrive: i luoghi arrivano dal server (/api/geocode, OpenStreetMap),
+// dopo una breve pausa di digitazione. Usato nel builder e nel wizard iniziale.
+export function AddressField({ label, value, onChange, className = "field wide", placeholder, autoFocus }: { label: string; value: string; onChange: (v: string) => void; className?: string; placeholder?: string; autoFocus?: boolean }) {
   const [text, setText] = useState(value);
   const [items, setItems] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -35,11 +36,13 @@ export function AddressField({ label, value, onChange }: { label: string; value:
   }, [text]);
 
   return (
-    <label className="field wide address-field">
+    <label className={`${className} address-field`}>
       <span>{label}</span>
       <input
         value={text}
         maxLength={200}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
         autoComplete="off"
         role="combobox"
         aria-expanded={open && items.length > 0}

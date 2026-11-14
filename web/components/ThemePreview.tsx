@@ -28,7 +28,7 @@ export function ThemePreview({ themeId, themeName, onClose, onChoose }: { themeI
     <div className="demo-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
       <div className="demo-modal tp-modal" role="dialog" aria-modal="true" aria-label={`Anteprima ${themeName}`}>
         {/* Telefono: l'anteprima è a tutto schermo, con «indietro» galleggiante in alto a sinistra. */}
-        <button type="button" className="tp-back" aria-label="Indietro" onClick={onClose}><ArrowLeft size={20} aria-hidden="true" /></button>
+        <button type="button" className="tp-back" onClick={onClose}><ArrowLeft size={18} aria-hidden="true" /><span>Indietro</span></button>
         <header className="tp-head">
           <div>
             <span className="claim-kicker">Anteprima</span>
