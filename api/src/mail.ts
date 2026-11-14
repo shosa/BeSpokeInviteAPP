@@ -104,7 +104,7 @@ export function renderMail(kind: MailTemplateKind, t: MailTemplate, vars: MailVa
 
 // attending: null quando l'invito non chiede la presenza (allora l'avviso dice solo che l'ospite ha risposto).
 export function rsvpNoticeEmail(p: { to: string; title: string; attending: boolean | null; invitationId: string }): MailMessage {
-  const link = `${appUrl()}/planner/${p.invitationId}`;
+  const link = `${appUrl()}/inviti/${p.invitationId}/risposte`;
   const m = renderMail("rsvp", getMailTemplate("rsvp"), { link, title: p.title, verdict: p.attending === true ? "parteciperà" : p.attending === false ? "non potrà partecipare" : "ha risposto" });
   return { to: p.to, subject: m.subject, html: m.html, text: m.text };
 }

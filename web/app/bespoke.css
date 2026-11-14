@@ -624,3 +624,18 @@ img {
 .bl-zone { display: contents; }
 .bl-zone.is-locked > *, .bl-left.is-locked > * { opacity: 0.72; filter: saturate(0.85); }
 .bl-left.is-locked > .bl-locked, .bl-app .bl-locked { opacity: 1; }
+
+/* Planner: evento e invito collegato (Riepilogo) */
+.pp-event { gap: 14px; }
+.pp-event-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.pp-event-head > div { display: grid; gap: 4px; }
+.pp-event-title { font-family: var(--font-display); font-weight: 300; font-size: 1.7rem !important; line-height: 1.1; }
+.pp-event-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; align-items: center; }
+.pp-event-link { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-radius: 16px; background: var(--paper, #fdfbf7); box-shadow: inset 0 0 0 1px var(--line); }
+.pp-event-thumb { width: 30px; height: 40px; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.pp-event-inv { display: grid; gap: 1px; flex: 1; min-width: 160px; }
+.pp-event-inv small { color: var(--ink-soft); font-size: 12px; }
+.pp-event-inv strong { font-weight: 500; font-size: 14px; }
+.pp-event-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; }
+.pp-event-pick span { font-size: 14px; color: var(--ink-soft); }
+.pp-event-pick select { min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font: inherit; flex: 1; min-width: 180px; }

@@ -1,2 +1,2 @@
-// Acquisto pagato su Shopify che aspetta il template: lo restituisce l'API /api/account/pending.
-export type PendingPurchase = { id: string; tier: "rsvp" | "premium"; createdAt: string; statusUrl: string | null };
+// Acquisto pagato su Shopify da attivare: un invito (si sceglie il template) o un planner (si dà un nome all'evento).
+export type PendingPurchase = { id: string; product: "invitation" | "planner"; createdAt: string; statusUrl: string | null };

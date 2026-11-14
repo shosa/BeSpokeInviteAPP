@@ -52,10 +52,9 @@ import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
 import { getShopifyIds, loadShopifySettings, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
-import { hasPlanner, isInviteTier } from "@inviteme/shared";
-import { buildPlannerPdf, isPdfChoice } from "./planner-pdf";
-import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind } from "./planner";
-import { geocodeOne } from "./places";
+import { isInviteTier } from "@inviteme/shared";
+import { sanitizeDocs } from "./planner";
+import { registerPlannerRoutes } from "./plannerRoutes";
 import { createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -207,7 +206,8 @@ export async function buildApp() {
     const c = await loadFullCatalog();
     const { rows } = await pool.query(
       `SELECT i.id, i.slug, i.status, i.tier, i.edit_count, i.config, i.views, i.guests, i.created_at,
-              (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps
+              (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps,
+              (SELECT p.id FROM planners p WHERE p.invitation_id = i.id) AS planner_id
        FROM invitations i WHERE i.user_id = $1 ORDER BY i.created_at DESC`,
       [user.id],
     );
@@ -223,6 +223,8 @@ export async function buildApp() {
       views: r.views,
       guests: (r.guests ?? []).length,
       rsvps: r.rsvps,
+      themeId: (r.config?.themeId as string) ?? "",
+      plannerId: (r.planner_id as string | null) ?? null,
     }));
   });
 
@@ -254,8 +256,10 @@ export async function buildApp() {
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     const c = await loadFullCatalog();
+    const linked = await pool.query("SELECT id FROM planners WHERE invitation_id = $1", [inv.id]);
     return {
       id: inv.id,
+      plannerId: (linked.rows[0]?.id as string | undefined) ?? null,
       slug: inv.slug,
       status: inv.status,
       config: inv.config as InviteConfig,
@@ -456,175 +460,8 @@ export async function buildApp() {
     return { ok: true, editCount: 1, slug };
   });
 
-  // Planner premium: panoramica con i conteggi. Solo per gli inviti del livello premium.
-  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/overview", async (req, reply) => {
-    const user = await requireUser(req, reply);
-    if (!user) return;
-    const inv = await ownedInvitation(req.params.id, user.id);
-    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
-    if (!hasPlanner(inv.tier)) return reply.code(403).send({ error: "Il planner è incluso nell'RSVP premium" });
-    const { rows } = await pool.query(
-      `SELECT
-         (SELECT count(*)::int FROM planner_guests WHERE invitation_id = $1) AS guests,
-         (SELECT count(*)::int FROM planner_guests WHERE invitation_id = $1 AND response = 'yes') AS guests_yes,
-         (SELECT count(*)::int FROM planner_budget_items WHERE invitation_id = $1) AS budget_items,
-         (SELECT count(*)::int FROM planner_tasks WHERE invitation_id = $1) AS tasks,
-         (SELECT count(*)::int FROM planner_tasks WHERE invitation_id = $1 AND done) AS tasks_done,
-         (SELECT count(*)::int FROM planner_vendors WHERE invitation_id = $1) AS vendors`,
-      [inv.id],
-    );
-    return { tier: inv.tier, counts: rows[0] };
-  });
-
-  // ───────── Planner premium: dati dell'organizzatore (solo livello premium, solo proprietario) ─────────
-  async function premiumInvitation(req: FastifyRequest, reply: FastifyReply) {
-    const user = await requireUser(req, reply);
-    if (!user) return null;
-    const inv = await ownedInvitation((req.params as { id: string }).id, user.id);
-    if (!inv) {
-      reply.code(404).send({ error: "Invito non trovato" });
-      return null;
-    }
-    if (!hasPlanner(inv.tier)) {
-      reply.code(403).send({ error: "Il planner è incluso nell'RSVP premium" });
-      return null;
-    }
-    return inv;
-  }
-
-  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/data", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const [guests, budget, tasks, vendors, rsvps] = await Promise.all([
-      pool.query("SELECT id, name, group_name, party_size, response, table_id FROM planner_guests WHERE invitation_id = $1 ORDER BY group_name, name", [inv.id]),
-      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE invitation_id = $1 ORDER BY due_date NULLS LAST, created_at", [inv.id]),
-      pool.query("SELECT id, title, done, days_before FROM planner_tasks WHERE invitation_id = $1 ORDER BY days_before DESC, created_at", [inv.id]),
-      pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
-      pool.query("SELECT count(*)::int AS n FROM rsvps WHERE invitation_id = $1", [inv.id]),
-    ]);
-    const event = (inv.config.event ?? {}) as Record<string, unknown>;
-    const tables = await pool.query("SELECT id, name, seats FROM planner_tables WHERE invitation_id = $1 ORDER BY created_at", [inv.id]);
-    return {
-      tier: inv.tier,
-      tables: tables.rows,
-      event: { title: event.title ?? "", eventDate: event.eventDate ?? "", venue: event.venue ?? "", address: event.address ?? "" },
-      guests: guests.rows,
-      budget: budget.rows,
-      tasks: tasks.rows,
-      vendors: vendors.rows,
-      rsvpResponses: rsvps.rows[0]?.n ?? 0,
-      docs: inv.planner?.docs ?? {},
-      notes: inv.planner?.notes ?? "",
-      budgetCents: inv.planner?.budgetCents ?? 0,
-      guestQuota: inv.planner?.guestQuota ?? 0,
-    };
-  });
-
-  // Meteo del giorno dell'evento, nel luogo indicato. Oltre i giorni di previsione non c'è un dato affidabile.
-  app.get<{ Params: { id: string } }>("/api/invitations/:id/planner/weather", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const event = (inv.config.event ?? {}) as Record<string, string>;
-    const date = event.eventDate ?? "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { forecast: null, reason: "date" };
-    const place = await geocodeOne(event.address || event.venue || "");
-    if (!place) return { forecast: null, reason: "place" };
-    const forecast = await forecastFor(place.lat, place.lon, date);
-    return forecast ? { forecast, place: place.name } : { forecast: null, reason: "range", place: place.name };
-  });
-
-  // Cartella in PDF: l'organizzatore sceglie le parti da includere; il documento è impaginato dal server.
-  app.post<{ Params: { id: string } }>("/api/invitations/:id/planner/pdf", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const b = (req.body ?? {}) as { include?: unknown };
-    const include = (Array.isArray(b.include) ? b.include : []).filter((x): x is string => typeof x === "string" && isPdfChoice(x));
-    if (include.length === 0) return reply.code(400).send({ error: "Scegliete almeno una parte da includere" });
-    const [guests, tables, budget, tasks, vendors] = await Promise.all([
-      pool.query("SELECT name, group_name, party_size, response, table_id FROM planner_guests WHERE invitation_id = $1 ORDER BY group_name, name", [inv.id]),
-      pool.query("SELECT id, name, seats FROM planner_tables WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
-      pool.query("SELECT label, category, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE invitation_id = $1 ORDER BY due_date NULLS LAST, created_at", [inv.id]),
-      pool.query("SELECT title, done, days_before FROM planner_tasks WHERE invitation_id = $1 ORDER BY days_before DESC, created_at", [inv.id]),
-      pool.query("SELECT name, role, contact, contract_status FROM planner_vendors WHERE invitation_id = $1 ORDER BY created_at", [inv.id]),
-    ]);
-    const c = await loadCatalog();
-    const theme = c.themes.find((t) => t.manifest.id === inv.config.themeId)?.manifest;
-    const event = (inv.config.event ?? {}) as Record<string, string>;
-    const pdf = await buildPlannerPdf(
-      {
-        title: String(event.title ?? ""),
-        eventDate: String(event.eventDate ?? ""),
-        venue: String(event.venue ?? ""),
-        accent: theme?.themeColor ?? "#8a6427",
-        budgetCents: inv.planner?.budgetCents ?? 0,
-        guestQuota: inv.planner?.guestQuota ?? 0,
-        guests: guests.rows,
-        tables: tables.rows,
-        budget: budget.rows,
-        tasks: tasks.rows,
-        vendors: vendors.rows,
-        docs: inv.planner?.docs ?? {},
-      },
-      include,
-    );
-    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", 'attachment; filename="cartella-matrimonio.pdf"').send(pdf);
-  });
-
-  app.post<{ Params: { id: string; kind: string } }>("/api/invitations/:id/planner/:kind", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const kind = req.params.kind;
-    if (!isCollectionKind(kind)) return reply.code(404).send({ error: "Raccolta non trovata" });
-    const clean = sanitizeItem(kind, req.body, false);
-    if (!clean.ok) return reply.code(400).send({ error: clean.error });
-    if ("table_id" in clean.values) return reply.code(400).send({ error: "Assegna il posto dopo aver creato l'invitato" });
-    const cols = Object.keys(clean.values);
-    const table = COLLECTIONS[kind].table;
-    const { rows } = await pool.query(
-      `INSERT INTO ${table} (id, invitation_id, ${cols.join(", ")}) VALUES ($1, $2, ${cols.map((_, i) => "$" + (i + 3)).join(", ")}) RETURNING *`,
-      [randomUUID(), inv.id, ...cols.map((c) => clean.values[c])],
-    );
-    return reply.code(201).send(rows[0]);
-  });
-
-  app.patch<{ Params: { id: string; kind: string; itemId: string } }>("/api/invitations/:id/planner/:kind/:itemId", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const kind = req.params.kind;
-    if (!isCollectionKind(kind) || !UUID.test(req.params.itemId)) return reply.code(404).send({ error: "Elemento non trovato" });
-    const clean = sanitizeItem(kind, req.body, true);
-    if (!clean.ok) return reply.code(400).send({ error: clean.error });
-    const cols = Object.keys(clean.values);
-    if (cols.length === 0) return reply.code(400).send({ error: "Nessun dato da salvare" });
-    // Posti: il tavolo deve essere dell'invito e non superare la capienza.
-    if (kind === "guests" && clean.values.table_id) {
-      const t = await pool.query("SELECT seats FROM planner_tables WHERE id = $1 AND invitation_id = $2", [clean.values.table_id, inv.id]);
-      if (!t.rows[0]) return reply.code(404).send({ error: "Tavolo non trovato" });
-      const g = await pool.query("SELECT party_size FROM planner_guests WHERE id = $1 AND invitation_id = $2", [req.params.itemId, inv.id]);
-      const used = await pool.query("SELECT COALESCE(SUM(party_size), 0)::int AS n FROM planner_guests WHERE table_id = $1 AND id <> $2", [clean.values.table_id, req.params.itemId]);
-      if (used.rows[0].n + (g.rows[0]?.party_size ?? 0) > t.rows[0].seats) return reply.code(409).send({ error: "Tavolo pieno" });
-    }
-    if (kind === "tables" && typeof clean.values.seats === "number") {
-      const used = await pool.query("SELECT COALESCE(SUM(party_size), 0)::int AS n FROM planner_guests WHERE table_id = $1", [req.params.itemId]);
-      if (used.rows[0].n > (clean.values.seats as number)) return reply.code(409).send({ error: "Ci sono già più persone sedute di questi posti" });
-    }
-    const table = COLLECTIONS[kind].table;
-    const { rows } = await pool.query(
-      `UPDATE ${table} SET ${cols.map((c, i) => c + " = $" + (i + 3)).join(", ")} WHERE id = $1 AND invitation_id = $2 RETURNING *`,
-      [req.params.itemId, inv.id, ...cols.map((c) => clean.values[c])],
-    );
-    if (!rows[0]) return reply.code(404).send({ error: "Elemento non trovato" });
-    return rows[0];
-  });
-
-  app.delete<{ Params: { id: string; kind: string; itemId: string } }>("/api/invitations/:id/planner/:kind/:itemId", async (req, reply) => {
-    const inv = await premiumInvitation(req, reply);
-    if (!inv) return;
-    const kind = req.params.kind;
-    if (!isCollectionKind(kind) || !UUID.test(req.params.itemId)) return reply.code(404).send({ error: "Elemento non trovato" });
-    await pool.query(`DELETE FROM ${COLLECTIONS[kind as CollectionKind].table} WHERE id = $1 AND invitation_id = $2`, [req.params.itemId, inv.id]);
-    return { ok: true };
-  });
+  // Il planner è un servizio a sé, con le sue rotte (/api/planners/…): plannerRoutes.ts.
+  registerPlannerRoutes(app, { requireUser, loadCatalog });
 
   // Note del pianificatore: testo libero per l'organizzatore (promemoria, nota del conto alla rovescia). Non va nella pagina invito.
   // Dati primari dell'invito (nomi o titolo, data, luogo): si chiedono la prima volta che si apre il builder o il planner.
@@ -1022,7 +859,7 @@ export async function buildApp() {
     const slug = id;
     await pool.query(
       "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7)",
-      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, sample ? "premium" : (d.tier === "premium" ? "premium" : "rsvp")],
+      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, "rsvp"],
     );
     await pool.query("UPDATE orders SET status = 'paid', invitation_id = $2, source = $3 WHERE id = $1", [order.id, id, source]);
     await track("order_paid", id);
@@ -1127,19 +964,27 @@ export async function buildApp() {
     total_price: string;
     currency: string;
     customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
-    line_items?: { variant_id?: number | string | null }[];
+    line_items?: { variant_id?: number | string | null; quantity?: number }[];
     order_status_url?: string | null;
   };
+  // Acquisto dal negozio: ogni riga con una variante nostra diventa un acquisto da attivare.
+  // Variante base → invito; variante planner → planner; variante «pacchetto» (ex premium) → invito e planner.
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
     const base = normalizeVariant(ids.variantId);
-    const premium = normalizeVariant(ids.variantPremiumId);
-    const ours = (order.line_items ?? []).find((l) => {
+    const bundle = normalizeVariant(ids.variantPremiumId);
+    const plannerVariant = normalizeVariant(ids.variantPlannerId);
+    let invitations = 0;
+    let planners = 0;
+    for (const l of order.line_items ?? []) {
       const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
-      return v !== null && (v === base || v === premium);
-    });
-    if (!ours) return false;
-    const tier = premium && normalizeVariant(String(ours.variant_id)) === premium ? "premium" : "rsvp";
+      if (!v) continue;
+      const q = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1)));
+      if (v === base) invitations += q;
+      else if (bundle && v === bundle) { invitations += q; planners += q; }
+      else if (plannerVariant && v === plannerVariant) planners += q;
+    }
+    if (invitations === 0 && planners === 0) return false;
     const email = (order.email ?? order.customer?.email ?? "").trim().toLowerCase();
     if (!EMAIL.test(email)) {
       app.log.warn({ order: order.id }, "acquisto Shopify senza email valida");
@@ -1152,28 +997,39 @@ export async function buildApp() {
     );
     const userId = userRows[0].id as string;
     const c = await loadCatalog();
-    const draft = { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier };
     // Link di stato dell'ordine su Shopify: serve al cliente per tornare alla sua pagina d'acquisto. Solo https.
     const statusUrl = typeof order.order_status_url === "string" && /^https:\/\//.test(order.order_status_url) ? order.order_status_url : null;
-    const inserted = await pool.query(
-      "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url) VALUES ($1, $2, NULL, $3, $4, 'shopify', 'paid', 'initial', $5, $6) ON CONFLICT (id) DO NOTHING",
-      [String(order.id), userId, Math.round(Number(order.total_price) * 100), order.currency, JSON.stringify(draft), statusUrl],
-    );
-    if (inserted.rowCount === 0) return true; // ripetizione del webhook: già registrato, niente email doppia
+    // Una riga per acquisto: il primo invito ha l'id dell'ordine (come prima), gli altri un suffisso. L'importo va sulla prima riga.
+    const rowsToAdd: { id: string; draft: Record<string, unknown> }[] = [];
+    for (let n = 0; n < invitations; n++) rowsToAdd.push({ id: n === 0 ? String(order.id) : `${order.id}-${n + 1}`, draft: { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier: "rsvp" } });
+    for (let n = 0; n < planners; n++) rowsToAdd.push({ id: `${order.id}-planner${n === 0 ? "" : `-${n + 1}`}`, draft: { product: "planner" } });
+    let added = 0;
+    for (const [k, r] of rowsToAdd.entries()) {
+      const inserted = await pool.query(
+        "INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url) VALUES ($1, $2, NULL, $3, $4, 'shopify', 'paid', 'initial', $5, $6) ON CONFLICT (id) DO NOTHING",
+        [r.id, userId, k === 0 ? Math.round(Number(order.total_price) * 100) : 0, order.currency, JSON.stringify(r.draft), statusUrl],
+      );
+      added += inserted.rowCount ?? 0;
+    }
+    if (added === 0) return true; // ripetizione del webhook: già registrato, niente email doppia
     const token = await createAccessToken(userId);
-    await sendMail(purchaseEmail({ to: email, link: `${appUrl()}/accesso/${token}` }), "order").catch((e) => app.log.warn({ err: e }, "email d'acquisto non inviata"));
+    const link = `${appUrl()}/accesso/${token}`;
+    const mail = invitations > 0 ? purchaseEmail({ to: email, link }) : accessEmail({ to: email, link });
+    await sendMail(mail, "order").catch((e) => app.log.warn({ err: e }, "email d'acquisto non inviata"));
     return true;
   }
+
 
   // Acquisti da attivare: pagati su Shopify, senza ancora un invito. Il cliente sceglie il template qui.
   app.get("/api/account/pending", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
     const { rows } = await pool.query(
-      "SELECT id, draft, created_at, status_url FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL ORDER BY created_at",
+      "SELECT id, draft, created_at, status_url FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND planner_id IS NULL ORDER BY created_at",
       [user.id],
     );
-    return rows.map((r) => ({ id: r.id, tier: r.draft?.tier === "premium" ? "premium" : "rsvp", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
+    // Due prodotti: l'invito (si sceglie il template) e il planner (si dà un nome all'evento).
+    return rows.map((r) => ({ id: r.id, product: r.draft?.product === "planner" ? "planner" : "invitation", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
   });
 
   // Il cliente sceglie il template in galleria: si crea l'invito con quel tema.
@@ -1184,7 +1040,7 @@ export async function buildApp() {
     const orderId = typeof b.orderId === "string" ? b.orderId : "";
     const themeId = typeof b.themeId === "string" ? b.themeId : "";
     const { rows } = await pool.query(
-      "SELECT id, user_id, draft, amount_cents FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL",
+      "SELECT id, user_id, draft, amount_cents FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND COALESCE(draft->>'product', '') <> 'planner'",
       [orderId, user.id],
     );
     if (!rows[0] || !rows[0].draft) return reply.code(404).send({ error: "Acquisto non trovato o già attivato" });
@@ -1448,6 +1304,7 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     const { rows } = await pool.query(
       `SELECT o.id, o.source, o.status, o.kind, o.created_at, o.status_url, o.draft->>'tier' AS tier, o.draft->>'model' AS model,
+              COALESCE(o.draft->>'product', 'invitation') AS product, o.planner_id,
               o.invitation_id, i.slug, i.status AS invitation_status, i.order_ref, i.config->>'title' AS title,
               u.id AS user_id, u.email, u.name AS user_name
        FROM orders o

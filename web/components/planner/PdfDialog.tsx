@@ -26,7 +26,7 @@ export function PdfDialog({ id, onClose }: { id: string; onClose: () => void }) 
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/invitations/${id}/planner/pdf`, {
+      const res = await fetch(`/api/planners/${id}/pdf`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ include: [...picked] }),

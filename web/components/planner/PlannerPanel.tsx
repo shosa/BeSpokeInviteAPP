@@ -34,7 +34,8 @@ function Panel({ icon, title, action, children, id, className = "" }: { icon: Re
   );
 }
 
-export function PlannerPanel({ data, lang = "it" }: { data: PlannerData; lang?: Lang }) {
+// plannerId: planner collegato all'invito (servizio a parte), per il collegamento rapido.
+export function PlannerPanel({ data, lang = "it", plannerId = null }: { data: PlannerData; lang?: Lang; plannerId?: string | null }) {
   const { manage, summary } = data;
   const L = ui(lang).planner;
   const T = lang === "en"
@@ -75,6 +76,7 @@ export function PlannerPanel({ data, lang = "it" }: { data: PlannerData; lang?: 
         <CopyLink path={shareHref} lang={lang} />
         <a className="pl-chip" href={shareHref} target="_blank" rel="noreferrer"><Eye size={16} aria-hidden="true" />{T.view}</a>
         <a className="pl-chip" href={`/editor/${manage.id}`}><Pencil size={16} aria-hidden="true" />{T.edit}</a>
+        {plannerId && <a className="pl-chip" href={`/planner/${plannerId}`}><CalendarDays size={16} aria-hidden="true" />Planner</a>}
       </div>
 
       <div className="pl-tiles" aria-label={L.kicker}>

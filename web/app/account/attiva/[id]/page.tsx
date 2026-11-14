@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { ActivateTemplate } from "@/components/ActivateTemplate";
+import { PlannerActivate } from "@/components/account/PlannerActivate";
+import "../../account.css";
 import { apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
 import type { ThemeManifest } from "@inviteme/shared";
@@ -20,9 +22,31 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
   }
   const item = pending.find((p) => p.id === id);
   if (!item) redirect("/account");
+  const isEn = lang === "en";
+
+  // Acquisto di un planner: nome e data dell'evento, invito da collegare facoltativo.
+  if (item.product === "planner") {
+    const rows = await apiServer<{ id: string; title: string; status: string; plannerId: string | null }[]>("/api/account/invitations").catch(() => []);
+    const free = rows.filter((r) => r.status === "paid" && !r.plannerId).map((r) => ({ id: r.id, title: r.title }));
+    return (
+      <>
+        <Nav current="account" lang={lang} />
+        <main className="wrap narrow act-page">
+          <a className="link act-back" href="/account">{isEn ? "← My account" : "← La mia area"}</a>
+          <ol className="act-steps" aria-label={isEn ? "Steps" : "Passi"}>
+            <li className="is-done"><span>1</span>{isEn ? "Purchase" : "Acquisto"}</li>
+            <li className="is-on"><span>2</span>{isEn ? "Your event" : "Il tuo evento"}</li>
+            <li><span>3</span>{isEn ? "Organise" : "Organizza"}</li>
+          </ol>
+          <h1>{isEn ? "Start your planner" : "Inizia il tuo planner"}</h1>
+          <p className="lede">{isEn ? "Give your event a name: tasks, budget, guests, tables and vendors will all be here." : "Dai un nome al tuo evento: attività, budget, invitati, tavoli e fornitori staranno tutti qui."}</p>
+          <PlannerActivate orderId={id} invitations={free} lang={lang === "en" ? "en" : "it"} />
+        </main>
+      </>
+    );
+  }
   const catalog = await apiPublic<{ themes?: { enabled: boolean; manifest: ThemeManifest }[] }>("/api/catalog");
   const templates = (catalog?.themes ?? []).filter((t) => t.enabled).map((t) => t.manifest);
-  const isEn = lang === "en";
 
   return (
     <>

@@ -12,6 +12,7 @@ export type OrderDetail = {
   created_at: string;
   status_url: string | null;
   tier: string | null;
+  product?: "invitation" | "planner";
   model: string | null;
   invitation_id: string | null;
   slug: string | null;
@@ -91,7 +92,7 @@ export function AdminOrders() {
         <div className="ac-card ac-table-wrap">
           <table className="ac-table ac-orders">
             <thead>
-              <tr><th>Data</th><th>ID ordine</th><th>Cliente</th><th>Invito</th><th>Fonte</th><th>Stato</th><th>Piano</th></tr>
+              <tr><th>Data</th><th>ID ordine</th><th>Cliente</th><th>Invito</th><th>Fonte</th><th>Stato</th><th>Prodotto</th></tr>
             </thead>
             <tbody>
               {shown.map((o) => (
@@ -109,7 +110,7 @@ export function AdminOrders() {
                     </td>
                     <td><span className="ac-tag">{o.source === "shopify" ? "Shopify" : "Prova"}</span></td>
                     <td><span className={`pill ${o.status === "paid" ? "yes" : "draft"}`}>{o.status === "paid" ? "Pagato" : "In attesa"}</span></td>
-                    <td>{o.tier === "premium" ? "Premium" : o.tier ? "Base" : "–"}</td>
+                    <td>{o.product === "planner" ? "Planner" : "Invito"}</td>
                   </tr>
                   {open === o.id && (
                     <tr className="ac-detail-row">

@@ -4,20 +4,23 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import { FOLDER, FOLDER_KEYS } from "@inviteme/shared";
 import { Folder, type FolderValue } from "./Folder";
-import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, MailCheck, MoreHorizontal, Printer, Store, Users, Wallet, X, type LucideProps } from "lucide-react";
+import { Armchair, CloudSun, FolderOpen, LayoutDashboard, ListChecks, MoreHorizontal, Printer, Store, Users, Wallet, X, type LucideProps } from "lucide-react";
 import { Seating } from "./Seating";
 import { PdfDialog } from "./PdfDialog";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { RsvpStats, RsvpTable, type RsvpSummary } from "./RsvpInsights";
 import { ShareInvite } from "./ShareInvite";
 
-// Planner premium: riepilogo, budget, invitati, attività, fornitori e cartella del matrimonio.
-// Colori e font seguono il tema dell'invito (variabili --inv e --inv-ink impostate dalla pagina).
-// Ogni modifica va alle rotte /api/invitations/:id/planner/… e il server applica le regole del livello premium.
+// Planner: servizio a sé (si compra a parte) per organizzare un evento: riepilogo, budget, invitati, tavoli,
+// attività, fornitori e cartella. Si può collegare a un invito del cliente: allora ne usa i colori e il link da condividere.
+// Le conferme di presenza restano dell'invito (pagina Risposte): qui solo il numero, se c'è un invito collegato.
+// Ogni modifica va alle rotte /api/planners/:id/… (plannerRoutes.ts).
 
+export type LinkedInvitation = { id: string; title: string; slug: string; published: boolean; themeId: string; themeColor: string; rsvps: number };
 export type PremiumData = {
-  tier: string;
+  id: string;
   event: { title: string; eventDate: string; venue: string; address: string };
+  invitation: LinkedInvitation | null;
+  linkable: { id: string; title: string }[];
   guests: { id: string; name: string; group_name: string; party_size: number; response: "pending" | "yes" | "no"; table_id: string | null }[];
   tables: { id: string; name: string; seats: number }[];
   budget: { id: string; category: string; label: string; amount_cents: number; due_date: string | null; paid: boolean }[];
@@ -31,12 +34,11 @@ export type PremiumData = {
 };
 
 type Weather = { forecast: { tmaxC: number; tminC: number; precipMm: number; precipProb: number | null } | null; reason?: string; place?: string };
-type Tab = "riepilogo" | "conferme" | "budget" | "invitati" | "tavoli" | "attivita" | "fornitori" | "cartella";
+type Tab = "riepilogo" | "budget" | "invitati" | "tavoli" | "attivita" | "fornitori" | "cartella";
 type Icon = ComponentType<LucideProps>;
 
 const TABS: { key: Tab; label: string; icon: Icon }[] = [
   { key: "riepilogo", label: "Riepilogo", icon: LayoutDashboard },
-  { key: "conferme", label: "Conferme", icon: MailCheck },
   { key: "budget", label: "Budget", icon: Wallet },
   { key: "invitati", label: "Invitati", icon: Users },
   { key: "tavoli", label: "Tavoli", icon: Armchair },
@@ -46,7 +48,7 @@ const TABS: { key: Tab; label: string; icon: Icon }[] = [
 ];
 
 // Telefono: barra in basso come un'app, con le sezioni principali e «Altro» per tutte le altre.
-const MAIN_TABS: Tab[] = ["riepilogo", "conferme", "invitati", "budget"];
+const MAIN_TABS: Tab[] = ["riepilogo", "invitati", "budget", "attivita"];
 const MORE_TABS = TABS.filter((t) => !MAIN_TABS.includes(t.key));
 
 const STANDARD_TASKS: { title: string; days_before: number }[] = [
@@ -75,8 +77,7 @@ const taskDue = (eventDate: string, daysBefore: number) => {
   return `entro il ${d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}`;
 };
 
-// sharePath: link pubblico dell'invito (/i/…), null se non è ancora pubblicato.
-export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; initial: PremiumData; lang: "it" | "en"; sharePath: string | null }) {
+export function PremiumPlanner({ id, initial, lang }: { id: string; initial: PremiumData; lang: "it" | "en" }) {
   const router = useRouter();
   const [data, setData] = useState<PremiumData>(initial);
   const [tab, setTab] = useState<Tab>("riepilogo");
@@ -99,25 +100,8 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [moreOpen]);
-  const [rsvp, setRsvp] = useState<RsvpSummary | null>(null);
-  const [rsvpFailed, setRsvpFailed] = useState(false);
-
-  // Risposte alla conferma: si caricano all'apertura della scheda e si aggiornano ogni 30 secondi finché resta aperta.
   useEffect(() => {
-    if (tab !== "conferme") return;
-    let alive = true;
-    const load = () =>
-      fetch(`/api/invitations/${id}/rsvps`)
-        .then((r) => (r.ok ? (r.json() as Promise<RsvpSummary>) : Promise.reject()))
-        .then((d) => { if (alive) { setRsvp(d); setRsvpFailed(false); } })
-        .catch(() => { if (alive) setRsvpFailed(true); });
-    load();
-    const t = setInterval(load, 30_000);
-    return () => { alive = false; clearInterval(t); };
-  }, [tab, id]);
-
-  useEffect(() => {
-    fetch(`/api/invitations/${id}/planner/weather`)
+    fetch(`/api/planners/${id}/weather`)
       .then((r) => (r.ok ? r.json() : null))
       .then((w: Weather | null) => setWeather(w))
       .catch(() => setWeather(null));
@@ -125,7 +109,7 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
 
   async function call(method: "POST" | "PATCH" | "DELETE" | "PUT", path: string, body?: unknown) {
     setError(null);
-    const res = await fetch(`/api/invitations/${id}/planner${path}`, {
+    const res = await fetch(`/api/planners/${id}${path}`, {
       method,
       headers: { "content-type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -140,7 +124,7 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
 
   // Dopo ogni modifica si ricaricano i dati dal server: il server è la sola fonte di verità.
   async function reload() {
-    const res = await fetch(`/api/invitations/${id}/planner/data`);
+    const res = await fetch(`/api/planners/${id}/data`);
     if (res.ok) setData((await res.json()) as PremiumData);
     router.refresh();
   }
@@ -182,7 +166,8 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
     <div className="pp-shell">
       <div className="pp-layout">
         <aside className="pp-rail" aria-label="Sezioni del planner">
-          <ShareInvite path={sharePath} title={data.event.title || "Il nostro invito"} editHref={`/editor/${id}`} lang={lang} />
+          {/* Condividi solo con un invito collegato: il planner da solo non ha una pagina per gli ospiti. */}
+          {data.invitation && <ShareInvite path={data.invitation.published ? `/i/${data.invitation.slug}` : null} title={data.event.title || "Il nostro invito"} editHref={`/editor/${data.invitation.id}`} lang={lang} />}
           <nav className="pp-rail-nav" role="tablist" aria-orientation="vertical">
             {TABS.map(({ key, label, icon: Icon }) => (
               <button key={key} type="button" role="tab" aria-selected={tab === key} className={`pp-rail-item${tab === key ? " is-on" : ""}`} onClick={() => go(key)}>
@@ -245,6 +230,7 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
 
           {tab === "riepilogo" && (
             <section className="pp-stagger" aria-label="Riepilogo">
+              <EventCard data={data} onSaveEvent={(ev) => act(() => call("PUT", "", ev))} onLink={(invitationId) => act(() => call("POST", "/link", { invitationId }))} />
               <div className="pp-hero-stats">
                 <div className="pp-stat pp-stat-days">
                   <span className="pp-kicker">Giorno del sì</span>
@@ -254,7 +240,7 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
                 <div className="pp-stat">
                   <span className="pp-kicker">Invitati confermati</span>
                   <strong>{yesPersons}</strong>
-                  <small>{data.guests.length} gruppi · {pendingGroups} senza risposta · {data.rsvpResponses} risposte dall&apos;invito</small>
+                  <small>{data.guests.length} gruppi · {pendingGroups} senza risposta{data.invitation ? ` · ${data.rsvpResponses} risposte dall'invito` : ""}</small>
                 </div>
                 <div className="pp-stat">
                   <span className="pp-kicker">Budget</span>
@@ -293,30 +279,6 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
                   <Bar value={Math.round((docsWritten / FOLDER.length) * 100)} />
                 </div>
               </div>
-            </section>
-          )}
-
-          {tab === "conferme" && (
-            <section className="pp-stagger" aria-label="Conferme">
-              {!rsvp ? (
-                <div className="pp-card"><p className="hint">{rsvpFailed ? "Non è stato possibile caricare le risposte. Riprova tra poco." : "Caricamento delle risposte…"}</p></div>
-              ) : (
-                <>
-                  <div className="pp-hero-stats">
-                    <div className="pp-stat"><span className="pp-kicker">Risposte</span><strong>{rsvp.total}</strong><small>dal link dell&apos;invito</small></div>
-                    <div className="pp-stat"><span className="pp-kicker">Presenti</span><strong>{rsvp.attending}</strong><small>{rsvp.declined} non potranno</small></div>
-                    <div className="pp-stat"><span className="pp-kicker">Persone</span><strong>{rsvp.guests}</strong><small>attese in tutto</small></div>
-                  </div>
-                  <div className="pp-card">
-                    <span className="pp-kicker">Statistiche delle risposte</span>
-                    <RsvpStats summary={rsvp} lang={lang} />
-                  </div>
-                  <div className="pp-card">
-                    <span className="pp-kicker">Tutte le risposte</span>
-                    <RsvpTable invitationId={id} summary={rsvp} lang={lang} />
-                  </div>
-                </>
-              )}
             </section>
           )}
 
@@ -472,6 +434,58 @@ export function PremiumPlanner({ id, initial, lang, sharePath }: { id: string; i
             </section>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Evento del planner (nome, data, luogo) e invito collegato: si modificano qui. Il collegamento è facoltativo.
+function EventCard({ data, onSaveEvent, onLink }: { data: PremiumData; onSaveEvent: (ev: { title: string; eventDate: string; venue: string; address: string }) => void; onLink: (invitationId: string | null) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [ev, setEv] = useState(data.event);
+  const [pick, setPick] = useState("");
+  useEffect(() => setEv(data.event), [data.event]);
+  const inv = data.invitation;
+  return (
+    <div className="pp-card pp-event">
+      <div className="pp-event-head">
+        <div>
+          <span className="pp-kicker">Il tuo evento</span>
+          <strong className="pp-event-title">{data.event.title || "Evento senza nome"}</strong>
+          <small>{[validIso(data.event.eventDate) ? longDate(data.event.eventDate) : "Data da definire", data.event.venue].filter(Boolean).join(" · ")}</small>
+        </div>
+        {!editing && <button type="button" className="pp-link" onClick={() => setEditing(true)}>Modifica</button>}
+      </div>
+      {editing && (
+        <form className="pp-form pp-event-form" onSubmit={(e) => { e.preventDefault(); onSaveEvent(ev); setEditing(false); }}>
+          <input value={ev.title} onChange={(e) => setEv({ ...ev, title: e.target.value })} placeholder="Nome dell'evento" maxLength={120} required aria-label="Nome dell'evento" />
+          <input type="date" value={ev.eventDate} onChange={(e) => setEv({ ...ev, eventDate: e.target.value })} aria-label="Data" />
+          <input value={ev.venue} onChange={(e) => setEv({ ...ev, venue: e.target.value })} placeholder="Luogo" maxLength={160} aria-label="Luogo" />
+          <input value={ev.address} onChange={(e) => setEv({ ...ev, address: e.target.value })} placeholder="Indirizzo (per il meteo)" maxLength={200} aria-label="Indirizzo" />
+          <button type="submit" className="btn solid small">Salva</button>
+          <button type="button" className="pp-link" onClick={() => { setEv(data.event); setEditing(false); }}>Annulla</button>
+        </form>
+      )}
+      <div className="pp-event-link">
+        {inv ? (
+          <>
+            <span className="pp-event-thumb" style={{ background: inv.themeColor }} aria-hidden="true" />
+            <span className="pp-event-inv"><small>Invito collegato</small><strong>{inv.title || "Invito"} · {inv.rsvps} {inv.rsvps === 1 ? "risposta" : "risposte"}</strong></span>
+            <a className="pp-link" href={`/inviti/${inv.id}/risposte`}>Risposte</a>
+            <button type="button" className="pp-link" onClick={() => { if (window.confirm("Scollegare l'invito da questo planner? I dati del planner restano.")) onLink(null); }}>Scollega</button>
+          </>
+        ) : data.linkable.length > 0 ? (
+          <form className="pp-event-pick" onSubmit={(e) => { e.preventDefault(); if (pick) onLink(pick); }}>
+            <span>Nessun invito collegato.</span>
+            <select value={pick} onChange={(e) => setPick(e.target.value)} aria-label="Invito da collegare">
+              <option value="">Scegli un invito…</option>
+              {data.linkable.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
+            </select>
+            <button type="submit" className="btn outline small" disabled={!pick}>Collega</button>
+          </form>
+        ) : (
+          <span className="hint">Nessun invito collegato. Il planner funziona anche da solo; se compri un invito potrai collegarlo qui.</span>
+        )}
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import { ShareInvite } from "../planner/ShareInvite";
 // Solo ciò che serve: il link da condividere, l'invito da aprire, le risposte e il planner.
 type Summary = { total: number; attending: number; declined: number; guests: number };
 
-export function PublishedPanel({ id, slug, title, lang, onPreview }: { id: string; slug: string; title: string; lang: "it" | "en"; onPreview?: () => void }) {
+export function PublishedPanel({ id, plannerId = null, slug, title, lang, onPreview }: { id: string; plannerId?: string | null; slug: string; title: string; lang: "it" | "en"; onPreview?: () => void }) {
   const en = lang === "en";
   const [summary, setSummary] = useState<Summary | null>(null);
   // Il dominio si legge nel browser dopo il montaggio: scritto subito, il server e il browser darebbero testi diversi.
@@ -50,10 +50,15 @@ export function PublishedPanel({ id, slug, title, lang, onPreview }: { id: strin
           <div><strong>{summary ? summary.attending : "–"}</strong><span>{en ? "attending" : "presenti"}</span></div>
           <div><strong>{summary ? summary.guests : "–"}</strong><span>{en ? "people" : "persone"}</span></div>
         </div>
-        <a className="pub-action" href={`/planner/${id}`}>
-          <CalendarHeart size={18} aria-hidden="true" />{en ? "Go to the planner" : "Vai al planner"}
+        <a className="pub-action" href={`/inviti/${id}/risposte`}>
+          <Users size={18} aria-hidden="true" />{en ? "See the replies" : "Vedi le risposte"}
         </a>
-        <p className="pub-note"><Users size={14} aria-hidden="true" />{en ? "Replies, statistics and export are in the planner." : "Risposte, statistiche ed esportazione sono nel planner."}</p>
+        {plannerId && (
+          <a className="pub-action" href={`/planner/${plannerId}`}>
+            <CalendarHeart size={18} aria-hidden="true" />{en ? "Open the planner" : "Apri il planner"}
+          </a>
+        )}
+        <p className="pub-note">{en ? "Replies, statistics and CSV export." : "Risposte, statistiche ed esportazione in CSV."}</p>
       </section>
     </div>
   );

@@ -5,16 +5,16 @@ import { toast } from "sonner";
 
 // Stato di una voce di configurazione, come la restituisce l'API. I segreti non hanno valore: solo la presenza.
 type Item = { key: string; label: string; required: boolean; source: "console" | "ambiente" | "assente"; value: string | null; secret: boolean };
-type Ids = { storeDomain: string; variantId: string; variantPremiumId: string };
+type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; variantPlannerId: string };
 type Payload = { items: Item[]; ids: Ids; configured: boolean; demo: boolean; webhookUrl: string; webhookTopic: string; appUrl: string };
-type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; error?: string };
+type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; error?: string };
 
 const SOURCE_LABEL: Record<Item["source"], string> = { console: "dalla console", ambiente: "dal file .env", assente: "mancante" };
 
 // Shopify: il sito di vendita. Qui si collegano il negozio e le varianti dei prodotti; i segreti stanno nel .env del server.
 export function AdminShopify() {
   const [data, setData] = useState<Payload | null>(null);
-  const [draft, setDraft] = useState<Ids>({ storeDomain: "", variantId: "", variantPremiumId: "" });
+  const [draft, setDraft] = useState<Ids>({ storeDomain: "", variantId: "", variantPremiumId: "", variantPlannerId: "" });
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [test, setTest] = useState<TestResult | null>(null);
@@ -58,7 +58,7 @@ export function AdminShopify() {
 
   const missing = data.items.filter((i) => i.required && i.source === "assente");
   const ready = missing.length === 0 && !data.demo;
-  const dirty = draft.storeDomain !== data.ids.storeDomain || draft.variantId !== data.ids.variantId || draft.variantPremiumId !== data.ids.variantPremiumId;
+  const dirty = draft.storeDomain !== data.ids.storeDomain || draft.variantId !== data.ids.variantId || draft.variantPremiumId !== data.ids.variantPremiumId || draft.variantPlannerId !== (data.ids.variantPlannerId ?? "");
 
   return (
     <div className="ac-stack">
@@ -86,7 +86,8 @@ export function AdminShopify() {
                 {test.shopName && <li><span>Negozio</span><b>{test.shopName}</b></li>}
                 {test.productTitle && <li><span>Prodotto base</span><b>{test.productTitle}{test.variantTitle && test.variantTitle !== "Default Title" ? ` · ${test.variantTitle}` : ""}</b></li>}
                 {test.price && <li><span>Prezzo base</span><b>{test.price}</b></li>}
-                {test.premiumTitle && <li><span>Prodotto premium</span><b>{test.premiumTitle}</b></li>}
+                {test.plannerTitle && <li><span>Prodotto planner</span><b>{test.plannerTitle}</b></li>}
+                {test.premiumTitle && <li><span>Pacchetto invito + planner</span><b>{test.premiumTitle}</b></li>}
               </ul>
             </>
           ) : (
@@ -104,14 +105,19 @@ export function AdminShopify() {
             <small>Lo trovi in Shopify, Impostazioni, Dominio: finisce con myshopify.com.</small>
           </label>
           <label className="ac-field">
-            <span>ID variante del pacchetto base</span>
+            <span>ID variante dell&apos;invito</span>
             <input value={draft.variantId} onChange={(e) => setDraft({ ...draft, variantId: e.target.value })} placeholder="es. 44123456789" maxLength={40} inputMode="numeric" />
             <small>Prodotti, scegli il prodotto, poi la variante: l&apos;ID numerico è nell&apos;indirizzo della pagina.</small>
           </label>
           <label className="ac-field">
-            <span>ID variante del planner premium</span>
+            <span>ID variante del planner</span>
+            <input value={draft.variantPlannerId} onChange={(e) => setDraft({ ...draft, variantPlannerId: e.target.value })} placeholder="facoltativo" maxLength={40} inputMode="numeric" />
+            <small>Il planner si vende a parte: chi lo compra lo trova da attivare nella sua area, e può collegarlo a un suo invito.</small>
+          </label>
+          <label className="ac-field">
+            <span>ID variante del pacchetto invito + planner</span>
             <input value={draft.variantPremiumId} onChange={(e) => setDraft({ ...draft, variantPremiumId: e.target.value })} placeholder="facoltativo" maxLength={40} inputMode="numeric" />
-            <small>Se è vuoto, il planner premium si vende con il pacchetto base.</small>
+            <small>Facoltativa: un acquisto di questa variante dà un invito e un planner da attivare.</small>
           </label>
           {error && <p className="form-error" role="alert">{error}</p>}
           <div className="ac-form-actions">

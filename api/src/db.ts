@@ -176,6 +176,63 @@ CREATE TABLE IF NOT EXISTS planner_guests (
   response text NOT NULL DEFAULT 'pending' CHECK (response IN ('pending', 'yes', 'no')),
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Planner come servizio a sé (si compra a parte): un evento con i suoi dati, collegabile a un invito (facoltativo).
+CREATE TABLE IF NOT EXISTS planners (
+  id uuid PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  invitation_id uuid UNIQUE REFERENCES invitations(id) ON DELETE SET NULL,
+  title text NOT NULL DEFAULT '',
+  event_date date,
+  venue text NOT NULL DEFAULT '',
+  address text NOT NULL DEFAULT '',
+  data jsonb NOT NULL DEFAULT '{}',
+  order_ref text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS planners_user_idx ON planners(user_id);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE SET NULL;
+ALTER TABLE planner_tables ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE CASCADE;
+ALTER TABLE planner_budget_items ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE CASCADE;
+ALTER TABLE planner_tasks ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE CASCADE;
+ALTER TABLE planner_vendors ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE CASCADE;
+ALTER TABLE planner_guests ADD COLUMN IF NOT EXISTS planner_id uuid REFERENCES planners(id) ON DELETE CASCADE;
+ALTER TABLE planner_tables ALTER COLUMN invitation_id DROP NOT NULL;
+ALTER TABLE planner_budget_items ALTER COLUMN invitation_id DROP NOT NULL;
+ALTER TABLE planner_tasks ALTER COLUMN invitation_id DROP NOT NULL;
+ALTER TABLE planner_vendors ALTER COLUMN invitation_id DROP NOT NULL;
+ALTER TABLE planner_guests ALTER COLUMN invitation_id DROP NOT NULL;
+
+-- Migrazione una tantum (idempotente): ogni invito «premium» diventa un invito normale con un planner collegato,
+-- che si porta dietro i dati del planner (note, cartella, budget, quota) e le righe di invitati, budget, attività, fornitori e tavoli.
+INSERT INTO planners (id, user_id, invitation_id, title, event_date, venue, address, data, order_ref, created_at)
+SELECT gen_random_uuid(), i.user_id, i.id,
+       COALESCE(i.config->'event'->>'title', ''),
+       CASE WHEN i.config->'event'->>'eventDate' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN (i.config->'event'->>'eventDate')::date END,
+       COALESCE(i.config->'event'->>'venue', ''),
+       COALESCE(i.config->'event'->>'address', ''),
+       jsonb_build_object(
+         'docs', COALESCE(i.planner->'docs', '{}'::jsonb),
+         'notes', COALESCE(i.planner->>'notes', ''),
+         'budgetCents', CASE WHEN i.planner->>'budgetCents' ~ '^[0-9]+$' THEN (i.planner->>'budgetCents')::bigint ELSE 0 END,
+         'guestQuota', CASE WHEN i.planner->>'guestQuota' ~ '^[0-9]+$' THEN (i.planner->>'guestQuota')::int ELSE 0 END
+       ),
+       i.order_ref, i.created_at
+FROM invitations i
+WHERE i.tier = 'premium' AND NOT EXISTS (SELECT 1 FROM planners p WHERE p.invitation_id = i.id);
+UPDATE planner_tables x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
+UPDATE planner_budget_items x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
+UPDATE planner_tasks x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
+UPDATE planner_vendors x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
+UPDATE planner_guests x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
+UPDATE invitations SET tier = 'rsvp' WHERE tier = 'premium';
+-- Acquisti «premium» non ancora attivati: restano un invito da attivare e ricevono anche un planner da attivare.
+INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url, created_at)
+SELECT o.id || '-planner', o.user_id, NULL, 0, o.currency, o.source, 'paid', 'initial', '{"product":"planner"}'::jsonb, o.status_url, o.created_at
+FROM orders o
+WHERE o.draft->>'tier' = 'premium' AND o.invitation_id IS NULL AND o.status = 'paid' AND o.user_id IS NOT NULL
+ON CONFLICT (id) DO NOTHING;
+UPDATE orders SET draft = jsonb_set(draft, '{tier}', '"rsvp"') WHERE draft->>'tier' = 'premium';
 `;
 
 // Crea lo schema all'avvio. Il lock evita che due istanze lo eseguano insieme.

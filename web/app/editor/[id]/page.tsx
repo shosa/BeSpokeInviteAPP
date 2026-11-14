@@ -11,7 +11,7 @@ export default async function Editor({ params }: { params: Promise<{ id: string 
   const { id } = await params;
   try {
     const manage = await apiServer<Manage>(`/api/invitations/${id}/manage`);
-    if (manage.status !== "paid") redirect(`/planner/${id}`);
+    if (manage.status !== "paid") redirect("/account");
     const setupDone = Boolean((manage as { planner?: { setupDone?: boolean } }).planner?.setupDone);
     return (
       <SetupGate id={id} setupDone={setupDone} config={manage.config}>

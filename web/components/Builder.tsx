@@ -45,6 +45,7 @@ export type Manage = {
   config: InviteConfig;
   guests: { email: string; sentAt: string }[];
   editCount: number;
+  plannerId?: string | null;
   editSession: string | null;
   purchasedAddons: AddonKey[];
   catalog: Catalog;
@@ -119,7 +120,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       return;
     }
     const res = await fetch(`/api/invitations/${initial.id}/confirm-edit`, { method: "POST" });
-    if (res.ok) return (window.location.href = `/planner/${initial.id}`);
+    if (res.ok) return (window.location.href = `/inviti/${initial.id}/risposte`);
     const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
     if (res.status === 409 && data.code === "payment_required") {
       setSummary(false);
@@ -542,7 +543,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       {/* Invito pubblicato: al posto di assistente, blocchi e proprietà, solo link, risposte e planner. */}
       {locked ? (
       <aside className="bl-left bl-published" aria-label={lang === "en" ? "Your invitation" : "Il tuo invito"}>
-        <PublishedPanel id={initial.id} slug={slug} title={title} lang={lang} onPreview={isDesktop ? undefined : () => setMobileTab("anteprima")} />
+        <PublishedPanel id={initial.id} plannerId={initial.plannerId ?? null} slug={slug} title={title} lang={lang} onPreview={isDesktop ? undefined : () => setMobileTab("anteprima")} />
       </aside>
       ) : (
       <aside className="bl-left" aria-label={initial.assistant && isDesktop ? "BeSpoke AI" : "Blocchi"}>
@@ -749,7 +750,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           lang={lang}
           onClose={() => setPublishOpen(false)}
           onPayment={() => { setPublishOpen(false); setSummary(false); checkout(); }}
-          onDone={() => { window.location.href = `/planner/${initial.id}`; }}
+          onDone={() => { window.location.href = `/inviti/${initial.id}/risposte`; }}
         />
       )}
       {summary && paidAlready && editable && (
