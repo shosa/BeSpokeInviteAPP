@@ -536,10 +536,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         <button role="tab" aria-selected={mobileTab === "proprieta"} onClick={() => setMobileTab("proprieta")}>{L.tabProps}</button>
       </nav>
 
-      <aside className={`bl-left${locked ? " is-locked" : ""}`} inert={locked || undefined} aria-label={initial.assistant && isDesktop ? (lang === "en" ? "Assistant" : "Assistente") : "Blocchi"}>
+      <aside className={`bl-left${locked ? " is-locked" : ""}`} inert={locked || undefined} aria-label={initial.assistant && isDesktop ? "BeSpoke AI" : "Blocchi"}>
         {!isDesktop && blocksPanel}
         {/* Desktop: l'assistente sta nella colonna a destra dell'anteprima. Su telefono la colonna è nascosta. */}
-        {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} />}
+        {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} config={config} catalog={catalog} />}
       </aside>
 
       <main className="bl-center" aria-label={L.previewAria}>
@@ -692,7 +692,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         <div className="bl-fab-row">
           {initial.assistant && !assistantSheet && (
             <button type="button" className="bl-assist-fab" onClick={() => setAssistantSheet(true)}>
-              <Sparkles size={16} aria-hidden="true" />{lang === "en" ? "Assistant" : "Assistente"}
+              <Sparkles size={16} aria-hidden="true" />BeSpoke AI
             </button>
           )}
           {paidAlready && editable ? (
@@ -706,10 +706,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         <div className="bl-modal-backdrop bl-assist-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setAssistantSheet(false); }}>
           <div className="bl-modal bl-assist-sheet" role="dialog" aria-modal="true" aria-labelledby="bl-assist-title">
             <header className="bl-modal-head">
-              <h2 id="bl-assist-title">{lang === "en" ? "Assistant" : "Assistente"}</h2>
+              <h2 id="bl-assist-title">BeSpoke AI</h2>
               <button type="button" className="bl-icon" aria-label={lang === "en" ? "Close" : "Chiudi"} onClick={() => setAssistantSheet(false)}><X size={18} aria-hidden="true" /></button>
             </header>
-            <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} />
+            <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} config={config} catalog={catalog} />
           </div>
         </div>
       )}

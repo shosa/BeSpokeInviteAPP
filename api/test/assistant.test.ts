@@ -236,6 +236,33 @@ describe("assistente: risposte del modello", () => {
     assert.match(found, /id 42/);
   });
 
+  it("propone le foto con le anteprime, così la persona le vede", async () => {
+    const shared = invitation();
+    const PREVIEW = "https://cdn.pixabay.com/photo/2026/01/01/mare_150.jpg";
+    let n = 0;
+    const call: ModelCall = async () => {
+      n += 1;
+      if (n === 1) return { content: [{ type: "tool_use", id: "s1", name: "searchPhotos", input: { query: "mare" } }], stop_reason: "tool_use", usage: usage(10, 5) } as any;
+      if (n === 2) return { content: [{ type: "tool_use", id: "a1", name: "askPhoto", input: { question: "Quale ti piace?", captions: ["Mare al tramonto", "Spiaggia"] } }], stop_reason: "tool_use", usage: usage(10, 5) } as any;
+      return { content: [{ type: "text", text: "Scegli tu." }], stop_reason: "end_turn", usage: usage(10, 5) } as any;
+    };
+    const { d } = deps({
+      makeCall: () => call,
+      findOwned: async () => shared,
+      stock: {
+        search: async () => [{ id: 1, tags: "mare", preview: PREVIEW }, { id: 2, tags: "spiaggia", preview: "javascript:alert(1)" }],
+        import: async () => ({ url: "/api/media/x.jpg" }),
+      },
+    });
+    const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
+    const body = out.body as { choice?: { options: string[]; photos?: string[] }; photosOffered: { id: number; preview?: string }[] };
+    assert.deepEqual(body.choice?.options, ["Mare al tramonto", "Spiaggia"]);
+    // Solo le anteprime di Pixabay passano: l'indirizzo non valido diventa vuoto.
+    assert.deepEqual(body.choice?.photos, [PREVIEW, ""]);
+    assert.equal(body.photosOffered.find((p) => p.id === 1)?.preview, PREVIEW);
+    assert.equal(body.photosOffered.find((p) => p.id === 2)?.preview, undefined);
+  });
+
   it("non importa una foto che non è nell'ultima ricerca", async () => {
     const shared = invitation();
     const hero = shared.config.blocks.find((b) => b.type === "hero")!;

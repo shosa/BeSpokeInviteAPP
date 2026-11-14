@@ -1,0 +1,210 @@
+/* BeSpoke AI: comandi visivi nella chat (ax-*) e ritocchi della chat (as-*).
+   Linguaggio: vetro chiaro, bordo d'oro che scorre, bagliori leggeri; «riduci movimento» spegne le animazioni. */
+.bl-app {
+  --ax-gold: #b8893f;
+  --ax-gold-2: #e9cf93;
+  --ax-glow: rgba(184, 137, 63, 0.35);
+  --ax-glass: rgba(255, 255, 255, 0.78);
+}
+@property --ax-ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes ax-spin { to { --ax-ang: 360deg; } }
+@keyframes ax-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes ax-pop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes ax-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@keyframes ax-rotate { to { transform: rotate(360deg); } }
+
+/* ── Testata della chat ── */
+.bl-app .as-kicker { display: inline-flex; align-items: center; gap: 6px; }
+.bl-app .as-title { background: linear-gradient(110deg, #2a2119 0%, #8a6427 40%, #e9cf93 50%, #8a6427 60%, #2a2119 100%); background-size: 240% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: ax-shimmer 8s linear infinite; }
+
+/* ── Griglia dei comandi ── */
+/* Il pannello è stretto su desktop (colonna laterale): sotto i 340 px i comandi vanno in colonna, con le descrizioni intere. */
+.bl-app .as-panel { container-type: inline-size; }
+@container (max-width: 340px) {
+  .as-cmds { grid-template-columns: 1fr !important; }
+  .as-cmd-text small { white-space: normal !important; }
+  .ax-palette { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .ax-add { grid-template-columns: minmax(0, 1fr) 44px !important; }
+  .ax-add select { grid-column: 1 / 2; grid-row: 2; }
+}
+.bl-app .as-cmds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bl-app .as-cmd { position: relative; display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; border: 1px solid rgba(160, 115, 45, 0.2); border-radius: 16px; background: var(--ax-glass); color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; isolation: isolate; animation: ax-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--n, 0) * 35ms); transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+.bl-app .as-cmd::after { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(120px 60px at var(--mx, 20%) 0%, rgba(233, 207, 147, 0.35), transparent 70%); opacity: 0; transition: opacity 0.3s ease; }
+.bl-app .as-cmd:hover { transform: translateY(-2px); border-color: var(--ax-gold); box-shadow: 0 14px 26px -18px var(--ax-glow); }
+.bl-app .as-cmd:hover::after { opacity: 1; }
+.bl-app .as-cmd-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: linear-gradient(135deg, #fff7e6, #f1e2bf); color: var(--brass); box-shadow: inset 0 0 0 1px rgba(184, 137, 63, 0.3); }
+.bl-app .as-cmd.is-ai .as-cmd-ico { background: conic-gradient(from var(--ax-ang), #b8893f, #f7e7bf, #8a6427, #e9cf93, #b8893f); color: #fff; animation: ax-spin 5s linear infinite; }
+.bl-app .as-cmd-text { display: grid; gap: 1px; min-width: 0; }
+.bl-app .as-cmd-text strong { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+.bl-app .as-cmd-text small { font-size: 11.5px; color: var(--ink-soft); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Messaggi ── */
+.bl-app .as-msg { animation: ax-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.bl-app .as-msg.is-widget { align-self: stretch; max-width: 100%; padding: 0; border: 0; background: transparent; }
+.bl-app .as-msg.is-command { background: linear-gradient(135deg, #2a2119, #4a3720); border-color: transparent; }
+.bl-app .as-msg.is-command p { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: 0.02em; }
+.bl-app .as-cmd-mark { color: var(--ax-gold-2); }
+.bl-app .as-md em { display: block; margin: 6px 0; padding: 8px 12px; border-left: 2px solid var(--ax-gold); border-radius: 0 10px 10px 0; background: rgba(233, 207, 147, 0.16); font-family: var(--font-display), serif; font-size: 15.5px; line-height: 1.45; color: var(--ink); }
+.bl-app .as-md li::marker { color: var(--ax-gold); }
+.bl-app .as-md li strong { color: var(--ink); }
+.bl-app .as-thinking .as-dots i { background: var(--ax-gold); }
+
+/* ── Campo e palette dei comandi ── */
+.bl-app .as-form { position: relative; flex-direction: row; align-items: flex-end; gap: 8px; padding: 6px; border-radius: 20px; background: var(--ax-glass); }
+.bl-app .as-form::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none; background: conic-gradient(from var(--ax-ang), rgba(184, 137, 63, 0.25), #e9cf93, rgba(184, 137, 63, 0.25), #b8893f, rgba(184, 137, 63, 0.25)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: ax-spin 7s linear infinite; }
+.bl-app .as-form:focus-within::before { animation-duration: 2.5s; }
+.bl-app .as-form .as-input { flex: 1; min-height: 46px; max-height: 140px; border: 0; background: transparent; resize: none; padding: 12px 6px; }
+.bl-app .as-form .as-input:focus { outline: none; }
+.bl-app .as-slash, .bl-app .as-send-orb { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 14px; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; }
+.bl-app .as-slash { background: #fff; color: var(--brass); box-shadow: inset 0 0 0 1px rgba(184, 137, 63, 0.3); }
+.bl-app .as-slash.is-on { background: var(--brass); color: #fff; }
+.bl-app .as-send-orb { background: radial-gradient(circle at 30% 25%, #f7e7bf, #b8893f 55%, #7e5a22); color: #fff; box-shadow: 0 10px 22px -10px rgba(126, 90, 34, 0.9); }
+.bl-app .as-send-orb:hover:not(:disabled) { transform: translateY(-1px) rotate(-8deg); }
+.bl-app .as-send-orb:disabled, .bl-app .as-slash:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.bl-app .as-palette { display: grid; gap: 2px; max-height: 300px; overflow-y: auto; padding: 6px; border: 1px solid rgba(160, 115, 45, 0.22); border-radius: 18px; background: rgba(255, 253, 249, 0.96); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 24px 50px -26px rgba(70, 48, 18, 0.5); animation: ax-in 0.2s ease both; }
+.bl-app .as-palette-head { display: flex; align-items: center; gap: 6px; margin: 2px 6px 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brass); }
+.bl-app .as-palette-empty { margin: 6px; font-size: 13px; color: var(--ink-soft); }
+.bl-app .as-palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.bl-app .as-palette-item.is-on { background: linear-gradient(90deg, rgba(233, 207, 147, 0.35), rgba(233, 207, 147, 0.08)); box-shadow: inset 2px 0 0 var(--ax-gold); }
+.bl-app .as-ai-tag { margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #fff; background: linear-gradient(135deg, #b8893f, #7e5a22); }
+
+/* Foto proposte dall'AI: si vedono, un tocco le applica */
+.bl-app .as-photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+.bl-app .as-photo-opt { display: grid; gap: 4px; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--ink); font-size: 11.5px; line-height: 1.25; }
+.bl-app .as-photo-opt img, .bl-app .as-photo-none { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; display: block; background: #f3e9d6; box-shadow: 0 0 0 1px rgba(160, 115, 45, 0.18); transition: transform 0.3s ease, box-shadow 0.3s ease; animation: ax-in 0.35s ease both; }
+.bl-app .as-photo-opt:hover:not(:disabled) img { transform: translateY(-2px); box-shadow: 0 0 0 2px var(--ax-gold), 0 12px 22px -14px var(--ax-glow); }
+.bl-app .as-photo-opt.is-on img { box-shadow: 0 0 0 3px var(--ax-gold); }
+.bl-app .as-photo-opt:disabled { cursor: default; opacity: 0.7; }
+
+/* Indietro nelle schede dei comandi, i colori scelti del dress code */
+.bl-app .ax-back { justify-self: start; display: inline-flex; align-items: center; gap: 4px; min-height: 30px; margin: -4px 0 -4px -4px; padding: 0 10px 0 6px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); font: 500 12px var(--font-text), sans-serif; cursor: pointer; }
+.bl-app .ax-back:hover { background: rgba(42, 33, 25, 0.06); color: var(--ink); }
+.bl-app .ax-picked { display: flex; flex-wrap: wrap; gap: 6px; }
+.bl-app .ax-picked-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 8px 0 4px; border: 1px solid rgba(160, 115, 45, 0.24); border-radius: 999px; background: #fff; color: var(--ink); font: 500 12.5px var(--font-text), sans-serif; cursor: pointer; }
+.bl-app .ax-picked-chip span { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1); }
+.bl-app .ax-picked-chip:hover { border-color: #d92d20; color: #b42318; }
+.bl-app .ax-full { color: #b42318 !important; text-transform: none; letter-spacing: 0; font-weight: 500; }
+.bl-app .ax-palette.is-full .ax-tone:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Scheda di un comando ── */
+.bl-app .ax-card { position: relative; display: grid; gap: 12px; padding: 16px; border-radius: 20px; background: var(--ax-glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 20px 40px -30px rgba(70, 48, 18, 0.55); isolation: isolate; }
+.bl-app .ax-card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1.5px; background: conic-gradient(from var(--ax-ang), rgba(184, 137, 63, 0.15), #e9cf93 20%, rgba(184, 137, 63, 0.15) 40%, #b8893f 60%, rgba(184, 137, 63, 0.15) 80%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: ax-spin 9s linear infinite; }
+.bl-app .ax-head { display: flex; align-items: center; gap: 10px; }
+.bl-app .ax-head-ico { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: radial-gradient(circle at 30% 25%, #f7e7bf, #b8893f 60%, #7e5a22); color: #fff; box-shadow: 0 8px 18px -10px rgba(126, 90, 34, 0.9); }
+.bl-app .ax-head-text { display: grid; gap: 1px; }
+.bl-app .ax-head-text strong { font-family: var(--font-display), serif; font-size: 1.15rem; font-weight: 400; color: var(--ink); }
+.bl-app .ax-head-text small { font-size: 12px; color: var(--ink-soft); }
+.bl-app .ax-label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass); }
+.bl-app .ax-label b { font-weight: 600; letter-spacing: 0.02em; color: var(--ink); }
+.bl-app .ax-time { font: 400 1.1rem var(--font-display), serif; text-transform: none; }
+.bl-app .ax-ok { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 999px; background: #e7f3e9; color: #2f6b3c !important; font-size: 10.5px; text-transform: none; letter-spacing: 0; }
+.bl-app .ax-field { display: grid; gap: 6px; font-size: 12px; color: var(--ink-soft); }
+.bl-app .ax-field input, .bl-app .ax-add input, .bl-app .ax-add select, .bl-app .ax-search input { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid rgba(160, 115, 45, 0.22); border-radius: 12px; background: #fff; color: var(--ink); font: 400 15px var(--font-text), sans-serif; }
+.bl-app .ax-field input:focus, .bl-app .ax-add input:focus, .bl-app .ax-search input:focus { outline: none; border-color: var(--ax-gold); box-shadow: 0 0 0 4px rgba(184, 137, 63, 0.14); }
+
+.bl-app .ax-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.bl-app .ax-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 12px; border: 1px solid rgba(160, 115, 45, 0.24); border-radius: 999px; background: #fff; color: var(--ink); font: 500 13px var(--font-text), sans-serif; cursor: pointer; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+.bl-app .ax-chip:hover:not(:disabled) { border-color: var(--ax-gold); transform: translateY(-1px); }
+.bl-app .ax-chip.is-on { background: linear-gradient(135deg, #2a2119, #4a3720); border-color: transparent; color: #fbf3e2; }
+.bl-app .ax-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.bl-app .ax-seg { display: inline-grid; grid-auto-flow: column; padding: 3px; border-radius: 999px; background: rgba(42, 33, 25, 0.06); justify-self: start; }
+.bl-app .ax-seg button { min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); font: 500 13px var(--font-text), sans-serif; cursor: pointer; }
+.bl-app .ax-seg button.is-on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(70, 48, 18, 0.12); }
+
+.bl-app .ax-go { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer; overflow: hidden; isolation: isolate; color: #fff; font: 600 13px var(--font-text), sans-serif; letter-spacing: 0.12em; text-transform: uppercase; background: linear-gradient(135deg, #2a2119, #5a3f1c); box-shadow: 0 14px 28px -16px rgba(42, 33, 25, 0.8); transition: transform 0.25s ease, box-shadow 0.25s ease; }
+.bl-app .ax-go::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(110deg, transparent 30%, rgba(247, 231, 191, 0.45) 50%, transparent 70%); background-size: 250% 100%; animation: ax-shimmer 3.2s linear infinite; }
+.bl-app .ax-go:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 20px 36px -18px rgba(42, 33, 25, 0.9); }
+.bl-app .ax-go:disabled { opacity: 0.45; cursor: not-allowed; }
+.bl-app .ax-go.is-ai { background: conic-gradient(from var(--ax-ang), #7e5a22, #b8893f, #e9cf93, #8a6427, #7e5a22); animation: ax-spin 4s linear infinite; color: #2a2119; }
+.bl-app .ax-done { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; border-radius: 12px; background: #eef7ef; color: #2f6b3c; font-size: 13px; animation: ax-in 0.3s ease both; }
+.bl-app .ax-done-ico { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #2f6b3c; color: #fff; animation: ax-pop 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.bl-app .ax-done.is-fail { background: #fef3f2; color: #b42318; }
+.bl-app .ax-empty { margin: 0; color: var(--ink-soft); font-size: 14px; }
+.bl-app .ax-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 1px solid rgba(160, 115, 45, 0.2); border-radius: 10px; background: #fff; color: var(--ink-soft); cursor: pointer; }
+.bl-app .ax-icon:hover:not(:disabled) { color: var(--ink); border-color: var(--ax-gold); }
+.bl-app .ax-icon:disabled { opacity: 0.35; cursor: not-allowed; }
+.bl-app .ax-icon.is-solid { background: var(--brass); border-color: transparent; color: #fff; width: 44px; height: 44px; }
+
+/* Sfondi animati: anteprime vive */
+.bl-app .ax-bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.bl-app .ax-bg { display: grid; gap: 6px; padding: 6px; border: 1px solid rgba(160, 115, 45, 0.2); border-radius: 14px; background: #fff; cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
+.bl-app .ax-bg.is-on { border-color: var(--ax-gold); box-shadow: 0 0 0 2px var(--ax-gold) inset, 0 12px 22px -16px var(--ax-glow); }
+.bl-app .ax-bg:hover { transform: translateY(-2px); }
+.bl-app .ax-bg-name { font-size: 12px; font-weight: 500; color: var(--ink); }
+.bl-app .ax-bg-fx { position: relative; height: 58px; border-radius: 10px; overflow: hidden; background: linear-gradient(180deg, #fffaf0, #f3e9d6); }
+.bl-app .ax-bg-fx i { position: absolute; left: calc(8% + var(--i) * 13%); top: -12px; width: 7px; height: 7px; border-radius: 50%; background: var(--fx); opacity: 0.85; animation: ax-fall 2.6s linear infinite; animation-delay: calc(var(--i) * -0.37s); }
+.bl-app .fx-petals i { width: 8px; height: 11px; border-radius: 80% 0 80% 0; }
+.bl-app .fx-confetti i { width: 5px; height: 9px; border-radius: 1px; background: hsl(calc(var(--i) * 50deg) 70% 60%); }
+.bl-app .fx-snow i { background: #fff; box-shadow: 0 0 0 1px rgba(160, 115, 45, 0.25); }
+.bl-app .fx-sparkles i { top: calc(10% + var(--i) * 11%); width: 6px; height: 6px; border-radius: 1px; transform: rotate(45deg); animation: ax-twinkle 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.23s); }
+.bl-app .fx-bubbles i { top: auto; bottom: -12px; background: transparent; border: 1.5px solid var(--fx); animation: ax-rise 2.8s linear infinite; animation-delay: calc(var(--i) * -0.4s); }
+.bl-app .fx-waves i { left: -10%; top: calc(30% + var(--i) * 8%); width: 120%; height: 2px; border-radius: 999px; opacity: 0.35; animation: ax-wave 3s ease-in-out infinite; animation-delay: calc(var(--i) * -0.3s); }
+.bl-app .fx-none i { display: none; }
+@keyframes ax-fall { to { transform: translateY(84px) rotate(220deg); } }
+@keyframes ax-rise { to { transform: translateY(-84px); opacity: 0; } }
+@keyframes ax-twinkle { 0%, 100% { opacity: 0; transform: rotate(45deg) scale(0.4); } 50% { opacity: 1; transform: rotate(45deg) scale(1.1); } }
+@keyframes ax-wave { 50% { transform: translateX(6%) scaleY(2); } }
+.bl-app .ax-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.bl-app .ax-swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(160, 115, 45, 0.3); cursor: pointer; font: 700 11px var(--font-text), sans-serif; color: var(--brass); }
+.bl-app .ax-swatch.is-auto { background: conic-gradient(#b8893f, #e2b7b0, #a9b29b, #1f2a44, #b8893f); color: #fff; }
+.bl-app .ax-swatch.is-on { box-shadow: 0 0 0 2px var(--ax-gold), 0 6px 14px -6px var(--ax-glow); transform: scale(1.1); }
+
+/* Dress code */
+.bl-app .ax-palette { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.bl-app .ax-tone { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 4px 8px 4px 4px; border: 1px solid rgba(160, 115, 45, 0.18); border-radius: 12px; background: #fff; color: var(--ink); font: 500 12.5px var(--font-text), sans-serif; text-align: left; cursor: pointer; }
+.bl-app .ax-tone span { display: grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); color: #fff; }
+.bl-app .ax-tone.is-on { border-color: var(--ax-gold); box-shadow: 0 0 0 1px var(--ax-gold) inset; }
+.bl-app .ax-strip { display: flex; height: 14px; border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06); }
+.bl-app .ax-strip i { flex: 1; animation: ax-in 0.3s ease both; }
+
+/* Liste: domande e struttura */
+.bl-app .ax-qlist, .bl-app .ax-blocks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.bl-app .ax-qlist li, .bl-app .ax-blocks li { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 8px; border: 1px solid rgba(160, 115, 45, 0.16); border-radius: 12px; background: #fff; animation: ax-in 0.3s ease both; }
+.bl-app .ax-blocks li.is-hidden { opacity: 0.5; }
+.bl-app .ax-qn { display: grid; place-items: center; width: 22px; height: 22px; flex: none; border-radius: 7px; background: rgba(184, 137, 63, 0.14); color: var(--brass); font: 600 11px var(--font-text), sans-serif; }
+.bl-app .ax-qt { flex: 1; display: grid; gap: 1px; min-width: 0; font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+.bl-app .ax-qt small { font-size: 11px; color: var(--ink-soft); }
+.bl-app .ax-add { display: grid; grid-template-columns: minmax(0, 1fr) 96px 44px; gap: 6px; }
+
+/* Musica */
+.bl-app .ax-tracks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; }
+.bl-app .ax-tracks li { display: flex; align-items: center; gap: 8px; padding: 6px; border: 1px solid rgba(160, 115, 45, 0.16); border-radius: 14px; background: #fff; }
+.bl-app .ax-tracks li.is-on { border-color: var(--ax-gold); box-shadow: 0 0 0 1px var(--ax-gold) inset; }
+.bl-app .ax-play { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border: 0; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #f7e7bf, #b8893f 60%, #7e5a22); color: #fff; cursor: pointer; }
+.bl-app .ax-track { flex: 1; display: grid; gap: 1px; min-width: 0; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; color: var(--ink); }
+.bl-app .ax-track strong { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl-app .ax-track small { font-size: 11.5px; color: var(--ink-soft); }
+.bl-app .ax-eq { display: none; align-items: flex-end; gap: 2px; height: 16px; margin-right: 6px; }
+.bl-app .ax-tracks li.is-playing .ax-eq { display: inline-flex; }
+.bl-app .ax-eq i { width: 3px; border-radius: 2px; background: var(--ax-gold); animation: ax-eq 0.9s ease-in-out infinite; }
+.bl-app .ax-eq i:nth-child(2) { animation-delay: -0.3s; } .bl-app .ax-eq i:nth-child(3) { animation-delay: -0.6s; } .bl-app .ax-eq i:nth-child(4) { animation-delay: -0.15s; }
+@keyframes ax-eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+
+/* Foto */
+.bl-app .ax-search { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; padding-left: 10px; border: 1px solid rgba(160, 115, 45, 0.22); border-radius: 14px; background: #fff; color: var(--ink-soft); }
+.bl-app .ax-search input { border: 0; min-height: 44px; padding: 0; }
+.bl-app .ax-search input:focus { box-shadow: none; }
+.bl-app .ax-photos, .bl-app .ax-shimmer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.bl-app .ax-photo { position: relative; aspect-ratio: 3 / 4; padding: 0; border: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: #f3e9d6; animation: ax-in 0.35s ease both; }
+.bl-app .ax-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.bl-app .ax-photo:hover img { transform: scale(1.06); }
+.bl-app .ax-photo:disabled { cursor: progress; }
+.bl-app .ax-photo-busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(42, 33, 25, 0.45); color: #fff; }
+.bl-app .ax-shimmer-grid i { aspect-ratio: 3 / 4; border-radius: 12px; background: linear-gradient(110deg, #f3e9d6 30%, #fffaf0 50%, #f3e9d6 70%); background-size: 250% 100%; animation: ax-shimmer 1.4s linear infinite; }
+.bl-app .ax-spin { animation: ax-rotate 0.9s linear infinite; }
+
+/* Tipo di evento */
+.bl-app .ax-events { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.bl-app .ax-event { display: grid; justify-items: center; gap: 8px; padding: 14px 8px; border: 1px solid rgba(160, 115, 45, 0.2); border-radius: 16px; background: #fff; color: var(--brass); font: 500 12.5px var(--font-text), sans-serif; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.bl-app .ax-event span { color: var(--ink); }
+.bl-app .ax-event:hover:not(:disabled) { transform: translateY(-2px); }
+.bl-app .ax-event.is-on { background: linear-gradient(135deg, #2a2119, #4a3720); color: var(--ax-gold-2); border-color: transparent; box-shadow: 0 14px 26px -16px rgba(42, 33, 25, 0.8); }
+.bl-app .ax-event.is-on span { color: #fbf3e2; }
+
+/* Il calendario dentro una scheda */
+.bl-app .ax-card .dp-cal { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bl-app .as-title, .bl-app .as-cmd, .bl-app .as-msg, .bl-app .as-form::before, .bl-app .as-cmd.is-ai .as-cmd-ico, .bl-app .ax-card::before, .bl-app .ax-go::after, .bl-app .ax-go.is-ai,
+  .bl-app .ax-bg-fx i, .bl-app .ax-eq i, .bl-app .ax-shimmer-grid i, .bl-app .ax-done, .bl-app .ax-done-ico, .bl-app .ax-qlist li, .bl-app .ax-blocks li, .bl-app .ax-photo { animation: none !important; }
+}

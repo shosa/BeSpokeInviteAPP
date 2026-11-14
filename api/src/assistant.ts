@@ -42,7 +42,7 @@ export type OwnedInvitation = {
 
 // Ricerca e importazione di foto (Pixabay): il server le esegue, il modello vede solo gli esiti.
 export type StockPort = {
-  search: (query: string) => Promise<{ id: number; tags: string }[]>;
+  search: (query: string) => Promise<{ id: number; tags: string; preview?: string }[]>;
   import: (id: number) => Promise<{ url: string }>;
 };
 
@@ -57,7 +57,8 @@ export type AssistantDeps = {
   places?: (query: string) => Promise<string[]>; // ricerca indirizzi reali
 };
 
-export type Choice = { question: string; options: string[] };
+// photos: anteprime delle foto proposte (stesso ordine delle opzioni), così la persona le vede invece di leggerne la descrizione.
+export type Choice = { question: string; options: string[]; photos?: string[] };
 
 export type Usage = { input: number; output: number; cacheRead: number; cacheWrite: number };
 export type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -69,7 +70,7 @@ export type AssistantBody = {
   remaining: number;
   mediaAllowed: string[];
   placesAllowed: string[];
-  photosOffered: { id: number; label: string }[]; // foto proposte: il browser le rimanda nei messaggi successivi
+  photosOffered: { id: number; label: string; preview?: string }[]; // foto proposte: il browser le rimanda nei messaggi successivi
   choice?: Choice; // scelta da far fare al cliente con i radio button: la risposta arriva come nuovo messaggio
   placeAsk?: { question: string }; // campo di ricerca luoghi: il cliente cerca e sceglie, la scelta arriva come nuovo messaggio
 };
@@ -105,7 +106,15 @@ Scelte: quando la persona deve scegliere tra alcune possibilità, usa askChoice 
 Con askChoice o askPlace non fare altre modifiche nello stesso giro: aspetta la risposta.
 Se la persona chiede più cose insieme, falle tutte in un solo giro e poi racconta il risultato.
 
-Scrivi in markdown semplice: frasi brevi, elenchi puntati solo se servono, **grassetto** per i valori cambiati.`;
+Ti chiami BeSpoke AI.
+STILE DELLE RISPOSTE (fondamentale: la chat è stretta e si legge al volo):
+- Sii concisa. Al massimo 2–3 frasi brevi, oppure un elenco. Mai un paragrafo oltre le 35 parole: vai a capo.
+- Niente saluti, niente ripetere la richiesta, niente premesse («Certo!», «Ottima idea!»).
+- Quando hai applicato modifiche: una frase sola con i valori nuovi in **grassetto** («Ho messo **sabato 12 giugno** alle **16:00** e lo sfondo con i **petali**.»).
+- Quando proponi più cose (idee, alternative, passi, consigli): elenco puntato, al massimo 4 voci, una per riga, ognuna che inizia con la **parola chiave in grassetto** seguita da pochi dettagli.
+- Quando proponi un testo da mettere nell'invito, scrivilo in una riga a sé in *corsivo*, separato dal resto.
+- Chiudi, se serve, con una sola riga che inizia con «**Prossimo passo:**».
+- Markdown permesso: paragrafi, **grassetto**, *corsivo*, elenchi puntati e numerati. Niente titoli, tabelle, link o emoji.`;
 
 // Campi che si possono leggere e scrivere con testo: niente file ed elenchi.
 const SCALAR = new Set(["text", "longtext", "number", "choice", "toggle", "color", "date", "time", "url"]);
@@ -256,11 +265,15 @@ function describeInvitation(config: InviteConfig, catalog: Catalog, readOnly: bo
 }
 
 // Foto proposte nella conversazione, rimandate dal browser: id e descrizione.
-function parsePhotosOffered(body: unknown): { id: number; label: string }[] {
+// Anteprime ammesse: solo immagini di Pixabay su https (le manda il server, il browser le rimanda).
+const PREVIEW_RE = /^https:\/\/(cdn\.)?pixabay\.com\/[^\s"'<>]{1,300}$/;
+
+function parsePhotosOffered(body: unknown): { id: number; label: string; preview?: string }[] {
   const raw = body && typeof body === "object" ? (body as { photosOffered?: unknown }).photosOffered : undefined;
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((x): x is { id: number; label: string } => !!x && typeof x === "object" && Number.isInteger((x as { id?: unknown }).id) && typeof (x as { label?: unknown }).label === "string")
+    .filter((x): x is { id: number; label: string; preview?: unknown } => !!x && typeof x === "object" && Number.isInteger((x as { id?: unknown }).id) && typeof (x as { label?: unknown }).label === "string")
+    .map((x) => ({ id: x.id, label: x.label, ...(typeof x.preview === "string" && PREVIEW_RE.test(x.preview) ? { preview: x.preview } : {}) }))
     .slice(0, 12);
 }
 
@@ -346,8 +359,10 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
   const ctx: ActionContext = { catalog, paid: rules.themeLocked, purchased: new Set(inv.purchased_addons ?? []), mediaAllowed, placesAllowed };
   const call = deps.makeCall(deps.apiKey);
   // Foto proposte: quelle della conversazione (il browser le rimanda) più quelle di questa richiesta.
-  const photoHits = new Map<number, string>(parsePhotosOffered(input.body).map((x) => [x.id, x.label] as [number, string]));
-  const photosOffered = (): { id: number; label: string }[] => [...photoHits].map(([id, label]) => ({ id, label }));
+  const offeredBefore = parsePhotosOffered(input.body);
+  const photoHits = new Map<number, string>(offeredBefore.map((x) => [x.id, x.label] as [number, string]));
+  const photoPreview = new Map<number, string>(offeredBefore.filter((x) => x.preview).map((x) => [x.id, x.preview as string] as [number, string]));
+  const photosOffered = (): { id: number; label: string; preview?: string }[] => [...photoHits].map(([id, label]) => ({ id, label, ...(photoPreview.has(id) ? { preview: photoPreview.get(id) } : {}) }));
   let current = inv.config;
   const actions: Action[] = [];
 
@@ -388,7 +403,8 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
         photoHits.set(id, label);
         return label;
       });
-      choice = { question, options: labels };
+      const photos = found.map(([id]) => photoPreview.get(id) ?? "");
+      choice = { question, options: labels, ...(photos.some(Boolean) ? { photos } : {}) };
       return { text: "foto inviate al cliente: attendi la sua scelta", error: false };
     }
     if (name === "askPlace") {
@@ -416,7 +432,10 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
       }
       if (hits.length === 0) return { text: "nessuna foto trovata: prova con altre parole", error: false };
       // Le foto proposte restano valide anche nei prossimi messaggi: il browser le rimanda.
-      hits.forEach((h) => photoHits.set(h.id, h.tags.slice(0, 80)));
+      hits.forEach((h) => {
+        photoHits.set(h.id, h.tags.slice(0, 80));
+        if (h.preview && PREVIEW_RE.test(h.preview)) photoPreview.set(h.id, h.preview);
+      });
       return { text: `trovate ${hits.length} foto:\n${hits.map((h) => `- id ${h.id}: ${h.tags.slice(0, 80)}`).join("\n")}`, error: false };
     }
     const id = Number(args.stockId);

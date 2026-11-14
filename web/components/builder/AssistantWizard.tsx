@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PlaceSearch } from "./PlaceSearch";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { ArrowLeft, ArrowRight, Baby, CalendarDays, Check, CircleDot, ClipboardCheck, Heart, ImagePlus, MapPin, Music, Shirt, Snowflake, Sparkles, Users, Wand2, Waves, type LucideIcon } from "lucide-react";
 
 // Percorso guidato «Creiamolo insieme»: fa le domande una alla volta e compone un unico messaggio per l'assistente.
@@ -64,7 +65,7 @@ function shuffled<T>(list: readonly T[]): T[] {
 const pick = <T,>(list: readonly T[]): T => list[Math.floor(Math.random() * list.length)];
 const pickN = <T,>(list: readonly T[], n: number): T[] => shuffled(list).slice(0, n);
 
-type Answers = {
+export type Answers = {
   names: string;
   date: string;
   time: string;
@@ -110,13 +111,20 @@ export function composeBrief(a: Answers, lang: Lang): string {
   return lines.join("\n");
 }
 
-export function AssistantWizard({ lang, onCompose, onCancel }: { lang: Lang; onCompose: (brief: string) => void; onCancel: () => void }) {
+// initial: i valori già inseriti (wizard iniziale, builder), così il percorso non richiede cose già note.
+export function AssistantWizard({ lang, onCompose, onCancel, initial }: { lang: Lang; onCompose: (brief: string) => void; onCancel: () => void; initial?: Partial<Answers> }) {
   const it = lang === "it";
   const [step, setStep] = useState(0);
-  const [a, setA] = useState<Answers>(EMPTY);
+  const [a, setA] = useState<Answers>(() => ({
+    ...EMPTY,
+    ...(initial ?? {}),
+    // Colori salvati (minuscoli) riportati ai pallini del percorso; quelli fuori palette restano nell'invito.
+    colors: (initial?.colors ?? []).map((h) => COLORS.find((c) => c.hex.toLowerCase() === h.toLowerCase())?.hex).filter((h): h is string => Boolean(h)),
+  }));
   // Opzioni e suggerimenti: scelti a caso ad ogni apertura del percorso.
   const [pool] = useState(() => ({
-    colors: pickN(COLORS, 6),
+    // I colori già scelti restano tra quelli mostrati.
+    colors: [...COLORS.filter((c) => initial?.colors?.includes(c.hex.toLowerCase())), ...pickN(COLORS.filter((c) => !initial?.colors?.includes(c.hex.toLowerCase())), 6)].slice(0, Math.max(6, initial?.colors?.length ?? 0)),
     backgrounds: shuffled(BACKGROUNDS),
     questions: pickN(GUEST_QUESTIONS, 6),
     names: pick(NAME_HINTS),
@@ -152,10 +160,9 @@ export function AssistantWizard({ lang, onCompose, onCancel }: { lang: Lang; onC
               <input value={a.names} placeholder={it ? pool.names : "Name & name"} onChange={(e) => set("names", e.target.value)} />
             </label>
             <div className="aw-row">
-              <label className="aw-field">
-                <span>{it ? "Data" : "Date"}</span>
-                <input type="date" value={a.date} onChange={(e) => set("date", e.target.value)} />
-              </label>
+              <div className="aw-field">
+                <DatePicker label={it ? "Data" : "Date"} value={a.date} onChange={(v) => set("date", v)} lang={lang} />
+              </div>
               <label className="aw-field">
                 <span>{it ? "Ora" : "Time"}</span>
                 <input type="time" value={a.time} onChange={(e) => set("time", e.target.value)} />

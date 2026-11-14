@@ -386,7 +386,7 @@ export async function buildApp() {
         places: searchPlaces,
         stock: process.env.PIXABAY_API_KEY
           ? {
-              search: async (query) => (await searchStock(parseStockFilters({ q: query }))).map((p) => ({ id: p.id, tags: p.tags })),
+              search: async (query) => (await searchStock(parseStockFilters({ q: query }))).map((p) => ({ id: p.id, tags: p.tags, preview: p.preview })),
               import: (id) => importStock(id),
             }
           : undefined,
