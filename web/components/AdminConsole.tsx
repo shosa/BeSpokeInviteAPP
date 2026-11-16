@@ -15,7 +15,7 @@ import { AdminOverview } from "./admin/AdminOverview";
 import { AdminPlanners } from "./admin/AdminPlanners";
 import { CommandPalette } from "./admin/CommandPalette";
 import { MusicLibrary } from "./admin/MusicLibrary";
-import { BookOpen, LayoutDashboard, ShoppingBag, Users, Mail, LayoutTemplate, Music, Image as ImageIcon, Search, Store, Send, Sparkles, type LucideIcon } from "lucide-react";
+import { BookOpen, LayoutDashboard, MoreHorizontal, ShoppingBag, Users, Mail, LayoutTemplate, Music, Image as ImageIcon, Search, Store, Send, Sparkles, X, type LucideIcon } from "lucide-react";
 import "./admin/console.css";
 import { useT } from "@/lib/lang";
 
@@ -51,6 +51,9 @@ const GROUPS: { title: Pair | null; items: { id: Tab; label: Pair; hint: Pair }[
   },
 ];
 const ALL = GROUPS.flatMap((g) => g.items);
+// Telefono: barra in basso come nel planner, con le sezioni principali, la ricerca e «Altro» per tutte le altre.
+const MAIN_TABS: Tab[] = ["panoramica", "ordini", "clienti"];
+const MORE_TABS = ALL.filter((x) => !MAIN_TABS.includes(x.id));
 
 // Console admin di Bespoke Invites.
 export function AdminConsole() {
@@ -62,6 +65,7 @@ export function AdminConsole() {
   const [clientId, setClientId] = useState<string | undefined>(undefined);
   const [openUser, setOpenUser] = useState<string | undefined>(undefined);
   const [searching, setSearching] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   async function reload() {
     const res = await fetch("/api/admin/catalog");
@@ -93,6 +97,7 @@ export function AdminConsole() {
     if (next === "inviti") setClientId(target?.userId);
     setTab(next);
     setSearching(false);
+    setMoreOpen(false);
     window.scrollTo({ top: 0 });
   };
 
@@ -161,6 +166,47 @@ export function AdminConsole() {
           {tab === "assistente" && <AdminAssistant />}
         </div>
       </section>
+      <nav className="pp-tabbar ac-tabbar" aria-label={tt("Sezioni della console", "Console sections")}>
+        {MAIN_TABS.map((id) => {
+          const item = ALL.find((x) => x.id === id)!;
+          const Icon = ICON[id];
+          return (
+            <button key={id} type="button" className={`pp-tabbar-item${tab === id ? " is-on" : ""}`} aria-current={tab === id ? "page" : undefined} onClick={() => go(id)}>
+              <Icon size={22} strokeWidth={1.6} aria-hidden="true" />
+              <span>{t(item.label)}</span>
+            </button>
+          );
+        })}
+        <button type="button" className="pp-tabbar-item" onClick={() => setSearching(true)}>
+          <Search size={22} strokeWidth={1.6} aria-hidden="true" />
+          <span>{tt("Cerca", "Search")}</span>
+        </button>
+        <button type="button" className={`pp-tabbar-item${MORE_TABS.some((x) => x.id === tab) || moreOpen ? " is-on" : ""}`} aria-haspopup="dialog" aria-expanded={moreOpen} onClick={() => setMoreOpen((o) => !o)}>
+          <MoreHorizontal size={22} strokeWidth={1.6} aria-hidden="true" />
+          <span>{(() => { const cur = MORE_TABS.find((x) => x.id === tab); return cur ? t(cur.label) : tt("Altro", "More"); })()}</span>
+        </button>
+      </nav>
+      {moreOpen && (
+        <div className="pp-sheet-backdrop ac-sheet" onClick={(e) => { if (e.target === e.currentTarget) setMoreOpen(false); }} onKeyDown={(e) => { if (e.key === "Escape") setMoreOpen(false); }}>
+          <div className="pp-sheet" role="dialog" aria-modal="true" aria-label={tt("Altre sezioni", "More sections")}>
+            <header className="pp-sheet-head">
+              <strong>{tt("Altro", "More")}</strong>
+              <button type="button" className="pp-sheet-close" aria-label={tt("Chiudi", "Close")} onClick={() => setMoreOpen(false)} autoFocus><X size={20} aria-hidden="true" /></button>
+            </header>
+            <div className="pp-sheet-grid">
+              {MORE_TABS.map((item) => {
+                const Icon = ICON[item.id];
+                return (
+                  <button key={item.id} type="button" className={`pp-sheet-item${tab === item.id ? " is-on" : ""}`} aria-current={tab === item.id ? "page" : undefined} onClick={() => go(item.id)}>
+                    <Icon size={24} strokeWidth={1.5} aria-hidden="true" />
+                    <span>{t(item.label)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
       {searching && <CommandPalette go={go} onClose={() => setSearching(false)} />}
     </main>
   );

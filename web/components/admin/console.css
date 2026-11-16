@@ -405,15 +405,10 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 
 @media (max-width: 1040px) {
   .ac { grid-template-columns: 1fr; }
-  /* Telefono: una riga di sezioni che scorre di lato, la ricerca come icona in testa. */
-  .ac-side { position: sticky; top: 58px; z-index: 30; height: auto; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
-  .ac-side::-webkit-scrollbar { display: none; }
-  .ac-brand, .ac-navlabel { display: none; }
-  .ac-search-btn { flex: none; width: 44px; justify-content: center; padding: 0; }
-  .ac-search-btn span, .ac-search-btn kbd { display: none; }
-  .ac-navgroup { display: contents; }
-  .ac-navgroup button { flex: none; width: auto; min-height: 40px; padding: 0 14px; border: 1px solid var(--line); white-space: nowrap; }
-  .ac-main { padding: 24px 16px 80px; }
+  /* Telefono: niente barra laterale; le sezioni passano alla barra in basso (come nel planner). */
+  .ac-side { display: none; }
+  .ac-main { padding: 24px 16px calc(110px + env(safe-area-inset-bottom)); }
+  .ac .ac-tabbar { display: grid; }
   .ov-row, .cu-two { grid-template-columns: 1fr; }
   .cu-row { grid-template-columns: 44px minmax(0, 1fr) auto; }
   .cu-row > .cu-meta:last-child, .cu-row > .cu-tag { display: none; }
