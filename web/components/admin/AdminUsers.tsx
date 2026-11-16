@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArrowLeft, BookOpen, Mail, Send, Ticket, Trash2 } from "lucide-react";
 import { fmtDate } from "./format";
 import { useLang } from "@/lib/lang";
+import { CopyId } from "./CopyId";
 
 type UserRow = { id: string; email: string; name: string; role: string; invitations: number; created_at: string };
 type Detail = {
@@ -201,7 +202,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
               {d.orders.map((o) => (
                 <li key={o.id}>
                   <time>{fmtDate(o.created_at)}</time>
-                  <span><b>{productName(o.product)}</b> · {o.manual ? t(`a mano, ${reasonName(o.manual.reason)}`, `by hand, ${reasonName(o.manual.reason)}`) : o.id}</span>
+                  <span className="cu-order"><b>{productName(o.product)}</b>{o.manual ? <small>{t(`a mano, ${reasonName(o.manual.reason)}`, `by hand, ${reasonName(o.manual.reason)}`)}</small> : null}<CopyId value={o.id} /></span>
                   <small>{o.invitation_id || o.planner_id ? t("attivato", "activated") : o.status === "paid" ? t("da attivare", "to activate") : t("in attesa", "pending")}</small>
                 </li>
               ))}

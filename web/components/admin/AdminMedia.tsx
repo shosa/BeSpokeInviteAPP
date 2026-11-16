@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Film, Music, Trash2, Image as ImageIcon } from "lucide-react";
 import { useLang } from "@/lib/lang";
+import { CopyId } from "./CopyId";
 
 // File caricati dai clienti: quali sono in uso, quali sono orfani, eliminazione degli orfani.
 type MediaFile = { name: string; kind: "foto" | "video" | "audio"; bytes: number; createdAt: string; invitations: number; music: number; orphan: boolean; ageHours: number };
@@ -80,7 +81,7 @@ export function AdminMedia() {
               {f.kind === "foto" ? <img src={`/api/media/${f.name}`} alt="" loading="lazy" /> : f.kind === "video" ? <Film size={30} aria-hidden="true" /> : <Music size={30} aria-hidden="true" />}
             </div>
             <div className="adm-media-meta">
-              <code title={f.name}>{f.name.slice(0, 8)}…</code>
+              <CopyId value={f.name} keep={8} />
               <span>{f.kind === "foto" && <ImageIcon size={13} aria-hidden="true" />} {en ? KIND_EN[f.kind] ?? f.kind : f.kind} · {mb(f.bytes)} · {ago(f.ageHours, en)}</span>
               <span className={`adm-pill ${f.orphan ? "is-warn" : "is-paid"}`}>
                 {f.orphan ? t("Orfano", "Orphan") : en ? `In use · ${f.invitations + f.music} ${f.invitations + f.music === 1 ? "use" : "uses"}` : `In uso · ${f.invitations + f.music} ${f.invitations + f.music === 1 ? "uso" : "usi"}`}

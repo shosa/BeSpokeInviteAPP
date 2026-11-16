@@ -5,6 +5,7 @@ import { fmtDate } from "./format";
 import { useT } from "@/lib/lang";
 import { toast } from "sonner";
 import type { Go } from "./types";
+import { CopyId } from "./CopyId";
 
 // Ordini senza importi: identificatori, cliente, invito e metadati utili per capire cosa è successo.
 export type OrderDetail = {
@@ -109,7 +110,7 @@ export function AdminOrders({ go }: { go?: Go }) {
                 <Fragment key={o.id}>
                   <tr className={open === o.id ? "is-open" : ""} onClick={() => setOpen(open === o.id ? null : o.id)} aria-expanded={open === o.id}>
                     <td>{fmtDate(o.created_at)}</td>
-                    <td><code className="ac-id">{o.id}</code></td>
+                    <td><CopyId value={o.id} /></td>
                     <td>
                       <b>{o.user_name || "–"}</b>
                       <small className="ac-sub">{o.email ?? t("email sconosciuta", "unknown email")}</small>
@@ -126,11 +127,11 @@ export function AdminOrders({ go }: { go?: Go }) {
                     <tr className="ac-detail-row">
                       <td colSpan={7}>
                         <dl className="ac-meta">
-                          <div><dt>{t("ID ordine", "Order ID")}</dt><dd><code>{o.id}</code></dd></div>
+                          <div><dt>{t("ID ordine", "Order ID")}</dt><dd><CopyId value={o.id} keep={24} /></dd></div>
                           <div><dt>{t("Riferimento", "Reference")}</dt><dd>{o.order_ref ?? "–"}</dd></div>
                           <div><dt>{t("Cliente", "Customer")}</dt><dd>{o.user_name || "–"} · {o.email ?? "–"}</dd></div>
-                          <div><dt>{t("ID cliente", "Customer ID")}</dt><dd><code>{o.user_id ?? "–"}</code></dd></div>
-                          <div><dt>{t("ID invito", "Invitation ID")}</dt><dd><code>{o.invitation_id ?? "–"}</code></dd></div>
+                          <div><dt>{t("ID cliente", "Customer ID")}</dt><dd>{o.user_id ? <CopyId value={o.user_id} /> : "–"}</dd></div>
+                          <div><dt>{t("ID invito", "Invitation ID")}</dt><dd>{o.invitation_id ? <CopyId value={o.invitation_id} /> : "–"}</dd></div>
                           <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_status ?? t("non creato", "not created")}</dd></div>
                           <div><dt>{t("Modello", "Model")}</dt><dd>{o.model ?? "–"}</dd></div>
                           <div><dt>{t("Tipo", "Kind")}</dt><dd>{o.kind === "upgrade" ? t("Aggiornamento", "Upgrade") : t("Acquisto", "Purchase")}</dd></div>

@@ -415,3 +415,80 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
   .cu-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cu-seg { grid-template-columns: 1fr; }
 }
+
+/* Niente testo che va a capo: tabelle su una riga (scorrono di lato nel loro box), testi lunghi con «…», filtri scorrevoli. */
+.ac-copyid { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; white-space: nowrap; vertical-align: middle; }
+.ac-copyid code { font-size: 12px; background: var(--paper-deep); padding: 3px 7px; border-radius: 6px; white-space: nowrap; }
+.ac-copyid button { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border: 0; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.ac-copyid button:hover { background: var(--paper-deep); color: var(--ink); }
+.ac-table th, .ac-table td, .adm-table th, .adm-table td, .admin-table th, .admin-table td { white-space: nowrap; }
+.ac-table td b, .ac-table td small, .ac-table td .ac-sub, .adm-table td strong, .adm-table td small, .adm-table td .adm-mail, .admin-table td b, .admin-table td small {
+  display: block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ac-meta dd, .ac-meta dt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ac-segment, .adm-seg, .tpl-filters, .ac-toolbar .ac-segment {
+  display: flex; flex-wrap: nowrap; max-width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.ac-segment::-webkit-scrollbar, .adm-seg::-webkit-scrollbar, .tpl-filters::-webkit-scrollbar { display: none; }
+.ac-segment button, .adm-seg button, .tpl-filters button, .cu-tag, .ac-tag, .pill, .chip-inv, .chip-pl, .chip-ok, .chip-soft, .chip-warn, .ov-go, .cu-meta { flex: none; white-space: nowrap; }
+.ac-toolbar { flex-wrap: wrap; }
+.ac-toolbar > .ac-segment { min-width: 0; flex: 0 1 auto; }
+.cu-order { display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; }
+.cu-order small { color: var(--ink-soft); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; }
+.cu-history li { align-items: center; }
+.cu-history li > small { white-space: nowrap; }
+.cu-item strong, .cu-item > small, .pl-admin h3, .cu-main small, .ov-todo small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Dettaglio dell'ordine: largo quanto il riquadro visibile (non quanto la tabella), fermo mentre la tabella scorre di lato. */
+.ac-table-wrap { container-type: inline-size; }
+.ac-detail-row td { white-space: normal; }
+.ac-detail-row td > * { position: sticky; left: 18px; box-sizing: border-box; width: calc(100cqw - 36px); max-width: 1000px; }
+.ac-detail-row .ac-meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 20px; }
+.ac-detail-row .ac-meta > div { min-width: 0; }
+.ac-toolbar .ac-search { flex: 1 1 220px; min-width: 0; }
+.ac-toolbar > .btn { flex: none; }
+
+/* Tabelle che non sforano mai (lo scorrimento laterale è bloccato): colonne fisse con «…»,
+   e sotto i 760 px di riquadro ogni riga diventa una scheda. */
+.ac-table-wrap, .adm-table-wrap, .admin-scroll { overflow: hidden; container-type: inline-size; }
+.ac-table, .adm-table, .admin-table { table-layout: fixed; width: 100%; }
+.ac-table th, .ac-table td, .adm-table th, .adm-table td, .admin-table th, .admin-table td { overflow: hidden; text-overflow: ellipsis; }
+.ac-table td > *, .adm-table td > *, .admin-table td > * { max-width: 100%; }
+.ac-orders th:nth-child(1) { width: 118px; }
+.ac-orders th:nth-child(2) { width: 168px; }
+.ac-orders th:nth-child(5) { width: 96px; }
+.ac-orders th:nth-child(6) { width: 132px; }
+.ac-orders th:nth-child(7) { width: 96px; }
+.ac-copyid { max-width: 100%; }
+.ac-copyid code { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ac-detail-row td > * { position: static; width: auto; max-width: none; }
+.adm-table th:nth-child(3), .adm-table th:nth-child(4) { width: 120px; }
+.adm-table th:nth-child(5) { width: 120px; }
+.adm-table th:nth-child(6), .adm-table th:nth-child(7) { width: 90px; }
+
+@container (max-width: 760px) {
+  .ac-table thead, .adm-table thead, .admin-table thead { display: none; }
+  .ac-table, .ac-table tbody, .adm-table, .adm-table tbody, .admin-table, .admin-table tbody { display: block; width: 100%; }
+  .ac-table tr, .adm-table tr, .admin-table tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft);
+  }
+  .ac-table td, .adm-table td, .admin-table td { display: block; padding: 0; border: 0; min-width: 0; text-align: left !important; }
+  .ac-table td:empty, .adm-table td:empty { display: none; }
+  .ac-detail-row { padding-top: 0 !important; }
+  .ac-detail-row td { grid-column: 1 / -1; padding: 0 !important; }
+  .ac-detail-row .ac-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-table audio { width: 100%; }
+}
+/* Nessun contenuto può allargare la colonna: tutto resta nella larghezza dello schermo. */
+.ac-body, .ac-stack { grid-template-columns: minmax(0, 1fr); }
+.ac-main, .ac-body > *, .ac-stack > * { min-width: 0; }
+@media (max-width: 1040px) {
+  /* Filtri da telefono: una griglia che sta tutta nello schermo, testi con «…». */
+  .ac-toolbar > .ac-segment, .adm-seg, .tpl-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; overflow: visible; border-radius: 18px; }
+  .ac-toolbar > .ac-segment button, .adm-seg button, .tpl-filters button { min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 8px 6px; }
+  .tpl-filters { gap: 6px; }
+  .ac-toolbar .ac-search { flex: 1 1 100%; }
+  .ac-toolbar > .btn { flex: 1 1 100%; justify-content: center; }
+}
+.ac-orders th:nth-child(1) { width: 150px; }
+.ac-orders th:nth-child(2) { width: 160px; }
+.ac-orders th:nth-child(7) { width: 112px; }
