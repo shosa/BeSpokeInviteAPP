@@ -71,7 +71,8 @@ export function AssistantPanel({
   const paletteItems = useMemo(() => matchCommands(slash ? draft.slice(1) : "", lang), [draft, slash, lang]);
   const showPalette = (paletteOpen || slash) && !readOnly && !out;
   const logEnd = useRef<HTMLDivElement>(null);
-  useEffect(() => { logEnd.current?.scrollIntoView({ block: "end", behavior: "smooth" }); }, [lines.length, busy]);
+  // Scende all'ultimo messaggio solo quando la conversazione c'è: all'apertura il pannello resta in cima (titolo, richieste, comandi).
+  useEffect(() => { if (lines.length || busy) logEnd.current?.scrollIntoView({ block: "end", behavior: "smooth" }); }, [lines.length, busy]);
 
   // Valori già inseriti (wizard iniziale e builder): il percorso guidato parte da lì.
   const wizardInitial = useMemo<Partial<Answers>>(() => {

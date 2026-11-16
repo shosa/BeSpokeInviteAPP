@@ -7,6 +7,7 @@ import { accentOf, inkOn } from "@/lib/invitePalette";
 import { InviteHero } from "@/components/dashboard/InviteHero";
 import { themeDecor } from "@/lib/themeAssets";
 import { getLang } from "@/lib/i18n";
+import { HeroImages } from "@/components/planner/HeroImages";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,9 @@ export default async function Planner({ params }: { params: Promise<{ id: string
           backHref="/account#planner"
           backLabel={lang === "en" ? "My account" : "La mia area"}
           decor={theme ? themeDecor(theme) : undefined}
+          banner={data.bannerImage}
+          arch={data.archImage}
+          actions={<HeroImages id={id} banner={data.bannerImage} arch={data.archImage} />}
         />
         <div className="wrap idash-body pp-body">
           <PremiumPlanner id={id} initial={data} lang={lang} />

@@ -20,6 +20,9 @@ async function usage(): Promise<{ byName: Map<string, number>; music: Set<string
   const byName = new Map<string, number>();
   const inv = await pool.query("SELECT config FROM invitations");
   for (const r of inv.rows) for (const n of mediaNames(r.config)) byName.set(n, (byName.get(n) ?? 0) + 1);
+  // Anche le foto della testata dei planner (sfondo e arco) sono in uso.
+  const pl = await pool.query("SELECT data FROM planners WHERE data ? 'bannerImage' OR data ? 'archImage'");
+  for (const r of pl.rows) for (const n of mediaNames({ b: r.data?.bannerImage, a: r.data?.archImage })) byName.set(n, (byName.get(n) ?? 0) + 1);
   const mt = await pool.query("SELECT url FROM music_tracks WHERE url LIKE '/api/media/%'");
   const music = new Set<string>(mt.rows.map((r) => path.basename(r.url)));
   return { byName, music };

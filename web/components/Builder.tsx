@@ -88,6 +88,9 @@ const BUILDER_TABS: { id: string; it: string; en: string; type?: string; guests?
 
 // Larghezza della pagina nell'anteprima desktop: uno schermo di computer, ridotto per stare nel riquadro.
 const DESK_W = 1280;
+// Anteprima telefono: l'invito si impagina sempre a 390 px (un telefono vero) e si rimpicciolisce per entrare nella cornice.
+const PHONE_W = 390;
+const PHONE_PAD = 9;
 
 export function Builder({ initial, lang = "it" }: { initial: Manage; lang?: Lang }) {
   return (
@@ -178,6 +181,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   // Contenitore dell'anteprima: in modalità desktop la pagina si disegna larga 1280 px e si riduce per stare nel riquadro.
   const frameBox = useRef<HTMLDivElement>(null);
   const [deskScale, setDeskScale] = useState<{ s: number; h: number } | null>(null);
+  const [phoneScale, setPhoneScale] = useState<{ s: number; h: number } | null>(null);
   // Anteprima a tutto schermo su telefono: i tocchi non selezionano i blocchi, si scorre l'invito e basta.
   const viewOnly = useRef(false);
   const scrollY = useRef(0);
@@ -330,6 +334,24 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       if (!r.width || !r.height) return;
       const s = Math.min(1, r.width / DESK_W);
       setDeskScale({ s, h: Math.round(r.height / s) });
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [device, isDesktop, previewFull]);
+
+  // Anteprima telefono su schermo grande: se la cornice è più stretta di un telefono vero (schermi bassi, come i portatili),
+  // l'invito resta largo 390 px e viene rimpicciolito: proporzioni identiche, nessun testo che va a capo in modo diverso.
+  useEffect(() => {
+    const el = frameBox.current;
+    if (!el || device !== "mobile" || !isDesktop || typeof ResizeObserver === "undefined") { setPhoneScale(null); return; }
+    const fit = () => {
+      const innerW = el.clientWidth - PHONE_PAD * 2;
+      const innerH = el.clientHeight - PHONE_PAD * 2;
+      if (innerW <= 0 || innerH <= 0) return;
+      const s = Math.min(1, innerW / PHONE_W);
+      setPhoneScale(s < 0.999 ? { s, h: Math.round(innerH / s) } : null);
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -591,7 +613,13 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
               title={L.previewTitle}
               srcDoc={preview}
               sandbox="allow-scripts"
-              style={device === "desktop" && isDesktop && deskScale ? { width: DESK_W, height: deskScale.h, transform: `scale(${deskScale.s})`, transformOrigin: "0 0" } : undefined}
+              style={
+                device === "desktop" && isDesktop && deskScale
+                  ? { width: DESK_W, height: deskScale.h, transform: `scale(${deskScale.s})`, transformOrigin: "0 0" }
+                  : device === "mobile" && isDesktop && phoneScale
+                    ? { position: "absolute", top: PHONE_PAD, left: PHONE_PAD, width: PHONE_W, height: phoneScale.h, transform: `scale(${phoneScale.s})`, transformOrigin: "0 0", borderRadius: 40 / phoneScale.s }
+                    : undefined
+              }
               onLoad={() => {
                 frame.current?.contentWindow?.postMessage({ type: "viewonly", on: viewOnly.current }, "*");
                 frame.current?.contentWindow?.postMessage({ type: "restore", id: selected, y: scrollY.current }, "*");

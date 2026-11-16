@@ -769,3 +769,39 @@ img {
 .bg-add .btn { min-height: 48px; }
 .bg-total-form input { width: 180px; }
 @media (max-width: 1100px) { .bg-add { grid-template-columns: 1fr 1fr; } .bg-add .btn { grid-column: 1 / -1; } }
+
+/* Testata con foto del cliente: sfondo con velo scuro per leggere i testi, comandi in alto a destra. */
+.idash-hero.has-banner { color: #fff; }
+.idash-banner { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.idash-hero.has-banner::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20, 14, 10, 0.72), rgba(20, 14, 10, 0.35) 70%, rgba(20, 14, 10, 0.2)); pointer-events: none; }
+.idash-hero.has-banner .idash-confetti { display: none; }
+.idash-hero > .wrap, .idash-hero .idash-photo { position: relative; z-index: 1; }
+.idash-hero .idash-photo { position: absolute; }
+.idash-actions { position: absolute; top: 18px; right: clamp(16px, 4vw, 40px); z-index: 5; }
+.hi { position: relative; }
+.hi-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 999px; background: rgba(255, 255, 255, 0.16); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: inherit; font: 500 13.5px var(--font-text), sans-serif; cursor: pointer; }
+.hi-toggle:hover { background: rgba(255, 255, 255, 0.28); }
+.hi-panel { position: absolute; top: calc(100% + 10px); right: 0; width: min(380px, calc(100vw - 32px)); padding: 16px; border-radius: 22px; background: #fff; color: var(--ink); box-shadow: 0 30px 60px -24px rgba(42, 33, 25, 0.55); display: grid; gap: 12px; animation: pp-fade 0.2s ease both; }
+.hi-head { display: flex; justify-content: space-between; align-items: center; }
+.hi-head strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; }
+.hi-close { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; background: none; color: var(--ink); cursor: pointer; }
+.hi-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--line); border-radius: 16px; }
+.hi-thumb { width: 56px; height: 42px; border-radius: 10px; overflow: hidden; display: grid; place-items: center; background: var(--paper-deep); color: var(--brass); }
+.hi-thumb.is-arch { width: 42px; height: 56px; border-radius: 999px 999px 10px 10px; justify-self: center; }
+.hi-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hi-text { display: grid; min-width: 0; }
+.hi-text b { font-weight: 500; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hi-text small { color: var(--ink-soft); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hi-acts { display: flex; align-items: center; gap: 6px; }
+.hi-acts .btn { white-space: nowrap; }
+.hi-reset { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink-soft); cursor: pointer; }
+.hi-reset:hover { color: var(--ink); border-color: var(--brass-light); }
+@media (max-width: 860px) { .idash-actions { top: 12px; right: 12px; } .hi-toggle span { display: none; } .hi-toggle { width: 40px; padding: 0; justify-content: center; } }
+/* Ordine dei livelli con la foto di sfondo: foto, velo scuro, poi testi, arco e comandi. */
+.idash-hero.has-banner .idash-banner { z-index: 0; }
+.idash-hero.has-banner::before { z-index: 1; background: linear-gradient(90deg, rgba(20, 14, 10, 0.74), rgba(20, 14, 10, 0.42) 65%, rgba(20, 14, 10, 0.25)); }
+.idash-hero.has-banner > .wrap, .idash-hero.has-banner .idash-photo { z-index: 2; }
+.idash-hero.has-banner .idash-actions { z-index: 6; }
+@media (max-width: 860px) { .pp-page .pp-rail.is-bare { display: none; } }
+/* I livelli della testata restano dentro la testata: le schede sotto la coprono come prima. */
+.idash-hero { isolation: isolate; }

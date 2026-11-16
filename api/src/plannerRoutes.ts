@@ -4,6 +4,7 @@ import type { Catalog } from "@inviteme/shared";
 import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
+import { INPUT_TYPES, MediaError, convertMedia } from "./media";
 import { buildPlannerPdf, isPdfChoice, type PdfChoice } from "./planner-pdf";
 import type { SessionUser } from "./auth";
 
@@ -20,7 +21,9 @@ type Deps = {
   loadCatalog: () => Promise<Catalog>;
 };
 
-export type PlannerData = { notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number };
+// bannerImage e archImage: foto scelte dal cliente per la testata del planner (sfondo e arco). Solo file caricati qui.
+export type PlannerData = { notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number; bannerImage?: string; archImage?: string };
+const IMAGE_SLOTS = { banner: "bannerImage", arch: "archImage" } as const;
 
 const validDate = (v: unknown): string | null => (typeof v === "string" && ISO_DATE.test(v) && !Number.isNaN(Date.parse(v + "T00:00:00")) ? v : null);
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -187,6 +190,8 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       rsvpResponses: invitation?.rsvps ?? 0,
       docs: data.docs ?? {},
       notes: data.notes ?? "",
+      bannerImage: data.bannerImage ?? null,
+      archImage: data.archImage ?? null,
       budgetCents: data.budgetCents ?? 0,
       guestQuota: data.guestQuota ?? 0,
     };
@@ -216,6 +221,37 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     await pool.query("UPDATE planners SET title = $2, event_date = $3, venue = $4, address = $5, data = $6 WHERE id = $1", [
       p.id, title, eventDate, b.venue !== undefined ? text(b.venue, 160) : p.venue, b.address !== undefined ? text(b.address, 200) : p.address, JSON.stringify(data),
     ]);
+    return { ok: true };
+  });
+
+  // Immagini della testata: il cliente carica una foto per lo sfondo (banner) o per l'arco; DELETE torna a quella del tema.
+  app.post<{ Params: { id: string; slot: string } }>("/api/planners/:id/image/:slot", async (req, reply) => {
+    const p = await plannerOf(req, reply);
+    if (!p) return;
+    const key = IMAGE_SLOTS[req.params.slot as keyof typeof IMAGE_SLOTS];
+    if (!key) return reply.code(404).send({ error: "Elemento non trovato" });
+    const file = await req.file();
+    if (!file) return reply.code(400).send({ error: "Nessun file ricevuto" });
+    const ext = INPUT_TYPES.photo[file.mimetype];
+    if (!ext) return reply.code(415).send({ error: "Formato non supportato" });
+    const buffer = await file.toBuffer();
+    if (file.file.truncated) return reply.code(413).send({ error: "File troppo grande" });
+    try {
+      const saved = await convertMedia("photo", buffer, ext);
+      await pool.query("UPDATE planners SET data = jsonb_set(coalesce(data, '{}'::jsonb), $2, to_jsonb($3::text)) WHERE id = $1", [p.id, `{${key}}`, saved.url]);
+      return reply.code(201).send({ url: saved.url });
+    } catch (e) {
+      if (e instanceof MediaError) return reply.code(e.status).send({ error: e.message });
+      throw e;
+    }
+  });
+
+  app.delete<{ Params: { id: string; slot: string } }>("/api/planners/:id/image/:slot", async (req, reply) => {
+    const p = await plannerOf(req, reply);
+    if (!p) return;
+    const key = IMAGE_SLOTS[req.params.slot as keyof typeof IMAGE_SLOTS];
+    if (!key) return reply.code(404).send({ error: "Elemento non trovato" });
+    await pool.query("UPDATE planners SET data = coalesce(data, '{}'::jsonb) - $2 WHERE id = $1", [p.id, key]);
     return { ok: true };
   });
 

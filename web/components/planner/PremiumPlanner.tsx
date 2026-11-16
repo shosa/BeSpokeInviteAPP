@@ -34,6 +34,8 @@ export type PremiumData = {
   notes: string;
   budgetCents: number;
   guestQuota: number;
+  bannerImage: string | null;
+  archImage: string | null;
 };
 
 type Weather = { forecast: { tmaxC: number; tminC: number; precipMm: number; precipProb: number | null } | null; reason?: string; place?: string };
@@ -170,7 +172,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
   return (
     <div className="pp-shell">
       <div className="pp-layout">
-        <aside className="pp-rail" aria-label={t("Sezioni del planner", "Planner sections")}>
+        <aside className={`pp-rail${data.invitation ? "" : " is-bare"}`} aria-label={t("Sezioni del planner", "Planner sections")}>
           {/* Condividi solo con un invito collegato: il planner da solo non ha una pagina per gli ospiti. */}
           {data.invitation && <ShareInvite path={data.invitation.published ? `/i/${data.invitation.slug}` : null} title={data.event.title || t("Il nostro invito", "Our invitation")} editHref={`/editor/${data.invitation.id}`} lang={lang} />}
           <nav className="pp-rail-nav" role="tablist" aria-orientation="vertical">
