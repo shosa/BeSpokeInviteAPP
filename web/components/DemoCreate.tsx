@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/lib/lang";
 
 export type DemoTheme = { id: string; name: string; models: string[] };
 
@@ -9,11 +10,12 @@ export type DemoTheme = { id: string; name: string; models: string[] };
 // e creare un invito di prova, senza pagamento.
 export function DemoCreate({ label, themes, models }: { label: string; themes: DemoTheme[]; models: string[] }) {
   const router = useRouter();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [themeId, setThemeId] = useState(themes[0]?.id ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const chosen = themes.find((t) => t.id === themeId);
+  const chosen = themes.find((x) => x.id === themeId);
 
   useEffect(() => {
     if (!open) return;
@@ -35,15 +37,15 @@ export function DemoCreate({ label, themes, models }: { label: string; themes: D
         body: JSON.stringify({ model, themeId: chosen.id }),
       });
       const data = (await res.json().catch(() => ({}))) as { invitationId?: string; error?: string };
-      if (!res.ok || !data.invitationId) throw new Error(data.error ?? "Non è stato possibile creare l'invito di prova");
+      if (!res.ok || !data.invitationId) throw new Error(data.error ?? t("Non è stato possibile creare l'invito di prova", "The trial invitation could not be created"));
       router.push(`/editor/${data.invitationId}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore");
+      setError(e instanceof Error ? e.message : t("Errore", "Error"));
       setBusy(false);
     }
   }
 
-  if (themes.length === 0) return <p className="hint">Nessun template è attivo al momento.</p>;
+  if (themes.length === 0) return <p className="hint">{t("Nessun template è attivo al momento.", "No templates are active right now.")}</p>;
 
   return (
     <>
@@ -53,19 +55,19 @@ export function DemoCreate({ label, themes, models }: { label: string; themes: D
           <div className="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-title">
             <header className="demo-modal-head">
               <h2 id="demo-title">{label}</h2>
-              <button type="button" className="demo-close" aria-label="Chiudi" onClick={() => setOpen(false)} disabled={busy}>×</button>
+              <button type="button" className="demo-close" aria-label={t("Chiudi", "Close")} onClick={() => setOpen(false)} disabled={busy}>×</button>
             </header>
-            <p className="hint">Scegli il template: l&apos;invito di prova parte con gli stessi blocchi e le stesse immagini dello stile.</p>
+            <p className="hint">{t("Scegli il template: l'invito di prova parte con gli stessi blocchi e le stesse immagini dello stile.", "Choose the template: the trial invitation starts with the same blocks and images as the style.")}</p>
             <label className="demo-field">
               <span>Template</span>
               <select value={themeId} onChange={(e) => setThemeId(e.target.value)} disabled={busy}>
-                {themes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {themes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
               </select>
             </label>
             {error && <p className="form-error">{error}</p>}
             <div className="demo-actions">
-              {chosen && <a className="btn outline small" href={`/api/themes/${chosen.id}/anteprima`} target="_blank" rel="noreferrer">Anteprima</a>}
-              <button type="button" className="btn solid" disabled={busy || !chosen} onClick={create}>{busy ? "…" : "Crea invito"}</button>
+              {chosen && <a className="btn outline small" href={`/api/themes/${chosen.id}/anteprima`} target="_blank" rel="noreferrer">{t("Anteprima", "Preview")}</a>}
+              <button type="button" className="btn solid" disabled={busy || !chosen} onClick={create}>{busy ? "…" : t("Crea invito", "Create invitation")}</button>
             </div>
           </div>
         </div>

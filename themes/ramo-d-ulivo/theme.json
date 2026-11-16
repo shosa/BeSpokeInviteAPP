@@ -3,6 +3,8 @@
   "id": "ramo-d-ulivo",
   "name": "Ramo d'ulivo",
   "description": "Busta avorio a tutto schermo col sigillo d'oro e il rametto d'ulivo, cartoncino con la cornice dorata; la data compare incisa in oro mentre una corona d'ulivo cresce foglia dopo foglia.",
+  "nameEn": "Olive Branch",
+  "descriptionEn": "A full-screen ivory envelope with a gold seal and olive sprig, a card with a gilded frame; the date is engraved in gold as an olive wreath grows leaf by leaf.",
   "models": [],
   "themeColor": "#f3ecdd",
   "fonts": [

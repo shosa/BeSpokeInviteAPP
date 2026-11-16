@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLang } from "@/lib/lang";
 import { FONT_LIBRARY, fontStack, fontsStylesheetUrl, type FontCategory, type FontId } from "@inviteme/shared";
 
-const CATEGORY_LABEL: Record<FontCategory, string> = { serif: "Classici", sans: "Moderni", script: "Calligrafici (per poche parole)" };
+const CATEGORY_LABEL: Record<"it" | "en", Record<FontCategory, string>> = {
+  it: { serif: "Classici", sans: "Moderni", script: "Calligrafici (per poche parole)" },
+  en: { serif: "Classic", sans: "Modern", script: "Script (for a few words)" },
+};
 const CATEGORIES: FontCategory[] = ["serif", "sans", "script"];
 
 // La libreria si carica una volta sola, così ogni nome nel menu si legge nel suo font.
@@ -18,6 +22,8 @@ function ensureFontSheet() {
 
 // Pulsante «Aa» accanto a un testo: apre la libreria dei font e sceglie quello del solo campo.
 export function FontButton({ label, value, onChange }: { label: string; value?: string; onChange: (id: FontId | null) => void }) {
+  const lang = useLang();
+  const t = (it: string, en: string) => (lang === "en" ? en : it);
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
 
@@ -45,15 +51,15 @@ export function FontButton({ label, value, onChange }: { label: string; value?: 
 
   return (
     <div className="font-pick" ref={wrap}>
-      <button type="button" className={`font-btn${value ? " is-set" : ""}`} aria-label={`Font di ${label}`} aria-expanded={open} title="Cambia font" onClick={() => setOpen((o) => !o)}>
+      <button type="button" className={`font-btn${value ? " is-set" : ""}`} aria-label={`${t("Font di", "Font for")} ${label}`} aria-expanded={open} title={t("Cambia font", "Change font")} onClick={() => setOpen((o) => !o)}>
         Aa
       </button>
       {open && (
-        <div className="font-menu" role="group" aria-label={`Font di ${label}`}>
-          <button type="button" className="font-opt" aria-pressed={!value} onClick={() => choose(null)}>Predefinito del tema</button>
+        <div className="font-menu" role="group" aria-label={`${t("Font di", "Font for")} ${label}`}>
+          <button type="button" className="font-opt" aria-pressed={!value} onClick={() => choose(null)}>{t("Predefinito del tema", "Theme default")}</button>
           {CATEGORIES.map((cat) => (
             <div key={cat} className="font-cat-group">
-              <p className="font-cat">{CATEGORY_LABEL[cat]}</p>
+              <p className="font-cat">{CATEGORY_LABEL[lang][cat]}</p>
               {FONT_LIBRARY.filter((f) => f.category === cat).map((f) => (
                 <button key={f.id} type="button" className="font-opt" aria-pressed={value === f.id} style={{ fontFamily: fontStack(f.id) }} onClick={() => choose(f.id)}>
                   <span>{f.id}</span>

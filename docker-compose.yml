@@ -25,16 +25,13 @@ services:
       DATABASE_URL: postgres://inviteme:${POSTGRES_PASSWORD}@db:5432/inviteme
       APP_URL: ${APP_URL:-http://localhost:3000}
       ADMIN_TOKEN: ${ADMIN_TOKEN:?Imposta ADMIN_TOKEN nel file .env}
+      # Solo al primo avvio di una nuova installazione, per avere il primo amministratore: poi si gestiscono dalla console.
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      MAIL_FROM: ${MAIL_FROM:-}
-      # Ricerca foto Pixabay: la chiave si imposta in .env (o nell'ambiente), mai nel repository.
       ANTHROPIC_KEY: ${ANTHROPIC_KEY:-}
-      ASSISTANT_MODEL: ${ASSISTANT_MODEL:-claude-opus-5-5}
+      # Ricerca foto Pixabay: la chiave si imposta in .env (o nell'ambiente), mai nel repository.
       PIXABAY_API_KEY: ${PIXABAY_API_KEY:-}
-      SHOPIFY_STORE_DOMAIN: ${SHOPIFY_STORE_DOMAIN:-}
       SHOPIFY_STOREFRONT_TOKEN: ${SHOPIFY_STOREFRONT_TOKEN:-}
-      SHOPIFY_VARIANT_ID: ${SHOPIFY_VARIANT_ID:-}
       SHOPIFY_WEBHOOK_SECRET: ${SHOPIFY_WEBHOOK_SECRET:-}
       ALLOW_LOCAL_CHECKOUT: ${ALLOW_LOCAL_CHECKOUT:-false}
       DEMO_MODE: ${DEMO_MODE:-false}

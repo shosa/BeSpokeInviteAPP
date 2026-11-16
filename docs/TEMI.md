@@ -36,6 +36,8 @@ themes/<id>/
   "id": "mio-stile",
   "name": "Nome per il cliente",
   "description": "Una frase che descrive lo stile.",
+  "nameEn": "Name for the customer",
+  "descriptionEn": "One sentence describing the style.",
   "models": [],
   "themeColor": "#f7eae7",
   "fonts": ["https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500&display=swap"],
@@ -43,11 +45,16 @@ themes/<id>/
     "hero": { "couplePhoto": "assets/foto-esempio.jpg" },
     "gallery": { "photos": ["assets/g1.jpg", "assets/g2.jpg", "assets/g3.jpg"] },
     "dresscode": { "dress": "Black tie" }
+  },
+  "demoEn": {
+    "hero": { "occasion": "We're getting married" }
   }
 }
 ```
 
-Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, `name`, `description`, `models`, `themeColor`, `fonts`, `demo`, `demoEn`, `background`, `envelope`, `backgroundVideo`.
+Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, `name`, `description`, `nameEn`, `descriptionEn`, `models`, `themeColor`, `fonts`, `demo`, `demoEn`, `background`, `envelope`, `backgroundVideo`.
+
+Ogni stile è **bilingue**: `nameEn`, `descriptionEn` e `demoEn` sono obbligatori. Senza, il validatore rifiuta lo stile (anche il caricamento ZIP dalla console).
 
 | Chiave | Obbligatoria | Regola |
 |---|---|---|
@@ -55,6 +62,8 @@ Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, 
 | `id` | sì | minuscole, numeri e trattini, 2–40 caratteri, uguale al nome della cartella, unico tra gli stili |
 | `name` | sì | 1–60 caratteri |
 | `description` | no | fino a 200 caratteri (il resto viene tagliato) |
+| `nameEn` | sì | nome in inglese, 1–60 caratteri: è quello che vede il cliente con il sito in inglese |
+| `descriptionEn` | sì | descrizione in inglese, 1–200 caratteri (oltre è un errore, non viene tagliata) |
 | `models` | no | elenco di modelli del catalogo che offrono lo stile; vuoto = tutti |
 | `themeColor` | sì | `#RRGGBB`, colore della barra del browser |
 | `fonts` | no | solo URL `https://fonts.googleapis.com/css2?…` (non altri host) |
@@ -62,7 +71,7 @@ Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, 
 | `demo` | no | per ogni tipo di blocco, i valori dell'esempio (vedi sotto) |
 | `envelope` | no | busta-video: `{ "video": "assets/busta.mp4", "poster": "assets/busta-poster.jpg" }`. Il filmato apre l'invito al posto della busta disegnata; `poster` è il fotogramma fermo mostrato prima del tocco. Vedi «Busta-video» |
 | `backgroundVideo` | no | video di sfondo per zona: `{ "hero": "assets/intestazione.mp4", "body": "assets/corpo.mp4" }`, ciascuno facoltativo. Vedi «Video di sfondo per zona» |
-| `demoEn` | no | esempi in inglese, per blocco: sostituiscono solo le proprietà indicate quando la demo è in inglese. Vedi «Esempi in inglese» |
+| `demoEn` | sì | esempi in inglese, per blocco: sostituiscono solo le proprietà indicate quando la demo è in inglese. Può essere `{}` se le etichette di default bastano, ma deve esserci. Vedi «Esempi in inglese» |
 
 ### Esempi (`demo`)
 
@@ -78,7 +87,7 @@ Le etichette e i titoli scritti dallo stile («Dettagli del nostro giorno», «C
 
 Le foto, i video e le altre proprietà non testuali restano quelli di `demo` in ogni lingua. I testi generati (nomi, luoghi, frasi, programma, dress code) vengono dal generatore in entrambe le lingue.
 
-Quando conviene scrivere `demoEn`: per avere frasi proprie dello stile in inglese, come nell'acquarello. Esempio:
+`demoEn` è obbligatorio (anche vuoto, `{}`). Scrivi dentro le frasi proprie dello stile: per avere frasi proprie dello stile in inglese, come nell'acquarello. Esempio:
 
 ```json
 "demoEn": {
@@ -393,6 +402,8 @@ Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge 
 ## Checklist prima del rilascio
 
 - [ ] il validatore passa senza errori
+- [ ] `nameEn`, `descriptionEn` e `demoEn` presenti, in un inglese naturale (non tradotto parola per parola)
+- [ ] nessun testo fisso nei file dei blocchi: le etichette di sistema vengono da `{{t.…}}`, i testi del cliente dalle proprietà
 - [ ] nessun dato di persone in asset, esempi o nomi di file
 - [ ] tutte le classi dei blocchi sono stilizzate, anche la versione mobile
 - [ ] la busta funziona con e senza filmato; con busta-video il filmato finisce su carta chiara e sfuma nell'invito

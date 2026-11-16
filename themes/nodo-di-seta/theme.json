@@ -3,6 +3,8 @@
   "id": "nodo-di-seta",
   "name": "Nodo di seta",
   "description": "Un cofanetto di velluto blu notte a due ante, legato da un nastro di raso champagne col sigillo d'oro: il fiocco si scioglie e le ante si aprono sul cartoncino avorio. Dentro, una notte d'estate: la data in una costellazione, le palette di un tabellone, una pergamena, una giostra di foto e le fasi della luna.",
+  "nameEn": "Silk Knot",
+  "descriptionEn": "A midnight-blue velvet case tied with champagne satin and a gold seal opens onto a summer night: the date in a constellation, a departures board and the phases of the moon.",
   "models": [],
   "themeColor": "#101a3a",
   "fonts": [

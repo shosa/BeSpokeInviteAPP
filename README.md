@@ -13,7 +13,7 @@ Inviti digitali per matrimoni ed eventi: copertina sigillata, musica, programma,
 
 ## Avvio con Docker
 
-1. Copia `.env.example` in `.env` e compila almeno `POSTGRES_PASSWORD`, `ADMIN_TOKEN` e `ADMIN_EMAIL`.
+1. Copia `.env.example` in `.env` e compila almeno `POSTGRES_PASSWORD` e `ADMIN_TOKEN`. Solo al primo avvio aggiungi `ADMIN_EMAIL=<la tua email>` per diventare amministratore; poi gli amministratori si gestiscono dalla console e la riga si può togliere.
 2. Avvia i servizi:
 
 ```bash
@@ -71,7 +71,7 @@ Si apre su `/admin` con un account amministratore. Da lì si gestiscono modelli,
 
 ## Pagamenti (Shopify)
 
-- Compila `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_TOKEN` e `SHOPIFY_VARIANT_ID` per il checkout reale.
+- Nel `.env` metti solo i segreti `SHOPIFY_STOREFRONT_TOKEN` e `SHOPIFY_WEBHOOK_SECRET`; dominio del negozio, variante dell'invito e prodotto planner si impostano dalla console (Shopify).
 - Crea nel pannello Shopify un webhook `Ordini pagati` verso `https://<tuo-dominio>/api/webhooks/shopify` e imposta `SHOPIFY_WEBHOOK_SECRET`.
 - Senza Shopify il pagamento non è possibile in produzione. Per le prove o una demo imposta `DEMO_MODE=true`: ogni acquisto va a buon fine, senza pagamento reale. Con Shopify configurato la demo è sempre spenta.
 

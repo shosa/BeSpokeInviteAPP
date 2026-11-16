@@ -42,6 +42,9 @@ export type ThemeManifest = {
   id: string;
   name: string;
   description: string;
+  // Nome e descrizione in inglese, per il sito in inglese. Obbligatori: ogni tema è bilingue.
+  nameEn: string;
+  descriptionEn: string;
   models: string[]; // modelli del catalogo che lo offrono; vuoto = tutti
   themeColor: string; // colore della barra del browser
   fonts: string[]; // fogli di stile di Google Fonts, soli URL https://fonts.googleapis.com/
@@ -73,7 +76,7 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
   if (!isRecord(input)) return { manifest: null, errors: [`${dir}: theme.json deve essere un oggetto`] };
   const x = input;
 
-  const allowed = ["engine", "id", "name", "description", "models", "themeColor", "fonts", "demo", "background", "envelope", "backgroundVideo", "demoEn"];
+  const allowed = ["engine", "id", "name", "description", "nameEn", "descriptionEn", "models", "themeColor", "fonts", "demo", "background", "envelope", "backgroundVideo", "demoEn"];
   for (const k of Object.keys(x)) if (!allowed.includes(k)) err(`campo sconosciuto "${k}"`);
   if (x.engine !== ENGINE_VERSION) err(`engine deve essere ${ENGINE_VERSION}`);
 
@@ -82,6 +85,12 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
   const name = typeof x.name === "string" && x.name.trim().length > 0 && x.name.length <= 60 ? x.name.trim() : null;
   if (!name) err("name: testo da 1 a 60 caratteri");
   const description = typeof x.description === "string" ? x.description.slice(0, 200) : "";
+  // Inglese obbligatorio: nome, descrizione ed esempi (demoEn) servono al sito e alle anteprime in inglese.
+  const nameEn = typeof x.nameEn === "string" && x.nameEn.trim().length > 0 && x.nameEn.length <= 60 ? x.nameEn.trim() : null;
+  if (!nameEn) err("nameEn: nome inglese obbligatorio, da 1 a 60 caratteri");
+  const descriptionEn = typeof x.descriptionEn === "string" && x.descriptionEn.trim().length > 0 && x.descriptionEn.length <= 200 ? x.descriptionEn.trim() : null;
+  if (!descriptionEn) err("descriptionEn: descrizione inglese obbligatoria, da 1 a 200 caratteri");
+  if (x.demoEn === undefined) err("demoEn: esempi in inglese obbligatori (per blocco, i testi da sostituire a quelli di demo)");
   const models = strings(x.models, "models", err, 4);
   const themeColor = typeof x.themeColor === "string" && HEX.test(x.themeColor) ? x.themeColor : "";
   if (!themeColor) err("themeColor: colore #RRGGBB");
@@ -119,13 +128,15 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
     else err("envelope: { video: \"assets/nome.mp4\", poster?: \"assets/nome.jpg\" } (filmato mp4 o webm del tema, senza audio; poster facoltativo)");
   }
 
-  if (errors.length || !id || !name) return { manifest: null, errors };
+  if (errors.length || !id || !name || !nameEn || !descriptionEn) return { manifest: null, errors };
   return {
     manifest: {
       engine: ENGINE_VERSION,
       id,
       name,
       description,
+      nameEn,
+      descriptionEn,
       models,
       themeColor,
       fonts,

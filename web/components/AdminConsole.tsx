@@ -14,32 +14,34 @@ import { AdminShopify } from "./admin/AdminShopify";
 import { MusicLibrary } from "./admin/MusicLibrary";
 import { ShoppingBag, Users, Mail, LayoutTemplate, Music, Image as ImageIcon, Store, Send, Sparkles, type LucideIcon } from "lucide-react";
 import "./admin/console.css";
+import { useT } from "@/lib/lang";
 
 // Navigazione per gruppi: ciò che si fa ogni giorno in alto, il catalogo al centro, il collegamento di sistema in basso.
 const ICON: Record<Tab, LucideIcon> = { ordini: ShoppingBag, clienti: Users, inviti: Mail, template: LayoutTemplate, musica: Music, file: ImageIcon, shopify: Store, email: Send, assistente: Sparkles };
-const GROUPS: { title: string; items: { id: Tab; label: string; hint: string }[] }[] = [
+type Pair = [string, string]; // [italiano, inglese]
+const GROUPS: { title: Pair; items: { id: Tab; label: Pair; hint: Pair }[] }[] = [
   {
-    title: "Vendita",
+    title: ["Vendita", "Sales"],
     items: [
-      { id: "ordini", label: "Ordini", hint: "Pagamenti" },
-      { id: "clienti", label: "Clienti", hint: "Account e ruoli" },
+      { id: "ordini", label: ["Ordini", "Orders"], hint: ["Pagamenti", "Payments"] },
+      { id: "clienti", label: ["Clienti", "Customers"], hint: ["Account e ruoli", "Accounts and roles"] },
     ],
   },
   {
-    title: "Contenuti",
+    title: ["Contenuti", "Content"],
     items: [
-      { id: "inviti", label: "Inviti", hint: "Tutti gli inviti" },
-      { id: "template", label: "Template", hint: "Cosa scelgono i clienti" },
-      { id: "musica", label: "Musica", hint: "Libreria brani" },
-      { id: "file", label: "File", hint: "Immagini caricate" },
+      { id: "inviti", label: ["Inviti", "Invitations"], hint: ["Tutti gli inviti", "All invitations"] },
+      { id: "template", label: ["Template", "Templates"], hint: ["Cosa scelgono i clienti", "What customers choose from"] },
+      { id: "musica", label: ["Musica", "Music"], hint: ["Libreria brani", "Track library"] },
+      { id: "file", label: ["File", "Files"], hint: ["Immagini caricate", "Uploaded images"] },
     ],
   },
   {
-    title: "Sistema",
+    title: ["Sistema", "System"],
     items: [
-      { id: "shopify", label: "Shopify", hint: "Collegamento al negozio" },
-      { id: "email", label: "Email", hint: "Mittente e avvisi" },
-      { id: "assistente", label: "Assistente", hint: "Modello e limiti" },
+      { id: "shopify", label: ["Shopify", "Shopify"], hint: ["Collegamento al negozio", "Shop connection"] },
+      { id: "email", label: ["Email", "Email"], hint: ["Mittente e avvisi", "Sender and notices"] },
+      { id: "assistente", label: ["Assistente", "Assistant"], hint: ["Modello e limiti", "Model and limits"] },
     ],
   },
 ];
@@ -47,6 +49,8 @@ const ALL = GROUPS.flatMap((g) => g.items);
 
 // Console admin di Bespoke Invites. Il collegamento Shopify è al centro: senza di quello non ci sono pagamenti.
 export function AdminConsole() {
+  const tt = useT();
+  const t = (p: Pair) => tt(p[0], p[1]);
   const [tab, setTab] = useState<Tab>("ordini");
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [shopify, setShopify] = useState<ShopifyState | null>(null);
@@ -73,7 +77,7 @@ export function AdminConsole() {
 
   return (
     <main className="ac">
-      <aside className="ac-side" aria-label="Sezioni della console">
+      <aside className="ac-side" aria-label={tt("Sezioni della console", "Console sections")}>
         <div className="ac-card ac-rail">
         <div className="ac-brand">
           <span className="ac-brand-mark" aria-hidden="true">B</span>
@@ -83,21 +87,21 @@ export function AdminConsole() {
           </div>
         </div>
         {GROUPS.map((g) => (
-          <div key={g.title} className="ac-navgroup">
-            <span className="ac-navlabel">{g.title}</span>
-            {g.items.map((t) => {
-              const Icon = ICON[t.id];
+          <div key={g.title[0]} className="ac-navgroup">
+            <span className="ac-navlabel">{t(g.title)}</span>
+            {g.items.map((item) => {
+              const Icon = ICON[item.id];
               return (
               <button
-                key={t.id}
+                key={item.id}
                 type="button"
-                className={tab === t.id ? "is-on" : ""}
-                aria-current={tab === t.id ? "page" : undefined}
-                onClick={() => setTab(t.id)}
+                className={tab === item.id ? "is-on" : ""}
+                aria-current={tab === item.id ? "page" : undefined}
+                onClick={() => setTab(item.id)}
               >
                 <span className="ac-navicon"><Icon size={18} strokeWidth={1.7} aria-hidden="true" /></span>
-                <span className="ac-navtext"><span>{t.label}</span><small>{t.hint}</small></span>
-                {t.id === "shopify" && needsShopify && <i className="ac-dot" aria-label="da completare" />}
+                <span className="ac-navtext"><span>{t(item.label)}</span><small>{t(item.hint)}</small></span>
+                {item.id === "shopify" && needsShopify && <i className="ac-dot" aria-label={tt("da completare", "to complete")} />}
               </button>
               );
             })}
@@ -109,14 +113,14 @@ export function AdminConsole() {
       <section className="ac-main">
         <header className="ac-head">
           <div>
-            <span className="ac-kicker">{GROUPS.find((g) => g.items.some((i) => i.id === tab))?.title}</span>
-            <h1>{current?.label}</h1>
-            <p className="hint">{current?.hint}</p>
+            <span className="ac-kicker">{(() => { const g = GROUPS.find((x) => x.items.some((i) => i.id === tab)); return g ? t(g.title) : ""; })()}</span>
+            <h1>{current ? t(current.label) : ""}</h1>
+            <p className="hint">{current ? t(current.hint) : ""}</p>
           </div>
           <div className="ac-headside">
             {shopify && (
               <button type="button" className={`ac-pill ${shopify.configured ? "is-ok" : shopify.demo ? "is-info" : "is-warn"}`} onClick={() => setTab("shopify")}>
-                {shopify.configured ? "Shopify collegato" : shopify.demo ? "Demo: nessun pagamento reale" : "Shopify da collegare"}
+                {shopify.configured ? tt("Shopify collegato", "Shopify connected") : shopify.demo ? tt("Demo: nessun pagamento reale", "Demo: no real payments") : tt("Shopify da collegare", "Shopify to connect")}
               </button>
             )}
           </div>
@@ -126,7 +130,7 @@ export function AdminConsole() {
           {tab === "ordini" && <AdminOrders />}
           {tab === "clienti" && <AdminUsers onOpenInvitations={(id) => { setClientId(id); setTab("inviti"); }} />}
           {tab === "inviti" && <AdminInvitations initialUser={clientId} onClearUser={() => setClientId(undefined)} />}
-          {tab === "template" && (catalog ? <ThemesAdmin catalog={catalog} onChanged={reload} /> : <p className="hint">Caricamento…</p>)}
+          {tab === "template" && (catalog ? <ThemesAdmin catalog={catalog} onChanged={reload} /> : <p className="hint">{tt("Caricamento…", "Loading…")}</p>)}
           {tab === "musica" && <MusicLibrary tracks={catalog?.music ?? []} onChange={reload} />}
           {tab === "file" && <AdminMedia />}
           {tab === "shopify" && <AdminShopify />}

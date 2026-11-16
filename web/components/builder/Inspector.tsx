@@ -266,7 +266,7 @@ export function Inspector(p: Props) {
           ))}
           <Field label={L.eventType}>
             <select value={p.config.eventType} onChange={(e) => p.onSetEventType(e.target.value as EventType)}>
-              {EVENT_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+              {EVENT_TYPES.map((t) => <option key={t.id} value={t.id}>{p.lang === "en" ? t.labelEn : t.label}</option>)}
             </select>
           </Field>
         </div>

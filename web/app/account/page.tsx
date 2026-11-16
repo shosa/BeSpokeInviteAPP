@@ -7,6 +7,7 @@ import { ShareLinkButton } from "@/components/account/ShareLinkButton";
 import { ApiError, apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
 import { ui } from "@/lib/ui";
+import { themeCopy } from "@/lib/catalogCopy";
 import type { PendingPurchase } from "@/lib/pending";
 import type { ThemeManifest } from "@inviteme/shared";
 import "./account.css";
@@ -114,7 +115,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const c = COPY[lang === "en" ? "en" : "it"];
   const catalog = await apiPublic<{ demo?: boolean; themes?: Theme[]; models?: { id: string }[] }>("/api/catalog");
   const demo = Boolean(catalog?.demo);
-  const demoThemes = (catalog?.themes ?? []).filter((x) => x.enabled).map((x) => ({ id: x.manifest.id, name: x.manifest.name, models: x.manifest.models }));
+  const demoThemes = (catalog?.themes ?? []).filter((x) => x.enabled).map((x) => ({ id: x.manifest.id, name: themeCopy(x.manifest, lang), models: x.manifest.models }));
   const demoModels = (catalog?.models ?? []).map((m) => m.id);
   const themeOf = (id: string) => catalog?.themes?.find((x) => x.manifest.id === id)?.manifest;
   const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL ?? "https://thebespokeinvite.com";
@@ -226,7 +227,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                   <article key={r.id} className="acx-inv">
                     {thumb(r, "acx-thumb")}
                     <div className="acx-inv-body">
-                      <div className="acx-inv-top"><span className="acx-live"><i />{c.online}</span><span className="acx-theme">{themeOf(r.themeId)?.name ?? ""}</span></div>
+                      <div className="acx-inv-top"><span className="acx-live"><i />{c.online}</span><span className="acx-theme">{(() => { const th = themeOf(r.themeId); return th ? themeCopy(th, lang) : ""; })()}</span></div>
                       <h4>{r.title}</h4>
                       <p className="acx-when">{when(r.eventDate)}</p>
                       <p className="acx-meta">{c.stats(r.views, r.rsvps)}</p>

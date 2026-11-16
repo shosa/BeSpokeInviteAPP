@@ -147,33 +147,6 @@ const FIELD_COPY_EN: Record<string, string> = {
   "galleryStyle.grid": "Grid",
 };
 
-const THEME_COPY_EN: Record<string, string> = {
-  "anniversario-oro": "Golden velvet",
-  "argento-anniversario": "Silver moonlight",
-  "autunno-cena": "October dusk",
-  "baby-shower": "Silken clouds",
-  "battesimo-celeste": "Heavenly hush",
-  "compleanno-festa": "Midnight confetti",
-  "festa-spiaggia": "Summer tide",
-  "gala-aziendale": "Gala night",
-  "giardino": "Secret garden",
-  "invitereference": "Arch of light",
-  "laurea-giulia": "Laurel and gold",
-  "lavanda-nozze": "Lavender bloom",
-  "matrimonio-citta": "City of silk",
-  "matrimonio-lago": "Lakeside reflections",
-  "minimo": "Elegant hush",
-  "notturno": "Beneath the stars",
-  "pensionamento": "New horizons",
-  "prima-comunione": "Little light",
-  "redazione": "Author's page",
-  "rivista": "Paper pages",
-  "velo": "Veil of mist",
-  "avorio-botanico": "Botanical ivory",
-  "acquarello-blu": "Blue watercolour",
-  "nozze-in-fiore": "Flowers in bloom",
-};
-
 export function blockCopy(type: string, label: string, lang: Lang) {
   return lang === "en" ? (BLOCK_COPY_EN[type] ?? label) : label;
 }
@@ -184,8 +157,9 @@ export function fieldCopy(type: string, key: string, label: string, lang: Lang) 
   return FIELD_COPY_EN[`${type}.${key}`] ?? FIELD_COPY_EN[key] ?? label;
 }
 
-export function themeCopy(id: string, name: string, lang: Lang) {
-  return lang === "en" ? (THEME_COPY_EN[id] ?? name) : name;
+// Nome e descrizione di un tema nella lingua del sito: in inglese quelli del manifest (nameEn, descriptionEn), se ci sono.
+export function themeCopy(m: { name: string; nameEn?: string }, lang: Lang) {
+  return lang === "en" ? m.nameEn || m.name : m.name;
 }
 
 // Descrizioni in inglese dei blocchi e degli stili (quelle in italiano sono nel catalogo).
@@ -209,37 +183,10 @@ const BLOCK_DESC_EN: Record<string, string> = {
   "footer": "Sign-off at the bottom of the page.",
 };
 
-const THEME_DESC_EN: Record<string, string> = {
-  "acquarello-blu": "A blue and light-blue watercolour that flows behind the invitation: transparent paper, blue flowers and lots of light. For weddings, anniversaries and spring ceremonies.",
-  "anniversario-oro": "Burgundy background and antique gold details, card panels. For fifty years of marriage and big milestones.",
-  "argento-anniversario": "Twenty-five years together: a silver arch frame on white paper. For wedding anniversaries and family celebrations.",
-  "autunno-cena": "Red leaves, pumpkins and candles on dark panels. For autumn dinners, birthdays and family gatherings.",
-  "avorio-botanico": "Ivory paper, pink and sage flowers, gold details and a cinematic opening with a romantic feel.",
-  "baby-shower": "Pastels, clouds and white flowers: a column of names and a scrolling programme. For baby showers and births.",
-  "battesimo-celeste": "Sky and clouds in soft blues: a column of names and a scrolling programme. For christenings and first communions.",
-  "compleanno-festa": "Warm, lively colours, cake and candles in front, big rounded titles. For birthdays and parties with friends.",
-  "festa-spiaggia": "Sand, sea and cobalt blue, big titles and a column layout. For beach weddings, hen parties and summer parties.",
-  "gala-aziendale": "Typography only on white, corporate blue and simple tables. For gala dinners, awards and company events.",
-  "giardino": "Full-page forest-green background, card panels and mosaic photos. For outdoor evening events.",
-  "invitereference": "Arch frame, gold ornaments on pink paper: a scratch-off date and a timeline programme.",
-  "laurea-giulia": "Midnight blue and gold, classic lettering and the list of the day's stops. For graduations and big study milestones.",
-  "lavanda-nozze": "Fields of lavender in soft violet, an arch frame and delicate flowers. For country weddings and outdoor ceremonies.",
-  "matrimonio-citta": "City lights at night, rose gold and geometric lines. For urban ceremonies and receptions in palaces.",
-  "matrimonio-lago": "A column of names over water and mountains, scrolling programme. For weddings by the lake and in the valleys.",
-  "minimo": "Typography only: no ornaments, no photos. Wide spaces and thin lines for an essential invitation.",
-  "notturno": "An evening ceremony: black background, thin white letters, geometric lines and a prominent countdown. For black-tie weddings.",
-  "nozze-in-fiore": "A romantic and sumptuous announcement: peonies, ivory roses, eucalyptus, wax seal and gold frames, with floating petals.",
-  "pensionamento": "Forest-green panels and gold details: an evening of thanks. For retirements and farewells.",
-  "prima-comunione": "Arch frame on light paper and sage green: simple, devout, with restrained ornaments. For first communions and confirmations.",
-  "redazione": "Magazine layout: a cover with the edition number, columns, thin rules and numbered sections like pages.",
-  "rivista": "Two-column editorial layout, big titles, crisp rules. Made for lovers of fashion magazines.",
-  "velo": "A vertical column of names in italics on ivory paper, light flowers and a horizontal scrolling programme. For romantic ceremonies.",
-};
-
 export function blockDescCopy(type: string, description: string, lang: Lang) {
   return lang === "en" ? (BLOCK_DESC_EN[type] ?? description) : description;
 }
 
-export function themeDescCopy(id: string, description: string, lang: Lang) {
-  return lang === "en" ? (THEME_DESC_EN[id] ?? description) : description;
+export function themeDescCopy(m: { description: string; descriptionEn?: string }, lang: Lang) {
+  return lang === "en" ? m.descriptionEn || m.description : m.description;
 }

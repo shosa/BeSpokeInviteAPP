@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FOLDER, FOLDER_GROUPS, type FolderSection } from "@inviteme/shared";
+import { FOLDER, FOLDER_GROUPS, FOLDER_GROUPS_EN, type FolderSection } from "@inviteme/shared";
 import { ArrowLeft, ChevronLeft, ChevronRight, Armchair, Car, Building2, Cake, Camera, Church, Clock, FileText, Flower2, Gift, Heart, Hotel, Images, ListChecks, Luggage, MapPin, Mic, Music, Package, Palette, PartyPopper, Phone, Shield, Shirt, Sparkles, Store, Tent, Users, Utensils, Wallet, Wine, type LucideIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { useLang } from "@/lib/lang";
 
 // Icona di ogni sezione della cartella.
 const ICON: Record<string, LucideIcon> = {
@@ -55,6 +56,15 @@ const LABEL_BY_KIND: Record<FolderSection["kind"], string[]> = {
   checklist: ["voce", "voci"],
   text: ["", ""],
 };
+const LABEL_BY_KIND_EN: Record<FolderSection["kind"], string[]> = {
+  timeline: ["moment", "moments"],
+  contacts: ["contact", "contacts"],
+  checklist: ["item", "items"],
+  text: ["", ""],
+};
+// Titolo, gruppo e suggerimento di una sezione nella lingua del sito.
+const titleOf = (s: FolderSection, en: boolean) => (en ? s.titleEn : s.title);
+const groupOf = (g: string, en: boolean) => (en ? FOLDER_GROUPS_EN[g as keyof typeof FOLDER_GROUPS_EN] ?? g : g);
 
 const itemsOf = (v: FolderValue | undefined): FolderRow[] => (v && typeof v === "object" ? v.items : []);
 const textOf = (v: FolderValue | undefined): string => (typeof v === "string" ? v : "");
@@ -64,12 +74,12 @@ const filled = (section: FolderSection, v: FolderValue | undefined): boolean => 
 };
 
 // Riepilogo di una sezione: quanti elementi e, per le spunte, quante fatte.
-function summary(section: FolderSection, v: FolderValue | undefined, vendors: FolderVendor[]): string {
-  if (section.key === "fornitori") return `${vendors.length} ${vendors.length === 1 ? "fornitore" : "fornitori"}`;
-  if (section.kind === "text") return textOf(v).trim() ? "scritto" : "vuoto";
+function summary(section: FolderSection, v: FolderValue | undefined, vendors: FolderVendor[], en: boolean): string {
+  if (section.key === "fornitori") return en ? `${vendors.length} ${vendors.length === 1 ? "vendor" : "vendors"}` : `${vendors.length} ${vendors.length === 1 ? "fornitore" : "fornitori"}`;
+  if (section.kind === "text") return textOf(v).trim() ? (en ? "written" : "scritto") : (en ? "empty" : "vuoto");
   const items = itemsOf(v);
-  if (section.kind === "checklist") return `${items.filter((i) => i.done).length} di ${items.length}`;
-  const [one, many] = LABEL_BY_KIND[section.kind];
+  if (section.kind === "checklist") return `${items.filter((i) => i.done).length} ${en ? "of" : "di"} ${items.length}`;
+  const [one, many] = (en ? LABEL_BY_KIND_EN : LABEL_BY_KIND)[section.kind];
   return items.length === 1 ? `1 ${one}` : `${items.length} ${many}`;
 }
 
@@ -92,6 +102,8 @@ export function Folder({
   eventDate: string;
   onSave: (next: Record<string, FolderValue>) => Promise<void>;
 }) {
+  const en = useLang() === "en";
+  const t = (it: string, eng: string) => (en ? eng : it);
   const [local, setLocal] = useState<Record<string, FolderValue>>(docs);
   const [open, setOpenState] = useState<string | null>(null);
   // Direzione dell'animazione: avanti (la sezione entra da destra) o indietro (torna l'elenco da sinistra).
@@ -111,7 +123,7 @@ export function Folder({
   const urgent = FOLDER.filter((s) => s.priority && !filled(s, local[s.key]));
 
   const q = query.trim().toLowerCase();
-  const matches = (s: FolderSection) => !q || s.title.toLowerCase().includes(q) || s.group.toLowerCase().includes(q) || s.hint.toLowerCase().includes(q);
+  const matches = (s: FolderSection) => !q || [titleOf(s, en), groupOf(s.group, en), en ? s.hintEn : s.hint].some((x) => x.toLowerCase().includes(q));
 
   async function persist(next: Record<string, FolderValue>) {
     setBusy(true);
@@ -177,7 +189,7 @@ export function Folder({
       <div className="fo fo-page is-fwd" ref={top} key={current.key}>
         <button type="button" className="fo-back pp-noprint" onClick={back}>
           <ArrowLeft size={18} aria-hidden="true" />
-          Cartella
+          {t("Cartella", "Folder")}
         </button>
         <FolderEditor
           section={current}
@@ -187,16 +199,16 @@ export function Folder({
           onDraft={(value) => { draft.current = { key: current.key, value }; }}
           onSave={async (v) => { draft.current = null; await persist({ ...local, [current.key]: v }); }}
         />
-        <nav className="fo-pager pp-noprint" aria-label="Altre sezioni">
+        <nav className="fo-pager pp-noprint" aria-label={t("Altre sezioni", "Other sections")}>
           {prev ? (
             <button type="button" className="fo-pager-btn" onClick={() => openSection(prev.key)}>
               <ChevronLeft size={18} aria-hidden="true" />
-              <span><small>Precedente</small>{prev.title}</span>
+              <span><small>{t("Precedente", "Previous")}</small>{titleOf(prev, en)}</span>
             </button>
           ) : <span />}
           {next && (
             <button type="button" className="fo-pager-btn is-next" onClick={() => openSection(next.key)}>
-              <span><small>Successiva</small>{next.title}</span>
+              <span><small>{t("Successiva", "Next")}</small>{titleOf(next, en)}</span>
               <ChevronRight size={18} aria-hidden="true" />
             </button>
           )}
@@ -209,34 +221,34 @@ export function Folder({
     <div className={`fo fo-page${dir === "back" ? " is-back" : ""}`} ref={top}>
       <header className="fo-head pp-noprint">
         <div>
-          <p className="pp-kicker">La cartella del matrimonio</p>
-          <h2>{written} di {FOLDER.length} sezioni con qualcosa di preparato</h2>
-          <p className="hint">{readyItems} elementi pronti{checkable ? ` · ${checked} di ${checkable} spuntati` : ""}</p>
+          <p className="pp-kicker">{t("La cartella del matrimonio", "The wedding folder")}</p>
+          <h2>{t(`${written} di ${FOLDER.length} sezioni con qualcosa di preparato`, `${written} of ${FOLDER.length} sections with something prepared`)}</h2>
+          <p className="hint">{t(`${readyItems} elementi pronti`, `${readyItems} items ready`)}{checkable ? t(` · ${checked} di ${checkable} spuntati`, ` · ${checked} of ${checkable} ticked`) : ""}</p>
         </div>
-        <button type="button" className="btn solid small" onClick={onPdf}>Crea PDF</button>
+        <button type="button" className="btn solid small" onClick={onPdf}>{t("Crea PDF", "Create PDF")}</button>
       </header>
 
       {urgent.length > 0 && (
-        <section className="fo-urgent pp-noprint" aria-label="Utile adesso">
-          <span className="pp-kicker">Utile adesso</span>
+        <section className="fo-urgent pp-noprint" aria-label={t("Utile adesso", "Useful now")}>
+          <span className="pp-kicker">{t("Utile adesso", "Useful now")}</span>
           <div className="fo-chips">
             {urgent.map((s) => (
-              <button key={s.key} type="button" className="fo-chip" onClick={() => openSection(s.key)}>{s.title}</button>
+              <button key={s.key} type="button" className="fo-chip" onClick={() => openSection(s.key)}>{titleOf(s, en)}</button>
             ))}
           </div>
         </section>
       )}
 
       <div className="fo-search pp-noprint">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca nella cartella" aria-label="Cerca nella cartella" />
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("Cerca nella cartella", "Search the folder")} aria-label={t("Cerca nella cartella", "Search the folder")} />
       </div>
 
       {FOLDER_GROUPS.map((group) => {
         const sections = FOLDER.filter((s) => s.group === group && matches(s));
         if (sections.length === 0) return null;
         return (
-          <section key={group} className="fo-group pp-noprint" aria-label={group}>
-            <h3>{group}</h3>
+          <section key={group} className="fo-group pp-noprint" aria-label={groupOf(group, en)}>
+            <h3>{groupOf(group, en)}</h3>
             <div className="fo-grid">
               {sections.map((s, i) => (
                 <button
@@ -247,8 +259,8 @@ export function Folder({
                   onClick={() => openSection(s.key)}
                 >
                   <span className="fo-card-ico">{(() => { const I = iconFor(s.key); return <I size={20} strokeWidth={1.5} aria-hidden="true" />; })()}</span>
-                  <strong>{s.title}</strong>
-                  <small>{summary(s, local[s.key], vendors)}</small>
+                  <strong>{titleOf(s, en)}</strong>
+                  <small>{summary(s, local[s.key], vendors, en)}</small>
                 </button>
               ))}
             </div>
@@ -275,6 +287,8 @@ function FolderEditor({
   onDraft: (v: FolderValue) => void;
   onSave: (v: FolderValue) => Promise<void>;
 }) {
+  const en = useLang() === "en";
+  const t = (it: string, eng: string) => (en ? eng : it);
   const [items, setItems] = useState<FolderRow[]>(itemsOf(value));
   const [text, setText] = useState<string>(textOf(value));
   const [saved, setSaved] = useState(false);
@@ -282,8 +296,8 @@ function FolderEditor({
   // Riga vuota per tipo: programma (orario, cosa), contatti (nome, ruolo, telefono), checklist (voce, fatto).
   const blank = (): FolderRow => (section.kind === "timeline" ? { time: "", item: "" } : section.kind === "contacts" ? { name: "", role: "", phone: "" } : { text: "", done: false });
   const setRow = (i: number, patch: FolderRow) => { setItems((rows) => rows.map((r, j) => (j === i ? { ...r, ...patch } : r))); setSaved(false); };
-  const valueOf = (rows: FolderRow[], t: string): FolderValue =>
-    section.kind === "text" ? t : { items: rows.filter((r) => Object.values(r).some((v) => v === true || (typeof v === "string" && v.trim()))) };
+  const valueOf = (rows: FolderRow[], txt: string): FolderValue =>
+    section.kind === "text" ? txt : { items: rows.filter((r) => Object.values(r).some((v) => v === true || (typeof v === "string" && v.trim()))) };
 
   // Ogni modifica diventa la bozza della sezione: tornando indietro si salva da sola.
   const first = useRef(true);
@@ -298,41 +312,41 @@ function FolderEditor({
   }
 
   return (
-    <section className="fo-editor pp-card pp-noprint" aria-label={section.title}>
+    <section className="fo-editor pp-card pp-noprint" aria-label={titleOf(section, en)}>
       <header className="fo-editor-head">
         <div className="fo-editor-title">
           <span className="fo-editor-ico">{(() => { const I = iconFor(section.key); return <I size={22} strokeWidth={1.5} aria-hidden="true" />; })()}</span>
-          <span className="pp-kicker">{section.group}</span>
-          <h3>{section.title}</h3>
-          <p className="hint">{section.hint}</p>
+          <span className="pp-kicker">{groupOf(section.group, en)}</span>
+          <h3>{titleOf(section, en)}</h3>
+          <p className="hint">{en ? section.hintEn : section.hint}</p>
         </div>
       </header>
 
       {section.key === "fornitori" ? (
         <ul className="fo-rows">
-          {vendors.length === 0 && <li className="hint">Nessun fornitore: aggiungili nella scheda Fornitori.</li>}
+          {vendors.length === 0 && <li className="hint">{t("Nessun fornitore: aggiungili nella scheda Fornitori.", "No vendors yet: add them in the Vendors tab.")}</li>}
           {vendors.map((v) => <li key={v.id} className="fo-row-static"><strong>{v.name}</strong> <small>{v.role}</small> <small>{v.contact}</small></li>)}
         </ul>
       ) : section.kind === "text" ? (
-        <textarea className="fo-text" value={text} onChange={(e) => { setText(e.target.value); setSaved(false); }} rows={6} maxLength={4000} aria-label={section.title} />
+        <textarea className="fo-text" value={text} onChange={(e) => { setText(e.target.value); setSaved(false); }} rows={6} maxLength={4000} aria-label={titleOf(section, en)} />
       ) : (
         <ul className="fo-rows">
           {items.map((r, i) => (
             <li key={i} className="fo-row">
               {section.kind === "timeline" && (<>
-                <input value={String(r.time ?? "")} onChange={(e) => setRow(i, { time: e.target.value })} placeholder="Ore" maxLength={10} aria-label="Orario" />
-                <input value={String(r.item ?? "")} onChange={(e) => setRow(i, { item: e.target.value })} placeholder="Cosa succede" maxLength={200} aria-label="Momento" />
+                <input value={String(r.time ?? "")} onChange={(e) => setRow(i, { time: e.target.value })} placeholder={t("Ore", "Time")} maxLength={10} aria-label={t("Orario", "Time")} />
+                <input value={String(r.item ?? "")} onChange={(e) => setRow(i, { item: e.target.value })} placeholder={t("Cosa succede", "What happens")} maxLength={200} aria-label={t("Momento", "Moment")} />
               </>)}
               {section.kind === "contacts" && (<>
-                <input value={String(r.name ?? "")} onChange={(e) => setRow(i, { name: e.target.value })} placeholder="Nome" maxLength={200} aria-label="Nome" />
-                <input value={String(r.role ?? "")} onChange={(e) => setRow(i, { role: e.target.value })} placeholder="Ruolo" maxLength={200} aria-label="Ruolo" />
-                <input value={String(r.phone ?? "")} onChange={(e) => setRow(i, { phone: e.target.value })} placeholder="Telefono" maxLength={200} aria-label="Telefono" />
+                <input value={String(r.name ?? "")} onChange={(e) => setRow(i, { name: e.target.value })} placeholder={t("Nome", "Name")} maxLength={200} aria-label={t("Nome", "Name")} />
+                <input value={String(r.role ?? "")} onChange={(e) => setRow(i, { role: e.target.value })} placeholder={t("Ruolo", "Role")} maxLength={200} aria-label={t("Ruolo", "Role")} />
+                <input value={String(r.phone ?? "")} onChange={(e) => setRow(i, { phone: e.target.value })} placeholder={t("Telefono", "Phone")} maxLength={200} aria-label={t("Telefono", "Phone")} />
               </>)}
               {section.kind === "checklist" && (<>
-                <Checkbox checked={Boolean(r.done)} onChange={(v) => setRow(i, { done: v })} ariaLabel="Fatto" />
-                <input value={String(r.text ?? "")} onChange={(e) => setRow(i, { text: e.target.value })} placeholder="Cosa fare" maxLength={200} aria-label="Voce" />
+                <Checkbox checked={Boolean(r.done)} onChange={(v) => setRow(i, { done: v })} ariaLabel={t("Fatto", "Done")} />
+                <input value={String(r.text ?? "")} onChange={(e) => setRow(i, { text: e.target.value })} placeholder={t("Cosa fare", "To do")} maxLength={200} aria-label={t("Voce", "Item")} />
               </>)}
-              <button type="button" className="pp-link" onClick={() => { setItems((rows) => rows.filter((_, j) => j !== i)); setSaved(false); }}>Rimuovi</button>
+              <button type="button" className="pp-link" onClick={() => { setItems((rows) => rows.filter((_, j) => j !== i)); setSaved(false); }}>{t("Rimuovi", "Remove")}</button>
             </li>
           ))}
         </ul>
@@ -340,9 +354,9 @@ function FolderEditor({
 
       {section.key !== "fornitori" && (
         <div className="fo-editor-actions">
-          {section.kind !== "text" && <button type="button" className="btn outline small" onClick={() => { setItems((rows) => [...rows, blank()]); setSaved(false); }}>Aggiungi riga</button>}
-          <button type="button" className="btn solid small" disabled={busy} onClick={save}>{busy ? "Salvo…" : "Salva sezione"}</button>
-          {saved && <span className="hint" role="status">Salvata</span>}
+          {section.kind !== "text" && <button type="button" className="btn outline small" onClick={() => { setItems((rows) => [...rows, blank()]); setSaved(false); }}>{t("Aggiungi riga", "Add row")}</button>}
+          <button type="button" className="btn solid small" disabled={busy} onClick={save}>{busy ? t("Salvo…", "Saving…") : t("Salva sezione", "Save section")}</button>
+          {saved && <span className="hint" role="status">{t("Salvata", "Saved")}</span>}
         </div>
       )}
     </section>

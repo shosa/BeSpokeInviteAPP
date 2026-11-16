@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, CalendarDays, Check, Heart, ListChecks, MailChec
 import { AddressField } from "./builder/AddressField";
 import { DatePicker } from "./ui/DatePicker";
 import "./setup.css";
+import { useLang } from "@/lib/lang";
 
 // Wizard iniziale: i dati di base dell'invito, chiesti a passi la prima volta che si apre il builder o il planner.
 // Dalle risposte il server imposta l'evento e aggiunge o toglie i blocchi collegati (shared/src/setup.ts):
@@ -14,20 +15,25 @@ import "./setup.css";
 // Finché non è completato non si prosegue: niente chiusura.
 
 type StepKey = "title" | "date" | "venue" | "signature" | "rsvp" | "questions";
-const STEPS: { key: StepKey; label: string; icon: LucideIcon }[] = [
-  { key: "title", label: "Nomi", icon: Heart },
-  { key: "date", label: "Data", icon: CalendarDays },
-  { key: "venue", label: "Luogo", icon: MapPin },
-  { key: "signature", label: "Firma", icon: PenLine },
-  { key: "rsvp", label: "Conferma", icon: MailCheck },
-  { key: "questions", label: "Domande", icon: ListChecks },
+const STEPS: { key: StepKey; label: string; en: string; icon: LucideIcon }[] = [
+  { key: "title", label: "Nomi", en: "Names", icon: Heart },
+  { key: "date", label: "Data", en: "Date", icon: CalendarDays },
+  { key: "venue", label: "Luogo", en: "Venue", icon: MapPin },
+  { key: "signature", label: "Firma", en: "Sign-off", icon: PenLine },
+  { key: "rsvp", label: "Conferma", en: "RSVP", icon: MailCheck },
+  { key: "questions", label: "Domande", en: "Questions", icon: ListChecks },
 ];
 
-const TYPE_LABEL: Record<RsvpQuestionType, string> = { "yes-no": "Sì / No", text: "Testo", number: "Numero", choice: "Scelta" };
+const TYPE_LABEL: Record<"it" | "en", Record<RsvpQuestionType, string>> = {
+  it: { "yes-no": "Sì / No", text: "Testo", number: "Numero", choice: "Scelta" },
+  en: { "yes-no": "Yes / No", text: "Text", number: "Number", choice: "Choice" },
+};
 type Custom = { id: string; label: string; type: RsvpQuestionType; options: string };
 
 export function SetupGate({ id, config, setupDone, children }: { id: string; config: InviteConfig; setupDone: boolean; children: ReactNode }) {
   const router = useRouter();
+  const lang = useLang();
+  const t = (it: string, en: string) => (lang === "en" ? en : it);
   const locale = config.locale === "en" ? "en" : "it";
   const start = useMemo(() => setupDefaults(config), [config]);
   const presets = useMemo(() => presetQuestions(locale), [locale]);
@@ -59,11 +65,11 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
 
   // Cosa manca per andare avanti in questo passo.
   const blocker = (() => {
-    if (current.key === "title" && !title.trim()) return "Scrivete i nomi o il titolo dell'evento";
-    if (current.key === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) return "Scegliete la data";
-    if (current.key === "rsvp" && rsvp === null) return "Scegliete se chiedere la conferma";
-    if (current.key === "questions" && total > 8) return "Al massimo 8 domande";
-    if (current.key === "questions" && custom.some((c) => c.type === "choice" && c.label.trim() && c.options.split(",").filter((o) => o.trim()).length < 2)) return "Le domande a scelta hanno bisogno di almeno due opzioni";
+    if (current.key === "title" && !title.trim()) return t("Scrivete i nomi o il titolo dell'evento", "Enter the names or the event title");
+    if (current.key === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) return t("Scegliete la data", "Choose the date");
+    if (current.key === "rsvp" && rsvp === null) return t("Scegliete se chiedere la conferma", "Choose whether to ask for RSVPs");
+    if (current.key === "questions" && total > 8) return t("Al massimo 8 domande", "At most 8 questions");
+    if (current.key === "questions" && custom.some((c) => c.type === "choice" && c.label.trim() && c.options.split(",").filter((o) => o.trim()).length < 2)) return t("Le domande a scelta hanno bisogno di almeno due opzioni", "Choice questions need at least two options");
     return null;
   })();
 
@@ -94,11 +100,11 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
         body: JSON.stringify({ title, eventDate, venue, address, signature, rsvp: rsvp === true, questions: rsvp ? questions() : [] }),
       });
       const out = (await res.json().catch(() => ({}))) as { error?: string };
-      if (!res.ok) throw new Error(out.error ?? "Non è stato possibile salvare");
+      if (!res.ok) throw new Error(out.error ?? t("Non è stato possibile salvare", "Could not save"));
       setDone(true);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore");
+      setError(err instanceof Error ? err.message : t("Errore", "Error"));
       setBusy(false);
     }
   }
@@ -117,14 +123,14 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
       {children}
       <div className="demo-backdrop setup-backdrop">
         <form className="demo-modal setup-modal sw" role="dialog" aria-modal="true" aria-labelledby="sw-title" onSubmit={next}>
-          <ol className="sw-steps" aria-label="Passi">
+          <ol className="sw-steps" aria-label={t("Passi", "Steps")}>
             {steps.map((s, i) => {
               const Icon = s.icon;
               const state = i < step ? "is-done" : i === step ? "is-on" : "";
               return (
                 <li key={s.key} className={`sw-step ${state}`} aria-current={i === step ? "step" : undefined}>
                   <span className="sw-step-ico">{i < step ? <Check size={16} aria-hidden="true" /> : <Icon size={16} aria-hidden="true" />}</span>
-                  <span className="sw-step-label">{s.label}</span>
+                  <span className="sw-step-label">{t(s.label, s.en)}</span>
                 </li>
               );
             })}
@@ -133,63 +139,63 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
 
           <div className="sw-body" key={current.key}>
             <span className="sw-ico" aria-hidden="true">{(() => { const I = current.icon; return <I size={26} strokeWidth={1.5} />; })()}</span>
-            <p className="sw-count">Passo {step + 1} di {steps.length}</p>
+            <p className="sw-count">{t(`Passo ${step + 1} di ${steps.length}`, `Step ${step + 1} of ${steps.length}`)}</p>
 
             {current.key === "title" && (<>
-              <h2 id="sw-title">Come si chiama il vostro evento?</h2>
-              <p className="hint">I nomi degli sposi o il titolo dell&apos;evento: compaiono sulla busta e in apertura dell&apos;invito.</p>
+              <h2 id="sw-title">{t("Come si chiama il vostro evento?", "What is your event called?")}</h2>
+              <p className="hint">{t("I nomi degli sposi o il titolo dell'evento: compaiono sulla busta e in apertura dell'invito.", "The couple's names or the event title: they appear on the envelope and at the top of the invitation.")}</p>
               <label className="demo-field">
-                <span>Nomi o titolo</span>
+                <span>{t("Nomi o titolo", "Names or title")}</span>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Sara & Luca" maxLength={80} autoFocus />
               </label>
             </>)}
 
             {current.key === "date" && (<>
-              <h2 id="sw-title">Quando sarà?</h2>
-              <p className="hint">La data serve alla data dell&apos;invito, al conto alla rovescia e al planner.</p>
-              <DatePicker id="sw-date" label="Data dell'evento" value={eventDate} onChange={setEventDate} lang={locale} inline autoFocus />
+              <h2 id="sw-title">{t("Quando sarà?", "When is it?")}</h2>
+              <p className="hint">{t("La data serve alla data dell'invito, al conto alla rovescia e al planner.", "The date is used for the invitation, the countdown and the planner.")}</p>
+              <DatePicker id="sw-date" label={t("Data dell'evento", "Event date")} value={eventDate} onChange={setEventDate} lang={lang} inline autoFocus />
             </>)}
 
             {current.key === "venue" && (<>
-              <h2 id="sw-title">Dove sarà?</h2>
-              <p className="hint">Con il nome del luogo l&apos;invito mostra la sezione Location; con l&apos;indirizzo anche la mappa. Lasciateli vuoti se non volete queste sezioni.</p>
+              <h2 id="sw-title">{t("Dove sarà?", "Where is it?")}</h2>
+              <p className="hint">{t("Con il nome del luogo l'invito mostra la sezione Location; con l'indirizzo anche la mappa. Lasciateli vuoti se non volete queste sezioni.", "With the venue name the invitation shows the Venue section; with the address, the map too. Leave them empty if you don't want these sections.")}</p>
               <label className="demo-field">
-                <span>Luogo dell&apos;evento</span>
+                <span>{t("Luogo dell'evento", "Event venue")}</span>
                 <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Villa Aurelia" maxLength={120} autoFocus />
               </label>
-              <AddressField className="demo-field" label="Indirizzo per la mappa (facoltativo)" value={address} onChange={setAddress} placeholder="Inizia a scrivere: via, città…" />
-              <p className="hint sw-addr-hint">Sceglietelo dai suggerimenti: così la mappa trova il punto giusto.</p>
+              <AddressField className="demo-field" label={t("Indirizzo per la mappa (facoltativo)", "Address for the map (optional)")} value={address} onChange={setAddress} placeholder={t("Inizia a scrivere: via, città…", "Start typing: street, city…")} />
+              <p className="hint sw-addr-hint">{t("Sceglietelo dai suggerimenti: così la mappa trova il punto giusto.", "Pick it from the suggestions so the map finds the right spot.")}</p>
             </>)}
 
             {current.key === "signature" && (<>
-              <h2 id="sw-title">Un ringraziamento per chiudere</h2>
-              <p className="hint">Compare in fondo all&apos;invito, nella Firma. Lasciatelo vuoto se non volete la Firma.</p>
+              <h2 id="sw-title">{t("Un ringraziamento per chiudere", "A thank-you to close")}</h2>
+              <p className="hint">{t("Compare in fondo all'invito, nella Firma. Lasciatelo vuoto se non volete la Firma.", "It appears at the bottom of the invitation, in the Sign-off. Leave it empty if you don't want a Sign-off.")}</p>
               <label className="demo-field">
-                <span>Ringraziamento</span>
-                <input value={signature} onChange={(e) => setSignature(e.target.value)} placeholder="Grazie di far parte del nostro giorno" maxLength={80} autoFocus />
+                <span>{t("Ringraziamento", "Thank-you")}</span>
+                <input value={signature} onChange={(e) => setSignature(e.target.value)} placeholder={t("Grazie di far parte del nostro giorno", "Thank you for being part of our day")} maxLength={80} autoFocus />
               </label>
             </>)}
 
             {current.key === "rsvp" && (<>
-              <h2 id="sw-title">Volete la conferma di presenza?</h2>
-              <p className="hint">Gli ospiti rispondono dall&apos;invito e voi vedete le risposte nel planner.</p>
+              <h2 id="sw-title">{t("Volete la conferma di presenza?", "Do you want RSVPs?")}</h2>
+              <p className="hint">{t("Gli ospiti rispondono dall'invito e voi vedete le risposte nel planner.", "Guests reply from the invitation and you see the replies in your account.")}</p>
               <div className="sw-choice" role="radiogroup" aria-labelledby="sw-title">
                 <button type="button" role="radio" aria-checked={rsvp === true} className={`sw-option${rsvp === true ? " is-on" : ""}`} onClick={() => setRsvp(true)}>
                   <MailCheck size={22} aria-hidden="true" />
-                  <strong>Sì, chiediamola</strong>
-                  <small>Aggiunge il modulo di conferma</small>
+                  <strong>{t("Sì, chiediamola", "Yes, ask for them")}</strong>
+                  <small>{t("Aggiunge il modulo di conferma", "Adds the reply form")}</small>
                 </button>
                 <button type="button" role="radio" aria-checked={rsvp === false} className={`sw-option${rsvp === false ? " is-on" : ""}`} onClick={() => setRsvp(false)}>
                   <Heart size={22} aria-hidden="true" />
-                  <strong>No, non serve</strong>
-                  <small>L&apos;invito resta solo da leggere</small>
+                  <strong>{t("No, non serve", "No, not needed")}</strong>
+                  <small>{t("L'invito resta solo da leggere", "The invitation is read-only")}</small>
                 </button>
               </div>
             </>)}
 
             {current.key === "questions" && (<>
-              <h2 id="sw-title">Cosa chiedere agli ospiti?</h2>
-              <p className="hint">Nome e presenza ci sono sempre. Attivate le altre domande o aggiungetene di vostre (al massimo 8). Si cambiano anche dopo, nel builder.</p>
+              <h2 id="sw-title">{t("Cosa chiedere agli ospiti?", "What should guests be asked?")}</h2>
+              <p className="hint">{t("Nome e presenza ci sono sempre. Attivate le altre domande o aggiungetene di vostre (al massimo 8). Si cambiano anche dopo, nel builder.", "Name and attendance are always included. Turn on other questions or add your own (up to 8). You can change them later in the builder.")}</p>
               <ul className="sw-questions">
                 {presets.map((p) => (
                   <li key={p.id}>
@@ -201,25 +207,25 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
                         onChange={(e) => setPicked((s) => { const n = new Set(s); if (e.target.checked) n.add(p.id); else n.delete(p.id); return n; })}
                       />
                       <span className="sw-q-box" aria-hidden="true"><Check size={14} /></span>
-                      <span className="sw-q-text">{p.label}<small>{TYPE_LABEL[p.type]}{p.locked ? " · sempre inclusa" : ""}</small></span>
+                      <span className="sw-q-text">{p.label}<small>{TYPE_LABEL[lang][p.type]}{p.locked ? t(" · sempre inclusa", " · always included") : ""}</small></span>
                     </label>
                   </li>
                 ))}
               </ul>
               {custom.map((c, i) => (
                 <div key={i} className="sw-custom">
-                  <input value={c.label} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="La vostra domanda" maxLength={160} aria-label="Testo della domanda" />
-                  <select value={c.type} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, type: e.target.value as RsvpQuestionType } : x)))} aria-label="Tipo di risposta">
-                    {(Object.keys(TYPE_LABEL) as RsvpQuestionType[]).map((t) => <option key={t} value={t}>{TYPE_LABEL[t]}</option>)}
+                  <input value={c.label} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder={t("La vostra domanda", "Your question")} maxLength={160} aria-label={t("Testo della domanda", "Question text")} />
+                  <select value={c.type} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, type: e.target.value as RsvpQuestionType } : x)))} aria-label={t("Tipo di risposta", "Answer type")}>
+                    {(Object.keys(TYPE_LABEL[lang]) as RsvpQuestionType[]).map((k) => <option key={k} value={k}>{TYPE_LABEL[lang][k]}</option>)}
                   </select>
-                  <button type="button" className="sw-icon-btn" aria-label="Togli la domanda" onClick={() => setCustom((l) => l.filter((_, j) => j !== i))}><Trash2 size={16} aria-hidden="true" /></button>
+                  <button type="button" className="sw-icon-btn" aria-label={t("Togli la domanda", "Remove the question")} onClick={() => setCustom((l) => l.filter((_, j) => j !== i))}><Trash2 size={16} aria-hidden="true" /></button>
                   {c.type === "choice" && (
-                    <input className="sw-custom-opts" value={c.options} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, options: e.target.value } : x)))} placeholder="Opzioni separate da virgola: Carne, Pesce, Vegetariano" maxLength={300} aria-label="Opzioni" />
+                    <input className="sw-custom-opts" value={c.options} onChange={(e) => setCustom((l) => l.map((x, j) => (j === i ? { ...x, options: e.target.value } : x)))} placeholder={t("Opzioni separate da virgola: Carne, Pesce, Vegetariano", "Options separated by commas: Meat, Fish, Vegetarian")} maxLength={300} aria-label={t("Opzioni", "Options")} />
                   )}
                 </div>
               ))}
               <button type="button" className="sw-add" disabled={total >= 8} onClick={() => setCustom((l) => [...l, { id: "", label: "", type: "text", options: "" }])}>
-                <Plus size={16} aria-hidden="true" />Aggiungi una domanda
+                <Plus size={16} aria-hidden="true" />{t("Aggiungi una domanda", "Add a question")}
               </button>
             </>)}
           </div>
@@ -228,10 +234,10 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
           {blocker && current.key === "questions" && <p className="hint sw-blocker">{blocker}</p>}
           <div className="sw-actions">
             {step > 0 ? (
-              <button type="button" className="btn ghost" onClick={() => setStep((s) => s - 1)} disabled={busy}><ArrowLeft size={16} aria-hidden="true" />Indietro</button>
+              <button type="button" className="btn ghost" onClick={() => setStep((s) => s - 1)} disabled={busy}><ArrowLeft size={16} aria-hidden="true" />{t("Indietro", "Back")}</button>
             ) : <span />}
             <button type="submit" className="btn solid" disabled={busy || Boolean(blocker)} title={blocker ?? undefined}>
-              {busy ? "Preparo l'invito…" : last ? <>Crea l&apos;invito<Check size={16} aria-hidden="true" /></> : <>Avanti<ArrowRight size={16} aria-hidden="true" /></>}
+              {busy ? t("Preparo l'invito…", "Preparing the invitation…") : last ? <>{t("Crea l'invito", "Create the invitation")}<Check size={16} aria-hidden="true" /></> : <>{t("Avanti", "Next")}<ArrowRight size={16} aria-hidden="true" /></>}
             </button>
           </div>
         </form>

@@ -599,3 +599,8 @@ export const UI = {
 export function ui(lang: Lang) {
   return UI[lang];
 }
+
+// Scelta del testo per lingua, per i componenti server: `tr(lang)("italiano", "English")`.
+export function tr(lang: Lang) {
+  return (it: string, en: string) => (lang === "en" ? en : it);
+}

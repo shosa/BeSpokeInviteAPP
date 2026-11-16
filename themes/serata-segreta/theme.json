@@ -3,6 +3,8 @@
   "id": "serata-segreta",
   "name": "Serata segreta",
   "description": "Si guarda dal buco della serratura: in un salotto a lume di candela una cloche d'argento si solleva e scopre il cartoncino col sigillo di ceralacca, poi si sale lo scalone tra le candele. Dentro: la data che si accende con un fiammifero, le cloche del conto alla rovescia, la galleria di cornici barocche, il programma a lume di candela e il luogo visto dalla serratura.",
+  "nameEn": "Secret Evening",
+  "descriptionEn": "Peek through the keyhole: in a candlelit salon a silver cloche lifts to reveal the card, then up the grand staircase. The date lights up with a match.",
   "models": [],
   "themeColor": "#2a0810",
   "fonts": [

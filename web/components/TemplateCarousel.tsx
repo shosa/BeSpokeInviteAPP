@@ -153,7 +153,7 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
       >
         {templates.map((t, i) => {
           const on = t.id === selectedId;
-          const name = themeCopy(t.id, t.name, lang);
+          const name = themeCopy(t, lang);
           return (
             <article key={t.id} data-id={t.id} className={`tpl-card${on ? " is-on" : ""}`} aria-roledescription="diapositiva" aria-label={`${i + 1} / ${templates.length}: ${name}`}>
               <div className="tpl-phone">
@@ -167,7 +167,7 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
               <div className="tpl-meta">
                 <h3>{name}</h3>
                 {on && <span className="tpl-chosen">{L.tplChosen}</span>}
-                <p>{themeDescCopy(t.id, t.description, lang)}</p>
+                <p>{themeDescCopy(t, lang)}</p>
               </div>
             </article>
           );

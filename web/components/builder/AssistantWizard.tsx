@@ -39,9 +39,9 @@ const GUEST_QUESTIONS = [
 ];
 
 // Esempi nei campi: generici, mai i dati di nessun invito reale. Ne esce uno a caso ad ogni apertura.
-const NAME_HINTS = ["Nome e Nome", "Nome & Nome", "Nome e Nome, o il festeggiato"];
-const DRESS_HINTS = ["Es. elegante, casual, a tema", "Es. formale, cocktail, bianco e nero", "Es. abbigliamento sportivo"];
-const PHOTO_HINTS = ["Es. un paesaggio", "Es. dettagli di fiori", "Es. una foto di gruppo", "Es. una città di sera"];
+const NAME_HINTS = { it: ["Nome e Nome", "Nome & Nome", "Nome e Nome, o il festeggiato"], en: ["Name and Name", "Name & Name", "Name and Name, or the guest of honour"] };
+const DRESS_HINTS = { it: ["Es. elegante, casual, a tema", "Es. formale, cocktail, bianco e nero", "Es. abbigliamento sportivo"], en: ["E.g. elegant, casual, themed", "E.g. formal, cocktail, black and white", "E.g. sportswear"] };
+const PHOTO_HINTS = { it: ["Es. un paesaggio", "Es. dettagli di fiori", "Es. una foto di gruppo", "Es. una città di sera"], en: ["E.g. a landscape", "E.g. floral details", "E.g. a group photo", "E.g. a city at night"] };
 
 // Casuale: Fisher-Yates su una copia; `pickN` prende n elementi a caso, nell'ordine casuale.
 function shuffled<T>(list: readonly T[]): T[] {
@@ -113,9 +113,9 @@ export function AssistantWizard({ lang, onCompose, onCancel, initial }: { lang: 
     // I colori già scelti restano tra quelli mostrati.
     colors: [...COLORS.filter((c) => initial?.colors?.includes(c.hex.toLowerCase())), ...pickN(COLORS.filter((c) => !initial?.colors?.includes(c.hex.toLowerCase())), 6)].slice(0, Math.max(6, initial?.colors?.length ?? 0)),
     questions: pickN(GUEST_QUESTIONS, 6),
-    names: pick(NAME_HINTS),
-    dress: pick(DRESS_HINTS),
-    photo: pick(PHOTO_HINTS),
+    names: pick(NAME_HINTS[lang === "en" ? "en" : "it"]),
+    dress: pick(DRESS_HINTS[lang === "en" ? "en" : "it"]),
+    photo: pick(PHOTO_HINTS[lang === "en" ? "en" : "it"]),
   }));
   const set = <K extends keyof Answers>(k: K, v: Answers[K]) => setA((x) => ({ ...x, [k]: v }));
   const last = step === STEPS.length - 1;

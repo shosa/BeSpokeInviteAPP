@@ -47,14 +47,15 @@ import { StockError, importStock, parseStockFilters, searchStock } from "./pixab
 import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
-import { getAllMailTemplates, isMailKind, loadMailTemplates, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
+import { getAllMailTemplates, isMailKind, loadMailTemplates, rsvpVerdict, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
 import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminMedia } from "./adminMedia";
-import { getShopifyIds, loadShopifySettings, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
+import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
 import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
+import { errorToEnglish } from "./errorsEn";
 import { createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -97,11 +98,22 @@ function renderFor(c: Catalog, slug: string, config: InviteConfig, preview = fal
   return renderInvitePage({ theme, config, slug, features: activeFeatures(c, config.model, config.addons), runtime: RUNTIME, preview, builder });
 }
 
-const NOT_FOUND_PAGE = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Invito non disponibile</title></head><body style="font-family:Georgia,serif;text-align:center;padding:60px 20px;color:#17242A"><p>Questo invito non è disponibile.</p></body></html>`;
+const NOT_FOUND_PAGE = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Invito non disponibile · Invitation not available</title></head><body style="font-family:Georgia,serif;text-align:center;padding:60px 20px;color:#17242A"><p>Questo invito non è disponibile.</p><p lang="en">This invitation is not available.</p></body></html>`;
 
 export async function buildApp() {
   const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? "info" }, bodyLimit: 12 * 1024 * 1024 });
   await app.register(cookie);
+  // Sito in inglese: i messaggi per il cliente ({ error }, { message }) partono tradotti. Vedi errorsEn.ts.
+  app.addHook("preSerialization", async (req, _reply, payload) => {
+    if (req.cookies.lang !== "en" || !payload || typeof payload !== "object" || Array.isArray(payload)) return payload;
+    const body = payload as Record<string, unknown>;
+    if (typeof body.error !== "string" && typeof body.message !== "string") return payload;
+    return {
+      ...body,
+      ...(typeof body.error === "string" ? { error: errorToEnglish(body.error) } : {}),
+      ...(typeof body.message === "string" ? { message: errorToEnglish(body.message) } : {}),
+    };
+  });
   // Il limite più alto è quello dei video in ingresso: poi ffmpeg li riduce (vedi media.ts).
   await app.register(multipart, { limits: { fileSize: 150 * 1024 * 1024, files: 1 } });
   ensureMediaDirs();
@@ -184,7 +196,7 @@ export async function buildApp() {
     const { rows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
     if (rows[0]) {
       const token = await createAccessToken(rows[0].id);
-      await sendMail(accessEmail({ to: email, link: `${appUrl()}/accesso/${token}` }), "other").catch((e) => app.log.warn({ err: e }, "link di accesso non inviato"));
+      await sendMail(accessEmail({ to: email, link: `${appUrl()}/accesso/${token}`, lang: req.cookies.lang === "en" ? "en" : "it" }), "other").catch((e) => app.log.warn({ err: e }, "link di accesso non inviato"));
     }
     return reply200;
   });
@@ -409,7 +421,7 @@ export async function buildApp() {
           );
         },
       },
-      { id: req.params.id, userId: user.id, body: req.body },
+      { id: req.params.id, userId: user.id, body: req.body, lang: req.cookies.lang === "en" ? "en" : "it" },
     );
     return reply.code(out.status).send(out.body);
   });
@@ -597,9 +609,10 @@ export async function buildApp() {
     const theme = themes().find((t) => t.manifest.id === req.params.id);
     if (!theme) return reply.code(404).type("text/plain; charset=utf-8").send("Tema non trovato");
     const q = req.query as { lang?: string; s?: string };
-    const lang = q.lang === "en" ? "en" : "it";
+    // Lingua: ?lang= se c'è, altrimenti quella del sito (cookie).
+    const lang = (q.lang ?? req.cookies.lang) === "en" ? "en" : "it";
     const seed = /^[a-z0-9]{1,12}$/i.test(q.s ?? "") ? (q.s as string) : "x";
-    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(previewShell(theme.manifest.id, theme.manifest.name, lang, seed)));
+    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(previewShell(theme.manifest.id, lang === "en" ? theme.manifest.nameEn || theme.manifest.name : theme.manifest.name, lang, seed)));
   });
 
   // Copertina statica di un tema per il carosello di scelta: la busta chiusa (poster del filmato), ridotta a 480 px.
@@ -635,7 +648,7 @@ export async function buildApp() {
   app.get<{ Params: { id: string } }>("/api/themes/:id/demo", async (req, reply) => {
     const theme = themes().find((t) => t.manifest.id === req.params.id);
     if (!theme) return reply.code(404).type("text/plain; charset=utf-8").send("Tema non trovato");
-    const lang = (req.query as { lang?: string }).lang === "en" ? "en" : "it";
+    const lang = ((req.query as { lang?: string }).lang ?? req.cookies.lang) === "en" ? "en" : "it";
     // Le miniature usano la pagina senza busta; l'anteprima la chiede con cover=1.
     const cover = (req.query as { cover?: string }).cover === "1";
     const html = quietScroll(renderInvitePage({ theme, config: sampleConfig(theme.manifest, lang), slug: "demo", features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: !cover }));
@@ -753,7 +766,7 @@ export async function buildApp() {
     await track("rsvp_submitted", inv.id);
     // Notifica al proprietario: un errore di posta non blocca la risposta dell'ospite.
     await sendMail(
-      rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: attendanceOf(questions, answers), invitationId: inv.id }),
+      rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: attendanceOf(questions, answers), invitationId: inv.id, lang: inv.config?.locale === "en" ? "en" : "it" }),
       "rsvp",
     ).catch((e) => req.log.warn({ err: e }, "notifica RSVP non inviata"));
     return reply.code(201).send({ ok: true });
@@ -865,7 +878,7 @@ export async function buildApp() {
     await track("order_paid", id);
     const { rows } = await pool.query("SELECT email FROM users WHERE id = $1", [order.user_id]);
     if (rows[0]) {
-      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug, link: `${appUrl()}/account` }), "order").catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
+      await sendMail(orderEmail({ to: rows[0].email, title: titleOf(config), amount: formatPrice(order.amount_cents), slug, link: `${appUrl()}/account`, lang: config.locale === "en" ? "en" : "it" }), "order").catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
     return id;
   }
@@ -950,7 +963,7 @@ export async function buildApp() {
     );
     if (rows[0]) {
       await sendMail(
-        orderEmail({ to: rows[0].email, title: titleOf(rows[0].config), amount: formatPrice(amountCents), slug: rows[0].slug, link: `${appUrl()}/account` }),
+        orderEmail({ to: rows[0].email, title: titleOf(rows[0].config), amount: formatPrice(amountCents), slug: rows[0].slug, link: `${appUrl()}/account`, lang: rows[0].config?.locale === "en" ? "en" : "it" }),
         "order",
       ).catch((e) => app.log.warn({ err: e }, "conferma d'ordine non inviata"));
     }
@@ -964,25 +977,26 @@ export async function buildApp() {
     total_price: string;
     currency: string;
     customer?: { first_name?: string | null; last_name?: string | null; email?: string | null };
-    line_items?: { variant_id?: number | string | null; quantity?: number }[];
+    line_items?: { variant_id?: number | string | null; product_id?: number | string | null; quantity?: number }[];
+    customer_locale?: string | null;
     order_status_url?: string | null;
   };
   // Acquisto dal negozio: ogni riga con una variante nostra diventa un acquisto da attivare.
-  // Variante base → invito; variante planner → planner; variante «pacchetto» (ex premium) → invito e planner.
+  // Variante base → invito; prodotto planner (qualunque variante) → planner; variante «pacchetto» (ex premium) → invito e planner.
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
     const base = normalizeVariant(ids.variantId);
     const bundle = normalizeVariant(ids.variantPremiumId);
-    const plannerVariant = normalizeVariant(ids.variantPlannerId);
+    const plannerProduct = normalizeProduct(ids.plannerProductId);
     let invitations = 0;
     let planners = 0;
     for (const l of order.line_items ?? []) {
       const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
-      if (!v) continue;
+      const prod = l.product_id == null ? null : normalizeProduct(String(l.product_id));
       const q = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1)));
-      if (v === base) invitations += q;
-      else if (bundle && v === bundle) { invitations += q; planners += q; }
-      else if (plannerVariant && v === plannerVariant) planners += q;
+      if (plannerProduct && prod === plannerProduct) planners += q;
+      else if (v && v === base) invitations += q;
+      else if (v && bundle && v === bundle) { invitations += q; planners += q; }
     }
     if (invitations === 0 && planners === 0) return false;
     const email = (order.email ?? order.customer?.email ?? "").trim().toLowerCase();
@@ -1014,7 +1028,9 @@ export async function buildApp() {
     if (added === 0) return true; // ripetizione del webhook: già registrato, niente email doppia
     const token = await createAccessToken(userId);
     const link = `${appUrl()}/accesso/${token}`;
-    const mail = invitations > 0 ? purchaseEmail({ to: email, link }) : accessEmail({ to: email, link });
+    // Lingua dell'email: quella del cliente nel negozio (customer_locale), italiano di base.
+    const lang = String(order.customer_locale ?? "").toLowerCase().startsWith("en") ? "en" : "it";
+    const mail = invitations > 0 ? purchaseEmail({ to: email, link, lang }) : accessEmail({ to: email, link, lang });
     await sendMail(mail, "order").catch((e) => app.log.warn({ err: e }, "email d'acquisto non inviata"));
     return true;
   }
@@ -1396,26 +1412,30 @@ export async function buildApp() {
   // Modelli delle email: salvataggio di un testo, ripristino del predefinito, anteprima con dati di esempio.
   app.put("/api/admin/mail/template", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
-    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown; reset?: unknown };
+    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown; reset?: unknown; lang?: unknown };
     if (!isMailKind(b.kind)) return reply.code(400).send({ error: "Tipo di email non valido" });
+    const lang = b.lang === "en" ? "en" : "it";
     if (b.reset === true) {
-      await saveMailTemplate(b.kind, null);
+      await saveMailTemplate(b.kind, null, lang);
       return mailPayload();
     }
     const checked = validateMailTemplate(b.template);
     if (!checked.ok) return reply.code(400).send({ error: checked.error });
-    await saveMailTemplate(b.kind, checked.value);
+    await saveMailTemplate(b.kind, checked.value, lang);
     return mailPayload();
   });
 
   app.post("/api/admin/mail/preview", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
-    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown };
+    const b = (req.body ?? {}) as { kind?: unknown; template?: unknown; lang?: unknown };
     if (!isMailKind(b.kind)) return reply.code(400).send({ error: "Tipo di email non valido" });
     const checked = validateMailTemplate(b.template);
     if (!checked.ok) return reply.code(400).send({ error: checked.error });
-    const sample = { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna e Luca", amount: "99,00 €", verdict: "parteciperà" };
-    const m = renderMail(b.kind, checked.value, sample);
+    const lang = b.lang === "en" ? "en" : "it";
+    const sample = lang === "en"
+      ? { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna and Luca", amount: "€99.00", verdict: rsvpVerdict(true, "en") }
+      : { link: `${appUrl()}/i/esempio-anna-luca`, title: "Anna e Luca", amount: "99,00 €", verdict: rsvpVerdict(true, "it") };
+    const m = renderMail(b.kind, checked.value, sample, lang);
     return { subject: m.subject, html: m.html, variables: MAIL_VARIABLES[b.kind] };
   });
 

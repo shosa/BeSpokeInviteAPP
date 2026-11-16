@@ -33,7 +33,7 @@ import { GuestsPanel } from "./builder/guests";
 import { useHistory } from "./builder/history";
 import { parseFragments } from "@/lib/blockFragments";
 import { ui, type Lang } from "@/lib/ui";
-import { blockCopy, modelCopy, themeCopy } from "@/lib/catalogCopy";
+import { addonCopy, blockCopy, modelCopy } from "@/lib/catalogCopy";
 import { StockContext } from "./builder/PixabayDialog";
 import { PublishedPanel } from "./builder/PublishedPanel";
 import { PublishDialog } from "@/components/PublishDialog";
@@ -126,7 +126,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       setSummary(false);
       return checkout();
     }
-    setError(data.error ?? "Conferma non riuscita, riprova.");
+    setError(data.error ?? (lang === "en" ? "Confirmation failed, please try again." : "Conferma non riuscita, riprova."));
   }
 
   const [selected, setSelected] = useState<string | null>(null);
@@ -212,11 +212,11 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       }
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       setSave("error");
-      setError(data.error ?? "Salvataggio non riuscito");
+      setError(data.error ?? (lang === "en" ? "Saving failed" : "Salvataggio non riuscito"));
       return false;
     } catch {
       setSave("error");
-      setError("Connessione assente: le modifiche non sono state salvate.");
+      setError(lang === "en" ? "No connection: your changes were not saved." : "Connessione assente: le modifiche non sono state salvate.");
       return false;
     }
   }
@@ -445,10 +445,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       body.append("file", file);
       const res = await fetch(`/api/invitations/${initial.id}/media?kind=${kind}`, { method: "POST", body });
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Caricamento non riuscito");
+      if (!res.ok || !data.url) throw new Error(data.error ?? (lang === "en" ? "Upload failed" : "Caricamento non riuscito"));
       return data.url;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Caricamento non riuscito");
+      setError(e instanceof Error ? e.message : lang === "en" ? "Upload failed" : "Caricamento non riuscito");
       return null;
     } finally {
       setBusy(null);
@@ -461,10 +461,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
     try {
       const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invitationId: initial.id }) });
       const data = (await res.json()) as { checkoutUrl?: string; error?: string };
-      if (!res.ok || !data.checkoutUrl) throw new Error(data.error ?? "Pagamento non disponibile");
+      if (!res.ok || !data.checkoutUrl) throw new Error(data.error ?? (lang === "en" ? "Payment unavailable" : "Pagamento non disponibile"));
       window.location.href = data.checkoutUrl;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore imprevisto");
+      setError(e instanceof Error ? e.message : lang === "en" ? "Unexpected error" : "Errore imprevisto");
       setCheckingOut(false);
     }
   }
@@ -761,8 +761,8 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
                 <h2 id="confirm-summary-title">{lang === "en" ? "Summary before confirming" : "Riepilogo prima della conferma"}</h2>
               </div>
             </header>
-            <p><strong>{lang === "en" ? "Purchased" : "Acquistato"}:</strong> {getModel(catalog, initial.config.model)?.name ?? initial.config.model}{initial.purchasedAddons.length ? ` · ${initial.purchasedAddons.map((k) => getAddon(catalog, k)?.label ?? k).join(", ")}` : ""}</p>
-            <p><strong>{lang === "en" ? "In the draft" : "Nella bozza"}:</strong> {config.addons.length ? config.addons.map((k) => getAddon(catalog, k)?.label ?? k).join(", ") : lang === "en" ? "no extra functions" : "nessuna funzione extra"}</p>
+            <p><strong>{lang === "en" ? "Purchased" : "Acquistato"}:</strong> {(() => { const m = getModel(catalog, initial.config.model); return m ? modelCopy(m, lang).name : initial.config.model; })()}{initial.purchasedAddons.length ? ` · ${initial.purchasedAddons.map((k) => { const a = getAddon(catalog, k); return a ? addonCopy(k, a.label, a.description, lang).label : k; }).join(", ")}` : ""}</p>
+            <p><strong>{lang === "en" ? "In the draft" : "Nella bozza"}:</strong> {config.addons.length ? config.addons.map((k) => { const a = getAddon(catalog, k); return a ? addonCopy(k, a.label, a.description, lang).label : k; }).join(", ") : lang === "en" ? "no extra functions" : "nessuna funzione extra"}</p>
             {extra > 0 && <p><strong>{lang === "en" ? "To pay now" : "Da pagare ora"}:</strong> {formatPrice(extra)} {lang === "en" ? "for the new functions" : "per le funzioni nuove"}</p>}
             <p className="confirm-warning">{lang === "en"
               ? "After confirming, the invitation can no longer be edited. Until then it stays a draft: you can edit it as many times as you want, and guests keep seeing the previous version."

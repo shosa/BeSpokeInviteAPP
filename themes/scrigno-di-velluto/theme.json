@@ -3,6 +3,8 @@
   "id": "scrigno-di-velluto",
   "name": "Scrigno di velluto",
   "description": "Uno scrigno di velluto verde smeraldo col medaglione d'oro e il mughetto che si apre su un biglietto avorio adagiato nella seta; la data compare incisa dentro la fede nuziale.",
+  "nameEn": "Velvet Casket",
+  "descriptionEn": "An emerald velvet casket with a gold medallion and lily of the valley opens onto an ivory card laid in silk; the date is engraved inside the wedding ring.",
   "models": [],
   "themeColor": "#0f2f27",
   "fonts": [

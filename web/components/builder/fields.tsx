@@ -4,6 +4,7 @@ import { AddressField } from "./AddressField";
 
 import { useState, type ChangeEvent, type ReactNode } from "react";
 import { emptyValue, type Catalog, type FieldDef } from "@inviteme/shared";
+import { useLang, useT } from "@/lib/lang";
 import { Search, Upload } from "lucide-react";
 import { Accordion } from "../ui/Accordion";
 import { PixabayDialog, useStockInvitation } from "./PixabayDialog";
@@ -13,17 +14,17 @@ export type MediaKind = "photo" | "video" | "audio";
 
 // Un campo del tema: il tipo decide l'editor. Le liste ripetono gli editor dei campi della singola voce.
 // Colori predefiniti come nel riferimento: si sceglie con un tocco, il selettore libero resta sotto.
-const COLOR_PRESETS: { name: string; hex: string }[] = [
-  { name: "Nero classico", hex: "#1D1B19" },
-  { name: "Marrone classico", hex: "#5C4632" },
-  { name: "Oro elegante", hex: "#B98D5F" },
-  { name: "Bordeaux profondo", hex: "#5A1B23" },
-  { name: "Blu navy", hex: "#1F2F4D" },
-  { name: "Verde foresta", hex: "#1F3127" },
-  { name: "Carbone", hex: "#3A3A3A" },
-  { name: "Oro rosa", hex: "#C9988A" },
-  { name: "Bianco puro", hex: "#FFFFFF" },
-  { name: "Crema morbida", hex: "#F4EDE2" },
+const COLOR_PRESETS: { name: string; en: string; hex: string }[] = [
+  { name: "Nero classico", en: "Classic black", hex: "#1D1B19" },
+  { name: "Marrone classico", en: "Classic brown", hex: "#5C4632" },
+  { name: "Oro elegante", en: "Elegant gold", hex: "#B98D5F" },
+  { name: "Bordeaux profondo", en: "Deep burgundy", hex: "#5A1B23" },
+  { name: "Blu navy", en: "Navy blue", hex: "#1F2F4D" },
+  { name: "Verde foresta", en: "Forest green", hex: "#1F3127" },
+  { name: "Carbone", en: "Charcoal", hex: "#3A3A3A" },
+  { name: "Oro rosa", en: "Rose gold", hex: "#C9988A" },
+  { name: "Bianco puro", en: "Pure white", hex: "#FFFFFF" },
+  { name: "Crema morbida", en: "Soft cream", hex: "#F4EDE2" },
 ];
 
 export function FieldEditor({
@@ -49,11 +50,13 @@ export function FieldEditor({
   standard?: string; // etichetta della scelta «predefinito» per colori e opzioni
   addon?: ReactNode; // controllo accanto al testo, dentro lo stesso campo (es. il pulsante del font)
 }) {
+  const lang = useLang();
+  const t = (it: string, en: string) => (lang === "en" ? en : it);
   const fieldLabel = copy ? copy(field.key, field.label) : field.label;
   if (field.key === "address") return <AddressField label={fieldLabel} value={typeof value === "string" ? value : ""} onChange={(v) => onChange(v)} />;
   const label = field.required ? `${fieldLabel} *` : fieldLabel;
   if (disabledByFeature) {
-    return <p className="hint">{label}: disponibile con la funzione «{field.feature}». Attivala nella scheda Funzioni.</p>;
+    return <p className="hint">{label}: {t(`disponibile con la funzione «${field.feature}». Attivala nella scheda Funzioni.`, `available with the «${field.feature}» function. Turn it on in the Functions tab.`)}</p>;
   }
   const max = field.max;
   const text = typeof value === "string" ? value : "";
@@ -64,7 +67,7 @@ export function FieldEditor({
     case "longtext":
       return textField(label, <textarea aria-label={label} rows={4} maxLength={max ?? 1500} value={text} onChange={(e) => onChange(e.target.value)} />, addon);
     case "color": {
-      const clearLabel = copy ? copy("transparent", "Trasparente") : "Trasparente";
+      const clearLabel = copy ? copy("transparent", "Trasparente") : t("Trasparente", "Transparent");
       return (
         <Field label={label}>
           <div className="swatches" role="group" aria-label={label}>
@@ -74,8 +77,8 @@ export function FieldEditor({
                 type="button"
                 className={`swatch${text.toLowerCase() === c.hex.toLowerCase() ? " is-on" : ""}`}
                 style={{ background: c.hex }}
-                title={c.name}
-                aria-label={c.name}
+                title={t(c.name, c.en)}
+                aria-label={t(c.name, c.en)}
                 aria-pressed={text.toLowerCase() === c.hex.toLowerCase()}
                 onClick={() => onChange(c.hex)}
               />
@@ -131,11 +134,11 @@ export function FieldEditor({
         <div className="stack">
           <MediaSlot label={label} help={field.help} kind="audio" url={text} busy={busy} onUpload={onUpload} onChange={onChange} />
           {library.length > 0 && (
-            <div className="tracks" role="radiogroup" aria-label="Brano dalla libreria">
+            <div className="tracks" role="radiogroup" aria-label={t("Brano dalla libreria", "Track from the library")}>
               {library.map((t) => (
                 <label key={t.id} className={`track${text === t.url ? " is-on" : ""}`}>
                   <input type="radio" name={`lib-${field.key}`} checked={text === t.url} onChange={() => onChange(t.url)} />
-                  <span><b>{t.title}</b><small>{t.artist || "Libreria Bespoke Invites"}</small></span>
+                  <span><b>{t.title}</b><small>{t.artist || (lang === "en" ? "Bespoke Invites library" : "Libreria Bespoke Invites")}</small></span>
                 </label>
               ))}
             </div>
@@ -147,13 +150,13 @@ export function FieldEditor({
       const room = (max ?? 6) - list.length;
       return (
         <div className="stack">
-          <p className="hint">{label} · fino a {max ?? 6}</p>
+          <p className="hint">{label} · {t("fino a", "up to")} {max ?? 6}</p>
           <div className="thumbs">
             {list.map((src, i) => (
               <div key={src} className="thumb">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt={`Foto ${i + 1}`} />
-                <button type="button" aria-label={`Rimuovi foto ${i + 1}`} onClick={() => onChange(list.filter((_, j) => j !== i))}>×</button>
+                <img src={src} alt={`${t("Foto", "Photo")} ${i + 1}`} />
+                <button type="button" aria-label={`${t("Rimuovi foto", "Remove photo")} ${i + 1}`} onClick={() => onChange(list.filter((_, j) => j !== i))}>×</button>
               </div>
             ))}
           </div>
@@ -174,9 +177,9 @@ export function FieldEditor({
       const items = Array.isArray(value) ? (value as Values[]) : [];
       return (
         <div className="stack">
-          <p className="hint">{label}{max ? ` · fino a ${max} voci` : ""}</p>
+          <p className="hint">{label}{max ? t(` · fino a ${max} voci`, ` · up to ${max} items`) : ""}</p>
           {items.map((item, i) => (
-            <Accordion key={i} title={String(item[field.item?.[0]?.key ?? ""] || `Voce ${i + 1}`)} summary="" className="card-edit-acc">
+            <Accordion key={i} title={String(item[field.item?.[0]?.key ?? ""] || `${t("Voce", "Item")} ${i + 1}`)} summary="" className="card-edit-acc">
               {(field.item ?? []).map((sub) => (
                 <FieldEditor
                   key={sub.key}
@@ -190,11 +193,11 @@ export function FieldEditor({
                   copy={copy}
                 />
               ))}
-              <button type="button" className="link" onClick={() => onChange(items.filter((_, j) => j !== i))}>Rimuovi voce</button>
+              <button type="button" className="link" onClick={() => onChange(items.filter((_, j) => j !== i))}>{t("Rimuovi voce", "Remove item")}</button>
             </Accordion>
           ))}
           <button type="button" className="btn outline" disabled={max !== undefined && items.length >= max} onClick={() => onChange([...items, Object.fromEntries((field.item ?? []).map((s) => [s.key, emptyValue(s)]))])}>
-            Aggiungi voce
+            {t("Aggiungi voce", "Add item")}
           </button>
         </div>
       );
@@ -212,6 +215,7 @@ function MediaSlot({ label, help, kind, url, busy, onUpload, onChange }: {
   onChange: (v: unknown) => void;
 }) {
   const invitationId = useStockInvitation();
+  const t = useT();
   const [searching, setSearching] = useState(false);
   return (
     <div className="stack">
@@ -230,11 +234,11 @@ function MediaSlot({ label, help, kind, url, busy, onUpload, onChange }: {
         }} />
         {kind === "photo" && invitationId && (
           <button type="button" className="upload media-stock" onClick={() => setSearching(true)}>
-            <span className="upload-inner"><Search size={18} aria-hidden="true" />Cerca su Pixabay</span>
+            <span className="upload-inner"><Search size={18} aria-hidden="true" />{t("Cerca su Pixabay", "Search Pixabay")}</span>
           </button>
         )}
       </div>
-      {url && <button type="button" className="link media-remove" onClick={() => onChange("")}>Rimuovi</button>}
+      {url && <button type="button" className="link media-remove" onClick={() => onChange("")}>{t("Rimuovi", "Remove")}</button>}
       {searching && invitationId && (
         <PixabayDialog invitationId={invitationId} onClose={() => setSearching(false)} onPick={(u) => onChange(u)} />
       )}
@@ -245,6 +249,7 @@ function MediaSlot({ label, help, kind, url, busy, onUpload, onChange }: {
 function UploadButton({ kind, busy, multiple, onFiles }: { kind: "photo" | "video" | "audio"; busy: string | null; multiple?: boolean; onFiles: (files: File[]) => Promise<void> }) {
   const accept = kind === "photo" ? "image/*" : kind === "video" ? "video/*" : "audio/*";
   const working = busy === kind;
+  const t = useT();
   return (
     <label className="upload">
       <input type="file" accept={accept} multiple={multiple} disabled={working} onChange={async (e: ChangeEvent<HTMLInputElement>) => {
@@ -252,7 +257,7 @@ function UploadButton({ kind, busy, multiple, onFiles }: { kind: "photo" | "vide
         e.target.value = "";
         if (files.length) await onFiles(files);
       }} />
-      <span className="upload-inner"><Upload size={18} aria-hidden="true" />{working ? "Converto il file…" : kind === "photo" ? "Carica foto" : kind === "video" ? "Carica video" : "Carica audio"}</span>
+      <span className="upload-inner"><Upload size={18} aria-hidden="true" />{working ? t("Converto il file…", "Converting the file…") : kind === "photo" ? t("Carica foto", "Upload photo") : kind === "video" ? t("Carica video", "Upload video") : t("Carica audio", "Upload audio")}</span>
     </label>
   );
 }

@@ -5,15 +5,19 @@ import { useRouter } from "next/navigation";
 import type { ThemeManifest } from "@inviteme/shared";
 import { TemplateCarousel } from "@/components/TemplateCarousel";
 import { ThemePreview } from "@/components/ThemePreview";
+import { useLang } from "@/lib/lang";
+import { themeCopy } from "@/lib/catalogCopy";
 
 // Attivazione di un acquisto: il cliente sceglie il template e il suo invito nasce con quello.
 export function ActivateTemplate({ orderId, templates }: { orderId: string; templates: ThemeManifest[] }) {
   const router = useRouter();
+  const lang = useLang();
+  const t = (it: string, en: string) => (lang === "en" ? en : it);
   const [themeId, setThemeId] = useState(templates[0]?.id ?? "");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const selected = templates.find((t) => t.id === themeId);
+  const selected = templates.find((x) => x.id === themeId);
 
   async function create() {
     setBusy(true);
@@ -22,7 +26,7 @@ export function ActivateTemplate({ orderId, templates }: { orderId: string; temp
     const body = (await res.json().catch(() => ({}))) as { error?: string; invitationId?: string };
     if (!res.ok || !body.invitationId) {
       setBusy(false);
-      return setError(body.error ?? "Non è stato possibile creare l'invito. Riprova.");
+      return setError(body.error ?? t("Non è stato possibile creare l'invito. Riprova.", "The invitation could not be created. Please try again."));
     }
     router.push(`/editor/${body.invitationId}`);
   }
@@ -30,23 +34,23 @@ export function ActivateTemplate({ orderId, templates }: { orderId: string; temp
   return (
     <div className="act">
       {templates.length > 0 ? (
-        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang="it" size="lg" autoplay={false} />
+        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} />
       ) : (
-        <p className="hint">Nessun template disponibile al momento.</p>
+        <p className="hint">{t("Nessun template disponibile al momento.", "No templates available right now.")}</p>
       )}
       <div className="act-bar">
         <div>
-          <span className="act-kicker">Template scelto</span>
-          <strong>{selected?.name ?? "—"}</strong>
+          <span className="act-kicker">{t("Template scelto", "Chosen template")}</span>
+          <strong>{selected ? themeCopy(selected, lang) : "—"}</strong>
         </div>
         <div className="act-actions">
-          <button type="button" className="btn outline" disabled={!selected} onClick={() => setPreviewOpen(true)}>Anteprima</button>
-          <button type="button" className="btn solid" disabled={busy || !themeId} onClick={create}>{busy ? "Creo il tuo invito…" : "Crea il tuo invito"}</button>
+          <button type="button" className="btn outline" disabled={!selected} onClick={() => setPreviewOpen(true)}>{t("Anteprima", "Preview")}</button>
+          <button type="button" className="btn solid" disabled={busy || !themeId} onClick={create}>{busy ? t("Creo il tuo invito…", "Creating your invitation…") : t("Crea il tuo invito", "Create your invitation")}</button>
         </div>
       </div>
-      <p className="hint act-hint-foot">Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.</p>
+      <p className="hint act-hint-foot">{t("Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.", "The template is just the starting point: texts, photos, colours and music can all be changed in the builder.")}</p>
       {error && <p className="form-error" role="alert">{error}</p>}
-      {previewOpen && selected && <ThemePreview themeId={selected.id} themeName={selected.name} onClose={() => setPreviewOpen(false)} onChoose={() => setPreviewOpen(false)} />}
+      {previewOpen && selected && <ThemePreview themeId={selected.id} themeName={themeCopy(selected, lang)} onClose={() => setPreviewOpen(false)} onChoose={() => setPreviewOpen(false)} />}
     </div>
   );
 }

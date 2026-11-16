@@ -3,6 +3,8 @@
   "id": "maiolica-di-capri",
   "name": "Maiolica di Capri",
   "description": "Una busta bianca a tutto schermo dipinta a mano come una maiolica caprese, con limoni blu cobalto e un sigillo 3D di ceralacca blu, si apre nella luce del mare: bianco e blu, la stessa tinta dall'apertura alla firma. La data è già scritta, in tre piastrelle.",
+  "nameEn": "Capri Majolica",
+  "descriptionEn": "A full-screen white envelope hand-painted like Capri majolica, with cobalt lemons and a blue wax seal: white and blue throughout, with the date on three tiles.",
   "models": [],
   "themeColor": "#eef3fa",
   "fonts": [

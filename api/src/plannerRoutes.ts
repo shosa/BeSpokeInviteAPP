@@ -253,16 +253,19 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
   app.post<{ Params: { id: string } }>("/api/planners/:id/pdf", async (req, reply) => {
     const p = await plannerOf(req, reply);
     if (!p) return;
-    const b = (req.body ?? {}) as { include?: unknown };
+    const b = (req.body ?? {}) as { include?: unknown; lang?: unknown };
     const include = (Array.isArray(b.include) ? b.include : []).filter((x): x is PdfChoice => typeof x === "string" && isPdfChoice(x));
     if (include.length === 0) return reply.code(400).send({ error: "Scegliete almeno una parte da includere" });
-    const [guests, tables, budget, tasks, vendors] = await Promise.all([
+    const [guests, tables, budget, tasks, vendors, quotes] = await Promise.all([
       pool.query("SELECT name, group_name, party_size, response, table_id FROM planner_guests WHERE planner_id = $1 ORDER BY group_name, name", [p.id]),
       pool.query("SELECT id, name, seats FROM planner_tables WHERE planner_id = $1 ORDER BY created_at", [p.id]),
-      pool.query("SELECT label, category, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
+      pool.query("SELECT label, category, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid, quote_id FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
       pool.query("SELECT title, done, days_before FROM planner_tasks WHERE planner_id = $1 ORDER BY days_before DESC, created_at", [p.id]),
       pool.query("SELECT name, role, contact, contract_status FROM planner_vendors WHERE planner_id = $1 ORDER BY created_at", [p.id]),
+      pool.query("SELECT id, category, name, amount_cents, booked, signed FROM planner_quotes WHERE planner_id = $1 ORDER BY category, amount_cents", [p.id]),
     ]);
+    // Lingua del documento: quella scelta nel planner, altrimenti quella del sito.
+    const lang = (b.lang ?? req.cookies.lang) === "en" ? "en" : "it";
     const invitation = await linkedInvitation(p.invitation_id, await deps.loadCatalog());
     const data = (p.data ?? {}) as PlannerData;
     const pdf = await buildPlannerPdf(
@@ -278,11 +281,13 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
         budget: budget.rows,
         tasks: tasks.rows,
         vendors: vendors.rows,
+        quotes: quotes.rows,
         docs: data.docs ?? {},
+        lang,
       },
       include,
     );
-    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", 'attachment; filename="cartella-evento.pdf"').send(pdf);
+    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", `attachment; filename="${lang === "en" ? "event-folder" : "cartella-evento"}.pdf"`).send(pdf);
   });
 
   app.post<{ Params: { id: string; kind: string } }>("/api/planners/:id/:kind", async (req, reply) => {

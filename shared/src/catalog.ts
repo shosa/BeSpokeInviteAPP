@@ -56,12 +56,12 @@ export const DEFAULT_CATALOG: Omit<Catalog, "themes" | "music"> = {
   ],
 };
 
-export const EVENT_TYPES: { id: EventType; label: string; sampleTitle: string }[] = [
-  { id: "wedding", label: "Matrimonio", sampleTitle: "Sara & Luca" },
-  { id: "birthday", label: "Compleanno", sampleTitle: "I 40 di Marco" },
-  { id: "baby", label: "Baby shower", sampleTitle: "Aspettiamo Bea" },
-  { id: "corporate", label: "Evento aziendale", sampleTitle: "Cena di Gala 2027" },
-  { id: "graduation", label: "Laurea", sampleTitle: "Laurea di Giulia" },
+export const EVENT_TYPES: { id: EventType; label: string; labelEn: string; sampleTitle: string }[] = [
+  { id: "wedding", label: "Matrimonio", labelEn: "Wedding", sampleTitle: "Sara & Luca" },
+  { id: "birthday", label: "Compleanno", labelEn: "Birthday", sampleTitle: "I 40 di Marco" },
+  { id: "baby", label: "Baby shower", labelEn: "Baby shower", sampleTitle: "Aspettiamo Bea" },
+  { id: "corporate", label: "Evento aziendale", labelEn: "Corporate event", sampleTitle: "Cena di Gala 2027" },
+  { id: "graduation", label: "Laurea", labelEn: "Graduation", sampleTitle: "Laurea di Giulia" },
 ];
 
 export const CURRENCY = "EUR";

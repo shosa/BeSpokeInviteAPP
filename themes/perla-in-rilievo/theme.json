@@ -3,6 +3,8 @@
   "id": "perla-in-rilievo",
   "name": "Perla in rilievo",
   "description": "Una busta verticale di carta di cotone bianca, a tutto schermo, con il cartiglio barocco in rilievo a secco e una perla come chiusura, si apre sul cartoncino con gli angoli in rilievo: bianco perla e grigio argento dall'apertura alla firma. La data è sotto una lastra col cartiglio: si tocca la perla, la lastra preme come un torchio e lascia la data impressa nella carta, con il mese in lamina d'argento.",
+  "nameEn": "Embossed Pearl",
+  "descriptionEn": "A full-screen white cotton envelope with a baroque embossed cartouche and a pearl clasp: touch the pearl and a press leaves the date embossed, the month in silver foil.",
   "models": [],
   "themeColor": "#f3f4f4",
   "fonts": [

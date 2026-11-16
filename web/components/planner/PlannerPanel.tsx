@@ -41,7 +41,7 @@ export function PlannerPanel({ data, lang = "it", plannerId = null }: { data: Pl
   const T = lang === "en"
     ? { quick: "Quick actions", share: "Share", view: "Open invitation", edit: "Edit", search: "Search name or answer", all: "All", yes: "Attending", no: "Not attending", noMatch: "No result for this search", progress: "Replies received", of: "of", guestsSearch: "Search guest", whatsapp: "WhatsApp", count: "Countdown", remind: "Reminder" }
     : { quick: "Azioni rapide", share: "Condividi", view: "Apri invito", edit: "Modifica", search: "Cerca nome o risposta", all: "Tutti", yes: "Presenti", no: "Assenti", noMatch: "Nessun risultato per questa ricerca", progress: "Risposte ricevute", of: "su", guestsSearch: "Cerca ospite", whatsapp: "WhatsApp", count: "Conto alla rovescia", remind: "Promemoria" };
-  const title = String(manage.config.event.title ?? "Il tuo invito");
+  const title = String(manage.config.event.title ?? (lang === "en" ? "Your invitation" : "Il tuo invito"));
   const eventDate = String(manage.config.event.eventDate ?? "");
   const eventTime = String(manage.config.event.eventTime ?? "");
   const days = daysUntil(eventDate);
