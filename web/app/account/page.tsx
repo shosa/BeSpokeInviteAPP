@@ -119,6 +119,10 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const demoModels = (catalog?.models ?? []).map((m) => m.id);
   const themeOf = (id: string) => catalog?.themes?.find((x) => x.manifest.id === id)?.manifest;
   const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL ?? "https://thebespokeinvite.com";
+  // Pulsanti d'acquisto: ognuno alla pagina del suo prodotto nel negozio (ricavata dagli ID della console).
+  const links = await apiPublic<{ home: string; invitation: string | null; planner: string | null; bundle: string | null }>("/api/shop/links").catch(() => null);
+  const buyInviteUrl = links?.invitation ?? shopUrl;
+  const buyPlannerUrl = links?.planner ?? shopUrl;
   const createLabel = lang === "en" ? "Create a test invitation" : "Crea un invito di prova";
 
   let rows: Row[];
@@ -180,8 +184,8 @@ export default async function Account({ searchParams }: { searchParams: Promise<
             <p>{c.summary(online.length, prep.length, planners.length, pending.length)}</p>
           </div>
           <div className="acx-buy">
-            {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : <a className="acx-pill" href={shopUrl}>{c.buyInvite}</a>}
-            <a className="acx-pill" href={shopUrl}>{c.buyPlanner}</a>
+            {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : <a className="acx-pill" href={buyInviteUrl}>{c.buyInvite}</a>}
+            <a className="acx-pill" href={buyPlannerUrl}>{c.buyPlanner}</a>
           </div>
         </section>
 
@@ -233,7 +237,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                       <p className="acx-meta">{c.stats(r.views, r.rsvps)}</p>
                       {r.plannerId
                         ? <a className="acx-chip" href={`/planner/${r.plannerId}`}>{Ico.link}{c.linked}</a>
-                        : <a className="acx-soft" href="#planner">{c.organize}</a>}
+                        : <a className="acx-soft" href={buyPlannerUrl}>{c.organize}</a>}
                       <div className="acx-actions">
                         <ShareLinkButton className="acx-cta is-dark" path={`/i/${r.slug}`} title={r.title} label={c.share} copiedLabel={c.copied} />
                         <a className="acx-ico" href={`/inviti/${r.id}/risposte`} aria-label={c.replies} title={c.replies}>{Ico.replies}</a>
@@ -317,7 +321,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                 </article>
               );
             })}
-            <a className="acx-plan-new" href={shopUrl}>
+            <a className="acx-plan-new" href={buyPlannerUrl}>
               <span className="acx-plan-new-ico">{Ico.plus}</span>
               <strong>{c.another}</strong>
               <span>{c.anotherText}</span>

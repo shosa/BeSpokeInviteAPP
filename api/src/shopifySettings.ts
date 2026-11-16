@@ -89,6 +89,7 @@ export async function saveShopifyIds(ids: ShopifyIds): Promise<void> {
     [JSON.stringify(ids)],
   );
   stored = { storeDomain: ids.storeDomain || undefined, variantId: ids.variantId || undefined, variantPremiumId: ids.variantPremiumId || undefined, plannerProductId: ids.plannerProductId || undefined };
+  linksCache = null; // i link dei prodotti si ricalcolano con gli ID nuovi
 }
 
 // Stato di ogni voce per la console: da dove arriva il valore, senza mai restituire i segreti.
@@ -152,5 +153,46 @@ export async function testShopify(): Promise<ShopifyTest> {
     return out;
   } catch (e) {
     return { ok: false, error: `Shopify non risponde correttamente: ${(e as Error).message}` };
+  }
+}
+
+// Pagine prodotto del negozio, ricavate dagli ID della console: invito (dalla sua variante), planner (dal prodotto),
+// pacchetto (pagina del prodotto con la variante scelta). Il planner può non essere visibile alla Storefront API:
+// allora si cerca il suo handle nell'elenco pubblico dei prodotti del sito. Risultato in memoria per un'ora.
+export type ShopLinks = { home: string; invitation: string | null; planner: string | null; bundle: string | null };
+let linksCache: { at: number; value: ShopLinks } | null = null;
+
+export async function shopLinks(): Promise<ShopLinks> {
+  if (linksCache && Date.now() - linksCache.at < 3_600_000) return linksCache.value;
+  const ids = getShopifyIds();
+  const token = storefrontToken();
+  const fallback: ShopLinks = { home: "https://www.thebespokeinvite.com", invitation: null, planner: null, bundle: null };
+  if (!ids.storeDomain || !token) return fallback;
+  try {
+    const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+      body: JSON.stringify({
+        query: `query Links($v: ID!, $b: ID!) { shop { primaryDomain { url } } v: node(id: $v) { ... on ProductVariant { product { onlineStoreUrl } } } b: node(id: $b) { ... on ProductVariant { product { onlineStoreUrl } } } }`,
+        variables: { v: ids.variantId || "gid://shopify/ProductVariant/0", b: ids.variantPremiumId || "gid://shopify/ProductVariant/0" },
+      }),
+      signal: AbortSignal.timeout(6000),
+    });
+    const d = ((await res.json()) as { data?: { shop?: { primaryDomain?: { url?: string } }; v?: { product?: { onlineStoreUrl?: string | null } } | null; b?: { product?: { onlineStoreUrl?: string | null } } | null } }).data;
+    const home = (d?.shop?.primaryDomain?.url ?? fallback.home).replace(/\/$/, "");
+    const value: ShopLinks = { home, invitation: d?.v?.product?.onlineStoreUrl ?? null, planner: null, bundle: null };
+    const bundleProduct = d?.b?.product?.onlineStoreUrl;
+    const bundleVariant = ids.variantPremiumId.split("/").pop();
+    if (bundleProduct && bundleVariant) value.bundle = `${bundleProduct}?variant=${bundleVariant}`;
+    const plannerId = ids.plannerProductId.split("/").pop();
+    if (plannerId) {
+      const list = await fetch(`${home}/products.json?limit=250`, { signal: AbortSignal.timeout(6000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null) as { products?: { id: number; handle: string }[] } | null;
+      const p = list?.products?.find((x) => String(x.id) === plannerId);
+      if (p) value.planner = `${home}/products/${p.handle}`;
+    }
+    linksCache = { at: Date.now(), value };
+    return value;
+  } catch {
+    return fallback;
   }
 }

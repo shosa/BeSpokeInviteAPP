@@ -52,7 +52,7 @@ import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminConsole } from "./adminConsole";
 import { registerAdminMedia } from "./adminMedia";
-import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
+import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, shopLinks, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
 import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
@@ -163,6 +163,8 @@ export async function buildApp() {
 
   // ───────────── Health & catalogo pubblico ─────────────
   app.get("/api/health", async () => ({ ok: true }));
+  // Pagine prodotto del negozio per i pulsanti «Acquista» dell'area cliente.
+  app.get("/api/shop/links", async () => shopLinks());
 
   app.get("/api/catalog", async () => {
     const c = await loadCatalog();
