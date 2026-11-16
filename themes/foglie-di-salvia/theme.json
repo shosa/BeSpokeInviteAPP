@@ -5,6 +5,7 @@
   "description": "Tutto in verde salvia su carta di cotone: una busta con sigillo d'ulivo si apre su rami di ulivo ed eucalipto all'acquerello, e la stessa tinta accompagna l'invito fino alle colline del finale.",
   "nameEn": "Sage Leaves",
   "descriptionEn": "All in sage green on cotton paper: an olive-sealed envelope opens onto watercolour olive and eucalyptus, and the same hue carries the invitation to the closing hills.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#f2f2ea",
   "fonts": [

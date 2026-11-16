@@ -136,7 +136,7 @@ I modelli hanno due set di testi: quelli in italiano (`name`, `tagline`, `descri
 ## Anteprima e demo
 
 - **Anteprima del builder**: `POST /api/invitations/:id/preview` con la configurazione in corso. Mostra la busta come la vede l'ospite. Il builder aggiorna da solo i blocchi che cambiano (per singolo blocco, senza ricaricare la pagina); la busta, la musica, la struttura e lo sfondo ricaricano tutta la pagina.
-- **Demo degli stili**: `GET /api/themes/:id/demo?lang=it|en`, con tutti i blocchi e gli esempi dello stile. La lingua sceglie i dati generati (nomi, luoghi, frasi) e la versione `demoEn` dello stile. Il selettore della lingua del sito (bandiere, `web/components/LangSelect.tsx`) cambia la lingua delle schede. Nessuna busta (`preview: true`), così le schede dei modelli si vedono subito. Gli esempi sono generati da `api/src/engine/samples.ts`.
+- **Demo degli stili**: `GET /api/themes/:id/demo?lang=it|en`, con tutti i blocchi e gli esempi dello stile. La lingua sceglie i dati generati (nomi, luoghi, frasi) e la versione `demoEn` dello stile. Il selettore della lingua del sito (bandiere, `web/components/LangSelect.tsx`) cambia la lingua delle schede. Nessuna busta (`preview: true`), così le schede dei modelli si vedono subito. Gli esempi sono generati da `api/src/engine/samples.ts`. Di base cambiano a ogni caricamento; uno stile con `"fixedDemo": true` (busta o immagini con nomi o iniziali) mostra invece sempre i suoi dati di `demo.event` e i suoi testi, e genera ciò che manca con un seme fisso legato all'id dello stile (`sampleConfig` in `api/src/engine/themes.ts`). Vale per anteprime, caroselli e invito di prova. Dettagli in `docs/TEMI.md`, «Esempi fissi».
 
 ## Verifica
 

@@ -5,6 +5,7 @@
   "description": "Tutto in bordeaux: una busta di velluto chiusa da un sigillo di ceralacca in rilievo si apre su rose a sbalzo, e la stessa tinta di vino e cipria veste l'invito fino alla firma.",
   "nameEn": "Burgundy Velvet",
   "descriptionEn": "All in burgundy: a velvet envelope with an embossed wax seal opens onto raised roses, and the same wine and blush tones dress the invitation to the signature.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#3a0d17",
   "fonts": [

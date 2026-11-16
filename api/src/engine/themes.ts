@@ -155,18 +155,47 @@ function checkCss(css: string, name: string, errors: string[]) {
 
 // Config di esempio per la demo e le anteprime: tutti i blocchi, tutte le funzioni, i file dello stile come esempio.
 // Vetrina: ogni caricamento genera contenuti nuovi (nomi, date, luoghi, programma) nella lingua richiesta.
+// Con fixedDemo nel manifest, invece, l'esempio è sempre lo stesso: i dati di demo (e demoEn in inglese) hanno la
+// precedenza, e quelli che mancano si generano con un seme fisso legato all'id del tema (stesso risultato a ogni caricamento).
 // Le proprietà di testo ed elenco di un blocco (titoli, etichette, programma, colori con nome): tolte dalla demo in inglese.
 function withoutTexts(def: { fields: { key: string; type: string }[] }, props: Record<string, unknown>): Record<string, unknown> {
   const textual = new Set(def.fields.filter((f) => f.type === "text" || f.type === "longtext" || f.type === "list").map((f) => f.key));
   return Object.fromEntries(Object.entries(props).filter(([k]) => !textual.has(k)));
 }
 
+// Generatore pseudo-casuale con seme: stessi numeri per lo stesso testo (mulberry32 su un hash FNV-1a).
+function seeded(text: string): () => number {
+  let a = 2166136261;
+  for (let i = 0; i < text.length; i++) a = Math.imul(a ^ text.charCodeAt(i), 16777619);
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 export function sampleConfig(manifest: ThemeManifest, lang: "it" | "en" = "it", rnd: () => number = Math.random): InviteConfig {
-  const sample = sampleSample(manifest.id, lang, rnd);
+  const fixed = manifest.fixedDemo === true;
+  const sample = sampleSample(manifest.id, lang, fixed ? seeded(`${manifest.id}:${lang}`) : rnd);
+  if (fixed) {
+    // Firma e orari coerenti con i dati del tema: i nomi del titolo («Ginevra & Tommaso») e l'ora dell'evento.
+    const own = (manifest.demo.event ?? {}) as Record<string, unknown>;
+    const names = typeof own.title === "string" ? own.title.split(/\s*(?:&|\be\b|\band\b)\s*/).filter(Boolean) : [];
+    if (names.length === 2) sample.signature = lang === "en" ? `${names[0]} & ${names[1]}` : `${names[0]} e ${names[1]}`;
+    if (typeof own.eventTime === "string" && /^\d{2}:\d{2}$/.test(own.eventTime)) sample.time = own.eventTime;
+  }
   const config = defaultConfig(manifest, "invitation-rsvp", sample.eventType === "anniversary" ? "wedding" : sample.eventType, new Set(ADDON_KEYS));
   config.locale = lang;
   config.rsvpQuestions = defaultRsvp(lang);
   config.event = { ...config.event, ...sampleEventFields(sample) };
+  if (fixed) {
+    // Esempi fissi: nomi, data, ora e luogo del tema. In inglese la riga di apertura (hosts) è italiana: vale quella di demoEn, se c'è.
+    const own = (manifest.demo.event ?? {}) as Record<string, unknown>;
+    const ownEn = (manifest.demoEn?.event ?? {}) as Record<string, unknown>;
+    const fromTheme = Object.fromEntries(Object.entries(own).filter(([k, v]) => typeof v === "string" && v.trim() && !(lang === "en" && k === "hosts")));
+    config.event = { ...config.event, ...fromTheme, ...(lang === "en" ? ownEn : {}) };
+  }
   // Alcuni template mostrano la data in chiaro al posto di quella da grattare: il manifest dichiara lo scambio.
   const swap: Record<string, string> = (manifest.demo as { blockSwap?: Record<string, string> }).blockSwap ?? {};
   // Il blocco Data compare solo dove il template lo sceglie con lo scambio: mai insieme alla data da grattare.
@@ -180,7 +209,10 @@ export function sampleConfig(manifest: ThemeManifest, lang: "it" | "en" = "it", 
       hidden: false,
       // I valori dello stile (immagini, filmati) restano quelli del template; i testi cambiano a ogni caricamento.
       // In inglese i testi scritti in italiano dallo stile non si usano: vale demoEn, altrimenti i dati generati e le etichette di default.
-      props: { ...JSON.parse(JSON.stringify(lang === "en" ? (def.defaultsEn ?? def.defaults) : def.defaults)), ...(lang === "en" ? withoutTexts(def, manifest.demo[type] ?? {}) : (manifest.demo[type] ?? {})), ...(lang === "en" ? (manifest.demoEn?.[type] ?? {}) : {}), ...generated },
+      // Con esempi fissi i testi del tema vincono su quelli generati; altrimenti i generati cambiano a ogni caricamento.
+      props: fixed
+        ? { ...JSON.parse(JSON.stringify(lang === "en" ? (def.defaultsEn ?? def.defaults) : def.defaults)), ...generated, ...(lang === "en" ? withoutTexts(def, manifest.demo[type] ?? {}) : (manifest.demo[type] ?? {})), ...(lang === "en" ? (manifest.demoEn?.[type] ?? {}) : {}) }
+        : { ...JSON.parse(JSON.stringify(lang === "en" ? (def.defaultsEn ?? def.defaults) : def.defaults)), ...(lang === "en" ? withoutTexts(def, manifest.demo[type] ?? {}) : (manifest.demo[type] ?? {})), ...(lang === "en" ? (manifest.demoEn?.[type] ?? {}) : {}), ...generated },
     };
   });
   return config;

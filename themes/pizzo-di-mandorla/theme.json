@@ -5,6 +5,7 @@
   "description": "Tutto nel tono della mandorla: una busta di pizzo e perle si apre su una cornice di gelsomino, poi centrini, fiocchi e madreperla nella stessa tinta fino alla firma.",
   "nameEn": "Almond Lace",
   "descriptionEn": "All in almond tones: a lace and pearl envelope opens onto a jasmine frame, then doilies, bows and mother-of-pearl in the same hue to the signature.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#f1e6d8",
   "fonts": [

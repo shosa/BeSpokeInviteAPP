@@ -5,6 +5,7 @@
   "description": "Un velo di glitter rubino copre lo schermo: al tocco vola via, il sipario di velluto rosso si apre e sul palco, sotto l'occhio di bue, gli sposi ballano. Dentro è una serata a teatro: l'insegna luminosa che accende la data, le poltrone di velluto col conto alla rovescia, la locandina, gli specchi del camerino e il programma in atti.",
   "nameEn": "Ruby Dust",
   "descriptionEn": "A veil of ruby glitter flies away, the red velvet curtain opens and the couple dance in the spotlight: a night at the theatre, with a marquee date and a programme in acts.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#1a0508",
   "fonts": [

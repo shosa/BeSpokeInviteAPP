@@ -52,6 +52,9 @@ export type ThemeManifest = {
   demo: Record<string, Record<string, unknown>>;
   // Versione inglese degli esempi: per blocco, solo le proprietà da sostituire quando la demo è in inglese. Il resto viene da demo.
   demoEn?: Record<string, Record<string, unknown>>;
+  // Esempi fissi: anteprime, caroselli e demo usano sempre i dati di demo (nomi, data, luogo, testi) invece di generarne di casuali.
+  // Serve quando la busta-video o le immagini del tema contengono già nomi o iniziali: l'invito deve dire le stesse cose.
+  fixedDemo?: boolean;
   // Sfondo animato proposto dallo stile (il cliente può cambiarlo o spegnerlo nel builder).
   background?: BackgroundSpec;
   // Busta-video: il filmato del tema apre l'invito al posto della busta disegnata. Il blocco Busta non ha proprietà.
@@ -76,7 +79,7 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
   if (!isRecord(input)) return { manifest: null, errors: [`${dir}: theme.json deve essere un oggetto`] };
   const x = input;
 
-  const allowed = ["engine", "id", "name", "description", "nameEn", "descriptionEn", "models", "themeColor", "fonts", "demo", "background", "envelope", "backgroundVideo", "demoEn"];
+  const allowed = ["engine", "id", "name", "description", "nameEn", "descriptionEn", "models", "themeColor", "fonts", "demo", "background", "envelope", "backgroundVideo", "demoEn", "fixedDemo"];
   for (const k of Object.keys(x)) if (!allowed.includes(k)) err(`campo sconosciuto "${k}"`);
   if (x.engine !== ENGINE_VERSION) err(`engine deve essere ${ENGINE_VERSION}`);
 
@@ -101,6 +104,9 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
   });
   const demo = validateDemo(x.demo, err);
   const demoEn = x.demoEn === undefined ? undefined : validateDemo(x.demoEn, err);
+  if (x.fixedDemo !== undefined && typeof x.fixedDemo !== "boolean") err("fixedDemo: true o false");
+  const fixedDemo = x.fixedDemo === true;
+  if (fixedDemo && (typeof demo.event?.title !== "string" || !String(demo.event.title).trim())) err("fixedDemo: con gli esempi fissi serve demo.event.title (i nomi che compaiono nella busta)");
   let background: BackgroundSpec | undefined;
   if (x.background !== undefined) {
     background = sanitizeBackground(x.background);
@@ -142,6 +148,7 @@ export function validateManifest(input: unknown, dir = "stile"): ManifestResult 
       fonts,
       demo,
       ...(demoEn ? { demoEn } : {}),
+      ...(fixedDemo ? { fixedDemo } : {}),
       ...(background ? { background } : {}),
       ...(envelope ? { envelope } : {}),
       ...(backgroundVideo ? { backgroundVideo } : {}),

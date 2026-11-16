@@ -5,6 +5,7 @@
   "description": "Busta di carta di cotone bianco latte coi bordi sfrangiati, chiusa da un sigillo d'oro antico col rametto d'ulivo; accenti rosa cipria e salvia. La data è in una lettera piegata in tre che si dispiega.",
   "nameEn": "Cotton Paper",
   "descriptionEn": "Milk-white cotton paper with deckled edges, sealed in antique gold with an olive sprig; blush and sage accents. The date is in a letter folded in three that unfolds.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#f6f3ec",
   "fonts": [

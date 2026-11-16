@@ -5,6 +5,7 @@
   "description": "Carta di cotone azzurro polvere col bordo strappato a mano e un sigillo perla con la capasanta: fogli sovrapposti, quiete di mare d'inverno. La data è custodita in una conchiglia che si apre sulla madreperla.",
   "nameEn": "Pearl Shell",
   "descriptionEn": "Powder-blue cotton paper with a hand-torn edge and a pearl scallop seal: layered sheets, a quiet winter sea. The date is kept in a shell that opens onto mother-of-pearl.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#9fb3c2",
   "fonts": [

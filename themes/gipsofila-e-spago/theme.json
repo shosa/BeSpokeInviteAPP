@@ -5,6 +5,7 @@
   "description": "Una busta avorio a portafoglio con il bordo curvo, legata con lo spago, un mazzetto di gipsofila secca e un sigillo 3D di ceralacca oro, a tutto schermo: avorio, lino e oro antico, la stessa tinta dall'apertura alla firma. La data è già scritta.",
   "nameEn": "Gypsophila and Twine",
   "descriptionEn": "A full-screen ivory wallet envelope tied with twine, a sprig of dried gypsophila and a gold wax seal: ivory, linen and antique gold from opening to signature.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#f4efe6",
   "fonts": [

@@ -5,6 +5,7 @@
   "description": "Una busta color pesca con sigillo fiorito che si apre su un prato ricamato: rose cipria, cosmee, foglie salvia e accenti d'oro.",
   "nameEn": "Peach Meadow",
   "descriptionEn": "A peach envelope with a floral seal that opens onto an embroidered meadow: blush roses, cosmos, sage leaves and touches of gold.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#f7efe5",
   "fonts": [

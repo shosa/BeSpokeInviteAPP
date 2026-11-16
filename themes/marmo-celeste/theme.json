@@ -5,6 +5,7 @@
   "description": "Carta marmorizzata fiorentina azzurra e bianca, sigillo di rame, cartoncino avorio con filigrane d'oro: una bottega di legatoria. La data affiora da una vasca di marmorizzazione.",
   "nameEn": "Sky Marble",
   "descriptionEn": "Blue and white Florentine marbled paper, a copper seal and an ivory card with gold filigree: a bookbinder's workshop. The date rises from a marbling bath.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#cfe0ec",
   "fonts": [

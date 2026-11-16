@@ -5,6 +5,7 @@
   "description": "Una busta beige a tutto schermo, con magnolie goffrate a secco e un sigillo 3D di ceralacca caramello, si apre in una luce calda sul cartoncino dell'invito: sabbia, lino e caramello, la stessa tinta dall'apertura alla firma.",
   "nameEn": "Sand Magnolia",
   "descriptionEn": "A full-screen beige envelope with blind-embossed magnolias and a caramel wax seal opens in warm light: sand, linen and caramel from opening to signature.",
+  "fixedDemo": true,
   "models": [],
   "themeColor": "#e7d0b8",
   "fonts": [

@@ -52,7 +52,7 @@ themes/<id>/
 }
 ```
 
-Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, `name`, `description`, `nameEn`, `descriptionEn`, `models`, `themeColor`, `fonts`, `demo`, `demoEn`, `background`, `envelope`, `backgroundVideo`.
+Solo queste chiavi sono ammesse (qualunque altra è un errore): `engine`, `id`, `name`, `description`, `nameEn`, `descriptionEn`, `models`, `themeColor`, `fonts`, `demo`, `demoEn`, `fixedDemo`, `background`, `envelope`, `backgroundVideo`.
 
 Ogni stile è **bilingue**: `nameEn`, `descriptionEn` e `demoEn` sono obbligatori. Senza, il validatore rifiuta lo stile (anche il caricamento ZIP dalla console).
 
@@ -72,6 +72,7 @@ Ogni stile è **bilingue**: `nameEn`, `descriptionEn` e `demoEn` sono obbligator
 | `envelope` | no | busta-video: `{ "video": "assets/busta.mp4", "poster": "assets/busta-poster.jpg" }`. Il filmato apre l'invito al posto della busta disegnata; `poster` è il fotogramma fermo mostrato prima del tocco. Vedi «Busta-video» |
 | `backgroundVideo` | no | video di sfondo per zona: `{ "hero": "assets/intestazione.mp4", "body": "assets/corpo.mp4" }`, ciascuno facoltativo. Vedi «Video di sfondo per zona» |
 | `demoEn` | sì | esempi in inglese, per blocco: sostituiscono solo le proprietà indicate quando la demo è in inglese. Può essere `{}` se le etichette di default bastano, ma deve esserci. Vedi «Esempi in inglese» |
+| `fixedDemo` | no | `true`: anteprime, caroselli e demo mostrano **sempre** i dati di `demo` (nomi, data, ora, luogo, testi) invece di generarne di casuali. Obbligatorio quando la busta-video o le immagini contengono nomi o iniziali. Richiede `demo.event.title`. Vedi «Esempi fissi» |
 
 ### Esempi (`demo`)
 
@@ -100,6 +101,28 @@ Regole:
 - valgono le stesse regole di `demo` (proprietà reali del blocco, `assets/…` per i file, niente URL esterni);
 - `demoEn` vale solo per le proprietà indicate: le altre restano quelle del punto 2;
 - non serve copiare tutto: basta ciò che lo stile vuole dire in modo diverso dall'inglese di default.
+
+### Esempi fissi (`fixedDemo`)
+
+Di base ogni anteprima genera un esempio nuovo: nomi, data, luogo, programma e frasi cambiano a ogni caricamento. Va bene finché nulla del tema contiene un nome. Se invece la **busta-video**, il sigillo, il poster o una foto mostrano nomi o iniziali (per esempio «G & T» sul sigillo), l'esempio casuale direbbe «Chiara & Paolo» sotto una busta con «Ginevra & Tommaso»: incoerente.
+
+Con `"fixedDemo": true` il motore usa invece i dati scritti nel tema, sempre uguali, in tutte le anteprime, nei caroselli e nella demo:
+
+- `demo.event`: `title` (i nomi, **gli stessi della busta**), `hosts`, `eventDate`, `eventTime`, `venue`, `address`. `title` è obbligatorio, gli altri sono consigliati;
+- i testi di `demo` per blocco (messaggio, programma, dress code, firma…) hanno la precedenza su quelli generati;
+- ciò che manca si genera comunque, ma **con un seme fisso** (l'id del tema): stesso risultato a ogni caricamento;
+- la firma in fondo usa i nomi del titolo («Ginevra e Tommaso»), e il programma parte dall'ora dell'evento;
+- in inglese i nomi, la data e il luogo restano quelli di `demo.event`; la riga di apertura (`hosts`) e i testi vengono da `demoEn` (per esempio `"demoEn": { "event": { "hosts": "Together with their families" } }`), altrimenti dal generatore in inglese.
+
+```json
+"fixedDemo": true,
+"demo": {
+  "event": { "title": "Ginevra & Tommaso", "hosts": "Insieme alle loro famiglie", "eventDate": "2027-06-12", "eventTime": "16:30", "venue": "Villa Medicea", "address": "Via di Castello, Firenze" }
+},
+"demoEn": { "event": { "hosts": "Together with their families" } }
+```
+
+Regola: se nel filmato della busta (o in un'immagine) si leggono nomi o iniziali, metti `fixedDemo: true` e scrivi in `demo.event.title` **esattamente** quei nomi. Una data scritta nella busta va ripetuta in `demo.event.eventDate`.
 
 ## I blocchi
 
@@ -403,6 +426,7 @@ Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge 
 
 - [ ] il validatore passa senza errori
 - [ ] `nameEn`, `descriptionEn` e `demoEn` presenti, in un inglese naturale (non tradotto parola per parola)
+- [ ] se la busta-video o le immagini mostrano nomi, iniziali o una data: `fixedDemo: true` e `demo.event` con gli stessi nomi (e la stessa data)
 - [ ] nessun testo fisso nei file dei blocchi: le etichette di sistema vengono da `{{t.…}}`, i testi del cliente dalle proprietà
 - [ ] nessun dato di persone in asset, esempi o nomi di file
 - [ ] tutte le classi dei blocchi sono stilizzate, anche la versione mobile
@@ -425,11 +449,11 @@ Se il controllo dello ZIP risponde `RIFIUTATO`, l'agente non consegna: corregge 
 
 Per uno stile semplice:
 
-> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`. Parti da `themes/invitereference`. Lo stile è [descrizione: colori, atmosfera, font]. Asset: [elenco, senza dati di persone]. Esempi per blocco: [elenco]. Esempi in inglese (`demoEn`, facoltativo: solo le frasi proprie dello stile). Copri tutte le classi dei blocchi, anche il mobile. Rispetta le regole non negoziabili 1–11 di `docs/TEMI.md`: in particolare ogni blocco con foto nella demo ha una foto stock dello stile, mai vuota. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e non consegnare finché non passa. Riporta i problemi trovati e come li hai risolti.
+> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`. Parti da `themes/invitereference`. Lo stile è [descrizione: colori, atmosfera, font]. Asset: [elenco, senza dati di persone]. Esempi per blocco: [elenco]. Esempi in inglese (`demoEn`, obbligatorio, anche `{}`). Se la busta o le immagini mostrano nomi o iniziali, `fixedDemo: true` con quei nomi in `demo.event.title` (vedi «Esempi fissi»). Copri tutte le classi dei blocchi, anche il mobile. Rispetta le regole non negoziabili 1–11 di `docs/TEMI.md`: in particolare ogni blocco con foto nella demo ha una foto stock dello stile, mai vuota. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e non consegnare finché non passa. Riporta i problemi trovati e come li hai risolti.
 
 Per uno stile complesso e animato:
 
-> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, in particolare il contratto delle classi. Atmosfera: [descrizione]. Obiettivi: (1) tutti i blocchi con una loro identità visiva, non un'unica griglia; (2) animazioni CSS decorative di ingresso con `data-anim` e `--d` per ritardi, senza alterare il testo; (3) layout mobile first a 390 px senza scorrimento orizzontale, e movimento ridotto rispettato. Vincoli: nessun codice nuovo, nessun `<script>`, nessun gestore inline, nessun dato di persone. Se lo stile ha video di sfondo, l'intestazione resta solo testo e i video sono in loop (vedi «Video di sfondo per zona»), con l'eccezione della foto principale: `.h-vista` va posizionato sopra il video, senza nasconderlo né nascondere il video. Non animare `.scroll-cue`: il rimbalzo lo fa il motore. Non creare file o cartelle fuori da `themes/<id>/`. Ogni blocco con foto (hero, gallery, image, venue) ha una foto stock nella demo, mai vuota. Rispetta le regole non negoziabili 1–11. Non inventare classi o attributi del runtime che non sono in `docs/TEMI.md`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e correggi finché non passa; poi elenca cosa hai fatto per ogni punto e le scelte che hai dovuto prendere.
+> Crea uno stile per InviteMe in `themes/<id>/` seguendo `docs/TEMI.md` e `docs/MOTORE.md`, in particolare il contratto delle classi. Atmosfera: [descrizione]. Obiettivi: (1) tutti i blocchi con una loro identità visiva, non un'unica griglia; (2) animazioni CSS decorative di ingresso con `data-anim` e `--d` per ritardi, senza alterare il testo; (3) layout mobile first a 390 px senza scorrimento orizzontale, e movimento ridotto rispettato. Vincoli: nessun codice nuovo, nessun `<script>`, nessun gestore inline, nessun dato di persone. Se lo stile ha video di sfondo, l'intestazione resta solo testo e i video sono in loop (vedi «Video di sfondo per zona»), con l'eccezione della foto principale: `.h-vista` va posizionato sopra il video, senza nasconderlo né nascondere il video. Non animare `.scroll-cue`: il rimbalzo lo fa il motore. Non creare file o cartelle fuori da `themes/<id>/`. Ogni blocco con foto (hero, gallery, image, venue) ha una foto stock nella demo, mai vuota. Rispetta le regole non negoziabili 1–11. Se la busta-video mostra nomi o iniziali, metti `fixedDemo: true` e gli stessi nomi in `demo.event.title` (vedi «Esempi fissi»). Non inventare classi o attributi del runtime che non sono in `docs/TEMI.md`. Valida con `npm run validate-theme -w @inviteme/api -- themes/<id>` e correggi finché non passa; poi elenca cosa hai fatto per ogni punto e le scelte che hai dovuto prendere.
 
 Per uno stile da caricare dalla console (ZIP):
 
