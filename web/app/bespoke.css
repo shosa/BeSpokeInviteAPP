@@ -805,3 +805,12 @@ img {
 @media (max-width: 860px) { .pp-page .pp-rail.is-bare { display: none; } }
 /* I livelli della testata restano dentro la testata: le schede sotto la coprono come prima. */
 .idash-hero { isolation: isolate; }
+
+/* Tavoli: disco più piccolo e un margine pari allo sbalzo dei posti, così i pallini restano dentro la scheda. */
+.seat-disc { width: 100px; height: 100px; margin: 26px auto; }
+.seat-dot { width: 14px; height: 14px; margin: -7px 0 0 -7px; transform: rotate(var(--a)) translateY(-66px) rotate(calc(-1 * var(--a))); }
+.seat-center { padding: 0 10px; max-width: 100%; box-sizing: border-box; }
+.seat-center strong { font-size: 0.9rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seat-center small { font-size: 12px; }
+.seat-table { overflow: hidden; }
+.seat-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }

@@ -102,7 +102,7 @@ export function Seating({ tables, guests, call }: { tables: SeatTable[]; guests:
                       <span key={i} className={`seat-dot${i < n ? " is-taken" : ""}`} style={{ "--a": `${(i / tb.seats) * 360}deg` } as React.CSSProperties} />
                     ))}
                     <div className="seat-center">
-                      <strong>{tb.name}</strong>
+                      <strong title={tb.name}>{tb.name}</strong>
                       <small>{n} / {tb.seats}</small>
                     </div>
                   </div>
