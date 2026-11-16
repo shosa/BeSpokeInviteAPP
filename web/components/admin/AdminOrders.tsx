@@ -3,6 +3,8 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { fmtDate } from "./format";
 import { useT } from "@/lib/lang";
+import { toast } from "sonner";
+import type { Go } from "./types";
 
 // Ordini senza importi: identificatori, cliente, invito e metadati utili per capire cosa è successo.
 export type OrderDetail = {
@@ -23,19 +25,25 @@ export type OrderDetail = {
   user_id: string | null;
   email: string | null;
   user_name: string | null;
+  planner_id?: string | null;
 };
 
-type Filter = "tutti" | "pagati" | "attesa" | "shopify" | "prova" | "senza-invito";
+type Filter = "tutti" | "attivare" | "inviti" | "planner" | "manuali" | "prova";
 const FILTERS: { id: Filter; label: string; en: string }[] = [
   { id: "tutti", label: "Tutti", en: "All" },
-  { id: "pagati", label: "Pagati", en: "Paid" },
-  { id: "attesa", label: "In attesa", en: "Pending" },
-  { id: "shopify", label: "Shopify", en: "Shopify" },
+  { id: "attivare", label: "Da attivare", en: "To activate" },
+  { id: "inviti", label: "Inviti", en: "Invitations" },
+  { id: "planner", label: "Planner", en: "Planners" },
+  { id: "manuali", label: "Assegnati a mano", en: "Assigned by hand" },
   { id: "prova", label: "Prova", en: "Test" },
-  { id: "senza-invito", label: "Senza invito", en: "No invitation" },
 ];
 
-export function AdminOrders() {
+// Acquisto assegnato dalla console (o a mano in passato): id «manuale-…».
+const isManual = (o: OrderDetail) => o.id.startsWith("manuale-");
+// Da attivare: pagato, ma il cliente non ha ancora creato l'invito o il planner.
+const isPending = (o: OrderDetail) => o.status === "paid" && !o.invitation_id && !o.planner_id;
+
+export function AdminOrders({ go }: { go?: Go }) {
   const t = useT();
   const [rows, setRows] = useState<OrderDetail[] | null>(null);
   const [filter, setFilter] = useState<Filter>("tutti");
@@ -49,11 +57,11 @@ export function AdminOrders() {
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (rows ?? []).filter((o) => {
-      if (filter === "pagati" && o.status !== "paid") return false;
-      if (filter === "attesa" && o.status === "paid") return false;
-      if (filter === "shopify" && o.source !== "shopify") return false;
+      if (filter === "attivare" && !isPending(o)) return false;
+      if (filter === "inviti" && o.product === "planner") return false;
+      if (filter === "planner" && o.product !== "planner") return false;
+      if (filter === "manuali" && !isManual(o)) return false;
       if (filter === "prova" && o.source !== "local") return false;
-      if (filter === "senza-invito" && o.invitation_id) return false;
       if (q && !`${o.id} ${o.email ?? ""} ${o.user_name ?? ""} ${o.title ?? ""} ${o.slug ?? ""} ${o.order_ref ?? ""}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -110,8 +118,8 @@ export function AdminOrders() {
                       {o.title ?? <span className="hint">{t("nessun invito", "no invitation")}</span>}
                       {o.slug && <small className="ac-sub">/i/{o.slug}</small>}
                     </td>
-                    <td><span className="ac-tag">{o.source === "shopify" ? "Shopify" : t("Prova", "Test")}</span></td>
-                    <td><span className={`pill ${o.status === "paid" ? "yes" : "draft"}`}>{o.status === "paid" ? t("Pagato", "Paid") : t("In attesa", "Pending")}</span></td>
+                    <td><span className="ac-tag">{isManual(o) ? t("A mano", "By hand") : o.source === "shopify" ? "Shopify" : t("Prova", "Test")}</span></td>
+                    <td><span className={`pill ${isPending(o) ? "draft" : o.status === "paid" ? "yes" : "draft"}`}>{isPending(o) ? t("Da attivare", "To activate") : o.status === "paid" ? t("Attivato", "Activated") : t("In attesa di pagamento", "Awaiting payment")}</span></td>
                     <td>{o.product === "planner" ? "Planner" : t("Invito", "Invitation")}</td>
                   </tr>
                   {open === o.id && (
@@ -129,6 +137,12 @@ export function AdminOrders() {
                           <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(o.created_at)}</dd></div>
                           <div><dt>{t("Ordine su Shopify", "Order on Shopify")}</dt><dd>{o.status_url ? <a href={o.status_url} target="_blank" rel="noopener noreferrer">{t("Apri la pagina dell'ordine", "Open the order page")}</a> : "–"}</dd></div>
                         </dl>
+                        {o.user_id && (
+                          <div className="ac-order-acts">
+                            {go && <button type="button" className="btn outline small" onClick={() => go("clienti", { userId: o.user_id! })}>{t("Scheda cliente", "Customer profile")}</button>}
+                            {isPending(o) && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   )}

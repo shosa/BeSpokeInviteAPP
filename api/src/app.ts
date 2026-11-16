@@ -50,6 +50,7 @@ import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, sav
 import { getAllMailTemplates, isMailKind, loadMailTemplates, rsvpVerdict, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
 import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
+import { registerAdminConsole } from "./adminConsole";
 import { registerAdminMedia } from "./adminMedia";
 import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
 import { isInviteTier } from "@inviteme/shared";
@@ -1458,6 +1459,10 @@ export async function buildApp() {
   });
 
   registerAdminInvitations(app, requireAdmin);
+  registerAdminConsole(app, {
+    requireAdmin,
+    enabledThemeIds: async () => (await loadCatalog()).themes.map((t) => ({ id: t.manifest.id, name: t.manifest.name, enabled: t.enabled })),
+  });
   registerAdminMedia(app, requireAdmin);
   return app;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Catalog } from "@inviteme/shared";
 import { Switch } from "./ui/Switch";
@@ -20,6 +20,21 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<{ title: string; details: string[] } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [usage, setUsage] = useState<Record<string, number>>({});
+  const [view, setView] = useState<"tutti" | "scelti" | "mai" | "off">("tutti");
+  useEffect(() => {
+    fetch("/api/admin/themes/usage").then((r) => (r.ok ? r.json() : {})).then(setUsage).catch(() => setUsage({}));
+  }, [catalog]);
+  // Ordine: i più usati in alto; i disattivati (spesso appena caricati) in cima nella loro vista.
+  const shown = useMemo(() => {
+    const list = [...catalog.themes].sort((a, b) => (usage[b.manifest.id] ?? 0) - (usage[a.manifest.id] ?? 0));
+    if (view === "scelti") return list.filter((x) => (usage[x.manifest.id] ?? 0) > 0);
+    if (view === "mai") return list.filter((x) => !usage[x.manifest.id]);
+    if (view === "off") return list.filter((x) => !x.enabled);
+    return list;
+  }, [catalog, usage, view]);
+  const never = catalog.themes.filter((x) => !usage[x.manifest.id]).length;
+  const off = catalog.themes.filter((x) => !x.enabled).length;
 
   async function setEnabled(id: string, enabled: boolean) {
     const res = await fetch(`/api/admin/themes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled }) });
@@ -90,8 +105,14 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
         )}
       </section>
 
+      <div className="tpl-filters" role="group" aria-label={t("Filtri", "Filters")}>
+        {([["tutti", t("Tutti", "All"), catalog.themes.length], ["scelti", t("Scelti dai clienti", "Chosen by customers"), catalog.themes.length - never], ["mai", t("Mai scelti", "Never chosen"), never], ["off", t("Disattivati", "Disabled"), off]] as const).map(([v, label, n]) => (
+          <button key={v} type="button" className={view === v ? "is-on" : ""} aria-pressed={view === v} onClick={() => setView(v)}>{label}<b>{n}</b></button>
+        ))}
+      </div>
+
       <div className="tpl-admin-grid">
-        {catalog.themes.map((th) => {
+        {shown.map((th) => {
           const m = th.manifest;
           return (
             <article key={m.id} className={`tpl-admin-card${th.enabled ? "" : " is-off"}`}>
@@ -101,7 +122,8 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
                 </div>
               </div>
               <h3>{themeCopy(m, lang)}</h3>
-              <small className="hint">{m.id}</small>
+              <small className="hint">{lang === "en" ? m.name : m.nameEn} · {(() => { const n = usage[m.id] ?? 0; return n === 0 ? t("mai scelto", "never chosen") : t(`${n} ${n === 1 ? "invito" : "inviti"}`, `${n} ${n === 1 ? "invitation" : "invitations"}`); })()}</small>
+              <div className="tpl-tags"><span>IT · EN</span>{m.envelope && <span>{t("Busta-video", "Video envelope")}</span>}{m.backgroundVideo && <span>{t("Video di sfondo", "Background video")}</span>}{!th.enabled && <span className="is-off">{t("Disattivato", "Disabled")}</span>}</div>
               <a className="btn outline small" href={`/api/themes/${m.id}/anteprima`} target="_blank" rel="noreferrer">{t("Apri anteprima", "Open preview")}</a>
               <Switch checked={th.enabled} onChange={(v) => setEnabled(m.id, v)} label={th.enabled ? t("Attivo", "Active") : t("Disattivato", "Disabled")} />
               <button type="button" className="link tpl-admin-del" onClick={() => remove(m.id, themeCopy(m, lang))}>{t("Elimina", "Delete")}</button>
