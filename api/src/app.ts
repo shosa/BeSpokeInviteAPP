@@ -57,7 +57,7 @@ import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
 import { errorToEnglish } from "./errorsEn";
-import { createAiCreditsCheckout, createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
+import { CreditsCheckoutError, createAiCreditsCheckout, createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -442,6 +442,7 @@ export async function buildApp() {
       return { checkoutUrl: await createAiCreditsCheckout({ invitationId: inv.id, email: user.email }) };
     } catch (e) {
       req.log.warn({ err: e }, "checkout crediti non creato");
+      if (e instanceof CreditsCheckoutError) return reply.code(503).send({ error: e.message });
       return reply.code(502).send({ error: "Il negozio non risponde: riprova tra poco" });
     }
   });
@@ -1052,12 +1053,15 @@ export async function buildApp() {
     const ids = getShopifyIds();
     const variant = normalizeVariant(ids.variantAiCreditsId);
     if (!variant) return 0;
+    // In console può esserci l'ID del prodotto invece della variante: valgono tutte le sue varianti.
+    const productNum = variant.split("/").pop();
     const perPack = Number(ids.aiCreditsPerPack) || 20;
     const cartFor = order.note_attributes?.find((a) => a.name === "aiCreditsFor")?.value;
     let added = 0;
     for (const [i, l] of (order.line_items ?? []).entries()) {
       const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
-      if (v !== variant) continue;
+      const prod = (l as { product_id?: number | string | null }).product_id;
+      if (v !== variant && String(prod ?? "") !== productNum) continue;
       const invitationId = l.properties?.find((p) => p.name === "_aiCreditsFor")?.value ?? cartFor ?? "";
       if (!UUID.test(invitationId)) { app.log.warn({ order: order.id }, "crediti BeSpoke AI senza invito collegato"); continue; }
       const credits = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1))) * perPack;

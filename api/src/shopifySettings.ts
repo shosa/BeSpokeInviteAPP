@@ -173,9 +173,12 @@ export async function testShopify(): Promise<ShopifyTest> {
       out.basicTitle = [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ");
     }
     if (ids.variantAiCreditsId) {
-      const node = (await gql(variantQuery, { id: ids.variantAiCreditsId })).node as { title?: string; product?: { title: string } } | null;
-      if (!node) return { ...out, ok: false, error: "La variante dei crediti BeSpoke AI non esiste in questo negozio" };
-      out.creditsTitle = [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ");
+      // Può essere l'ID della variante o del prodotto: si prova la variante, poi il prodotto.
+      const num = ids.variantAiCreditsId.split("/").pop();
+      const node = (await gql(variantQuery, { id: `gid://shopify/ProductVariant/${num}` })).node as { title?: string; product?: { title: string } } | null;
+      const product = node ? null : ((await gql(`query P($id: ID!) { node(id: $id) { ... on Product { title } } }`, { id: `gid://shopify/Product/${num}` })).node as { title?: string } | null);
+      if (!node && !product?.title) return { ...out, ok: false, error: "Il prodotto dei crediti BeSpoke AI non è visibile: controlla l'ID e che sia pubblicato nel canale di vendita collegato al sito" };
+      out.creditsTitle = node ? [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ") : product!.title;
     }
     if (ids.plannerProductId) {
       const node = (await gql(`query Product($id: ID!) { node(id: $id) { ... on Product { title availableForSale } } }`, { id: ids.plannerProductId })).node as { title?: string } | null;

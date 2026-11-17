@@ -111,10 +111,35 @@ export function invitationIdFromOrder(order: {
 
 // Ricarica dei crediti di BeSpoke AI: carrello con la variante dei crediti, legato all'invito.
 // L'invito viaggia come attributo «aiCreditsFor» (non «invitationId», che il webhook usa per il pagamento dell'invito).
+// Errore della ricarica con un messaggio da mostrare al cliente (e all'admin nei log).
+export class CreditsCheckoutError extends Error {}
+
+// La variante dei crediti: l'ID salvato può essere quello della variante o, per errore, quello del prodotto.
+// Nel secondo caso si usa la prima variante del prodotto. Se l'API non vede nessuno dei due, il prodotto non è pubblicato
+// nel canale di vendita collegato al token Storefront.
+async function creditsMerchandise(domain: string, token: string, saved: string): Promise<string> {
+  const num = saved.split("/").pop() ?? "";
+  const res = await fetch(`https://${domain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+    body: JSON.stringify({
+      query: `query M($v: ID!, $p: ID!) { v: node(id: $v) { ... on ProductVariant { id availableForSale } } p: node(id: $p) { ... on Product { variants(first: 1) { nodes { id availableForSale } } } } }`,
+      variables: { v: `gid://shopify/ProductVariant/${num}`, p: `gid://shopify/Product/${num}` },
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  const d = ((await res.json().catch(() => ({}))) as { data?: { v?: { id?: string; availableForSale?: boolean } | null; p?: { variants?: { nodes: { id: string; availableForSale: boolean }[] } } | null } }).data;
+  const found = d?.v?.id ? d.v : d?.p?.variants?.nodes[0];
+  if (!found?.id) throw new CreditsCheckoutError("Il prodotto dei crediti non è visibile al negozio: va pubblicato nel canale di vendita collegato al sito");
+  if (found.availableForSale === false) throw new CreditsCheckoutError("I crediti non sono in vendita in questo momento");
+  return found.id;
+}
+
 export async function createAiCreditsCheckout(input: { invitationId: string; email?: string }): Promise<string> {
   const ids = getShopifyIds();
   const token = storefrontToken();
-  if (!ids.storeDomain || !token || !ids.variantAiCreditsId) throw new Error("Ricarica non disponibile");
+  if (!ids.storeDomain || !token || !ids.variantAiCreditsId) throw new CreditsCheckoutError("Ricarica dei crediti non disponibile in questo momento");
+  const merchandiseId = await creditsMerchandise(ids.storeDomain, token, ids.variantAiCreditsId);
   const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
@@ -122,7 +147,7 @@ export async function createAiCreditsCheckout(input: { invitationId: string; ema
       query: `mutation cartCreate($input: CartInput!) { cartCreate(input: $input) { cart { checkoutUrl } userErrors { message } } }`,
       variables: {
         input: {
-          lines: [{ merchandiseId: ids.variantAiCreditsId, quantity: 1, attributes: [{ key: "_aiCreditsFor", value: input.invitationId }] }],
+          lines: [{ merchandiseId, quantity: 1, attributes: [{ key: "_aiCreditsFor", value: input.invitationId }] }],
           attributes: [{ key: "aiCreditsFor", value: input.invitationId }],
           ...(input.email ? { buyerIdentity: { email: input.email } } : {}),
           note: `Crediti BeSpoke AI · invito ${input.invitationId}`,

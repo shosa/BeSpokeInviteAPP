@@ -24,7 +24,7 @@ const MAX_CHAT = 12; // messaggi di cronologia inviati al modello
 const MAX_MESSAGE = 1000; // caratteri per messaggio del cliente
 const MAX_PHOTO_HITS = 3; // foto proposte per ogni ricerca: tre, mai di più
 const MAX_CHOICE = 3; // opzioni per ogni scelta: tre, mai di più
-const MAX_FREE_RUN = 5; // risposte gratuite di fila dopo una domanda: oltre, si torna a contare
+const MAX_FREE_RUN = 3; // risposte gratuite di fila dopo una scelta: oltre, si torna a contare
 
 export type ModelCall = (params: Anthropic.MessageCreateParamsNonStreaming) => Promise<Anthropic.Message>;
 
@@ -337,10 +337,10 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
   if (!inv) return { status: 404, body: { error: "Invito non trovato" } };
   if (!deps.apiKey) return { status: 503, body: { error: "L'assistente non è attivo: manca la chiave del modello" } };
   const settings = await deps.loadSettings();
-  // Risposta a una domanda dell'assistente: non consuma richieste, entro il limite di risposte gratuite di fila.
+  // Risposta a una scelta dell'assistente: può essere gratuita (vedi sotto), ma a crediti finiti non si manda nulla.
   const free = inv.assistant_asked && inv.assistant_free_run < MAX_FREE_RUN;
   const limit = settings.callLimit + (inv.assistant_bonus ?? 0);
-  if (!free && inv.assistant_calls >= limit) {
+  if (inv.assistant_calls >= limit) {
     return { status: 409, body: { error: "Hai usato tutte le richieste dell'assistente per questo invito" } };
   }
   const chat = parseChat(input.body);
@@ -515,16 +515,20 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
 
   const fallback = choice || placeAsk ? "" : actions.length > 0 ? "Fatto." : "Non ho ancora cambiato nulla: dimmi di più.";
   const reply = refused ? "Non posso aiutarti con questa richiesta. Prova a riformularla." : texts.join("\n").trim() || fallback;
-  const asked = !refused && (choice !== undefined || placeAsk !== undefined || reply.trimEnd().endsWith("?"));
-  await deps.recordUsage(inv.id, settings.model, usage, actions.length, { counted: !free, asked, freeRun: free ? inv.assistant_free_run + 1 : 0 });
+  // Gratis solo la risposta a una scelta esplicita (pulsanti, foto, ricerca del luogo): una frase che finisce con «?»
+  // non basta, perché l'assistente chiude spesso proponendo il passo successivo e quasi ogni messaggio risultava gratis.
+  const asked = !refused && (choice !== undefined || placeAsk !== undefined);
+  // Ogni modifica all'invito consuma una richiesta, anche se arriva rispondendo a una scelta: gratis solo le risposte senza modifiche.
+  const counted = !free || actions.length > 0;
+  await deps.recordUsage(inv.id, settings.model, usage, actions.length, { counted, asked, freeRun: counted ? 0 : inv.assistant_free_run + 1 });
   return {
     status: 200,
     body: {
       reply,
       actions,
       usage,
-      remaining: Math.max(0, limit - inv.assistant_calls - (free ? 0 : 1)),
-      counted: !free,
+      remaining: Math.max(0, limit - inv.assistant_calls - (counted ? 1 : 0)),
+      counted,
       mediaAllowed: [...mediaAllowed],
       photosOffered: photosOffered(),
       placesAllowed: [...placesAllowed],

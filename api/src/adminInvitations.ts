@@ -3,6 +3,7 @@ import path from "path";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { pool } from "./db";
 import { MEDIA_DIR } from "./media";
+import { loadAssistantSettings } from "./assistantSettings";
 
 // Inviti dei clienti, dalla console admin: ricerca, dettaglio, riapertura della modifica, eliminazione.
 // Ogni azione lascia una riga in events, così resta traccia di chi ha fatto cosa.
@@ -69,6 +70,7 @@ export function registerAdminInvitations(app: FastifyInstance, requireAdmin: Gua
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Invito non trovato" });
     const { rows } = await pool.query(
       `SELECT i.id, i.slug, i.status, i.created_at, i.views, i.edit_count, i.config, i.guests, i.planner,
+              i.assistant_calls, i.assistant_bonus,
               u.id AS user_id, u.email, u.name
        FROM invitations i JOIN users u ON u.id = i.user_id WHERE i.id = $1`,
       [req.params.id],
@@ -83,14 +85,21 @@ export function registerAdminInvitations(app: FastifyInstance, requireAdmin: Gua
       "SELECT id, amount_cents, currency, source, status, created_at FROM orders WHERE invitation_id = $1 ORDER BY created_at DESC",
       [req.params.id],
     );
-    return { ...inv, rsvps: rsvps.rows, orders: orders.rows };
+    const limit = (await loadAssistantSettings()).settings.callLimit + (inv.assistant_bonus ?? 0);
+    return { ...inv, assistant_limit: limit, rsvps: rsvps.rows, orders: orders.rows };
   });
 
   // Riapre la modifica di un invito già pagato (dopo la conferma il cliente non può più cambiarlo).
   app.patch<{ Params: { id: string } }>("/api/admin/invitations/:id", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Invito non trovato" });
-    const body = (req.body ?? {}) as { reopenEdit?: boolean };
+    const body = (req.body ?? {}) as { reopenEdit?: boolean; assistantCalls?: unknown };
+    // Richieste di BeSpoke AI usate: si possono azzerare o portare a un numero (anche oltre il limite, per provare la ricarica).
+    if (typeof body.assistantCalls === "number" && Number.isInteger(body.assistantCalls) && body.assistantCalls >= 0 && body.assistantCalls <= 10_000) {
+      const { rowCount } = await pool.query("UPDATE invitations SET assistant_calls = $2, assistant_asked = false, assistant_free_run = 0 WHERE id = $1", [req.params.id, body.assistantCalls]);
+      if (!rowCount) return reply.code(404).send({ error: "Invito non trovato" });
+      return { ok: true };
+    }
     if (body.reopenEdit !== true) return reply.code(400).send({ error: "Azione non valida" });
     const { rowCount } = await pool.query("UPDATE invitations SET edit_count = 0, edit_session = NULL WHERE id = $1", [req.params.id]);
     if (!rowCount) return reply.code(404).send({ error: "Invito non trovato" });

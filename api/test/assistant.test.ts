@@ -297,10 +297,10 @@ describe("assistente: cronologia lunga", () => {
   });
 });
 
-describe("assistente: risposte a una domanda non contano", () => {
-  it("dopo una domanda la risposta è gratuita anche a limite raggiunto, e non consuma richieste", async () => {
-    const shared = { ...invitation(), assistant_calls: SETTINGS.callLimit, assistant_asked: true, assistant_free_run: 0 };
-    const model = fakeModel([{ content: [{ type: "text", text: "Ok, scelta registrata." }], stop_reason: "end_turn" }]);
+describe("assistente: conteggio delle richieste", () => {
+  it("la risposta a una scelta senza modifiche è gratuita", async () => {
+    const shared = { ...invitation(), assistant_calls: 1, assistant_asked: true, assistant_free_run: 0 };
+    const model = fakeModel([{ content: [{ type: "text", text: "Ok, ecco altre opzioni." }], stop_reason: "end_turn" }]);
     const { d, recorded } = deps({ model, findOwned: async () => shared });
     const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
     assert.equal(out.status, 200);
@@ -308,13 +308,34 @@ describe("assistente: risposte a una domanda non contano", () => {
     assert.equal(recorded.length, 1);
   });
 
-  it("dopo cinque risposte gratuite di fila torna a contare, e a limite raggiunto si ferma", async () => {
-    const shared = { ...invitation(), assistant_calls: SETTINGS.callLimit, assistant_asked: true, assistant_free_run: 5 };
+  it("ogni modifica all'invito conta, anche rispondendo a una scelta", async () => {
+    const shared = { ...invitation(), assistant_calls: 1, assistant_asked: true, assistant_free_run: 0 };
+    const model = fakeModel([
+      { content: [{ type: "tool_use", id: "t1", name: "setEvent", input: { key: "title", value: "Marco & Anna" } }], stop_reason: "tool_use" },
+      { content: [{ type: "text", text: "Fatto." }], stop_reason: "end_turn" },
+    ]);
+    const { d } = deps({ model, findOwned: async () => shared });
+    const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
+    assert.equal(out.status, 200);
+    assert.equal((out.body as { counted: boolean }).counted, true);
+  });
+
+  it("a crediti finiti si ferma, anche rispondendo a una scelta", async () => {
+    const shared = { ...invitation(), assistant_calls: SETTINGS.callLimit, assistant_asked: true, assistant_free_run: 0 };
     const model = fakeModel([{ content: [{ type: "text", text: "x" }], stop_reason: "end_turn" }]);
     const { d } = deps({ model, findOwned: async () => shared });
     const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
     assert.equal(out.status, 409);
     assert.equal(model.calls.length, 0);
+  });
+
+  it("i crediti ricaricati si sommano al limite", async () => {
+    const shared = { ...invitation(), assistant_calls: SETTINGS.callLimit, assistant_bonus: 20 };
+    const model = fakeModel([{ content: [{ type: "text", text: "ok" }], stop_reason: "end_turn" }]);
+    const { d } = deps({ model, findOwned: async () => shared });
+    const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
+    assert.equal(out.status, 200);
+    assert.equal((out.body as { remaining: number }).remaining, 19);
   });
 });
 

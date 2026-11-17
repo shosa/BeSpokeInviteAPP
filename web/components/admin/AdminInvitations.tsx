@@ -12,6 +12,9 @@ type Row = {
   rsvps: number; guests: number;
 };
 type Detail = Row & {
+  assistant_calls: number;
+  assistant_bonus: number;
+  assistant_limit: number;
   config: { event?: Record<string, unknown>; blocks?: { type: string }[]; addons?: string[] };
   guests: unknown[];
   rsvps: { id: string; answers: Record<string, unknown>; created_at: string }[];
@@ -136,6 +139,16 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
     onChanged();
   }
 
+  // Richieste di BeSpoke AI usate: azzera (tutte di nuovo disponibili) o esaurisce (per provare la ricarica).
+  async function setCalls(n: number) {
+    setBusy(true);
+    const res = await fetch(`/api/admin/invitations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ assistantCalls: n }) });
+    setBusy(false);
+    if (!res.ok) return toast.error(t("Operazione non riuscita", "Something went wrong"));
+    toast.success(n === 0 ? t("Richieste AI azzerate.", "AI requests reset.") : t("Richieste AI esaurite.", "AI requests used up."));
+    fetchDetail();
+  }
+
   async function remove() {
     if (!d) return;
     setBusy(true);
@@ -166,10 +179,13 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(d.created_at)}</dd></div>
             <div><dt>{t("Visite", "Visits")}</dt><dd>{d.views}</dd></div>
             <div><dt>{t("Modifiche", "Edits")}</dt><dd>{d.edit_count >= 1 ? t("Confermata", "Confirmed") : t("Aperta", "Open")}</dd></div>
+            <div><dt>BeSpoke AI</dt><dd>{t(`${Math.min(d.assistant_calls, d.assistant_limit)} usate su ${d.assistant_limit}`, `${Math.min(d.assistant_calls, d.assistant_limit)} used of ${d.assistant_limit}`)}{d.assistant_bonus ? t(` (di cui ${d.assistant_bonus} ricaricate)`, ` (${d.assistant_bonus} topped up)`) : ""}</dd></div>
           </dl>
 
           <div className="adm-actions">
             <a className="btn outline small" href={`/i/${d.slug}`} target="_blank" rel="noopener"><ExternalLink size={15} aria-hidden="true" /> {t("Apri la pagina", "Open the page")}</a>
+            <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(0)}>{t("Azzera richieste AI", "Reset AI requests")}</button>
+            <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(d.assistant_limit)}>{t("Esaurisci richieste AI", "Use up AI requests")}</button>
             {d.status === "paid" && d.edit_count >= 1 && (
               <button type="button" className="btn outline small" disabled={busy} onClick={reopen}><RotateCcw size={15} aria-hidden="true" /> {t("Riapri la modifica", "Reopen editing")}</button>
             )}

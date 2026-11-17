@@ -11,8 +11,6 @@ type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; p
 type Payload = { items: Item[]; ids: Ids; configured: boolean; demo: boolean; webhookUrl: string; webhookTopic: string; appUrl: string };
 type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; creditsTitle?: string; error?: string };
 const EMPTY: Ids = { storeDomain: "", variantId: "", variantPremiumId: "", plannerProductId: "", variantBasicId: "", variantAiCreditsId: "", aiCreditsPerPack: "20" };
-// Mostra solo il numero degli ID gid://shopify/…/123.
-const num = (v: string | null | undefined) => (v ?? "").split("/").pop() ?? "";
 
 export function AdminShopify() {
   const t = useT();
@@ -25,11 +23,12 @@ export function AdminShopify() {
 
   const fromPayload = (p: Payload): Ids => ({
     storeDomain: p.ids.storeDomain ?? "",
-    variantId: num(p.ids.variantId),
-    variantBasicId: num(p.ids.variantBasicId),
-    variantPremiumId: num(p.ids.variantPremiumId),
-    plannerProductId: num(p.ids.plannerProductId),
-    variantAiCreditsId: num(p.ids.variantAiCreditsId),
+    // Come li salva il server: gid://shopify/ProductVariant/123 (o Product/123). Si può incollare anche il solo numero.
+    variantId: p.ids.variantId ?? "",
+    variantBasicId: p.ids.variantBasicId ?? "",
+    variantPremiumId: p.ids.variantPremiumId ?? "",
+    plannerProductId: p.ids.plannerProductId ?? "",
+    variantAiCreditsId: p.ids.variantAiCreditsId ?? "",
     aiCreditsPerPack: p.ids.aiCreditsPerPack || "20",
   });
 
@@ -111,7 +110,7 @@ export function AdminShopify() {
         {rows.map((r) => (
           <label key={r.key} className="sh-row">
             <span className="sh-label">{r.label}<small>{r.kind}{r.optional ? ` · ${t("facoltativo", "optional")}` : ""}</small></span>
-            <input value={draft[r.key]} onChange={set(r.key)} placeholder="ID" maxLength={40} inputMode="numeric" title={r.help} />
+            <input value={draft[r.key]} onChange={set(r.key)} placeholder={t("ID o numero", "ID or number")} maxLength={80} title={r.help} />
             <span className="sh-found" title={r.help}>{r.found ? <><Check size={13} aria-hidden="true" />{r.found}</> : <Info size={14} aria-label={r.help} />}</span>
           </label>
         ))}
