@@ -87,6 +87,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub_idx ON users (google_sub) WHE
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_calls integer NOT NULL DEFAULT 0;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_asked boolean NOT NULL DEFAULT false;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_free_run integer NOT NULL DEFAULT 0;
+-- Richieste di BeSpoke AI ricaricate con un acquisto su Shopify: si sommano al limite della console.
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_bonus integer NOT NULL DEFAULT 0;
 ALTER TABLE assistant_usage ADD COLUMN IF NOT EXISTS counted boolean NOT NULL DEFAULT true;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS draft jsonb;

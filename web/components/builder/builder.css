@@ -762,3 +762,20 @@ button.bl-crumb:hover { color: var(--brass); }
   .bl-app { zoom: 0.8; height: calc(100vh / 0.8); }
   .bl-app.is-mobile .bl-frame.is-mobile { width: min(390px, 100%, calc((100vh / 0.8 - 300px) * 390 / 844)); }
 }
+
+/* BeSpoke AI senza richieste: il pannello si sfoca e una scheda propone la ricarica su Shopify. */
+.bl-app .as-panel { position: relative; }
+.bl-app .as-panel.is-out > :not(.as-out) { filter: blur(5px); opacity: 0.55; pointer-events: none; user-select: none; }
+.bl-app .as-out { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: rgba(253, 251, 247, 0.35); animation: pp-fade 0.3s ease both; }
+.bl-app .as-out-card { width: min(320px, 100%); box-sizing: border-box; display: grid; justify-items: center; gap: 12px; padding: 26px 22px 20px; border-radius: 24px; background: #fff; border: 1px solid var(--line); box-shadow: 0 30px 60px -30px rgba(110, 78, 28, 0.55); text-align: center; }
+.bl-app .as-out-card h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 24px; }
+.bl-app .as-out-card p { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.55; }
+.bl-app .as-out-card .btn { justify-content: center; width: 100%; }
+.bl-app .as-out-card small { color: var(--ink-soft); font-size: 12px; }
+.bl-app .as-out-note { font-size: 13px !important; }
+.bl-app .as-out-link { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--brass); text-decoration: underline; cursor: pointer; }
+.bl-app .as-out-art { position: relative; width: 84px; height: 84px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fbf1dc, #ecd6ab); color: var(--brass); }
+.bl-app .as-out-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px dashed rgba(184, 137, 63, 0.45); animation: as-ring 12s linear infinite; }
+.bl-app .as-out-art b { position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font: 600 13px var(--font-text), sans-serif; box-shadow: 0 0 0 3px #fff; }
+@keyframes as-ring { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bl-app .as-out-ring { animation: none; } }

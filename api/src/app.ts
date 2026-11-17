@@ -57,7 +57,7 @@ import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
 import { errorToEnglish } from "./errorsEn";
-import { createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
+import { createAiCreditsCheckout, createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
 const isProd = process.env.NODE_ENV === "production";
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -326,7 +326,9 @@ export async function buildApp() {
       editSession: inv.edit_session ?? null,
       purchasedAddons: [...ADDON_KEYS] as string[],
       assistant: !!process.env.ANTHROPIC_KEY,
-      assistantLimit: (await loadAssistantSettings()).settings.callLimit,
+      assistantLimit: (await loadAssistantSettings()).settings.callLimit + (inv.assistant_bonus ?? 0),
+      assistantTopup: Boolean(getShopifyIds().variantAiCreditsId) && shopifyConfigured(),
+      assistantPack: Number(getShopifyIds().aiCreditsPerPack) || 20,
       assistantUsed: inv.assistant_calls ?? 0,
       catalog: c,
       hasRsvp: hasRsvp(c, inv.config),
@@ -429,6 +431,21 @@ export async function buildApp() {
   });
 
   // Assistente del builder: risponde e propone modifiche validate. La chiave del modello sta solo qui, da ANTHROPIC_KEY.
+  // Ricarica dei crediti di BeSpoke AI: carrello Shopify con la variante dei crediti, legato a questo invito.
+  app.post<{ Params: { id: string } }>("/api/invitations/:id/assistant/topup", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    if (!shopifyConfigured() || !getShopifyIds().variantAiCreditsId) return reply.code(503).send({ error: "Ricarica dei crediti non disponibile in questo momento" });
+    try {
+      return { checkoutUrl: await createAiCreditsCheckout({ invitationId: inv.id, email: user.email }) };
+    } catch (e) {
+      req.log.warn({ err: e }, "checkout crediti non creato");
+      return reply.code(502).send({ error: "Il negozio non risponde: riprova tra poco" });
+    }
+  });
+
   app.post<{ Params: { id: string }; Body: unknown }>("/api/invitations/:id/assistant", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
@@ -1028,6 +1045,35 @@ export async function buildApp() {
   // Acquisto dal negozio: ogni riga con una variante nostra diventa un acquisto da attivare.
   // Variante dell'invito → invito; variante «invito base» → invito con i soli template non Premium (draft.plan = "base");
   // prodotto planner (qualunque variante) → planner; variante «pacchetto» (ex premium) → invito e planner.
+  // Crediti di BeSpoke AI comprati su Shopify. Ogni riga lascia un ordine «-ai…» collegato all'invito: se Shopify
+  // ripete il webhook, l'ordine esiste già e le richieste non si sommano due volte.
+  type AiCreditsOrder = { id: number | string; currency?: string; note_attributes?: { name: string; value: string }[]; line_items?: { variant_id?: number | string | null; quantity?: number; properties?: { name: string; value: string }[] }[] };
+  async function applyAiCredits(order: AiCreditsOrder): Promise<number> {
+    const ids = getShopifyIds();
+    const variant = normalizeVariant(ids.variantAiCreditsId);
+    if (!variant) return 0;
+    const perPack = Number(ids.aiCreditsPerPack) || 20;
+    const cartFor = order.note_attributes?.find((a) => a.name === "aiCreditsFor")?.value;
+    let added = 0;
+    for (const [i, l] of (order.line_items ?? []).entries()) {
+      const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
+      if (v !== variant) continue;
+      const invitationId = l.properties?.find((p) => p.name === "_aiCreditsFor")?.value ?? cartFor ?? "";
+      if (!UUID.test(invitationId)) { app.log.warn({ order: order.id }, "crediti BeSpoke AI senza invito collegato"); continue; }
+      const credits = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1))) * perPack;
+      const ins = await pool.query(
+        `INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft)
+         SELECT $1, i.user_id, i.id, 0, $3, 'shopify', 'paid', 'upgrade', $4 FROM invitations i WHERE i.id = $2
+         ON CONFLICT (id) DO NOTHING`,
+        [`${order.id}-ai${i ? `-${i + 1}` : ""}`, invitationId, order.currency ?? "EUR", JSON.stringify({ product: "ai_credits", credits })],
+      );
+      if (!ins.rowCount) continue;
+      await pool.query("UPDATE invitations SET assistant_bonus = assistant_bonus + $2 WHERE id = $1", [invitationId, credits]);
+      added += credits;
+    }
+    return added;
+  }
+
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
     const base = normalizeVariant(ids.variantId);
@@ -1130,6 +1176,8 @@ export async function buildApp() {
       return reply.code(401).send({ error: "Firma non valida" });
     }
     if (req.headers["x-shopify-topic"] !== "orders/paid") return { ok: true, ignored: true };
+    // Ricarica dei crediti di BeSpoke AI: le righe con la variante dei crediti aggiungono richieste all'invito indicato.
+    await applyAiCredits(req.body as AiCreditsOrder);
     const order = req.body as {
       id: number;
       name: string;

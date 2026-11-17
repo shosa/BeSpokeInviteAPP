@@ -8,7 +8,7 @@ import { useT } from "@/lib/lang";
 // Accesso all'area cliente: con email e password, oppure con il link personale via email (come sempre).
 export function LoginPanel() {
   const t = useT();
-  const [mode, setMode] = useState<"password" | "link">("password");
+  const [mode, setMode] = useState<"password" | "link">("link");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
@@ -28,8 +28,8 @@ export function LoginPanel() {
   return (
     <section className="lg">
       <div className="lg-tabs" role="tablist" aria-label={t("Modo di accesso", "Sign-in method")}>
-        <button type="button" role="tab" aria-selected={mode === "password"} className={mode === "password" ? "is-on" : ""} onClick={() => setMode("password")}>{t("Email e password", "Email and password")}</button>
         <button type="button" role="tab" aria-selected={mode === "link"} className={mode === "link" ? "is-on" : ""} onClick={() => setMode("link")}>{t("Link via email", "Email link")}</button>
+        <button type="button" role="tab" aria-selected={mode === "password"} className={mode === "password" ? "is-on" : ""} onClick={() => setMode("password")}>{t("Email e password", "Email and password")}</button>
       </div>
       {mode === "password" ? (
         <form className="lg-form" onSubmit={login}>

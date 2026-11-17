@@ -12,7 +12,8 @@ const PRODUCT_RE = /^(gid:\/\/shopify\/Product\/)?(\d{1,20})$/;
 
 // Il planner è un prodotto a sé nel negozio (come l'invito): si riconosce dal prodotto, qualunque variante si compri.
 // variantBasicId: l'«invito base», variante a parte con la scelta limitata ai template non Premium.
-export type ShopifyIds = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string };
+// variantAiCreditsId: pacchetto di richieste per BeSpoke AI; aiCreditsPerPack: quante richieste dà un pacchetto (testo con il numero).
+export type ShopifyIds = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string; variantAiCreditsId: string; aiCreditsPerPack: string };
 export type ShopifySource = "console" | "ambiente" | "assente";
 
 // Valori caricati dalla tabella settings. Vuoti finché non viene chiamato loadShopifySettings().
@@ -24,6 +25,8 @@ const fromEnv = (): ShopifyIds => ({
   variantPremiumId: normalizeVariant(process.env.SHOPIFY_VARIANT_PREMIUM_ID ?? "") ?? "",
   plannerProductId: normalizeProduct(process.env.SHOPIFY_PLANNER_PRODUCT_ID ?? "") ?? "",
   variantBasicId: normalizeVariant(process.env.SHOPIFY_VARIANT_BASIC_ID ?? "") ?? "",
+  variantAiCreditsId: "",
+  aiCreditsPerPack: "20",
 });
 
 // Un ID di variante come gid completo. Accetta anche il solo numero, che è quello che si copia dall'admin di Shopify.
@@ -46,6 +49,8 @@ export function getShopifyIds(): ShopifyIds {
     variantPremiumId: stored.variantPremiumId ?? env.variantPremiumId,
     plannerProductId: stored.plannerProductId ?? env.plannerProductId,
     variantBasicId: stored.variantBasicId ?? env.variantBasicId,
+    variantAiCreditsId: stored.variantAiCreditsId ?? env.variantAiCreditsId,
+    aiCreditsPerPack: stored.aiCreditsPerPack ?? env.aiCreditsPerPack,
   };
 }
 
@@ -61,6 +66,8 @@ export async function loadShopifySettings(): Promise<void> {
   if (typeof v.variantPremiumId === "string" && normalizeVariant(v.variantPremiumId)) stored.variantPremiumId = normalizeVariant(v.variantPremiumId)!;
   if (typeof v.plannerProductId === "string" && normalizeProduct(v.plannerProductId)) stored.plannerProductId = normalizeProduct(v.plannerProductId)!;
   if (typeof v.variantBasicId === "string" && normalizeVariant(v.variantBasicId)) stored.variantBasicId = normalizeVariant(v.variantBasicId)!;
+  if (typeof v.variantAiCreditsId === "string" && normalizeVariant(v.variantAiCreditsId)) stored.variantAiCreditsId = normalizeVariant(v.variantAiCreditsId)!;
+  if (typeof v.aiCreditsPerPack === "string" && /^\d{1,3}$/.test(v.aiCreditsPerPack) && Number(v.aiCreditsPerPack) > 0) stored.aiCreditsPerPack = v.aiCreditsPerPack;
 }
 
 export type ValidationResult = { ok: true; value: ShopifyIds } | { ok: false; error: string };
@@ -74,6 +81,10 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
   const planner = typeof input.plannerProductId === "string" ? input.plannerProductId.trim() : "";
   const basic = typeof input.variantBasicId === "string" ? input.variantBasicId.trim() : "";
   if (basic && !normalizeVariant(basic)) return { ok: false, error: "L'ID della variante dell'invito base non è valido: usa il numero della variante" };
+  const credits = typeof input.variantAiCreditsId === "string" ? input.variantAiCreditsId.trim() : "";
+  if (credits && !normalizeVariant(credits)) return { ok: false, error: "L'ID della variante dei crediti BeSpoke AI non è valido: usa il numero della variante" };
+  const perPack = typeof input.aiCreditsPerPack === "string" || typeof input.aiCreditsPerPack === "number" ? String(input.aiCreditsPerPack).trim() : "20";
+  if (!/^\d{1,3}$/.test(perPack) || Number(perPack) < 1) return { ok: false, error: "Le richieste per pacchetto devono essere un numero da 1 a 999" };
   if (base && !normalizeVariant(base)) return { ok: false, error: "L'ID della variante base non è valido: usa il numero della variante" };
   if (premium && !normalizeVariant(premium)) return { ok: false, error: "L'ID della variante del pacchetto non è valido: usa il numero della variante" };
   if (planner && !normalizeProduct(planner)) return { ok: false, error: "L'ID del prodotto planner non è valido: usa il numero del prodotto" };
@@ -85,6 +96,8 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
       variantPremiumId: normalizeVariant(premium) ?? "",
       plannerProductId: normalizeProduct(planner) ?? "",
       variantBasicId: normalizeVariant(basic) ?? "",
+      variantAiCreditsId: normalizeVariant(credits) ?? "",
+      aiCreditsPerPack: perPack,
     },
   };
 }
@@ -95,7 +108,7 @@ export async function saveShopifyIds(ids: ShopifyIds): Promise<void> {
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
     [JSON.stringify(ids)],
   );
-  stored = { storeDomain: ids.storeDomain || undefined, variantId: ids.variantId || undefined, variantPremiumId: ids.variantPremiumId || undefined, plannerProductId: ids.plannerProductId || undefined, variantBasicId: ids.variantBasicId || undefined };
+  stored = { storeDomain: ids.storeDomain || undefined, variantId: ids.variantId || undefined, variantPremiumId: ids.variantPremiumId || undefined, plannerProductId: ids.plannerProductId || undefined, variantBasicId: ids.variantBasicId || undefined, variantAiCreditsId: ids.variantAiCreditsId || undefined, aiCreditsPerPack: ids.aiCreditsPerPack || undefined };
   linksCache = null; // i link dei prodotti si ricalcolano con gli ID nuovi
 }
 
@@ -111,6 +124,7 @@ export function shopifyStatus(): ShopifyItem[] {
   return [
     { key: "storeDomain", label: "Dominio del negozio", required: true, source: srcOf(stored.storeDomain, env.storeDomain), value: ids.storeDomain || null, secret: false },
     { key: "variantId", label: "Variante dell'invito", required: true, source: srcOf(stored.variantId, env.variantId), value: ids.variantId || null, secret: false },
+    { key: "variantAiCreditsId", label: "Variante dei crediti BeSpoke AI", required: false, source: srcOf(stored.variantAiCreditsId, env.variantAiCreditsId), value: ids.variantAiCreditsId || null, secret: false },
     { key: "variantBasicId", label: "Variante dell'invito base (template non Premium)", required: false, source: srcOf(stored.variantBasicId, env.variantBasicId), value: ids.variantBasicId || null, secret: false },
     { key: "plannerProductId", label: "Prodotto planner (venduto a parte)", required: false, source: srcOf(stored.plannerProductId, env.plannerProductId), value: ids.plannerProductId || null, secret: false },
     { key: "variantPremiumId", label: "Variante del pacchetto invito + planner", required: false, source: srcOf(stored.variantPremiumId, env.variantPremiumId), value: ids.variantPremiumId || null, secret: false },
@@ -119,7 +133,7 @@ export function shopifyStatus(): ShopifyItem[] {
   ];
 }
 
-export type ShopifyTest = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; error?: string };
+export type ShopifyTest = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; creditsTitle?: string; error?: string };
 
 // Verifica reale: il token risponde, il negozio esiste e le varianti configurate sono vendibili.
 export async function testShopify(): Promise<ShopifyTest> {
@@ -157,6 +171,11 @@ export async function testShopify(): Promise<ShopifyTest> {
       const node = (await gql(variantQuery, { id: ids.variantBasicId })).node as { title?: string; product?: { title: string } } | null;
       if (!node) return { ...out, ok: false, error: "La variante dell'invito base non esiste in questo negozio" };
       out.basicTitle = [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ");
+    }
+    if (ids.variantAiCreditsId) {
+      const node = (await gql(variantQuery, { id: ids.variantAiCreditsId })).node as { title?: string; product?: { title: string } } | null;
+      if (!node) return { ...out, ok: false, error: "La variante dei crediti BeSpoke AI non esiste in questo negozio" };
+      out.creditsTitle = [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ");
     }
     if (ids.plannerProductId) {
       const node = (await gql(`query Product($id: ID!) { node(id: $id) { ... on Product { title availableForSale } } }`, { id: ids.plannerProductId })).node as { title?: string } | null;

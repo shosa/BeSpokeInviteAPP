@@ -2,51 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useLang, useT } from "@/lib/lang";
+import { Check, Copy, Info, Loader2 } from "lucide-react";
+import { useT } from "@/lib/lang";
 
-// Stato di una voce di configurazione, come la restituisce l'API. I segreti non hanno valore: solo la presenza.
+// Shopify: stato del collegamento, ID dei prodotti (salvati dalla console), webhook e segreti (solo presenza: stanno nel .env).
 type Item = { key: string; label: string; required: boolean; source: "console" | "ambiente" | "assente"; value: string | null; secret: boolean };
-type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string };
+type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string; variantAiCreditsId: string; aiCreditsPerPack: string };
 type Payload = { items: Item[]; ids: Ids; configured: boolean; demo: boolean; webhookUrl: string; webhookTopic: string; appUrl: string };
-type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; error?: string };
+type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; creditsTitle?: string; error?: string };
+const EMPTY: Ids = { storeDomain: "", variantId: "", variantPremiumId: "", plannerProductId: "", variantBasicId: "", variantAiCreditsId: "", aiCreditsPerPack: "20" };
+// Mostra solo il numero degli ID gid://shopify/…/123.
+const num = (v: string | null | undefined) => (v ?? "").split("/").pop() ?? "";
 
-const SOURCE_LABEL: Record<"it" | "en", Record<Item["source"], string>> = {
-  it: { console: "dalla console", ambiente: "dal file .env", assente: "mancante" },
-  en: { console: "from the console", ambiente: "from the .env file", assente: "missing" },
-};
-// Nomi inglesi delle voci (l'API le manda in italiano).
-const ITEM_EN: Record<string, string> = {
-  storeDomain: "Shop domain",
-  variantId: "Invitation variant",
-  plannerProductId: "Planner product (sold separately)",
-  variantPremiumId: "Invitation + planner bundle variant",
-  variantBasicId: "Basic invitation variant (non-Premium templates)",
-  storefrontToken: "Storefront API token",
-  webhookSecret: "orders/paid webhook secret",
-};
-
-// Shopify: il sito di vendita. Qui si collegano il negozio e le varianti dei prodotti; i segreti stanno nel .env del server.
 export function AdminShopify() {
-  const lang = useLang();
   const t = useT();
-  const itemLabel = (i: Item) => (lang === "en" ? ITEM_EN[i.key] ?? i.label : i.label);
   const [data, setData] = useState<Payload | null>(null);
-  const [draft, setDraft] = useState<Ids>({ storeDomain: "", variantId: "", variantPremiumId: "", plannerProductId: "", variantBasicId: "" });
+  const [draft, setDraft] = useState<Ids>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [test, setTest] = useState<TestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const fromPayload = (p: Payload): Ids => ({
+    storeDomain: p.ids.storeDomain ?? "",
+    variantId: num(p.ids.variantId),
+    variantBasicId: num(p.ids.variantBasicId),
+    variantPremiumId: num(p.ids.variantPremiumId),
+    plannerProductId: num(p.ids.plannerProductId),
+    variantAiCreditsId: num(p.ids.variantAiCreditsId),
+    aiCreditsPerPack: p.ids.aiCreditsPerPack || "20",
+  });
 
   async function load() {
     const res = await fetch("/api/admin/shopify");
     if (!res.ok) return toast.error(t("Impossibile leggere il collegamento Shopify", "Couldn't read the Shopify connection"));
     const body = (await res.json()) as Payload;
     setData(body);
-    setDraft(body.ids);
+    setDraft(fromPayload(body));
   }
   useEffect(() => {
     void load();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,125 +53,100 @@ export function AdminShopify() {
     setSaving(false);
     if (!res.ok || !("items" in body)) return setError((body as { error?: string }).error ?? t("Salvataggio non riuscito", "Saving failed"));
     setData(body);
-    setDraft(body.ids);
+    setDraft(fromPayload(body));
     setTest(null);
-    toast.success(t("Collegamento salvato. Verifica la connessione per confermare.", "Connection saved. Test it to confirm."));
+    toast.success(t("Salvato. Verifica il collegamento per confermare.", "Saved. Test the connection to confirm."));
   }
 
   async function runTest() {
     setTesting(true);
     setTest(null);
     const res = await fetch("/api/admin/shopify/test", { method: "POST" });
-    const body = (await res.json().catch(() => ({ ok: false, error: t("Risposta non valida", "Invalid response") }))) as TestResult;
+    setTest((await res.json().catch(() => ({ ok: false, error: t("Risposta non valida", "Invalid response") }))) as TestResult);
     setTesting(false);
-    setTest(body);
   }
 
   if (!data) return <p className="hint">{t("Caricamento…", "Loading…")}</p>;
 
+  const saved = fromPayload(data);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(saved);
+  const secrets = data.items.filter((i) => i.secret);
   const missing = data.items.filter((i) => i.required && i.source === "assente");
   const ready = missing.length === 0 && !data.demo;
-  const dirty = draft.storeDomain !== data.ids.storeDomain || draft.variantId !== data.ids.variantId || draft.variantPremiumId !== data.ids.variantPremiumId || draft.plannerProductId !== (data.ids.plannerProductId ?? "") || draft.variantBasicId !== (data.ids.variantBasicId ?? "");
+  const set = (k: keyof Ids) => (e: React.ChangeEvent<HTMLInputElement>) => setDraft({ ...draft, [k]: e.target.value });
+
+  // Righe dei prodotti: etichetta, campo, nome trovato dalla verifica, aiuto breve al passaggio del mouse.
+  const rows: { key: keyof Ids; label: string; kind: string; found?: string; help: string; optional?: boolean }[] = [
+    { key: "variantId", label: t("Invito", "Invitation"), kind: t("variante", "variant"), found: test?.productTitle && [test.productTitle, test.variantTitle !== "Default Title" ? test.variantTitle : null].filter(Boolean).join(" · "), help: t("Invito completo: tutti i template.", "Full invitation: all templates.") },
+    { key: "variantBasicId", label: t("Invito base", "Basic invitation"), kind: t("variante", "variant"), found: test?.basicTitle, help: t("Solo template non Premium.", "Non-Premium templates only."), optional: true },
+    { key: "variantPremiumId", label: t("Invito + planner", "Invitation + planner"), kind: t("variante", "variant"), found: test?.premiumTitle, help: t("Pacchetto: un invito e un planner.", "Bundle: one invitation and one planner."), optional: true },
+    { key: "plannerProductId", label: "Planner", kind: t("prodotto", "product"), found: test?.plannerTitle, help: t("Qualunque variante del prodotto dà un planner.", "Any variant of the product gives a planner."), optional: true },
+    { key: "variantAiCreditsId", label: t("Crediti BeSpoke AI", "BeSpoke AI credits"), kind: t("variante", "variant"), found: test?.creditsTitle, help: t("Ricarica delle richieste di BeSpoke AI per un invito.", "Top-up of BeSpoke AI requests for one invitation."), optional: true },
+  ];
 
   return (
-    <div className="ac-stack">
-      <section className={`ac-card ac-status ${ready ? "is-ready" : "is-todo"}`}>
-        <div>
-          <span className="ac-kicker">{t("Stato", "Status")}</span>
-          <h2>{ready ? t("Pronto a vendere", "Ready to sell") : data.demo ? t("Modalità demo attiva", "Demo mode active") : t("Collegamento da completare", "Connection to complete")}</h2>
-          <p className="hint">
-            {ready
-              ? t("Il checkout porta al pagamento su Shopify e l'invito si attiva quando Shopify conferma l'ordine.", "Checkout leads to payment on Shopify and the invitation activates when Shopify confirms the order.")
-              : missing.length > 0
-                ? `${t("Mancano", "Missing")}: ${missing.map((m) => itemLabel(m).toLowerCase()).join(", ")}.`
-                : t("Con Shopify non collegato il sito usa la modalità demo: nessun pagamento reale.", "With Shopify not connected the site uses demo mode: no real payments.")}
-          </p>
+    <div className="ac-stack sh">
+      <section className={`ac-card sh-status ${ready ? "is-ready" : "is-todo"}`}>
+        <span className="sh-dot" aria-hidden="true" />
+        <div className="sh-status-text">
+          <strong>{ready ? t("Collegato e pronto a vendere", "Connected and ready to sell") : data.demo ? t("Modalità demo: nessun pagamento reale", "Demo mode: no real payments") : t("Collegamento da completare", "Connection to complete")}</strong>
+          {!ready && missing.length > 0 && <small>{t("Manca", "Missing")}: {missing.map((m) => m.label.toLowerCase()).join(", ")}</small>}
+          {test && (test.ok
+            ? <small className="sh-ok"><Check size={13} aria-hidden="true" />{t("Verifica riuscita", "Test passed")}{test.shopName ? ` · ${test.shopName}` : ""}{test.price ? ` · ${test.price}` : ""}</small>
+            : <small className="sh-err">{test.error}</small>)}
         </div>
-        <button type="button" className="btn solid small" onClick={runTest} disabled={testing}>{testing ? t("Verifico…", "Testing…") : t("Verifica collegamento", "Test connection")}</button>
+        <button type="button" className="btn outline small" onClick={runTest} disabled={testing}>{testing ? <Loader2 size={14} className="as-spin" aria-hidden="true" /> : null}{t("Verifica", "Test")}</button>
       </section>
 
-      {test && (
-        <section className={`ac-card ac-test ${test.ok ? "is-ok" : "is-err"}`} role="status">
-          {test.ok ? (
-            <>
-              <strong>{t("Collegamento funzionante", "Connection working")}</strong>
-              <ul className="ac-kv">
-                {test.shopName && <li><span>{t("Negozio", "Shop")}</span><b>{test.shopName}</b></li>}
-                {test.productTitle && <li><span>{t("Prodotto base", "Base product")}</span><b>{test.productTitle}{test.variantTitle && test.variantTitle !== "Default Title" ? ` · ${test.variantTitle}` : ""}</b></li>}
-                {test.price && <li><span>{t("Prezzo base", "Base price")}</span><b>{test.price}</b></li>}
-                {test.plannerTitle && <li><span>{t("Prodotto planner", "Planner product")}</span><b>{test.plannerTitle}</b></li>}
-                {test.basicTitle && <li><span>{t("Invito base", "Basic invitation")}</span><b>{test.basicTitle}</b></li>}
-                {test.premiumTitle && <li><span>{t("Pacchetto invito + planner", "Invitation + planner bundle")}</span><b>{test.premiumTitle}</b></li>}
-              </ul>
-            </>
-          ) : (
-            <><strong>{t("Non funziona ancora", "Not working yet")}</strong><p>{test.error}</p></>
-          )}
-        </section>
-      )}
+      <form className="ac-card sh-form" onSubmit={save}>
+        <div className="sh-head">
+          <h3>{t("Negozio e prodotti", "Shop and products")}</h3>
+          <span className="hint">{t("ID = il numero nell'indirizzo della pagina in Shopify", "ID = the number in the page address in Shopify")}</span>
+        </div>
+        <label className="sh-row">
+          <span className="sh-label">{t("Dominio", "Domain")}</span>
+          <input value={draft.storeDomain} onChange={set("storeDomain")} placeholder="nome-negozio.myshopify.com" maxLength={120} />
+          <span className="sh-found">{test?.shopName ?? ""}</span>
+        </label>
+        {rows.map((r) => (
+          <label key={r.key} className="sh-row">
+            <span className="sh-label">{r.label}<small>{r.kind}{r.optional ? ` · ${t("facoltativo", "optional")}` : ""}</small></span>
+            <input value={draft[r.key]} onChange={set(r.key)} placeholder="ID" maxLength={40} inputMode="numeric" title={r.help} />
+            <span className="sh-found" title={r.help}>{r.found ? <><Check size={13} aria-hidden="true" />{r.found}</> : <Info size={14} aria-label={r.help} />}</span>
+          </label>
+        ))}
+        <label className="sh-row">
+          <span className="sh-label">{t("Richieste per pacchetto", "Requests per pack")}<small>{t("crediti BeSpoke AI", "BeSpoke AI credits")}</small></span>
+          <input value={draft.aiCreditsPerPack} onChange={set("aiCreditsPerPack")} maxLength={3} inputMode="numeric" className="sh-short" />
+          <span className="sh-found" />
+        </label>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <div className="ac-form-actions">
+          <button type="submit" className="btn solid small" disabled={saving || !dirty}>{saving ? t("Salvo…", "Saving…") : t("Salva", "Save")}</button>
+          {dirty && <button type="button" className="link" onClick={() => { setDraft(saved); setError(null); }}>{t("Annulla", "Cancel")}</button>}
+        </div>
+      </form>
 
-      <div className="ac-two">
-        <form className="ac-card ac-form" onSubmit={save}>
-          <span className="ac-kicker">{t("Negozio e prodotti", "Shop and products")}</span>
-          <label className="ac-field">
-            <span>{t("Dominio del negozio", "Shop domain")}</span>
-            <input value={draft.storeDomain} onChange={(e) => setDraft({ ...draft, storeDomain: e.target.value })} placeholder={t("nome-negozio.myshopify.com", "shop-name.myshopify.com")} maxLength={120} />
-            <small>{t("Lo trovi in Shopify, Impostazioni, Dominio: finisce con myshopify.com.", "Find it in Shopify, Settings, Domains: it ends in myshopify.com.")}</small>
-          </label>
-          <label className="ac-field">
-            <span>{t("ID variante dell'invito", "Invitation variant ID")}</span>
-            <input value={draft.variantId} onChange={(e) => setDraft({ ...draft, variantId: e.target.value })} placeholder={t("es. 44123456789", "e.g. 44123456789")} maxLength={40} inputMode="numeric" />
-            <small>{t("Prodotti, scegli il prodotto, poi la variante: l'ID numerico è nell'indirizzo della pagina.", "Products, pick the product, then the variant: the numeric ID is in the page address.")}</small>
-          </label>
-          <label className="ac-field">
-            <span>{t("ID variante dell'invito base", "Basic invitation variant ID")}</span>
-            <input value={draft.variantBasicId ?? ""} onChange={(e) => setDraft({ ...draft, variantBasicId: e.target.value })} placeholder={t("facoltativo", "optional")} maxLength={40} inputMode="numeric" />
-            <small>{t("Variante a parte dell'invito: chi la compra sceglie solo tra i template non Premium (quelli Premium li vede con il lucchetto). Il segno Premium si mette nella sezione Template.", "A separate invitation variant: buyers choose only among non-Premium templates (they see Premium ones locked). Mark templates as Premium in the Templates section.")}</small>
-          </label>
-          <label className="ac-field">
-            <span>{t("ID prodotto del planner", "Planner product ID")}</span>
-            <input value={draft.plannerProductId} onChange={(e) => setDraft({ ...draft, plannerProductId: e.target.value })} placeholder={t("facoltativo", "optional")} maxLength={40} inputMode="numeric" />
-            <small>{t("Il planner è un prodotto a sé nel negozio: Prodotti, scegli il planner, l'ID numerico è nell'indirizzo della pagina. Qualunque sua variante dà un planner da attivare, che il cliente può collegare a un suo invito.", "The planner is its own product in the shop: Products, pick the planner, the numeric ID is in the page address. Any of its variants gives a planner to activate, which the customer can link to one of their invitations.")}</small>
-          </label>
-          <label className="ac-field">
-            <span>{t("ID variante del pacchetto invito + planner", "Invitation + planner bundle variant ID")}</span>
-            <input value={draft.variantPremiumId} onChange={(e) => setDraft({ ...draft, variantPremiumId: e.target.value })} placeholder={t("facoltativo", "optional")} maxLength={40} inputMode="numeric" />
-            <small>{t("Facoltativa: un acquisto di questa variante dà un invito e un planner da attivare.", "Optional: buying this variant gives an invitation and a planner to activate.")}</small>
-          </label>
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <div className="ac-form-actions">
-            <button type="submit" className="btn solid small" disabled={saving || !dirty}>{saving ? t("Salvo…", "Saving…") : t("Salva collegamento", "Save connection")}</button>
-            {dirty && <button type="button" className="link" onClick={() => { setDraft(data.ids); setError(null); }}>{t("Annulla", "Cancel")}</button>}
-          </div>
-        </form>
-
-        <section className="ac-card">
-          <span className="ac-kicker">{t("Webhook ordini", "Order webhook")}</span>
-          <p className="hint">{t("Shopify avvisa il sito quando un ordine è pagato, così l'invito si attiva da solo.", "Shopify notifies the site when an order is paid, so the invitation activates by itself.")}</p>
-          <ol className="ac-steps">
-            <li>{t("In Shopify apri Impostazioni, Notifiche, poi Webhook, e crea un webhook.", "In Shopify open Settings, Notifications, then Webhooks, and create a webhook.")}</li>
-            <li>{t("Evento", "Event")}: <b>{t("Ordine pagato", "Order payment")}</b> (orders/paid). {t("Formato", "Format")}: JSON.</li>
-            <li>{t("Incolla questo indirizzo:", "Paste this address:")}</li>
-          </ol>
+      <div className="sh-two">
+        <section className="ac-card sh-hook">
+          <h3>Webhook</h3>
+          <p className="hint">{t("In Shopify: Impostazioni › Notifiche › Webhook › evento «Ordine pagato», formato JSON.", "In Shopify: Settings › Notifications › Webhooks › event «Order payment», JSON format.")}</p>
           <CopyField value={data.webhookUrl} />
-          <p className="hint">{t("Shopify mostra un segreto per il webhook. Va nel file .env del server come", "Shopify shows a secret for the webhook. It goes in the server's .env file as")} <code>SHOPIFY_WEBHOOK_SECRET</code>{t(": non si incolla qui.", ": don't paste it here.")}</p>
+        </section>
+        <section className="ac-card sh-secrets">
+          <h3>{t("Segreti", "Secrets")}</h3>
+          <p className="hint">{t("Nel file .env del server, mai qui.", "In the server's .env file, never here.")}</p>
+          <ul>
+            {secrets.map((i) => (
+              <li key={i.key} className={i.source === "assente" ? "is-missing" : "is-ok"}>
+                <span aria-hidden="true">{i.source === "assente" ? "!" : "✓"}</span>
+                <code>{i.key === "storefrontToken" ? "SHOPIFY_STOREFRONT_TOKEN" : "SHOPIFY_WEBHOOK_SECRET"}</code>
+                <small>{i.source === "assente" ? t("mancante", "missing") : t("impostato", "set")}</small>
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
-
-      <section className="ac-card">
-        <span className="ac-kicker">{t("Chiavi e segreti", "Keys and secrets")}</span>
-        <p className="hint">{t("Questi valori restano sul server. La console mostra solo se sono presenti.", "These values stay on the server. The console only shows whether they're present.")}</p>
-        <ul className="ac-checks">
-          {data.items.map((i) => (
-            <li key={i.key} className={i.source === "assente" ? (i.required ? "is-missing" : "is-optional") : "is-ok"}>
-              <span className="ac-check-mark" aria-hidden="true">{i.source === "assente" ? (i.required ? "!" : "–") : "✓"}</span>
-              <span className="ac-check-label">{itemLabel(i)}{i.secret && <small>{t("nel file .env", "in the .env file")}: SHOPIFY_{i.key === "storefrontToken" ? "STOREFRONT_TOKEN" : "WEBHOOK_SECRET"}</small>}</span>
-              <span className="ac-check-value">{i.secret ? (i.source === "assente" ? t("mancante", "missing") : t("impostato", "set")) : i.value ?? t("non impostato", "not set")}</span>
-              <span className="ac-tag">{SOURCE_LABEL[lang][i.source]}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }
@@ -193,9 +164,9 @@ function CopyField({ value }: { value: string }) {
     }
   }
   return (
-    <div className="ac-copy">
-      <code>{value}</code>
-      <button type="button" className="btn outline small" onClick={copy}>{copied ? t("Copiato", "Copied") : t("Copia", "Copy")}</button>
+    <div className="sh-copy">
+      <code title={value}>{value}</code>
+      <button type="button" onClick={copy} aria-label={copied ? t("Copiato", "Copied") : t("Copia", "Copy")}>{copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}</button>
     </div>
   );
 }

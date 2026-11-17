@@ -178,3 +178,13 @@
 .lg-form { display: grid; gap: 14px; padding: 22px; border-radius: 22px; background: #fff; border: 1px solid rgba(160, 115, 45, 0.18); }
 .lg-form .btn { justify-self: start; }
 .lg-switch { justify-self: start; padding: 0; border: 0; background: none; font: 400 13.5px var(--font-text), sans-serif; color: #8a6427; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+
+/* Schermata di accesso: tutto al centro della pagina, in verticale e in orizzontale. */
+.acx-login { min-height: calc(100dvh - 78px); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-top: 40px; padding-bottom: 60px; }
+.acx-login h1 { margin: 0 0 10px; }
+.acx-login .lede { max-width: 460px; margin: 0 auto; }
+.acx-login .lg { width: min(460px, 100%); margin: 22px auto 0; text-align: left; }
+.acx-login .claim { text-align: left; }
+.acx-login .lg-form .btn, .acx-login .claim-form .btn { justify-self: stretch; justify-content: center; }
+.acx-login .claim { margin: 0; }
+.acx-login .claim-form input { max-width: none; }

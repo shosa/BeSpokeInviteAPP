@@ -36,6 +36,7 @@ export type OwnedInvitation = {
   assistant_calls: number;
   assistant_asked: boolean; // l'ultima risposta ha fatto una domanda o una scelta: la risposta a seguire è gratuita
   assistant_free_run: number; // risposte gratuite di fila già date
+  assistant_bonus?: number; // richieste ricaricate con un acquisto, oltre al limite della console
   purchased_addons: AddonKey[] | null;
 };
 
@@ -338,7 +339,8 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
   const settings = await deps.loadSettings();
   // Risposta a una domanda dell'assistente: non consuma richieste, entro il limite di risposte gratuite di fila.
   const free = inv.assistant_asked && inv.assistant_free_run < MAX_FREE_RUN;
-  if (!free && inv.assistant_calls >= settings.callLimit) {
+  const limit = settings.callLimit + (inv.assistant_bonus ?? 0);
+  if (!free && inv.assistant_calls >= limit) {
     return { status: 409, body: { error: "Hai usato tutte le richieste dell'assistente per questo invito" } };
   }
   const chat = parseChat(input.body);
@@ -521,7 +523,7 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
       reply,
       actions,
       usage,
-      remaining: Math.max(0, settings.callLimit - inv.assistant_calls - (free ? 0 : 1)),
+      remaining: Math.max(0, limit - inv.assistant_calls - (free ? 0 : 1)),
       counted: !free,
       mediaAllowed: [...mediaAllowed],
       photosOffered: photosOffered(),

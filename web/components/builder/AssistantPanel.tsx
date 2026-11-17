@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { ArrowRight, Command, Sparkles, Wand2 } from "lucide-react";
+import { ArrowRight, Command, RefreshCw, Sparkles, Wand2 } from "lucide-react";
 import { AssistantWizard, type Answers } from "./AssistantWizard";
 import { COMMANDS, CommandWidget, matchCommands, type CommandId } from "./AssistantTools";
 import { PlaceSearch } from "./PlaceSearch";
@@ -23,10 +23,14 @@ export function AssistantPanel({
   readOnly,
   limit,
   used,
+  topup = false,
+  pack = 20,
   onApply,
   config,
   catalog,
 }: {
+  topup?: boolean; // si possono ricaricare le richieste su Shopify
+  pack?: number; // richieste per pacchetto
   config: InviteConfig;
   catalog: Catalog;
   lang: "it" | "en";
@@ -42,6 +46,19 @@ export function AssistantPanel({
   const [busy, setBusy] = useState(false);
   const [remaining, setRemaining] = useState(Math.max(0, limit - used));
   const out = remaining <= 0;
+  const [buying, setBuying] = useState<"idle" | "busy" | "opened">("idle");
+  const [buyError, setBuyError] = useState<string | null>(null);
+
+  // Ricarica: apre il checkout Shopify in una scheda nuova; dopo il pagamento, «Ho pagato» ricarica la pagina con i crediti nuovi.
+  async function buyCredits() {
+    setBuying("busy");
+    setBuyError(null);
+    const res = await fetch(`/api/invitations/${invitationId}/assistant/topup`, { method: "POST" });
+    const out2 = (await res.json().catch(() => ({}))) as { checkoutUrl?: string; error?: string };
+    if (!res.ok || !out2.checkoutUrl) { setBuying("idle"); return setBuyError(out2.error ?? (it ? "Ricarica non disponibile" : "Top-up not available")); }
+    window.open(out2.checkoutUrl, "_blank", "noopener");
+    setBuying("opened");
+  }
 
   const [picks, setPicks] = useState<Record<number, string>>({});
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -140,7 +157,37 @@ export function AssistantPanel({
   }
 
   return (
-    <div className="bl-inspector as-panel">
+    <div className={`bl-inspector as-panel${out && !readOnly ? " is-out" : ""}`}>
+      {out && !readOnly && (
+        <div className="as-out" role="dialog" aria-modal="false" aria-labelledby="as-out-title">
+          <div className="as-out-card">
+            <span className="as-out-art" aria-hidden="true">
+              <span className="as-out-ring" />
+              <Sparkles size={30} strokeWidth={1.5} />
+              <b>0</b>
+            </span>
+            <h3 id="as-out-title">{it ? "Richieste finite" : "No requests left"}</h3>
+            <p>{it ? "Hai usato tutte le richieste di BeSpoke AI per questo invito. Puoi continuare a modificarlo a mano, oppure ricaricarne altre." : "You've used all the BeSpoke AI requests for this invitation. You can keep editing it by hand, or top up."}</p>
+            {topup ? (
+              buying === "opened" ? (
+                <>
+                  <p className="as-out-note">{it ? "Completa il pagamento nella scheda che si è aperta. Le richieste arrivano appena Shopify lo conferma." : "Complete the payment in the tab that opened. Requests arrive as soon as Shopify confirms it."}</p>
+                  <button type="button" className="btn solid" onClick={() => window.location.reload()}><RefreshCw size={15} aria-hidden="true" />{it ? "Ho pagato: aggiorna" : "I've paid: refresh"}</button>
+                  <button type="button" className="as-out-link" onClick={buyCredits}>{it ? "Riapri il pagamento" : "Reopen the payment"}</button>
+                </>
+              ) : (
+                <button type="button" className="btn solid" disabled={buying === "busy"} onClick={buyCredits}>
+                  <Sparkles size={15} aria-hidden="true" />{buying === "busy" ? (it ? "Apro il negozio…" : "Opening the shop…") : it ? `Ricarica ${pack} richieste` : `Top up ${pack} requests`}
+                </button>
+              )
+            ) : (
+              <p className="as-out-note">{it ? "La ricarica non è ancora disponibile: scrivici e la attiviamo noi." : "Top-up isn't available yet: contact us and we'll add more."}</p>
+            )}
+            {buyError && <p className="form-error" role="alert">{buyError}</p>}
+            {topup && <small>{it ? "Pagamento sicuro su Shopify" : "Secure payment on Shopify"}</small>}
+          </div>
+        </div>
+      )}
       <div className="as-body">
       <div className="bl-tabs-head">
         <span className="bl-kicker as-kicker"><Sparkles size={12} aria-hidden="true" />AI</span>

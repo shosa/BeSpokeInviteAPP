@@ -52,6 +52,8 @@ export type Manage = {
   assistant: boolean; // assistente attivo sul server (chiave del modello presente)
   assistantLimit: number; // richieste per invito
   assistantUsed: number; // richieste già usate
+  assistantTopup?: boolean; // ricarica dei crediti attiva su Shopify
+  assistantPack?: number; // richieste per pacchetto
 };
 
 type MobileTab = "blocchi" | "anteprima" | "proprieta";
@@ -571,7 +573,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       <aside className="bl-left" aria-label={initial.assistant && isDesktop ? "BeSpoke AI" : "Blocchi"}>
         {!isDesktop && blocksPanel}
         {/* Desktop: l'assistente sta nella colonna a destra dell'anteprima. Su telefono la colonna è nascosta. */}
-        {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} config={config} catalog={catalog} />}
+        {isDesktop && initial.assistant && <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} topup={initial.assistantTopup} pack={initial.assistantPack} onApply={applyAssistant} config={config} catalog={catalog} />}
       </aside>
       )}
 
@@ -746,7 +748,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
               <h2 id="bl-assist-title">BeSpoke AI</h2>
               <button type="button" className="bl-icon" aria-label={lang === "en" ? "Close" : "Chiudi"} onClick={() => setAssistantSheet(false)}><X size={18} aria-hidden="true" /></button>
             </header>
-            <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} onApply={applyAssistant} config={config} catalog={catalog} />
+            <AssistantPanel lang={lang} invitationId={initial.id} readOnly={locked} limit={initial.assistantLimit} used={initial.assistantUsed} topup={initial.assistantTopup} pack={initial.assistantPack} onApply={applyAssistant} config={config} catalog={catalog} />
           </div>
         </div>
       )}

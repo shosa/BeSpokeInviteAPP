@@ -135,7 +135,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
     return (
       <>
         <Nav current="account" lang={lang} />
-        <main className="wrap narrow dash">
+        <main className="wrap acx-login">
           <h1>{t.myInvites}</h1>
           <p className="lede">
             {expired

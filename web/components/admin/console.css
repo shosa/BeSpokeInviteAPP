@@ -496,3 +496,44 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .ac-main .ac-body, .ac-main .ac-head { margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
 /* Assegna un acquisto: quattro prodotti (invito, invito base, planner, pacchetto). */
 .cu-seg { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+
+/* Shopify: stato in una riga, prodotti come tabella compatta, webhook e segreti affiancati. */
+.sh-status { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+.sh-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: #c2410c; box-shadow: 0 0 0 5px rgba(194, 65, 12, 0.14); }
+.sh-status.is-ready .sh-dot { background: #3f7a45; box-shadow: 0 0 0 5px rgba(63, 122, 69, 0.14); }
+.sh-status-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.sh-status-text strong { font-weight: 500; }
+.sh-status-text small { color: var(--ink-soft); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-status-text .sh-ok { color: #2f6234; display: inline-flex; align-items: center; gap: 5px; }
+.sh-status-text .sh-err { color: #9b3b2f; white-space: normal; }
+.sh-status .btn { flex: none; }
+.sh-form { display: grid; gap: 4px; }
+.sh-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.sh-head h3, .sh-hook h3, .sh-secrets h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 22px; }
+.sh-head .hint { margin: 0; font-size: 13px; }
+.sh-row { display: grid; grid-template-columns: 210px minmax(0, 260px) minmax(0, 1fr); gap: 14px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-soft); }
+.sh-label { display: grid; font-weight: 500; font-size: 14.5px; }
+.sh-label small { font-weight: 400; font-size: 12px; color: var(--ink-soft); }
+.sh-row input { min-height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font: inherit; font-size: 15px; color: var(--ink); min-width: 0; }
+.sh-row input:focus { outline: none; border-color: var(--brass-light); box-shadow: 0 0 0 4px rgba(184, 137, 63, 0.15); }
+.sh-row input.sh-short { width: 90px; }
+.sh-found { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: #2f6234; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-found svg[aria-label] { color: var(--ink-soft); }
+.sh-form .ac-form-actions { margin-top: 12px; }
+.sh-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.sh-hook, .sh-secrets { display: grid; gap: 10px; align-content: start; }
+.sh-hook .hint, .sh-secrets .hint { margin: 0; font-size: 13px; }
+.sh-copy { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 4px 4px 4px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.sh-copy code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.sh-copy button { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: #fff; color: var(--ink); cursor: pointer; flex: none; }
+.sh-secrets ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sh-secrets li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13.5px; }
+.sh-secrets li span { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: #e2ebdd; color: #2f5130; }
+.sh-secrets li.is-missing span { background: #fbe3dc; color: #8c2f17; }
+.sh-secrets code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-secrets small { color: var(--ink-soft); }
+@media (max-width: 1040px) {
+  .sh-row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .sh-row input.sh-short { width: 100%; }
+  .sh-two { grid-template-columns: minmax(0, 1fr); }
+}

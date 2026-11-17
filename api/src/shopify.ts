@@ -108,3 +108,31 @@ export function invitationIdFromOrder(order: {
   }
   return undefined;
 }
+
+// Ricarica dei crediti di BeSpoke AI: carrello con la variante dei crediti, legato all'invito.
+// L'invito viaggia come attributo «aiCreditsFor» (non «invitationId», che il webhook usa per il pagamento dell'invito).
+export async function createAiCreditsCheckout(input: { invitationId: string; email?: string }): Promise<string> {
+  const ids = getShopifyIds();
+  const token = storefrontToken();
+  if (!ids.storeDomain || !token || !ids.variantAiCreditsId) throw new Error("Ricarica non disponibile");
+  const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+    body: JSON.stringify({
+      query: `mutation cartCreate($input: CartInput!) { cartCreate(input: $input) { cart { checkoutUrl } userErrors { message } } }`,
+      variables: {
+        input: {
+          lines: [{ merchandiseId: ids.variantAiCreditsId, quantity: 1, attributes: [{ key: "_aiCreditsFor", value: input.invitationId }] }],
+          attributes: [{ key: "aiCreditsFor", value: input.invitationId }],
+          ...(input.email ? { buyerIdentity: { email: input.email } } : {}),
+          note: `Crediti BeSpoke AI · invito ${input.invitationId}`,
+        },
+      },
+    }),
+    signal: AbortSignal.timeout(10000),
+  });
+  const json = (await res.json().catch(() => ({}))) as { data?: { cartCreate?: { cart?: { checkoutUrl: string }; userErrors: { message: string }[] } }; errors?: { message: string }[] };
+  const url = json.data?.cartCreate?.cart?.checkoutUrl;
+  if (!res.ok || !url) throw new Error(json.errors?.[0]?.message ?? json.data?.cartCreate?.userErrors?.[0]?.message ?? `HTTP ${res.status}`);
+  return url;
+}
