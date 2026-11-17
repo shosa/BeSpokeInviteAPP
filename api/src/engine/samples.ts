@@ -87,6 +87,8 @@ export function sampleProps(type: BlockType, s: Sample, lang: Lang): Record<stri
     case "footer": return { signature: s.signature };
     // Didascalia e testo del trasferimento: senza questi valori restano vuoti nella demo.
     case "image": return { caption: lang === "en" ? "A moment from our day." : "Un momento del nostro giorno." };
+    case "faq": return {};
+    case "gifts": return { url: "https://www.thebespokeinvite.com" };
     case "transfer": return { body: lang === "en" ? "Follow the signs for the venue. Parking is available on site." : "Seguite le indicazioni per il luogo. C'è parcheggio in loco." };
     default: return null;
   }

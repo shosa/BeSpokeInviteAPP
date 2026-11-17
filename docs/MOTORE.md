@@ -66,13 +66,17 @@ Il registro è in `shared/src/blocks.ts`. Ogni tipo ha un template di default in
 | `image` | Immagine | `photo` (foto), `caption` (testo) | — |
 | `program` | Programma | `heading` (testo), `items` (lista fino a 8: `time`, `label`) | funzione `program` |
 | `venue` | Location | `heading`, `venue` (testo), `kind` (villa, chiesa, ristorante, giardino, hotel, sala, spiaggia, altro), `photo` (foto) | unica |
-| `map` | Mappa | `mapShape` (forma: `theme`, `square`, `arch`, `circle`, `rounded`); l'indirizzo è nei dati dell'evento | unica, funzione `map` |
+| `map` | Mappa | `mapShape` (forma: `theme`, `square`, `arch`, `circle`, `rounded`), `mapMode` (`map`/`button`), `buttonLabel` (testo); l'indirizzo è nei dati dell'evento | unica, funzione `map` |
 | `transfer` | Come arrivare | `heading`, `body` (testo lungo, 800) | — |
 | `dresscode` | Dress code | `heading`, `dress` (testo), `colors` (lista fino a 6: `hex` colore, `name` testo) | — |
 | `video` | Video | `heading` (testo), `video` (video) | — |
 | `music` | Musica | `music` (audio) | unica, funzione `music` |
-| `rsvp` | Conferma di presenza | `heading`, `intro` (testo lungo, 300), `openLabel`, `submitLabel`, `thanksLabel` (testi) | unica, funzione `rsvp` |
+| `rsvp` | Conferma di presenza | `heading`, `intro` (testo lungo, 300), `openLabel`, `submitLabel`, `thanksLabel` (testi), `rsvpMode` (`popup`/`inline`) | unica, funzione `rsvp` |
+| `gifts` | Lista regali | `heading`, `body` (testo lungo, 800), `buttonLabel` (testo), `url` (solo https) | — |
+| `faq` | Domande frequenti | `heading`, `intro` (testo lungo, 300), `items` (lista fino a 12: `q` testo, `a` testo lungo) | unica |
 | `footer` | Firma | `signature` (testo) | unica |
+
+**Varianti** (`BLOCK_VARIANTS`, `blockVariant()`): `mapMode = "button"` usa `engine/blocks/map-button.html`, `rsvpMode = "inline"` usa `engine/blocks/rsvp-inline.html`. Uno stile può avere le sue in `blocks/map-button.html` e `blocks/rsvp-inline.html`; la sostituzione di `map.html`/`rsvp.html` vale solo per la versione normale.
 
 **Proprietà di aspetto** (aggiunte da sole, con il loro significato):
 - `lookBg`, `lookInk`, `lookCover` (colori): sfondo del blocco, colore del testo, colore della copertura del gratta. Il motore li scrive nello stile del blocco come `--bk-bg`, `--bk-ink`, `--bk-cover`. Non esistono per la Busta, e ogni colore può essere `transparent`.

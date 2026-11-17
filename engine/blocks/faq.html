@@ -1,0 +1,17 @@
+{{#hasItems}}
+<section class="sec faq-sec">
+  <div class="card">
+    <span class="faq-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#intro}}<p class="body" data-anim="fadeinup" style="--d:.15s">{{intro | lines}}</p>{{/intro}}
+    <div class="faq-list" data-faq>
+      {{#items}}{{#q}}
+      <details class="faq-item" data-anim="fadeinup">
+        <summary class="faq-q"><span>{{q}}</span><i class="faq-mark" aria-hidden="true"></i></summary>
+        <div class="faq-a"><p>{{a | lines}}</p></div>
+      </details>
+      {{/q}}{{/items}}
+    </div>
+  </div>
+</section>
+{{/hasItems}}

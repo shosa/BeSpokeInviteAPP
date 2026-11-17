@@ -54,6 +54,7 @@ export type Manage = {
   assistantUsed: number; // richieste già usate
   assistantTopup?: boolean; // ricarica dei crediti attiva su Shopify
   assistantPack?: number; // richieste per pacchetto
+  templateMusic?: string | null; // brano incluso nel template, copiato nell'invito alla creazione
 };
 
 type MobileTab = "blocchi" | "anteprima" | "proprieta";
@@ -697,6 +698,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         ) : (
           <Inspector
             lang={lang}
+            templateMusic={initial.templateMusic ?? null}
             section={GENERAL_TABS.includes(tab) && !block ? (tab as "dettagli" | "tema" | "lingua" | "link") : undefined}
             shareUrl={published ? shareUrl : undefined}
             slug={slug}

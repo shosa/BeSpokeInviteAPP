@@ -2,6 +2,7 @@ import {
   ADDON_KEYS,
   BLOCK_LABELS,
   blockDef,
+  blockVariant,
   escapeHtml,
   fontStack,
   fontsStylesheetUrl,
@@ -15,7 +16,7 @@ import {
   type TemplateNode,
   type ThemeManifest,
 } from "@inviteme/shared";
-import { blockPartials } from "./blocks";
+import { blockPartials, variantPartials } from "./blocks";
 import { labelsFor } from "./i18n";
 
 // Renderer della pagina invito: i blocchi visibili, nell'ordine scelto, più lo stile del tema.
@@ -89,7 +90,9 @@ export function renderInvitePage(input: PageInput): string {
     // Busta-video del tema: il filmato è dello stile, il blocco Busta non ha proprietà modificabili.
     // Le proprietà della busta scelte dal cliente (scritte, rimbalzo, sfondo) restano; il filmato lo mette lo stile.
     const block = instance.type === "cover" && m.envelope ? { ...instance, props: { ...instance.props, coverVideo: m.envelope.video, ...(m.envelope.poster ? { coverPoster: m.envelope.poster } : {}) } } : instance;
-    const template = partials.get(block.type as BlockType);
+    // Variante scelta nel blocco (mappa come pulsante, conferma nella pagina): prima quella dello stile, poi quella del motore.
+    const variant = blockVariant(block.type, block.props);
+    const template = variant ? (theme.blocks?.get(variant as unknown as BlockType) ?? variantPartials().get(variant)) : partials.get(block.type as BlockType);
     if (!template) continue;
     // Un campo vuoto non cancella il valore dell'evento quando la proprietà esiste anche tra i dati dell'evento (nomi, riga sotto i nomi).
     const merged: Record<string, unknown> = { ...globals, ...listFlags(block.props) };
@@ -463,6 +466,31 @@ html[data-preview]{scrollbar-width:none}html[data-preview]::-webkit-scrollbar{di
 .map-frame[data-map-shape] .map-fl { display:none }
 [data-music-toggle]{position:fixed!important;right:18px!important;bottom:18px!important;top:auto!important;left:auto!important;z-index:9000!important;width:52px!important;height:52px!important;border-radius:50%!important;border:0!important;background:#0E1116!important;display:flex!important;align-items:center!important;justify-content:center!important;margin:0!important;box-shadow:0 10px 28px rgba(0,0,0,.25)!important;cursor:pointer}
 [data-music-toggle] svg{width:20px!important;height:20px!important;fill:#FFFFFF!important}
+/* Pulsanti del motore (mappa come pulsante, lista regali): eleganti con ogni stile, il tema può ridefinirli. */
+:where(.inv-btn) { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:46px; margin-top:18px; padding:0 26px; border:1px solid currentColor; border-radius:999px; background:transparent; color:inherit; font:inherit; font-size:13px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; text-decoration:none; cursor:pointer; transition:background .25s ease, color .25s ease }
+:where(.inv-btn):hover { color:inherit; background:rgba(0,0,0,.06) }
+:where(.map-btn-sec, .gifts-sec) .card { text-align:center }
+:where(.map-btn-sec, .gifts-sec) .body { margin-left:auto; margin-right:auto }
+/* Conferma già aperta nella pagina: stati del modulo anche negli stili pensati per il popup. */
+/* Domande frequenti a fisarmonica (details/summary: si apre anche senza script). */
+:where(.faq-sec) .card { text-align:center }
+:where(.faq-ico) { display:inline-flex; margin-bottom:6px; opacity:.8 }
+:where(.faq-list) { max-width:560px; margin:22px auto 0; text-align:left }
+:where(.faq-item) { border-bottom:1px solid currentColor; border-bottom-color:color-mix(in srgb, currentColor 22%, transparent) }
+:where(.faq-q) { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 2px; cursor:pointer; list-style:none; font-weight:500 }
+.faq-q::-webkit-details-marker { display:none }
+:where(.faq-mark) { position:relative; flex:none; width:14px; height:14px }
+:where(.faq-mark)::before, :where(.faq-mark)::after { content:""; position:absolute; left:0; right:0; top:50%; height:1.5px; margin-top:-.75px; background:currentColor; transition:transform .3s ease }
+:where(.faq-mark)::after { transform:rotate(90deg) }
+.faq-item[open] .faq-mark::after { transform:rotate(0deg) }
+:where(.faq-a) { padding:0 2px 18px; opacity:.85 }
+:where(.faq-a) p { margin:0 }
+:where(.rsvp-inline) .form { max-width:520px; margin:22px auto 0; text-align:left }
+.rsvp-inline .success { display:none; text-align:center }
+.rsvp-inline .success.is-on { display:block }
+.rsvp-inline .invio-ko { display:none }
+.rsvp-inline .invio-ko.is-on { display:block }
+.rsvp-inline .honey { position:absolute!important; left:-9999px!important; width:1px; height:1px; overflow:hidden }
 `;
 
 // Per ogni lista del blocco, un flag "has<Nome>" vero se ha almeno una voce: la sezione si mostra una volta sola.

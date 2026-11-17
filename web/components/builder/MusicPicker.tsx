@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Music2, Pause, Play, Upload, VolumeX } from "lucide-react";
+import { Check, Music2, Pause, Play, Sparkles, Upload, User, VolumeX } from "lucide-react";
 import type { MusicTrack } from "@inviteme/shared";
 
 // Scelta della musica di sottofondo, come nel riferimento: elenco a schede, anteprima ascoltabile, brano proprio.
@@ -12,7 +12,9 @@ export function MusicPicker({
   onChange,
   onUpload,
   busy,
+  templateUrl = null,
 }: {
+  templateUrl?: string | null; // brano incluso nel template: sempre riselezionabile
   lang: "it" | "en";
   library: MusicTrack[];
   value: string;
@@ -24,7 +26,18 @@ export function MusicPicker({
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const tracks = library.filter((t) => t.enabled);
+  // Voci della lista: il brano del template (se c'è), quelli della libreria e l'ultimo brano caricato dal cliente.
+  // Il brano proprio resta in elenco anche dopo averne scelto un altro, così si può riprendere.
+  const libraryTracks = library.filter((t) => t.enabled);
+  const isKnown = (url: string) => !url || url === templateUrl || libraryTracks.some((t) => t.url === url);
+  const [ownUrl, setOwnUrl] = useState<string | null>(() => (isKnown(value) ? null : value));
+  useEffect(() => { if (!isKnown(value)) setOwnUrl(value); }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  type Entry = { key: string; url: string; title: string; sub: string; kind: "template" | "library" | "own" };
+  const tracks: Entry[] = [
+    ...(templateUrl ? [{ key: "template", url: templateUrl, title: en ? "Template music" : "Musica del template", sub: en ? "Included with the style you chose" : "Inclusa nello stile che hai scelto", kind: "template" as const }] : []),
+    ...libraryTracks.map((t) => ({ key: t.id, url: t.url, title: t.title, sub: t.artist || (en ? "Bespoke Invites library" : "Libreria Bespoke Invites"), kind: "library" as const })),
+    ...(ownUrl ? [{ key: "own", url: ownUrl, title: en ? "Your track" : "Il tuo brano", sub: en ? "Uploaded by you" : "Caricato da te", kind: "own" as const }] : []),
+  ];
 
   useEffect(() => () => { audio.current?.pause(); audio.current = null; }, []);
 
@@ -67,11 +80,12 @@ export function MusicPicker({
       {tracks.map((t) => {
         const on = value === t.url;
         const isPlaying = playing === t.url;
+        const Icon = t.kind === "template" ? Sparkles : t.kind === "own" ? User : Music2;
         return (
-          <div key={t.id} className={`mp-pick${on ? " is-on" : ""}`} role="radio" aria-checked={on} tabIndex={0}
+          <div key={t.key} className={`mp-pick${on ? " is-on" : ""}${t.kind === "template" ? " is-template" : ""}`} role="radio" aria-checked={on} tabIndex={0}
             onClick={() => onChange(t.url)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onChange(t.url); } }}>
-            <span className="mp-ico" aria-hidden="true"><Music2 size={16} /></span>
-            <span className="mp-text"><strong>{t.title}</strong><small>{t.artist || (en ? "Bespoke Invites library" : "Libreria Bespoke Invites")}</small></span>
+            <span className="mp-ico" aria-hidden="true"><Icon size={16} /></span>
+            <span className="mp-text"><strong>{t.title}</strong><small>{t.sub}</small></span>
             <button type="button" className={`mp-preview${isPlaying ? " is-playing" : ""}`} aria-label={`${isPlaying ? (en ? "Pause" : "Pausa") : "Preview"} ${t.title}`}
               onClick={(e) => { e.stopPropagation(); preview(t.url); }}>
               {isPlaying ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
@@ -93,7 +107,7 @@ export function MusicPicker({
             e.target.value = "";
             if (!file) return;
             const url = await onUpload(file);
-            if (url) onChange(url);
+            if (url) { setOwnUrl(url); onChange(url); }
           }} />
         </label>
       </div>

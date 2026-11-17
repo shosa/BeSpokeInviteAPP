@@ -779,3 +779,5 @@ button.bl-crumb:hover { color: var(--brass); }
 .bl-app .as-out-art b { position: absolute; right: -2px; bottom: -2px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font: 600 13px var(--font-text), sans-serif; box-shadow: 0 0 0 3px #fff; }
 @keyframes as-ring { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .bl-app .as-out-ring { animation: none; } }
+/* Musica: la voce del template si distingue con l'icona dorata. */
+.mp-pick.is-template .mp-ico { background: linear-gradient(135deg, #e7c88d, #b8893f); color: #fff; }

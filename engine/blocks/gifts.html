@@ -1,0 +1,7 @@
+<section class="sec gifts-sec">
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#body}}<p class="body" data-anim="fadeinup" style="--d:.15s">{{body | lines}}</p>{{/body}}
+    {{#url}}<a class="inv-btn gifts-open" href="{{url}}" target="_blank" rel="noopener noreferrer" data-anim="fadeinup" style="--d:.25s">{{#buttonLabel}}{{buttonLabel}}{{/buttonLabel}}{{^buttonLabel}}{{t.giftsOpen}}{{/buttonLabel}}</a>{{/url}}
+  </div>
+</section>

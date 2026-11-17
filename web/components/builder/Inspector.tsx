@@ -147,6 +147,7 @@ type Props = {
   onBack?: () => void;
   onUpload: (kind: "photo" | "video" | "audio", file: File) => Promise<string | null>;
   lang?: "it" | "en";
+  templateMusic?: string | null; // brano del template, da riproporre nella scelta della musica
 };
 
 // Colonna destra: le proprietà del blocco selezionato, oppure i dati generali dell'invito.
@@ -198,6 +199,7 @@ export function Inspector(p: Props) {
               lang={p.lang ?? "it"}
               library={p.catalog.music}
               value={String(p.block.props.music ?? "")}
+              templateUrl={p.templateMusic ?? null}
               onChange={(url) => p.onSetProp(p.block!.id, "music", url, `${p.block!.id}:music`)}
               onUpload={(file) => p.onUpload("audio", file)}
               busy={!!p.busy}

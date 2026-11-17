@@ -301,7 +301,7 @@ export async function buildApp() {
     const id = randomUUID();
     // Slug provvisorio: l'ID. Il link vero si sceglie solo alla pubblicazione.
     const slug = id;
-    await pool.query("INSERT INTO invitations (id, slug, user_id, config) VALUES ($1, $2, $3, $4)", [id, slug, user.id, JSON.stringify(config)]);
+    await pool.query("INSERT INTO invitations (id, slug, user_id, config, planner) VALUES ($1, $2, $3, $4, $5)", [id, slug, user.id, JSON.stringify(config), JSON.stringify({ templateMusic: templateMusicOf(config) })]);
     await track("invitation_created", id);
     return reply.code(201).send({ id, slug });
   });
@@ -328,6 +328,7 @@ export async function buildApp() {
       assistant: !!process.env.ANTHROPIC_KEY,
       assistantLimit: (await loadAssistantSettings()).settings.callLimit + (inv.assistant_bonus ?? 0),
       assistantTopup: Boolean(getShopifyIds().variantAiCreditsId) && shopifyConfigured(),
+      templateMusic: typeof inv.planner?.templateMusic === "string" ? inv.planner.templateMusic : null,
       assistantPack: Number(getShopifyIds().aiCreditsPerPack) || 20,
       assistantUsed: inv.assistant_calls ?? 0,
       catalog: c,
@@ -580,7 +581,9 @@ export async function buildApp() {
     if (inv.status !== "paid") return reply.code(409).send({ error: "Il pannello è disponibile dopo il pagamento" });
     const b = (req.body ?? {}) as { notes?: unknown; countdownNote?: unknown; docs?: unknown; budgetCents?: unknown; guestQuota?: unknown };
     const docs = sanitizeDocs(b.docs) ?? (inv.planner?.docs ?? {});
+    // Si tengono gli altri dati dell'invito salvati qui (wizard completato, brano del template).
     const planner = {
+      ...(inv.planner ?? {}),
       notes: typeof b.notes === "string" ? b.notes.slice(0, 4000) : (inv.planner?.notes ?? ""),
       countdownNote: typeof b.countdownNote === "string" ? b.countdownNote.slice(0, 200) : (inv.planner?.countdownNote ?? ""),
       docs,
@@ -885,6 +888,13 @@ export async function buildApp() {
   // Resta modificabile dal builder finché non si pubblica (conferma).
   // Foto e video dello stile diventano file dell'invito, come quelli caricati dal cliente: galleria e immagini
   // li gestiscono dalle proprie proprietà. Un file che non si riesce a importare resta com'è.
+  // Brano del template, già copiato tra i file dell'invito: si salva a parte (planner.templateMusic) perché il builder
+  // possa mostrarlo come «Musica del template» e farlo riscegliere dopo che il cliente ha provato altri brani.
+  const templateMusicOf = (config: InviteConfig): string | null => {
+    const v = config.blocks.find((b) => b.type === "music")?.props.music;
+    return typeof v === "string" && v.startsWith("/api/media/") ? v : null;
+  };
+
   async function importStyleMedia(config: InviteConfig, themeId: string): Promise<InviteConfig> {
     const dir = themes().find((t) => t.manifest.id === themeId)?.dir;
     if (!dir) return config;
@@ -933,8 +943,8 @@ export async function buildApp() {
     // Slug provvisorio: l'ID. Il cliente sceglie il link al momento di pubblicare.
     const slug = id;
     await pool.query(
-      "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7)",
-      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, "rsvp"],
+      "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier, planner) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7, $8)",
+      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, "rsvp", JSON.stringify({ templateMusic: templateMusicOf(config) })],
     );
     await pool.query("UPDATE orders SET status = 'paid', invitation_id = $2, source = $3 WHERE id = $1", [order.id, id, source]);
     await track("order_paid", id);

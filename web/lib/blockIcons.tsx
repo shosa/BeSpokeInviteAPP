@@ -1,4 +1,4 @@
-import { CalendarDays, Car, CalendarClock, Gift, Hand, Image as ImageIcon, ListOrdered, PartyPopper, Mail, Map, MapPin, Images, Music, PenLine, Shirt, Timer, MessageSquare, CircleCheck, Video, type LucideIcon } from "lucide-react";
+import { CalendarDays, CircleHelp, Car, CalendarClock, Gift, Hand, Image as ImageIcon, ListOrdered, PartyPopper, Mail, Map, MapPin, Images, Music, PenLine, Shirt, Timer, MessageSquare, CircleCheck, Video, type LucideIcon } from "lucide-react";
 import type { BlockType } from "@inviteme/shared";
 
 // Un'icona per ogni tipo di blocco: la vetrina dei blocchi e i modelli le mostrano accanto al nome.
@@ -19,6 +19,8 @@ const ICON: Record<BlockType, LucideIcon> = {
   video: Video,
   music: Music,
   rsvp: CircleCheck,
+  gifts: Gift,
+  faq: CircleHelp,
   footer: PenLine,
 };
 

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { BLOCK_TYPES, parseTemplate, type BlockType, type TemplateNode } from "@inviteme/shared";
+import { BLOCK_TYPES, BLOCK_VARIANTS, parseTemplate, type BlockType, type BlockVariant, type TemplateNode } from "@inviteme/shared";
 
 // Template di ogni tipo di blocco (engine/blocks/<tipo>.html). Il markup è condiviso da tutti gli stili:
 // lo stile lo decide il CSS del tema, la struttura del blocco sta qui.
@@ -27,4 +27,14 @@ export function blockPartials(): { partials: Map<BlockType, TemplateNode[]>; err
   }
   cache = { partials, errors };
   return cache;
+}
+
+// Varianti del motore (engine/blocks/<variante>.html): mappa come pulsante, conferma già aperta nella pagina.
+let variants: Map<BlockVariant, TemplateNode[]> | null = null;
+export function variantPartials(): Map<BlockVariant, TemplateNode[]> {
+  if (!variants) {
+    variants = new Map();
+    for (const v of BLOCK_VARIANTS) variants.set(v, parseTemplate(fs.readFileSync(path.join(BLOCKS_DIR, `${v}.html`), "utf8")));
+  }
+  return variants;
 }

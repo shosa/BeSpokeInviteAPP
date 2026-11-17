@@ -102,6 +102,21 @@ Regole:
 - `demoEn` vale solo per le proprietà indicate: le altre restano quelle del punto 2;
 - non serve copiare tutto: basta ciò che lo stile vuole dire in modo diverso dall'inglese di default.
 
+### Musica del template (`demo.music`)
+
+Uno stile può includere un brano: parte quando la busta si apre, come la musica scelta dal cliente.
+
+```json
+"demo": {
+  "music": { "music": "assets/brano.mp3" }
+}
+```
+
+- Il file sta in `assets/` (mp3, m4a o ogg). Quando nasce un invito da questo stile, il brano viene copiato tra i file dell'invito e convertito in mp3; resta anche nelle anteprime.
+- Nel builder (scheda Audio) compare in cima alla lista come **«Musica del template»**: il cliente può provare altri brani della libreria o caricarne uno suo e tornare sempre a quello del template.
+- Durata consigliata: 1–3 minuti, volume normalizzato, attacco morbido (parte all'apertura della busta). Peso: qualche MB al massimo, oltre i 6 MB la conversione lo rifiuta.
+- **Diritti**: solo brani di cui si hanno i diritti per l'uso in un invito digitale (regola 1: niente audio di persone reali senza permesso). Senza un brano con licenza chiara, lo stile non include musica e la sceglie il cliente.
+
 ### Esempi fissi (`fixedDemo`)
 
 Di base ogni anteprima genera un esempio nuovo: nomi, data, luogo, programma e frasi cambiano a ogni caricamento. Va bene finché nulla del tema contiene un nome. Se invece la **busta-video**, il sigillo, il poster o una foto mostrano nomi o iniziali (per esempio «G & T» sul sigillo), l'esempio casuale direbbe «Chiara & Paolo» sotto una busta con «Ginevra & Tommaso»: incoerente.
@@ -126,7 +141,7 @@ Regola: se nel filmato della busta (o in un'immagine) si leggono nomi o iniziali
 
 ## I blocchi
 
-Diciassette tipi. Il registro completo (con vincoli e lunghezze) è in `shared/src/blocks.ts`.
+Diciannove tipi, più due varianti (mappa come pulsante, conferma nella pagina). Il registro completo (con vincoli e lunghezze) è in `shared/src/blocks.ts`.
 
 | Tipo | Nome | Proprietà dell'esempio (`demo`) | Unico | Funzione |
 |---|---|---|---|---|
@@ -140,12 +155,14 @@ Diciassette tipi. Il registro completo (con vincoli e lunghezze) è in `shared/s
 | `image` | Immagine | `photo` (foto), `caption` | no | — |
 | `program` | Programma | `heading`, `items` (orario + testo, fino a 8) | no | program |
 | `venue` | Location | `heading`, `venue`, `kind`, `photo` | sì | — |
-| `map` | Mappa | `mapShape` (forma: `theme`, `square`, `arch`, `circle`, `rounded`) | sì | map |
+| `map` | Mappa | `mapShape` (forma: `theme`, `square`, `arch`, `circle`, `rounded`), `mapMode` (`map` mappa nella pagina, `button` pulsante «Apri nelle mappe»), `buttonLabel` | sì | map |
 | `transfer` | Come arrivare | `heading`, `body` | no | — |
 | `dresscode` | Dress code | `heading`, `dress`, `colors` (fino a 6: `hex`, `name`) | no | — |
 | `video` | Video | `heading`, `video` (file) | no | — |
 | `music` | Musica | `music` (file audio) | sì | music |
-| `rsvp` | Conferma di presenza | `heading`, `intro`, `openLabel`, `submitLabel`, `thanksLabel` | sì | rsvp |
+| `rsvp` | Conferma di presenza | `heading`, `intro`, `openLabel`, `submitLabel`, `thanksLabel`, `rsvpMode` (`popup` o `inline`: modulo già aperto nella pagina) | sì | rsvp |
+| `gifts` | Lista regali | `heading`, `body`, `buttonLabel`, `url` (link https al negozio esterno) | no | — |
+| `faq` | Domande frequenti | `heading`, `intro`, `items` (fino a 12: `q` domanda, `a` risposta) | sì | — |
 | `footer` | Firma | `signature` | sì | — |
 
 Il **contenuto** dell'invito (testi, foto, date) lo inserisce il cliente nel builder: nel tuo stile devi solo prevedere come appare, anche quando un campo è vuoto.
@@ -172,6 +189,10 @@ Il markup di ogni blocco è in `engine/blocks/<tipo>.html`. Il tuo `theme.css` d
 | `video` | `video-sec`, `card`, `title`, `video-frame`, `video-play`, `orn`, `sec` |
 | `music` | `music-toggle` |
 | `rsvp` | `rsvp-sec`, `card`, `title`, `body`, `seal-btn`, `seal-text`, `seal-cue`, `arrow-up`, `rsvp-fl`, `fl`, `popup`, `popup__box`, `popup__title`, `popup__close`, `form`, `field`, `lab`, `ind`, `radio-wrap`, `radio`, `submit`, `success`, `err`, `invio-ko`, `honey`, `visually-hidden` |
+| `map` (pulsante, `map-button.html`) | `map-sec`, `map-btn-sec`, `card`, `title`, `body`, `inv-btn`, `map-open`, `sec` |
+| `rsvp` (nella pagina, `rsvp-inline.html`) | `rsvp-sec`, `rsvp-inline`, `card`, `title`, `body` e le classi del modulo (`form`, `field`, `lab`, `radio-wrap`, `radio`, `ind`, `submit`, `success`, `err`, `invio-ko`, `honey`): niente popup, il modulo scorre con la pagina |
+| `gifts` | `gifts-sec`, `card`, `title`, `body`, `inv-btn`, `gifts-open`, `sec` |
+| `faq` | `faq-sec`, `card`, `faq-ico` (icona), `title`, `body`, `faq-list`, `faq-item` (un `<details>`, attributo `open` quando è aperta), `faq-q` (il `<summary>`), `faq-mark` (il segno +/−), `faq-a`, `sec` |
 | `footer` | `footer-sec`, `footer-in`, `signature`, `credits`, `title`, `fl`, `l`, `r`, `orn`, `sec` |
 
 Classi di stato che il runtime aggiunge (il CSS le deve gestire): `is-locked` (body), `wei-opening`, `in`, `done`, `show`, `is-paused`, `is-open`, `has-error`, `is-on`, `flip-in`, `flip-out`, `revealed`.
@@ -191,6 +212,9 @@ Il contenitore `.bk` (vedi «Aspetto dei blocchi») avvolge un blocco solo se il
 | `data-loop-video` | video in loop, parte quando entra nello schermo |
 | `data-rsvp-open`, `data-rsvp-dialog` (classe `is-open`), `data-rsvp-close` | popup della conferma |
 | `data-rsvp-form`, `data-rsvp-field`, `data-rsvp-error`, `data-rsvp-success` | modulo RSVP |
+| `data-rsvp-inline` | conferma già aperta nella pagina: il runtime gestisce solo l'invio |
+| `data-maps-query` | pulsante «Apri nelle mappe»: su iPhone/iPad/Mac il link diventa Apple Mappe, altrove resta Google Maps (che sul telefono apre l'app) |
+| `data-faq` | elenco di `<details>`: aprendo una domanda si chiudono le altre |
 | `name="website"` | campo trappola: va nascosto, non va stilizzato per essere visibile |
 
 Il runtime non è un tuo file: non lo modifichi. Se un comportamento non è in questo elenco, non esiste: non inventarlo nel template.
@@ -304,10 +328,12 @@ Lo stile fa solo il CSS: il motore mette i contenitori e i video. Per l'intestaz
 ## Sostituzioni di blocco (`blocks/`)
 
 Quando uno stile vuole un markup diverso per un blocco, mette `themes/<id>/blocks/<tipo>.html`. Il file sostituisce il template di default **solo per quel tipo**. Regole:
-- il nome del file deve essere un tipo di blocco noto (vedi tabella);
+- il nome del file deve essere un tipo di blocco noto (vedi tabella) oppure una variante: `map-button.html` (mappa come pulsante) o `rsvp-inline.html` (conferma nella pagina);
 - niente `<script>`, `<style>`, `<link>`, `<meta>`, `<base>`, `<html>`, `<head>`, `<body>`;
 - niente gestori inline (`onclick=…`);
 - stessi dati e stessi segnaposto del template di default (vedi `engine/blocks/`), e le stesse classi del runtime.
+
+Il motore dà già uno stile di base (a specificità zero, con `:where`) a pulsanti `inv-btn`, fisarmonica FAQ e conferma nella pagina: funzionano con ogni stile, ma uno stile curato li ridisegna nel suo `theme.css`. Le FAQ sono il blocco dove lo stile ha più libertà (icona, segno +/−, apertura animata).
 
 Per la maggior parte degli stili non serve: basta il CSS. Usa una sostituzione quando il layout del blocco deve cambiare davvero (per esempio la colonna di nomi, o il programma a scorrimento).
 
@@ -315,7 +341,7 @@ Per la maggior parte degli stili non serve: basta il CSS. Usa una sostituzione q
 
 - Ornamenti, cornici e fregi: SVG preferibili, o PNG con sfondo trasparente.
 - Foto e illustrazioni dello stile (solo se non sono di persone reali): JPEG, lato lungo massimo 2000 px, meno di 400 KB ciascuna.
-- Audio o video dello stile: solo con diritti chiari. Di default lo stile non include musica: la sceglie il cliente.
+- Audio o video dello stile: solo con diritti chiari. Di default lo stile non include musica: la sceglie il cliente. Per includerne una vedi «Musica del template».
 - Per i video: H.264 senza audio, massimo 90 secondi. La busta-video segue le regole della sezione «Busta-video», i video di sfondo quelle di «Video di sfondo per zona».
 - Nei template e nel CSS i percorsi sono `assets/nome.file`: il motore li porta sul percorso pubblico dello stile.
 

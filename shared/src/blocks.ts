@@ -21,9 +21,21 @@ export const BLOCK_TYPES = [
   "video",
   "music",
   "rsvp",
+  "gifts",
+  "faq",
   "footer",
 ] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
+// Varianti di blocco con un markup diverso, scelte da una proprietà: la mappa come pulsante (mapMode = "button") e la
+// conferma di presenza già aperta nella pagina (rsvpMode = "inline"). Il motore ha le sue; uno stile può dare le proprie
+// in blocks/<variante>.html.
+export const BLOCK_VARIANTS = ["map-button", "rsvp-inline"] as const;
+export type BlockVariant = (typeof BLOCK_VARIANTS)[number];
+export function blockVariant(type: string, props: Record<string, unknown>): BlockVariant | null {
+  if (type === "map" && props.mapMode === "button") return "map-button";
+  if (type === "rsvp" && props.rsvpMode === "inline") return "rsvp-inline";
+  return null;
+}
 
 export type BlockDef = {
   type: BlockType;
@@ -61,6 +73,11 @@ export const EVENT_DEFAULTS: Record<string, string> = {
 const DRESS_COLOR: FieldDef[] = [
   { key: "hex", label: "Colore", type: "color", group: "Colore" },
   { key: "name", label: "Nome", type: "text", group: "Colore", max: 30 },
+];
+
+const FAQ_ITEM: FieldDef[] = [
+  { key: "q", label: "Domanda", type: "text", group: "Domanda", max: 140 },
+  { key: "a", label: "Risposta", type: "longtext", group: "Domanda", max: 600 },
 ];
 
 const PROGRAM_ITEM: FieldDef[] = [
@@ -235,7 +252,7 @@ export const BLOCKS: BlockDef[] = [
   {
     type: "map",
     label: "Mappa",
-    description: "Mappa del luogo con il link alle indicazioni.",
+    description: "Mappa del luogo, oppure un pulsante che la apre nell'app di mappe del telefono.",
     feature: "map",
     unique: true,
     fields: [
@@ -252,8 +269,20 @@ export const BLOCKS: BlockDef[] = [
           { value: "rounded", label: "Angoli arrotondati" },
         ],
       },
+      // In alternativa alla mappa nella pagina: luogo, indirizzo e un pulsante che apre l'app di mappe del telefono.
+      {
+        key: "mapMode",
+        label: "Come mostrarla",
+        type: "choice",
+        group: "Mappa",
+        options: [
+          { value: "map", label: "Mappa nella pagina" },
+          { value: "button", label: "Pulsante «Apri nelle mappe»" },
+        ],
+      },
+      { key: "buttonLabel", label: "Testo del pulsante", type: "text", group: "Mappa", max: 40 },
     ],
-    defaults: { mapShape: "theme" },
+    defaults: { mapShape: "theme", mapMode: "map", buttonLabel: "" },
   },
   {
     type: "transfer",
@@ -265,6 +294,58 @@ export const BLOCKS: BlockDef[] = [
     ],
     defaults: { heading: "Come arrivare", body: "" },
     defaultsEn: { heading: "How to get there", body: "" },
+  },
+  {
+    type: "gifts",
+    label: "Lista regali",
+    description: "Un testo e un pulsante che apre la lista regali su un negozio online.",
+    fields: [
+      { key: "heading", label: "Titolo", type: "text", group: "Lista regali", max: 80 },
+      { key: "body", label: "Testo", type: "longtext", group: "Lista regali", max: 800 },
+      { key: "buttonLabel", label: "Testo del pulsante", type: "text", group: "Lista regali", max: 40 },
+      { key: "url", label: "Link della lista (https://…)", type: "url", group: "Lista regali" },
+    ],
+    defaults: {
+      heading: "Lista regali",
+      body: "La vostra presenza è il regalo più bello. Se desiderate farci un pensiero, abbiamo preparato una lista.",
+      buttonLabel: "Vai alla lista",
+      url: "",
+    },
+    defaultsEn: {
+      heading: "Gift list",
+      body: "Your presence is the best gift. If you would like to give us something, we have prepared a list.",
+      buttonLabel: "Open the list",
+      url: "",
+    },
+  },
+  {
+    type: "faq",
+    label: "Domande frequenti",
+    description: "Domande e risposte a fisarmonica: si apre una risposta alla volta.",
+    unique: true,
+    fields: [
+      { key: "heading", label: "Titolo", type: "text", group: "Domande frequenti", max: 80 },
+      { key: "intro", label: "Testo introduttivo", type: "longtext", group: "Domande frequenti", max: 300 },
+      { key: "items", label: "Domande", type: "list", group: "Domande frequenti", max: 12, item: FAQ_ITEM },
+    ],
+    defaults: {
+      heading: "FAQ",
+      intro: "",
+      items: [
+        { q: "Posso portare un accompagnatore?", a: "L'invito è nominativo: se è incluso un accompagnatore lo trovate indicato nel vostro invito." },
+        { q: "C'è un parcheggio?", a: "Sì, c'è un parcheggio gratuito vicino al luogo della festa." },
+        { q: "Entro quando confermare?", a: "Vi chiediamo di confermare entro un mese dalla data, così possiamo organizzare al meglio." },
+      ],
+    },
+    defaultsEn: {
+      heading: "FAQ",
+      intro: "",
+      items: [
+        { q: "Can I bring a plus-one?", a: "Invitations are personal: if a plus-one is included, it is shown on your invitation." },
+        { q: "Is there parking?", a: "Yes, there is free parking near the venue." },
+        { q: "When should we reply by?", a: "Please reply at least a month before the date, so we can plan everything." },
+      ],
+    },
   },
   {
     type: "dresscode",
@@ -310,14 +391,25 @@ export const BLOCKS: BlockDef[] = [
   {
     type: "rsvp",
     label: "Conferma di presenza",
-    description: "Modulo di risposta in popup, con le domande configurate.",
+    description: "Modulo di risposta con le domande configurate: in un popup o già aperto nella pagina.",
     feature: "rsvp",
     unique: true,
     fields: [
       { key: "heading", label: "Titolo", type: "text", group: "Conferma", max: 80 },
       { key: "intro", label: "Testo introduttivo", type: "longtext", group: "Conferma", max: 300 },
+      // Popup (si apre con un tocco) oppure modulo già aperto nella pagina, dentro lo scorrimento.
+      {
+        key: "rsvpMode",
+        label: "Come mostrare il modulo",
+        type: "choice",
+        group: "Conferma",
+        options: [
+          { value: "popup", label: "In un popup, con un tocco" },
+          { value: "inline", label: "Già aperto nella pagina" },
+        ],
+      },
     ],
-    defaults: { heading: "Conferma la tua presenza", intro: "Ti chiediamo gentilmente di confermare la tua presenza." },
+    defaults: { heading: "Conferma la tua presenza", intro: "Ti chiediamo gentilmente di confermare la tua presenza.", rsvpMode: "popup" },
     defaultsEn: { heading: "Confirm your attendance", intro: "Please let us know whether you will be able to join us." },
   },
   {

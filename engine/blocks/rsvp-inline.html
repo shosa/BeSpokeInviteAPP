@@ -1,0 +1,37 @@
+{{#rsvp}}
+<section class="sec rsvp-sec rsvp-inline" data-rsvp-inline>
+  <div class="card">
+    {{#heading}}<h2 class="title" data-anim="fadeinup">{{heading}}</h2>{{/heading}}
+    {{#intro}}<p class="body" data-anim="fadeinup" style="--d:.15s">{{intro | lines}}</p>{{/intro}}
+  <form class="form" data-rsvp-form data-slug="{{slug}}" data-label-sending="{{t.sending}}" data-label-retry="{{t.retry}}" novalidate>
+    {{#rsvpQuestions}}
+    <div class="field" data-rsvp-field data-id="{{qid}}" data-type="{{type}}" data-required="{{requiredAttr}}">
+      <div class="lab">{{label}}</div>
+      {{#isYesNo}}
+      <div class="radio-wrap">
+        <label class="radio"><input type="radio" name="{{qid}}" value="true"><span class="ind"></span><span>{{yes}}</span></label>
+        <label class="radio"><input type="radio" name="{{qid}}" value="false"><span class="ind"></span><span>{{no}}</span></label>
+      </div>
+      {{/isYesNo}}
+      {{#isChoice}}
+      <div class="radio-wrap">
+        {{#options}}<label class="radio"><input type="radio" name="{{qid}}" value="{{value}}"><span class="ind"></span><span>{{label}}</span></label>{{/options}}
+      </div>
+      {{/isChoice}}
+      {{#isNumber}}<input type="text" inputmode="numeric" name="{{qid}}">{{/isNumber}}
+      {{#isText}}<input type="text" name="{{qid}}" autocomplete="off">{{/isText}}
+      <div class="err">{{t.rsvpRequired}}</div>
+    </div>
+    {{/rsvpQuestions}}
+    <!-- Campo trappola: nascosto agli ospiti, i bot lo compilano -->
+    <div class="honey" aria-hidden="true"><label>{{t.honeypot}} <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="invio-ko" data-rsvp-error role="alert">{{t.rsvpError}}</div>
+    <button class="submit" type="submit">{{t.rsvpSubmit}}</button>
+  </form>
+  <div class="success" data-rsvp-success>
+    <h3>{{t.rsvpThanks}}</h3>
+    <p>{{t.rsvpThanksText}}</p>
+  </div>
+  </div>
+</section>
+{{/rsvp}}

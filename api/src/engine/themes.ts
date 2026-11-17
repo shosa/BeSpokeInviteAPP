@@ -5,6 +5,7 @@ import {
   ADDON_KEYS,
   BLOCKS,
   BLOCK_TYPES,
+  BLOCK_VARIANTS,
   defaultConfig,
   parseTemplate,
   validateManifest,
@@ -130,7 +131,8 @@ function loadBlockOverrides(dir: string, name: string, errors: string[]): Map<Bl
   if (!fs.existsSync(folder)) return out;
   for (const file of fs.readdirSync(folder)) {
     const type = file.replace(/\.html$/, "") as BlockType;
-    if (!file.endsWith(".html") || !(BLOCK_TYPES as readonly string[]).includes(type)) {
+    // Tipi di blocco e varianti (map-button, rsvp-inline).
+    if (!file.endsWith(".html") || !([...BLOCK_TYPES, ...BLOCK_VARIANTS] as readonly string[]).includes(type)) {
       errors.push(`${name}: blocks/${file} non è un tipo di blocco noto`);
       continue;
     }

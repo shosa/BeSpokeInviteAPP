@@ -13,6 +13,9 @@
  *   data-countdown-before / data-countdown-after     elementi mostrati prima / dopo la data
  *   data-loop-video                                  video muto in loop: parte quando entra nello schermo
  *   data-rsvp-open / data-rsvp-close / data-rsvp-dialog  popup della conferma di presenza
+ *   data-faq                                         elenco di <details>: una risposta aperta alla volta
+ *   data-rsvp-inline                                 conferma già aperta nella pagina (senza popup)
+ *   data-maps-query                                  pulsante «Apri nelle mappe»: Apple Mappe su iPhone/iPad/Mac, Google Maps altrove
  *   data-rsvp-form data-slug                         modulo: campi data-rsvp-field data-id data-type (vedi sotto)
  *   data-rsvp-error, data-rsvp-success               messaggi di esito
  *
@@ -487,13 +490,16 @@
 
   /* ---------- 6. Conferma di presenza ---------- */
   function initRsvp(root) {
+    // Il modulo può stare in un popup (data-rsvp-dialog, aperto da data-rsvp-open) oppure già nella pagina
+    // (data-rsvp-inline, o semplicemente senza popup): in quel caso niente apertura e chiusura, solo l'invio.
     var popup = (root || document).querySelector('[data-rsvp-dialog]');
     var form = (root || document).querySelector('[data-rsvp-form]');
-    if (!popup || !form) return;
-    var openers = all(root, '[data-rsvp-open]');
-    var closeBtn = popup.querySelector('[data-rsvp-close]');
-    var success = popup.querySelector('[data-rsvp-success]');
-    var errore = popup.querySelector('[data-rsvp-error]');
+    if (!form) return;
+    var scope = popup || form.closest('[data-rsvp-inline]') || form.parentElement;
+    var openers = popup ? all(root, '[data-rsvp-open]') : [];
+    var closeBtn = popup ? popup.querySelector('[data-rsvp-close]') : null;
+    var success = scope.querySelector('[data-rsvp-success]');
+    var errore = scope.querySelector('[data-rsvp-error]');
     var invia = form.querySelector('[type="submit"]');
     var endpoint = form.getAttribute('data-endpoint') || '/api/rsvp';
     var slug = form.getAttribute('data-slug') || '';
@@ -510,13 +516,15 @@
       document.body.classList.remove('is-locked');
       if (lastFocus) lastFocus.focus();
     }
-    openers.forEach(function (b) { b.addEventListener('click', openPopup); });
-    if (closeBtn) closeBtn.addEventListener('click', closePopup);
-    popup.addEventListener('click', function (e) { if (e.target === popup) closePopup(); });
-    // Il focus sta nel popup quando è aperto: l'Esc arriva qui, senza ascoltatori sul documento.
-    popup.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && popup.classList.contains('is-open')) closePopup();
-    });
+    if (popup) {
+      openers.forEach(function (b) { b.addEventListener('click', openPopup); });
+      if (closeBtn) closeBtn.addEventListener('click', closePopup);
+      popup.addEventListener('click', function (e) { if (e.target === popup) closePopup(); });
+      // Il focus sta nel popup quando è aperto: l'Esc arriva qui, senza ascoltatori sul documento.
+      popup.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && popup.classList.contains('is-open')) closePopup();
+      });
+    }
 
     // Legge un campo in base al suo tipo: yes-no → booleano, number → numero, il resto → testo.
     function readField(wrap) {
@@ -581,6 +589,27 @@
     });
   }
 
+  /* ---------- Domande frequenti ---------- */
+  // Fisarmonica: aprendo una domanda si chiudono le altre dello stesso elenco.
+  document.addEventListener('toggle', function (e) {
+    var d = e.target;
+    if (!d || d.tagName !== 'DETAILS' || !d.open) return;
+    var list = d.closest('[data-faq]');
+    if (!list) return;
+    all(list, 'details[open]').forEach(function (o) { if (o !== d) o.open = false; });
+  }, true);
+
+  /* ---------- Apri nelle mappe ---------- */
+  // Su iPhone, iPad e Mac il pulsante apre Apple Mappe (l'app predefinita); altrove resta il link di Google Maps,
+  // che sul telefono apre l'app di mappe.
+  function initMapsLinks(root) {
+    var apple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+    if (!apple) return;
+    all(root, '[data-maps-query]').forEach(function (a) {
+      a.setAttribute('href', 'https://maps.apple.com/?q=' + encodeURIComponent(a.getAttribute('data-maps-query') || ''));
+    });
+  }
+
   /* ---------- Avvio ---------- */
   // Galleria con frecce: carosello e slider scorrono di una foto alla volta.
   document.addEventListener('click', function (e) {
@@ -616,6 +645,7 @@
     initCountdown(root);
     initLoopVideo(root);
     initRsvp(root);
+    initMapsLinks(root);
     markScrollers(root);
   }
 
