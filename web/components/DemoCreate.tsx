@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/lib/lang";
+import { CreatingOverlay } from "@/components/CreatingOverlay";
 
 export type DemoTheme = { id: string; name: string; models: string[] };
 
@@ -50,6 +51,7 @@ export function DemoCreate({ label, themes, models }: { label: string; themes: D
   return (
     <>
       <button type="button" className="btn solid" onClick={() => setOpen(true)}>{label}</button>
+      {busy && <CreatingOverlay />}
       {open && (
         <div className="demo-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) setOpen(false); }}>
           <div className="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-title">

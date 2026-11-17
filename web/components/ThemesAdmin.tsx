@@ -136,7 +136,8 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
               <div className="tpl-tags"><span>IT · EN</span>{m.envelope && <span>{t("Busta-video", "Video envelope")}</span>}{m.backgroundVideo && <span>{t("Video di sfondo", "Background video")}</span>}{!th.enabled && <span className="is-off">{t("Disattivato", "Disabled")}</span>}</div>
               <a className="btn outline small" href={`/api/themes/${m.id}/anteprima`} target="_blank" rel="noreferrer">{t("Apri anteprima", "Open preview")}</a>
               <Switch checked={th.enabled} onChange={(v) => setEnabled(m.id, v)} label={th.enabled ? t("Attivo", "Active") : t("Disattivato", "Disabled")} />
-              <Switch checked={th.premium} onChange={(v) => setPremium(m.id, v)} label={th.premium ? t("Premium (escluso dall'invito base)", "Premium (not in the basic invitation)") : t("Incluso nell'invito base", "Included in the basic invitation")} />
+              {/* Interruttore fisso «Premium»: acceso = escluso dall'invito base. */}
+              <Switch checked={th.premium} onChange={(v) => setPremium(m.id, v)} label="Premium" ariaLabel={t("Template Premium: escluso dall'invito base", "Premium template: not in the basic invitation")} />
               <button type="button" className="link tpl-admin-del" onClick={() => remove(m.id, themeCopy(m, lang))}>{t("Elimina", "Delete")}</button>
             </article>
           );

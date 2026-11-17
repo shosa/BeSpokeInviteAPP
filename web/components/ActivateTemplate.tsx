@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ThemeManifest } from "@inviteme/shared";
 import { TemplateCarousel } from "@/components/TemplateCarousel";
 import { ThemePreview } from "@/components/ThemePreview";
+import { CreatingOverlay } from "@/components/CreatingOverlay";
 import { useLang } from "@/lib/lang";
 import { themeCopy } from "@/lib/catalogCopy";
 
@@ -19,6 +20,7 @@ export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId:
   const [previewOpen, setPreviewOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
   const selected = templates.find((x) => x.id === themeId);
 
   async function create() {
@@ -30,6 +32,8 @@ export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId:
       setBusy(false);
       return setError(body.error ?? t("Non è stato possibile creare l'invito. Riprova.", "The invitation could not be created. Please try again."));
     }
+    // La barra arriva in fondo, poi si apre l'editor (l'attesa continua finché la pagina nuova non è pronta).
+    setDone(true);
     router.push(`/editor/${body.invitationId}`);
   }
 
@@ -52,6 +56,7 @@ export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId:
       </div>
       <p className="hint act-hint-foot">{t("Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.", "The template is just the starting point: texts, photos, colours and music can all be changed in the builder.")}</p>
       {error && <p className="form-error" role="alert">{error}</p>}
+      {busy && <CreatingOverlay done={done} />}
       {previewOpen && selected && <ThemePreview themeId={selected.id} themeName={themeCopy(selected, lang)} onClose={() => setPreviewOpen(false)} onChoose={() => setPreviewOpen(false)} />}
     </div>
   );
