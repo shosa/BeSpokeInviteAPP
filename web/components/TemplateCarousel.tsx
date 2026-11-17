@@ -12,7 +12,8 @@ const RESUME_MS = 6000;
 // Carosello dei template pre-fatti: ogni template è un telefono con l'immagine statica della busta chiusa.
 // Niente pagine vere qui (troppo pesanti tutte insieme): l'invito completo si vede con «Anteprima».
 // Si sceglie toccando il telefono: niente pulsanti con il nome.
-export function TemplateCarousel({ templates, selectedId, onSelect, label, lang = "it", size = "md", autoplay = true }: { templates: ThemeManifest[]; selectedId: string; onSelect: (id: string) => void; label: string; lang?: Lang; size?: "md" | "lg"; autoplay?: boolean }) {
+// locked: template visibili ma non selezionabili (Premium con l'invito base): lucchetto sulla copertina.
+export function TemplateCarousel({ templates, selectedId, onSelect, label, lang = "it", size = "md", autoplay = true, locked }: { templates: ThemeManifest[]; selectedId: string; onSelect: (id: string) => void; label: string; lang?: Lang; size?: "md" | "lg"; autoplay?: boolean; locked?: ReadonlySet<string> }) {
   const L = ui(lang).builder;
   const track = useRef<HTMLDivElement>(null);
   // Immagini da caricare: la scelta e le vicine subito, le altre quando entrano nel carosello.
@@ -154,19 +155,28 @@ export function TemplateCarousel({ templates, selectedId, onSelect, label, lang 
         {templates.map((t, i) => {
           const on = t.id === selectedId;
           const name = themeCopy(t, lang);
+          const isLocked = locked?.has(t.id) === true;
+          const premiumLabel = lang === "en" ? "Premium · not included in the basic invitation" : "Premium · non incluso nell'invito base";
           return (
-            <article key={t.id} data-id={t.id} className={`tpl-card${on ? " is-on" : ""}`} aria-roledescription="diapositiva" aria-label={`${i + 1} / ${templates.length}: ${name}`}>
+            <article key={t.id} data-id={t.id} className={`tpl-card${on ? " is-on" : ""}${isLocked ? " is-locked" : ""}`} aria-roledescription="diapositiva" aria-label={`${i + 1} / ${templates.length}: ${name}`}>
               <div className="tpl-phone">
                 <div className="tpl-screen" style={{ background: t.themeColor }}>
                   {t.envelope?.poster && ready.has(t.id) && (
                     <img src={`/api/themes/${encodeURIComponent(t.id)}/cover.jpg`} alt="" width={480} height={853} decoding="async" draggable={false} />
                   )}
                 </div>
-                <button type="button" className="tpl-hit" aria-pressed={on} aria-label={`${name}: ${L.tplUse}`} title={on ? L.tplChosen : L.tplUse} onClick={() => onSelect(t.id)} />
+                {isLocked && (
+                  <span className="tpl-lock" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                    <b>Premium</b>
+                  </span>
+                )}
+                <button type="button" className="tpl-hit" aria-pressed={on} aria-disabled={isLocked || undefined} aria-label={isLocked ? `${name}: ${premiumLabel}` : `${name}: ${L.tplUse}`} title={isLocked ? premiumLabel : on ? L.tplChosen : L.tplUse} onClick={() => { if (!isLocked) onSelect(t.id); }} />
               </div>
               <div className="tpl-meta">
                 <h3>{name}</h3>
                 {on && <span className="tpl-chosen">{L.tplChosen}</span>}
+                {isLocked && <span className="tpl-premium">{premiumLabel}</span>}
                 <p>{themeDescCopy(t, lang)}</p>
               </div>
             </article>

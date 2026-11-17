@@ -985,23 +985,27 @@ export async function buildApp() {
     order_status_url?: string | null;
   };
   // Acquisto dal negozio: ogni riga con una variante nostra diventa un acquisto da attivare.
-  // Variante base → invito; prodotto planner (qualunque variante) → planner; variante «pacchetto» (ex premium) → invito e planner.
+  // Variante dell'invito → invito; variante «invito base» → invito con i soli template non Premium (draft.plan = "base");
+  // prodotto planner (qualunque variante) → planner; variante «pacchetto» (ex premium) → invito e planner.
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
     const base = normalizeVariant(ids.variantId);
     const bundle = normalizeVariant(ids.variantPremiumId);
     const plannerProduct = normalizeProduct(ids.plannerProductId);
+    const basic = normalizeVariant(ids.variantBasicId);
     let invitations = 0;
+    let basics = 0;
     let planners = 0;
     for (const l of order.line_items ?? []) {
       const v = l.variant_id == null ? null : normalizeVariant(String(l.variant_id));
       const prod = l.product_id == null ? null : normalizeProduct(String(l.product_id));
       const q = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1)));
       if (plannerProduct && prod === plannerProduct) planners += q;
+      else if (v && basic && v === basic) basics += q;
       else if (v && v === base) invitations += q;
       else if (v && bundle && v === bundle) { invitations += q; planners += q; }
     }
-    if (invitations === 0 && planners === 0) return false;
+    if (invitations === 0 && basics === 0 && planners === 0) return false;
     const email = (order.email ?? order.customer?.email ?? "").trim().toLowerCase();
     if (!EMAIL.test(email)) {
       app.log.warn({ order: order.id }, "acquisto Shopify senza email valida");
@@ -1019,6 +1023,7 @@ export async function buildApp() {
     // Una riga per acquisto: il primo invito ha l'id dell'ordine (come prima), gli altri un suffisso. L'importo va sulla prima riga.
     const rowsToAdd: { id: string; draft: Record<string, unknown> }[] = [];
     for (let n = 0; n < invitations; n++) rowsToAdd.push({ id: n === 0 ? String(order.id) : `${order.id}-${n + 1}`, draft: { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier: "rsvp" } });
+    for (let n = 0; n < basics; n++) rowsToAdd.push({ id: `${order.id}-base${n === 0 ? "" : `-${n + 1}`}`, draft: { model: c.models[0]?.id ?? "", themeId: "", eventType: "wedding", addons: [], tier: "rsvp", plan: "base" } });
     for (let n = 0; n < planners; n++) rowsToAdd.push({ id: `${order.id}-planner${n === 0 ? "" : `-${n + 1}`}`, draft: { product: "planner" } });
     let added = 0;
     for (const [k, r] of rowsToAdd.entries()) {
@@ -1033,7 +1038,7 @@ export async function buildApp() {
     const link = `${appUrl()}/accesso/${token}`;
     // Lingua dell'email: quella del cliente nel negozio (customer_locale), italiano di base.
     const lang = String(order.customer_locale ?? "").toLowerCase().startsWith("en") ? "en" : "it";
-    const mail = invitations > 0 ? purchaseEmail({ to: email, link, lang }) : accessEmail({ to: email, link, lang });
+    const mail = invitations + basics > 0 ? purchaseEmail({ to: email, link, lang }) : accessEmail({ to: email, link, lang });
     await sendMail(mail, "order").catch((e) => app.log.warn({ err: e }, "email d'acquisto non inviata"));
     return true;
   }
@@ -1048,7 +1053,7 @@ export async function buildApp() {
       [user.id],
     );
     // Due prodotti: l'invito (si sceglie il template) e il planner (si dà un nome all'evento).
-    return rows.map((r) => ({ id: r.id, product: r.draft?.product === "planner" ? "planner" : "invitation", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
+    return rows.map((r) => ({ id: r.id, product: r.draft?.product === "planner" ? "planner" : "invitation", plan: r.draft?.plan === "base" ? "base" : "full", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
   });
 
   // Il cliente sceglie il template in galleria: si crea l'invito con quel tema.
@@ -1067,6 +1072,8 @@ export async function buildApp() {
     const model = c.models[0]?.id ?? "";
     if (!enabledThemes(c, model).some((t) => t.id === themeId)) return reply.code(400).send({ error: "Template non disponibile" });
     const row = rows[0];
+    // Invito base: i template Premium si vedono ma non si scelgono.
+    if (row.draft.plan === "base" && c.themes.some((t) => t.manifest.id === themeId && t.premium)) return reply.code(403).send({ error: "Questo template è Premium: non è incluso nell'invito base" });
     const id = await createInvitationFromOrder(
       { id: row.id, user_id: row.user_id, draft: { ...row.draft, model, themeId }, amount_cents: row.amount_cents },
       "shopify",
@@ -1162,7 +1169,7 @@ export async function buildApp() {
   // Salva modelli, funzioni e attivazione dei temi. Ogni valore viene validato: l'admin non può inserire HTML o prezzi negativi.
   app.put("/api/admin/catalog", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
-    const b = (req.body ?? {}) as { models?: Row[]; addons?: Row[]; themes?: { id?: unknown; enabled?: unknown }[] };
+    const b = (req.body ?? {}) as { models?: Row[]; addons?: Row[]; themes?: { id?: unknown; enabled?: unknown; premium?: unknown }[] };
     const addonKeys = ["rsvp", "program", "map", "music", "countdown", "gallery"];
     const text = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
 
@@ -1188,9 +1195,11 @@ export async function buildApp() {
     }));
     // I temi sono file del repository: qui si decide solo quali sono attivi.
     const known = new Set(themes().map((t) => t.manifest.id));
+    // Premium: se la richiesta non lo dice, resta quello salvato.
+    const premiumNow = new Map((await loadFullCatalog()).themes.map((t) => [t.manifest.id, t.premium]));
     const themeList = (Array.isArray(b.themes) ? b.themes : [])
       .filter((t) => known.has(String(t.id)))
-      .map((t) => ({ id: String(t.id), enabled: t.enabled !== false }));
+      .map((t) => ({ id: String(t.id), enabled: t.enabled !== false, premium: typeof t.premium === "boolean" ? t.premium : premiumNow.get(String(t.id)) === true }));
     if (models.length === 0 || !themeList.some((t) => t.enabled)) return reply.code(400).send({ error: "Serve almeno un modello e un tema attivo" });
     await saveCatalog({ models, addons, themes: themeList });
     return { ok: true };
@@ -1210,7 +1219,7 @@ export async function buildApp() {
       const result = installThemeZip(buffer, { replace: req.query.replace === "1" });
       reloadThemes();
       const c = await loadFullCatalog();
-      const stored = c.themes.map((t) => ({ id: t.manifest.id, enabled: t.manifest.id === result.id && !result.replaced ? false : t.enabled }));
+      const stored = c.themes.map((t) => ({ id: t.manifest.id, enabled: t.manifest.id === result.id && !result.replaced ? false : t.enabled, premium: t.premium }));
       await saveCatalog({ models: c.models, addons: c.addons, themes: stored });
       req.log.info({ theme: result.id, replaced: result.replaced }, "tema caricato dalla console");
       return reply.code(201).send(result);
@@ -1236,7 +1245,7 @@ export async function buildApp() {
     }
     reloadThemes();
     const after = await loadFullCatalog();
-    await saveCatalog({ models: after.models, addons: after.addons, themes: after.themes.map((t) => ({ id: t.manifest.id, enabled: t.enabled })) });
+    await saveCatalog({ models: after.models, addons: after.addons, themes: after.themes.map((t) => ({ id: t.manifest.id, enabled: t.enabled, premium: t.premium })) });
     return { ok: true };
   });
 
@@ -1244,8 +1253,11 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     const c = await loadFullCatalog();
     if (!c.themes.some((t) => t.manifest.id === req.params.id)) return reply.code(404).send({ error: "Tema non trovato" });
-    const enabled = (req.body as { enabled?: boolean })?.enabled === true;
-    const next = c.themes.map((t) => ({ id: t.manifest.id, enabled: t.manifest.id === req.params.id ? enabled : t.enabled }));
+    // Si cambia l'attivazione, il segno Premium, o entrambi: ciò che non è nella richiesta resta com'è.
+    const b = (req.body ?? {}) as { enabled?: unknown; premium?: unknown };
+    const next = c.themes.map((t) => t.manifest.id === req.params.id
+      ? { id: t.manifest.id, enabled: typeof b.enabled === "boolean" ? b.enabled : t.enabled, premium: typeof b.premium === "boolean" ? b.premium : t.premium }
+      : { id: t.manifest.id, enabled: t.enabled, premium: t.premium });
     if (!next.some((t) => t.enabled)) return reply.code(400).send({ error: "Serve almeno un tema attivo" });
     await saveCatalog({ models: c.models, addons: c.addons, themes: next });
     return { ok: true };
@@ -1323,7 +1335,7 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     const { rows } = await pool.query(
       `SELECT o.id, o.source, o.status, o.kind, o.created_at, o.status_url, o.draft->>'tier' AS tier, o.draft->>'model' AS model,
-              COALESCE(o.draft->>'product', 'invitation') AS product, o.planner_id,
+              COALESCE(o.draft->>'product', 'invitation') AS product, COALESCE(o.draft->>'plan', 'full') AS plan, o.planner_id,
               o.invitation_id, i.slug, i.status AS invitation_status, i.order_ref, i.config->>'title' AS title,
               u.id AS user_id, u.email, u.name AS user_name
        FROM orders o

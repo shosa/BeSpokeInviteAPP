@@ -26,7 +26,8 @@ export type ModelDef = {
 export type AddonDef = { key: AddonKey; label: string; description: string; cents: number; enabled: boolean };
 
 // Un tema è una cartella in themes/ (vedi docs/TEMI.md). Il catalogo salva solo se è attivo.
-export type ThemeEntry = { enabled: boolean; manifest: ThemeManifest };
+// premium: template riservato all'invito completo; con l'invito base si vede, ma con il lucchetto.
+export type ThemeEntry = { enabled: boolean; premium: boolean; manifest: ThemeManifest };
 
 export type MusicTrack = { id: string; title: string; artist: string; url: string; enabled: boolean; license: string };
 

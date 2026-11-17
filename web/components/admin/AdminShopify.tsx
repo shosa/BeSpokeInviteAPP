@@ -6,9 +6,9 @@ import { useLang, useT } from "@/lib/lang";
 
 // Stato di una voce di configurazione, come la restituisce l'API. I segreti non hanno valore: solo la presenza.
 type Item = { key: string; label: string; required: boolean; source: "console" | "ambiente" | "assente"; value: string | null; secret: boolean };
-type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string };
+type Ids = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string };
 type Payload = { items: Item[]; ids: Ids; configured: boolean; demo: boolean; webhookUrl: string; webhookTopic: string; appUrl: string };
-type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; error?: string };
+type TestResult = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; error?: string };
 
 const SOURCE_LABEL: Record<"it" | "en", Record<Item["source"], string>> = {
   it: { console: "dalla console", ambiente: "dal file .env", assente: "mancante" },
@@ -20,6 +20,7 @@ const ITEM_EN: Record<string, string> = {
   variantId: "Invitation variant",
   plannerProductId: "Planner product (sold separately)",
   variantPremiumId: "Invitation + planner bundle variant",
+  variantBasicId: "Basic invitation variant (non-Premium templates)",
   storefrontToken: "Storefront API token",
   webhookSecret: "orders/paid webhook secret",
 };
@@ -30,7 +31,7 @@ export function AdminShopify() {
   const t = useT();
   const itemLabel = (i: Item) => (lang === "en" ? ITEM_EN[i.key] ?? i.label : i.label);
   const [data, setData] = useState<Payload | null>(null);
-  const [draft, setDraft] = useState<Ids>({ storeDomain: "", variantId: "", variantPremiumId: "", plannerProductId: "" });
+  const [draft, setDraft] = useState<Ids>({ storeDomain: "", variantId: "", variantPremiumId: "", plannerProductId: "", variantBasicId: "" });
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [test, setTest] = useState<TestResult | null>(null);
@@ -74,7 +75,7 @@ export function AdminShopify() {
 
   const missing = data.items.filter((i) => i.required && i.source === "assente");
   const ready = missing.length === 0 && !data.demo;
-  const dirty = draft.storeDomain !== data.ids.storeDomain || draft.variantId !== data.ids.variantId || draft.variantPremiumId !== data.ids.variantPremiumId || draft.plannerProductId !== (data.ids.plannerProductId ?? "");
+  const dirty = draft.storeDomain !== data.ids.storeDomain || draft.variantId !== data.ids.variantId || draft.variantPremiumId !== data.ids.variantPremiumId || draft.plannerProductId !== (data.ids.plannerProductId ?? "") || draft.variantBasicId !== (data.ids.variantBasicId ?? "");
 
   return (
     <div className="ac-stack">
@@ -103,6 +104,7 @@ export function AdminShopify() {
                 {test.productTitle && <li><span>{t("Prodotto base", "Base product")}</span><b>{test.productTitle}{test.variantTitle && test.variantTitle !== "Default Title" ? ` · ${test.variantTitle}` : ""}</b></li>}
                 {test.price && <li><span>{t("Prezzo base", "Base price")}</span><b>{test.price}</b></li>}
                 {test.plannerTitle && <li><span>{t("Prodotto planner", "Planner product")}</span><b>{test.plannerTitle}</b></li>}
+                {test.basicTitle && <li><span>{t("Invito base", "Basic invitation")}</span><b>{test.basicTitle}</b></li>}
                 {test.premiumTitle && <li><span>{t("Pacchetto invito + planner", "Invitation + planner bundle")}</span><b>{test.premiumTitle}</b></li>}
               </ul>
             </>
@@ -124,6 +126,11 @@ export function AdminShopify() {
             <span>{t("ID variante dell'invito", "Invitation variant ID")}</span>
             <input value={draft.variantId} onChange={(e) => setDraft({ ...draft, variantId: e.target.value })} placeholder={t("es. 44123456789", "e.g. 44123456789")} maxLength={40} inputMode="numeric" />
             <small>{t("Prodotti, scegli il prodotto, poi la variante: l'ID numerico è nell'indirizzo della pagina.", "Products, pick the product, then the variant: the numeric ID is in the page address.")}</small>
+          </label>
+          <label className="ac-field">
+            <span>{t("ID variante dell'invito base", "Basic invitation variant ID")}</span>
+            <input value={draft.variantBasicId ?? ""} onChange={(e) => setDraft({ ...draft, variantBasicId: e.target.value })} placeholder={t("facoltativo", "optional")} maxLength={40} inputMode="numeric" />
+            <small>{t("Variante a parte dell'invito: chi la compra sceglie solo tra i template non Premium (quelli Premium li vede con il lucchetto). Il segno Premium si mette nella sezione Template.", "A separate invitation variant: buyers choose only among non-Premium templates (they see Premium ones locked). Mark templates as Premium in the Templates section.")}</small>
           </label>
           <label className="ac-field">
             <span>{t("ID prodotto del planner", "Planner product ID")}</span>

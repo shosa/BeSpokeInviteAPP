@@ -21,7 +21,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
   const [problem, setProblem] = useState<{ title: string; details: string[] } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [usage, setUsage] = useState<Record<string, number>>({});
-  const [view, setView] = useState<"tutti" | "scelti" | "mai" | "off">("tutti");
+  const [view, setView] = useState<"tutti" | "scelti" | "mai" | "off" | "premium">("tutti");
   useEffect(() => {
     fetch("/api/admin/themes/usage").then((r) => (r.ok ? r.json() : {})).then(setUsage).catch(() => setUsage({}));
   }, [catalog]);
@@ -31,10 +31,20 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
     if (view === "scelti") return list.filter((x) => (usage[x.manifest.id] ?? 0) > 0);
     if (view === "mai") return list.filter((x) => !usage[x.manifest.id]);
     if (view === "off") return list.filter((x) => !x.enabled);
+    if (view === "premium") return list.filter((x) => x.premium);
     return list;
   }, [catalog, usage, view]);
   const never = catalog.themes.filter((x) => !usage[x.manifest.id]).length;
   const off = catalog.themes.filter((x) => !x.enabled).length;
+  const premiumCount = catalog.themes.filter((x) => x.premium).length;
+
+  // Premium: escluso dall'invito base (il cliente lo vede con il lucchetto).
+  async function setPremium(id: string, premium: boolean) {
+    const res = await fetch(`/api/admin/themes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ premium }) });
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) return toast.error(data.error ?? t("Modifica non riuscita", "Change failed"));
+    onChanged();
+  }
 
   async function setEnabled(id: string, enabled: boolean) {
     const res = await fetch(`/api/admin/themes/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled }) });
@@ -106,7 +116,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
       </section>
 
       <div className="tpl-filters" role="group" aria-label={t("Filtri", "Filters")}>
-        {([["tutti", t("Tutti", "All"), catalog.themes.length], ["scelti", t("Scelti dai clienti", "Chosen by customers"), catalog.themes.length - never], ["mai", t("Mai scelti", "Never chosen"), never], ["off", t("Disattivati", "Disabled"), off]] as const).map(([v, label, n]) => (
+        {([["tutti", t("Tutti", "All"), catalog.themes.length], ["scelti", t("Scelti dai clienti", "Chosen by customers"), catalog.themes.length - never], ["mai", t("Mai scelti", "Never chosen"), never], ["off", t("Disattivati", "Disabled"), off], ["premium", "Premium", premiumCount]] as const).map(([v, label, n]) => (
           <button key={v} type="button" className={view === v ? "is-on" : ""} aria-pressed={view === v} onClick={() => setView(v)}>{label}<b>{n}</b></button>
         ))}
       </div>
@@ -126,6 +136,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
               <div className="tpl-tags"><span>IT · EN</span>{m.envelope && <span>{t("Busta-video", "Video envelope")}</span>}{m.backgroundVideo && <span>{t("Video di sfondo", "Background video")}</span>}{!th.enabled && <span className="is-off">{t("Disattivato", "Disabled")}</span>}</div>
               <a className="btn outline small" href={`/api/themes/${m.id}/anteprima`} target="_blank" rel="noreferrer">{t("Apri anteprima", "Open preview")}</a>
               <Switch checked={th.enabled} onChange={(v) => setEnabled(m.id, v)} label={th.enabled ? t("Attivo", "Active") : t("Disattivato", "Disabled")} />
+              <Switch checked={th.premium} onChange={(v) => setPremium(m.id, v)} label={th.premium ? t("Premium (escluso dall'invito base)", "Premium (not in the basic invitation)") : t("Incluso nell'invito base", "Included in the basic invitation")} />
               <button type="button" className="link tpl-admin-del" onClick={() => remove(m.id, themeCopy(m, lang))}>{t("Elimina", "Delete")}</button>
             </article>
           );

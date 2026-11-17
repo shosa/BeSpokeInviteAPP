@@ -11,7 +11,8 @@ const VARIANT_RE = /^(gid:\/\/shopify\/ProductVariant\/)?(\d{1,20})$/;
 const PRODUCT_RE = /^(gid:\/\/shopify\/Product\/)?(\d{1,20})$/;
 
 // Il planner è un prodotto a sé nel negozio (come l'invito): si riconosce dal prodotto, qualunque variante si compri.
-export type ShopifyIds = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string };
+// variantBasicId: l'«invito base», variante a parte con la scelta limitata ai template non Premium.
+export type ShopifyIds = { storeDomain: string; variantId: string; variantPremiumId: string; plannerProductId: string; variantBasicId: string };
 export type ShopifySource = "console" | "ambiente" | "assente";
 
 // Valori caricati dalla tabella settings. Vuoti finché non viene chiamato loadShopifySettings().
@@ -22,6 +23,7 @@ const fromEnv = (): ShopifyIds => ({
   variantId: normalizeVariant(process.env.SHOPIFY_VARIANT_ID ?? "") ?? "",
   variantPremiumId: normalizeVariant(process.env.SHOPIFY_VARIANT_PREMIUM_ID ?? "") ?? "",
   plannerProductId: normalizeProduct(process.env.SHOPIFY_PLANNER_PRODUCT_ID ?? "") ?? "",
+  variantBasicId: normalizeVariant(process.env.SHOPIFY_VARIANT_BASIC_ID ?? "") ?? "",
 });
 
 // Un ID di variante come gid completo. Accetta anche il solo numero, che è quello che si copia dall'admin di Shopify.
@@ -43,6 +45,7 @@ export function getShopifyIds(): ShopifyIds {
     variantId: stored.variantId ?? env.variantId,
     variantPremiumId: stored.variantPremiumId ?? env.variantPremiumId,
     plannerProductId: stored.plannerProductId ?? env.plannerProductId,
+    variantBasicId: stored.variantBasicId ?? env.variantBasicId,
   };
 }
 
@@ -57,6 +60,7 @@ export async function loadShopifySettings(): Promise<void> {
   if (typeof v.variantId === "string" && normalizeVariant(v.variantId)) stored.variantId = normalizeVariant(v.variantId)!;
   if (typeof v.variantPremiumId === "string" && normalizeVariant(v.variantPremiumId)) stored.variantPremiumId = normalizeVariant(v.variantPremiumId)!;
   if (typeof v.plannerProductId === "string" && normalizeProduct(v.plannerProductId)) stored.plannerProductId = normalizeProduct(v.plannerProductId)!;
+  if (typeof v.variantBasicId === "string" && normalizeVariant(v.variantBasicId)) stored.variantBasicId = normalizeVariant(v.variantBasicId)!;
 }
 
 export type ValidationResult = { ok: true; value: ShopifyIds } | { ok: false; error: string };
@@ -68,6 +72,8 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
   const base = typeof input.variantId === "string" ? input.variantId.trim() : "";
   const premium = typeof input.variantPremiumId === "string" ? input.variantPremiumId.trim() : "";
   const planner = typeof input.plannerProductId === "string" ? input.plannerProductId.trim() : "";
+  const basic = typeof input.variantBasicId === "string" ? input.variantBasicId.trim() : "";
+  if (basic && !normalizeVariant(basic)) return { ok: false, error: "L'ID della variante dell'invito base non è valido: usa il numero della variante" };
   if (base && !normalizeVariant(base)) return { ok: false, error: "L'ID della variante base non è valido: usa il numero della variante" };
   if (premium && !normalizeVariant(premium)) return { ok: false, error: "L'ID della variante del pacchetto non è valido: usa il numero della variante" };
   if (planner && !normalizeProduct(planner)) return { ok: false, error: "L'ID del prodotto planner non è valido: usa il numero del prodotto" };
@@ -78,6 +84,7 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
       variantId: normalizeVariant(base) ?? "",
       variantPremiumId: normalizeVariant(premium) ?? "",
       plannerProductId: normalizeProduct(planner) ?? "",
+      variantBasicId: normalizeVariant(basic) ?? "",
     },
   };
 }
@@ -88,7 +95,7 @@ export async function saveShopifyIds(ids: ShopifyIds): Promise<void> {
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,
     [JSON.stringify(ids)],
   );
-  stored = { storeDomain: ids.storeDomain || undefined, variantId: ids.variantId || undefined, variantPremiumId: ids.variantPremiumId || undefined, plannerProductId: ids.plannerProductId || undefined };
+  stored = { storeDomain: ids.storeDomain || undefined, variantId: ids.variantId || undefined, variantPremiumId: ids.variantPremiumId || undefined, plannerProductId: ids.plannerProductId || undefined, variantBasicId: ids.variantBasicId || undefined };
   linksCache = null; // i link dei prodotti si ricalcolano con gli ID nuovi
 }
 
@@ -104,6 +111,7 @@ export function shopifyStatus(): ShopifyItem[] {
   return [
     { key: "storeDomain", label: "Dominio del negozio", required: true, source: srcOf(stored.storeDomain, env.storeDomain), value: ids.storeDomain || null, secret: false },
     { key: "variantId", label: "Variante dell'invito", required: true, source: srcOf(stored.variantId, env.variantId), value: ids.variantId || null, secret: false },
+    { key: "variantBasicId", label: "Variante dell'invito base (template non Premium)", required: false, source: srcOf(stored.variantBasicId, env.variantBasicId), value: ids.variantBasicId || null, secret: false },
     { key: "plannerProductId", label: "Prodotto planner (venduto a parte)", required: false, source: srcOf(stored.plannerProductId, env.plannerProductId), value: ids.plannerProductId || null, secret: false },
     { key: "variantPremiumId", label: "Variante del pacchetto invito + planner", required: false, source: srcOf(stored.variantPremiumId, env.variantPremiumId), value: ids.variantPremiumId || null, secret: false },
     { key: "storefrontToken", label: "Token Storefront API", required: true, source: token ? "ambiente" : "assente", value: token ? "impostato nel .env" : null, secret: true },
@@ -111,7 +119,7 @@ export function shopifyStatus(): ShopifyItem[] {
   ];
 }
 
-export type ShopifyTest = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; error?: string };
+export type ShopifyTest = { ok: boolean; shopName?: string; variantTitle?: string; productTitle?: string; price?: string; premiumTitle?: string; plannerTitle?: string; basicTitle?: string; error?: string };
 
 // Verifica reale: il token risponde, il negozio esiste e le varianti configurate sono vendibili.
 export async function testShopify(): Promise<ShopifyTest> {
@@ -144,6 +152,11 @@ export async function testShopify(): Promise<ShopifyTest> {
       const node = (await gql(variantQuery, { id: ids.variantPremiumId })).node as { title?: string; product?: { title: string } } | null;
       if (!node) return { ...out, ok: false, error: "La variante del pacchetto non esiste in questo negozio" };
       out.premiumTitle = node.product?.title ?? node.title;
+    }
+    if (ids.variantBasicId) {
+      const node = (await gql(variantQuery, { id: ids.variantBasicId })).node as { title?: string; product?: { title: string } } | null;
+      if (!node) return { ...out, ok: false, error: "La variante dell'invito base non esiste in questo negozio" };
+      out.basicTitle = [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ");
     }
     if (ids.plannerProductId) {
       const node = (await gql(`query Product($id: ID!) { node(id: $id) { ... on Product { title availableForSale } } }`, { id: ids.plannerProductId })).node as { title?: string } | null;

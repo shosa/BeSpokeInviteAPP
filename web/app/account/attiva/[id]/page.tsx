@@ -45,8 +45,12 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
       </>
     );
   }
-  const catalog = await apiPublic<{ themes?: { enabled: boolean; manifest: ThemeManifest }[] }>("/api/catalog");
-  const templates = (catalog?.themes ?? []).filter((t) => t.enabled).map((t) => t.manifest);
+  const catalog = await apiPublic<{ themes?: { enabled: boolean; premium?: boolean; manifest: ThemeManifest }[] }>("/api/catalog");
+  const enabled = (catalog?.themes ?? []).filter((t) => t.enabled);
+  // Invito base: i template Premium restano visibili, in fondo e con il lucchetto.
+  const basic = item.plan === "base";
+  const templates = (basic ? [...enabled.filter((t) => !t.premium), ...enabled.filter((t) => t.premium)] : enabled).map((t) => t.manifest);
+  const locked = basic ? enabled.filter((t) => t.premium).map((t) => t.manifest.id) : [];
 
   return (
     <>
@@ -64,7 +68,14 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
             ? "Browse the templates and open the preview, with or without the envelope. Your invitation starts from the one you choose."
             : "Sfoglia i template e apri l'anteprima, con o senza busta. Il tuo invito parte da quello che scegli."}
         </p>
-        <ActivateTemplate orderId={id} templates={templates} />
+        {basic && (
+          <p className="act-basic">
+            {isEn
+              ? "You bought the basic invitation: choose among the templates included. The ones marked Premium are part of the full invitation."
+              : "Hai acquistato l'invito base: scegli tra i template inclusi. Quelli con il lucchetto Premium fanno parte dell'invito completo."}
+          </p>
+        )}
+        <ActivateTemplate orderId={id} templates={templates} locked={locked} />
       </main>
     </>
   );

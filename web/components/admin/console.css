@@ -492,3 +492,7 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .ac-orders th:nth-child(1) { width: 150px; }
 .ac-orders th:nth-child(2) { width: 160px; }
 .ac-orders th:nth-child(7) { width: 112px; }
+/* Contenuto della console centrato nello spazio a destra della barra laterale. */
+.ac-main .ac-body, .ac-main .ac-head { margin-left: auto; margin-right: auto; width: 100%; box-sizing: border-box; }
+/* Assegna un acquisto: quattro prodotti (invito, invito base, planner, pacchetto). */
+.cu-seg { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }

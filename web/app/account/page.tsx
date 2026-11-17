@@ -197,7 +197,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                 <article className="acx-ticket is-inv">
                   <div className="acx-env" aria-hidden="true"><span className="acx-env-back" /><span className="acx-env-front"><span className="acx-env-flap" /><span className="acx-env-seal">B</span></span></div>
                   <div className="acx-ticket-text">
-                    <span className="acx-tag">{c.invTag}</span>
+                    <span className="acx-tag">{pendingInv[0].plan === "base" ? (lang === "en" ? "Basic invitation" : "Invito base") : c.invTag}</span>
                     <h2>{c.invTitle(pendingInv.length)}</h2>
                     <p>{c.invText}</p>
                     <a className="acx-cta is-gold" href={`/account/attiva/${encodeURIComponent(pendingInv[0].id)}`}>{c.invCta}</a>

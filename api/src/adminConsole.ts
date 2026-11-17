@@ -78,9 +78,9 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
                          (SELECT count(*)::int FROM planner_tasks t WHERE t.planner_id = p.id) AS tasks,
                          (SELECT count(*)::int FROM planner_tasks t WHERE t.planner_id = p.id AND t.done) AS tasks_done
                   FROM planners p WHERE p.user_id = $1 ORDER BY p.created_at DESC`, [id]),
-      pool.query(`SELECT o.id, o.created_at, COALESCE(o.draft->>'product', 'invitation') AS product, o.draft->'manual' AS manual
+      pool.query(`SELECT o.id, o.created_at, COALESCE(o.draft->>'product', 'invitation') AS product, COALESCE(o.draft->>'plan', 'full') AS plan, o.draft->'manual' AS manual
                   FROM orders o WHERE o.user_id = $1 AND ${PENDING} ORDER BY o.created_at`, [id]),
-      pool.query(`SELECT o.id, o.created_at, o.status, o.kind, COALESCE(o.draft->>'product', 'invitation') AS product,
+      pool.query(`SELECT o.id, o.created_at, o.status, o.kind, COALESCE(o.draft->>'product', 'invitation') AS product, COALESCE(o.draft->>'plan', 'full') AS plan,
                          o.draft->'manual' AS manual, o.invitation_id, o.planner_id
                   FROM orders o LEFT JOIN invitations i ON i.id = o.invitation_id
                   WHERE COALESCE(i.user_id, o.user_id) = $1 ORDER BY o.created_at DESC LIMIT 30`, [id]),
@@ -93,17 +93,18 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Utente non trovato" });
     const b = (req.body ?? {}) as { product?: unknown; qty?: unknown; reason?: unknown; notify?: unknown };
-    const product = b.product === "planner" || b.product === "bundle" ? b.product : "invitation";
+    // invitation: invito completo; basic: invito base (solo template non Premium); planner; bundle: invito + planner.
+    const product = b.product === "planner" || b.product === "bundle" || b.product === "basic" ? b.product : "invitation";
     const qty = Math.max(1, Math.min(10, Math.round(Number(b.qty) || 1)));
     const reason = (GRANT_REASONS as readonly string[]).includes(String(b.reason)) ? String(b.reason) : "omaggio";
     const { rows: users } = await pool.query("SELECT id, email FROM users WHERE id = $1", [req.params.id]);
     if (!users[0]) return reply.code(404).send({ error: "Utente non trovato" });
     const manual = { reason, at: new Date().toISOString(), by: (await currentUser(req))?.email ?? null };
-    const invitationDraft = { model: "invitation-rsvp", themeId: "", eventType: "wedding", addons: [], tier: "rsvp", manual };
+    const invitationDraft = { model: "invitation-rsvp", themeId: "", eventType: "wedding", addons: [], tier: "rsvp", manual, ...(product === "basic" ? { plan: "base" } : {}) };
     const rows: Record<string, unknown>[] = [];
     for (let n = 0; n < qty; n++) {
       if (product !== "planner") rows.push(invitationDraft);
-      if (product !== "invitation") rows.push({ product: "planner", manual });
+      if (product === "planner" || product === "bundle") rows.push({ product: "planner", manual });
     }
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     for (const draft of rows) {

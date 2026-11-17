@@ -1735,3 +1735,12 @@ h2 { font-size: clamp(2rem, 3.2vw, 2.7rem); }
    "clip" (non "hidden") non crea un contenitore di scorrimento, così le barre sticky continuano a funzionare.
    I caroselli dei template hanno il loro scorrimento orizzontale e restano scorrevoli. */
 html, body { overflow-x: clip; overscroll-behavior-x: none; max-width: 100%; }
+
+/* Invito base: template Premium visibili ma bloccati, con il lucchetto. */
+.tpl-card.is-locked .tpl-screen { filter: grayscale(0.55) brightness(0.92); }
+.tpl-card.is-locked .tpl-hit { cursor: not-allowed; }
+.tpl-lock { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 6px; color: #fff; pointer-events: none; background: linear-gradient(180deg, rgba(20, 14, 10, 0.05), rgba(20, 14, 10, 0.45)); border-radius: inherit; }
+.tpl-lock svg { width: 44px; height: 44px; padding: 11px; border-radius: 50%; background: rgba(20, 14, 10, 0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-sizing: border-box; }
+.tpl-lock b { font: 600 11px var(--font-text), sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+.tpl-premium { display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 999px; background: #f3e6cf; color: #6b4a15; font-size: 12px; font-weight: 500; }
+.act-basic { margin: 0; padding: 12px 16px; border-radius: 16px; background: #fbf4e6; border: 1px solid #ecd9b4; color: #5c4a2e; font-size: 14.5px; }

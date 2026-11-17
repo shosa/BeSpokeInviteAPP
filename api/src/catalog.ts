@@ -7,7 +7,7 @@ import { loadThemes, type LoadedTheme } from "./engine/themes";
 export type StoredCatalog = {
   models: ModelDef[];
   addons: AddonDef[];
-  themes?: { id: string; enabled: boolean }[];
+  themes?: { id: string; enabled: boolean; premium?: boolean }[];
 };
 
 // Temi caricati all'avvio dalla cartella themes/; si ricaricano quando la console installa o elimina un tema.
@@ -29,6 +29,7 @@ export function themes(): LoadedTheme[] {
 export function themeEntries(stored: StoredCatalog["themes"]): ThemeEntry[] {
   return themes().map((t) => ({
     enabled: stored?.find((s) => s.id === t.manifest.id)?.enabled !== false,
+    premium: stored?.find((s) => s.id === t.manifest.id)?.premium === true,
     manifest: t.manifest,
   }));
 }

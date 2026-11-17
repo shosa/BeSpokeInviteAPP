@@ -17,6 +17,7 @@ export type OrderDetail = {
   status_url: string | null;
   tier: string | null;
   product?: "invitation" | "planner";
+  plan?: "base" | "full";
   model: string | null;
   invitation_id: string | null;
   slug: string | null;
@@ -121,7 +122,7 @@ export function AdminOrders({ go }: { go?: Go }) {
                     </td>
                     <td><span className="ac-tag">{isManual(o) ? t("A mano", "By hand") : o.source === "shopify" ? "Shopify" : t("Prova", "Test")}</span></td>
                     <td><span className={`pill ${isPending(o) ? "draft" : o.status === "paid" ? "yes" : "draft"}`}>{isPending(o) ? t("Da attivare", "To activate") : o.status === "paid" ? t("Attivato", "Activated") : t("In attesa di pagamento", "Awaiting payment")}</span></td>
-                    <td>{o.product === "planner" ? "Planner" : t("Invito", "Invitation")}</td>
+                    <td>{o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation")}</td>
                   </tr>
                   {open === o.id && (
                     <tr className="ac-detail-row">

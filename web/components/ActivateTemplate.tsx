@@ -9,11 +9,13 @@ import { useLang } from "@/lib/lang";
 import { themeCopy } from "@/lib/catalogCopy";
 
 // Attivazione di un acquisto: il cliente sceglie il template e il suo invito nasce con quello.
-export function ActivateTemplate({ orderId, templates }: { orderId: string; templates: ThemeManifest[] }) {
+// locked: template Premium che l'invito base non può scegliere (si vedono con il lucchetto).
+export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId: string; templates: ThemeManifest[]; locked?: string[] }) {
   const router = useRouter();
   const lang = useLang();
   const t = (it: string, en: string) => (lang === "en" ? en : it);
-  const [themeId, setThemeId] = useState(templates[0]?.id ?? "");
+  const lockedSet = new Set(locked);
+  const [themeId, setThemeId] = useState(templates.find((x) => !lockedSet.has(x.id))?.id ?? "");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export function ActivateTemplate({ orderId, templates }: { orderId: string; temp
   return (
     <div className="act">
       {templates.length > 0 ? (
-        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} />
+        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} locked={lockedSet} />
       ) : (
         <p className="hint">{t("Nessun template disponibile al momento.", "No templates available right now.")}</p>
       )}

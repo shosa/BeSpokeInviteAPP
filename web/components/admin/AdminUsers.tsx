@@ -12,10 +12,10 @@ type Detail = {
   user: { id: string; email: string; name: string; role: string; created_at: string };
   invitations: { id: string; slug: string; status: string; edit_count: number; views: number; created_at: string; theme: string | null; title: string | null; event_date: string | null; rsvps: number }[];
   planners: { id: string; title: string; event_date: string | null; invitation_id: string | null; created_at: string; tasks: number; tasks_done: number }[];
-  pending: { id: string; created_at: string; product: string; manual: { reason: string } | null }[];
-  orders: { id: string; created_at: string; status: string; kind: string; product: string; manual: { reason: string } | null; invitation_id: string | null; planner_id: string | null }[];
+  pending: { id: string; created_at: string; product: string; plan?: string; manual: { reason: string } | null }[];
+  orders: { id: string; created_at: string; status: string; kind: string; product: string; plan?: string; manual: { reason: string } | null; invitation_id: string | null; planner_id: string | null }[];
 };
-type Product = "invitation" | "planner" | "bundle";
+type Product = "invitation" | "basic" | "planner" | "bundle";
 const REASONS: { id: string; it: string; en: string }[] = [
   { id: "omaggio", it: "Omaggio", en: "Gift" },
   { id: "sostituzione", it: "Sostituzione", en: "Replacement" },
@@ -121,7 +121,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
   if (err) return <div className="ac-stack"><button type="button" className="cu-back" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" />{t("Clienti", "Customers")}</button><p className="form-error">{err}</p></div>;
   if (!d) return <p className="hint">{t("Caricamento…", "Loading…")}</p>;
   const u = d.user;
-  const productName = (p: string) => (p === "planner" ? "Planner" : t("Invito", "Invitation"));
+  const productName = (p: string, plan?: string) => (p === "planner" ? "Planner" : plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation"));
   const reasonName = (r?: string) => { const x = REASONS.find((y) => y.id === r); return x ? t(x.it, x.en) : ""; };
 
   return (
@@ -154,7 +154,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
         {d.pending.map((p) => (
           <article key={p.id} className="cu-item is-pending">
             <div className="cu-item-top"><span className="chip-warn"><Ticket size={13} aria-hidden="true" />{t("Da attivare", "To activate")}</span><small>{fmtDate(p.created_at)}</small></div>
-            <strong>{productName(p.product)}</strong>
+            <strong>{productName(p.product, p.plan)}</strong>
             <small>{p.manual ? t(`Assegnato a mano · ${reasonName(p.manual.reason)}`, `Assigned by hand · ${reasonName(p.manual.reason)}`) : t("Dal negozio", "From the shop")}</small>
             <div className="cu-links"><button type="button" onClick={sendLink} disabled={busy}>{t("Ricorda via email", "Remind by email")}</button><button type="button" className="is-danger" onClick={() => removePending(p.id)} disabled={busy}><Trash2 size={13} aria-hidden="true" />{t("Togli", "Remove")}</button></div>
           </article>
@@ -183,7 +183,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
           <h3>{t("Assegna un acquisto", "Assign a purchase")}</h3>
           <p className="hint">{t("Compare nella sua area come «da attivare», come un acquisto dal negozio. Non entra negli ordini di Shopify.", "It appears in their account as «to activate», like a shop purchase. It doesn't go into Shopify orders.")}</p>
           <div className="cu-seg" role="radiogroup" aria-label={t("Prodotto", "Product")}>
-            {([["invitation", t("Invito", "Invitation"), t("sceglie il template", "picks the template")], ["planner", "Planner", t("organizza l'evento", "plans the event")], ["bundle", t("Pacchetto", "Bundle"), t("invito + planner", "invitation + planner")]] as const).map(([v, label, hint]) => (
+            {([["invitation", t("Invito", "Invitation"), t("tutti i template", "all templates")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")], ["bundle", t("Pacchetto", "Bundle"), t("invito + planner", "invitation + planner")]] as const).map(([v, label, hint]) => (
               <button key={v} type="button" role="radio" aria-checked={product === v} className={product === v ? "is-on" : ""} onClick={() => setProduct(v)}><b>{label}</b><small>{hint}</small></button>
             ))}
           </div>
@@ -202,7 +202,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
               {d.orders.map((o) => (
                 <li key={o.id}>
                   <time>{fmtDate(o.created_at)}</time>
-                  <span className="cu-order"><b>{productName(o.product)}</b>{o.manual ? <small>{t(`a mano, ${reasonName(o.manual.reason)}`, `by hand, ${reasonName(o.manual.reason)}`)}</small> : null}<CopyId value={o.id} /></span>
+                  <span className="cu-order"><b>{productName(o.product, o.plan)}</b>{o.manual ? <small>{t(`a mano, ${reasonName(o.manual.reason)}`, `by hand, ${reasonName(o.manual.reason)}`)}</small> : null}<CopyId value={o.id} /></span>
                   <small>{o.invitation_id || o.planner_id ? t("attivato", "activated") : o.status === "paid" ? t("da attivare", "to activate") : t("in attesa", "pending")}</small>
                 </li>
               ))}
