@@ -135,12 +135,41 @@ async function creditsMerchandise(domain: string, token: string, saved: string):
   return found.id;
 }
 
-// Strada principale: il carrello del sito (Online Store), come per il planner. Il link /cart/<variante>:1 porta l'invito
-// come attributo del carrello («aiCreditsFor»), che Shopify passa all'ordine e il webhook legge. La variante si ricava
-// dall'elenco pubblico dei prodotti quando in console c'è l'ID del prodotto. Se il sito non lo trova, si prova la Storefront API.
+// Ricarica dei crediti: prima la Storefront API (prodotto pubblicato solo nel canale headless, così si compra solo
+// dall'app, legato all'invito); se la Storefront non vede il prodotto, il carrello del sito (/cart/<variante>:1) con l'invito
+// come attributo del carrello («aiCreditsFor»), che Shopify passa all'ordine e il webhook legge.
 export async function createAiCreditsCheckout(input: { invitationId: string; email?: string }): Promise<string> {
   const ids = getShopifyIds();
   if (!ids.variantAiCreditsId) throw new CreditsCheckoutError("Ricarica dei crediti non disponibile in questo momento");
+  const token = storefrontToken();
+  if (ids.storeDomain && token) {
+    try {
+      const merchandiseId = await creditsMerchandise(ids.storeDomain, token, ids.variantAiCreditsId);
+      const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+        body: JSON.stringify({
+          query: `mutation cartCreate($input: CartInput!) { cartCreate(input: $input) { cart { checkoutUrl } userErrors { message } } }`,
+          variables: {
+            input: {
+              lines: [{ merchandiseId, quantity: 1, attributes: [{ key: "_aiCreditsFor", value: input.invitationId }] }],
+              attributes: [{ key: "aiCreditsFor", value: input.invitationId }],
+              ...(input.email ? { buyerIdentity: { email: input.email } } : {}),
+              note: `Crediti BeSpoke AI · invito ${input.invitationId}`,
+            },
+          },
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+      const json = (await res.json().catch(() => ({}))) as { data?: { cartCreate?: { cart?: { checkoutUrl: string }; userErrors: { message: string }[] } }; errors?: { message: string }[] };
+      const url = json.data?.cartCreate?.cart?.checkoutUrl;
+      if (res.ok && url) return url;
+      throw new Error(json.errors?.[0]?.message ?? json.data?.cartCreate?.userErrors?.[0]?.message ?? `HTTP ${res.status}`);
+    } catch (e) {
+      if (!(e instanceof CreditsCheckoutError) || /in vendita/.test(e.message)) throw e;
+      // Non visibile alla Storefront: si prova il carrello del sito.
+    }
+  }
   const { home } = await shopLinks();
   const savedNum = ids.variantAiCreditsId.split("/").pop() ?? "";
   const list = (await fetch(`${home}/products.json?limit=250`, { signal: AbortSignal.timeout(6000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null)) as
@@ -150,33 +179,8 @@ export async function createAiCreditsCheckout(input: { invitationId: string; ema
   const byProduct = products.find((p) => String(p.id) === savedNum);
   const byVariant = products.flatMap((p) => p.variants).find((v) => String(v.id) === savedNum);
   const variant = byVariant ?? byProduct?.variants.find((v) => v.available) ?? byProduct?.variants[0];
-  if (variant) {
-    if (variant.available === false) throw new CreditsCheckoutError("I crediti non sono in vendita in questo momento");
-    const q = new URLSearchParams({ "attributes[aiCreditsFor]": input.invitationId, ...(input.email ? { "checkout[email]": input.email } : {}) });
-    return `${home}/cart/${variant.id}:1?${q.toString()}`;
-  }
-  // Prodotto non pubblicato sul sito: ultima prova con la Storefront API (canale headless).
-  const token = storefrontToken();
-  if (!ids.storeDomain || !token) throw new CreditsCheckoutError("Il prodotto dei crediti non è visibile al negozio: va pubblicato nel canale di vendita collegato al sito");
-  const merchandiseId = await creditsMerchandise(ids.storeDomain, token, ids.variantAiCreditsId);
-  const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
-    body: JSON.stringify({
-      query: `mutation cartCreate($input: CartInput!) { cartCreate(input: $input) { cart { checkoutUrl } userErrors { message } } }`,
-      variables: {
-        input: {
-          lines: [{ merchandiseId, quantity: 1, attributes: [{ key: "_aiCreditsFor", value: input.invitationId }] }],
-          attributes: [{ key: "aiCreditsFor", value: input.invitationId }],
-          ...(input.email ? { buyerIdentity: { email: input.email } } : {}),
-          note: `Crediti BeSpoke AI · invito ${input.invitationId}`,
-        },
-      },
-    }),
-    signal: AbortSignal.timeout(10000),
-  });
-  const json = (await res.json().catch(() => ({}))) as { data?: { cartCreate?: { cart?: { checkoutUrl: string }; userErrors: { message: string }[] } }; errors?: { message: string }[] };
-  const url = json.data?.cartCreate?.cart?.checkoutUrl;
-  if (!res.ok || !url) throw new Error(json.errors?.[0]?.message ?? json.data?.cartCreate?.userErrors?.[0]?.message ?? `HTTP ${res.status}`);
-  return url;
+  if (!variant) throw new CreditsCheckoutError("Il prodotto dei crediti non è visibile al negozio: va pubblicato nel canale di vendita collegato al sito");
+  if (variant.available === false) throw new CreditsCheckoutError("I crediti non sono in vendita in questo momento");
+  const q = new URLSearchParams({ "attributes[aiCreditsFor]": input.invitationId, ...(input.email ? { "checkout[email]": input.email } : {}) });
+  return `${home}/cart/${variant.id}:1?${q.toString()}`;
 }
