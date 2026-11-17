@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { getShopifyIds, storefrontToken, webhookSecret, SHOPIFY_API_VERSION } from "./shopifySettings";
+import { getShopifyIds, shopLinks, storefrontToken, webhookSecret, SHOPIFY_API_VERSION } from "./shopifySettings";
 
 // Integrazione Shopify headless.
 // - Con SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN + SHOPIFY_VARIANT_ID: carrello reale e checkoutUrl Shopify.
@@ -135,10 +135,29 @@ async function creditsMerchandise(domain: string, token: string, saved: string):
   return found.id;
 }
 
+// Strada principale: il carrello del sito (Online Store), come per il planner. Il link /cart/<variante>:1 porta l'invito
+// come attributo del carrello («aiCreditsFor»), che Shopify passa all'ordine e il webhook legge. La variante si ricava
+// dall'elenco pubblico dei prodotti quando in console c'è l'ID del prodotto. Se il sito non lo trova, si prova la Storefront API.
 export async function createAiCreditsCheckout(input: { invitationId: string; email?: string }): Promise<string> {
   const ids = getShopifyIds();
+  if (!ids.variantAiCreditsId) throw new CreditsCheckoutError("Ricarica dei crediti non disponibile in questo momento");
+  const { home } = await shopLinks();
+  const savedNum = ids.variantAiCreditsId.split("/").pop() ?? "";
+  const list = (await fetch(`${home}/products.json?limit=250`, { signal: AbortSignal.timeout(6000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null)) as
+    | { products?: { id: number; variants: { id: number; available: boolean }[] }[] }
+    | null;
+  const products = list?.products ?? [];
+  const byProduct = products.find((p) => String(p.id) === savedNum);
+  const byVariant = products.flatMap((p) => p.variants).find((v) => String(v.id) === savedNum);
+  const variant = byVariant ?? byProduct?.variants.find((v) => v.available) ?? byProduct?.variants[0];
+  if (variant) {
+    if (variant.available === false) throw new CreditsCheckoutError("I crediti non sono in vendita in questo momento");
+    const q = new URLSearchParams({ "attributes[aiCreditsFor]": input.invitationId, ...(input.email ? { "checkout[email]": input.email } : {}) });
+    return `${home}/cart/${variant.id}:1?${q.toString()}`;
+  }
+  // Prodotto non pubblicato sul sito: ultima prova con la Storefront API (canale headless).
   const token = storefrontToken();
-  if (!ids.storeDomain || !token || !ids.variantAiCreditsId) throw new CreditsCheckoutError("Ricarica dei crediti non disponibile in questo momento");
+  if (!ids.storeDomain || !token) throw new CreditsCheckoutError("Il prodotto dei crediti non è visibile al negozio: va pubblicato nel canale di vendita collegato al sito");
   const merchandiseId = await creditsMerchandise(ids.storeDomain, token, ids.variantAiCreditsId);
   const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
     method: "POST",

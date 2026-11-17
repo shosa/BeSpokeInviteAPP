@@ -208,13 +208,28 @@ export async function testShopify(): Promise<ShopifyTest> {
       const num = ids.variantAiCreditsId.split("/").pop();
       const node = (await gql(variantQuery, { id: `gid://shopify/ProductVariant/${num}` })).node as { title?: string; product?: { title: string } } | null;
       const product = node ? null : ((await gql(`query P($id: ID!) { node(id: $id) { ... on Product { title } } }`, { id: `gid://shopify/Product/${num}` })).node as { title?: string } | null);
-      if (!node && !product?.title) return { ...out, ok: false, error: "Il prodotto dei crediti BeSpoke AI non è visibile: controlla l'ID e che sia pubblicato nel canale di vendita collegato al sito" };
-      out.creditsTitle = node ? [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ") : product!.title;
+      // Come per il planner, basta che il prodotto sia pubblicato sul sito (Online Store): la ricarica usa il carrello del sito.
+      let siteTitle: string | undefined;
+      if (!node && !product?.title) {
+        const { home } = await shopLinks();
+        const list = (await fetch(`${home}/products.json?limit=250`, { signal: AbortSignal.timeout(6000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null)) as { products?: { id: number; title: string; variants: { id: number }[] }[] } | null;
+        siteTitle = list?.products?.find((p) => String(p.id) === num || p.variants.some((v) => String(v.id) === num))?.title;
+      }
+      if (!node && !product?.title && !siteTitle) return { ...out, ok: false, error: "Il prodotto dei crediti BeSpoke AI non è visibile: controlla l'ID e che sia pubblicato nel canale di vendita collegato al sito" };
+      out.creditsTitle = node ? [node.product?.title, node.title && node.title !== "Default Title" ? node.title : null].filter(Boolean).join(" · ") : product?.title ?? siteTitle;
     }
     if (ids.plannerProductId) {
       const node = (await gql(`query Product($id: ID!) { node(id: $id) { ... on Product { title availableForSale } } }`, { id: ids.plannerProductId })).node as { title?: string } | null;
-      if (!node?.title) return { ...out, ok: false, error: "Il prodotto planner non esiste in questo negozio" };
-      out.plannerTitle = node.title;
+      // Il planner si compra dalla pagina prodotto del sito: basta che sia pubblicato lì (Online Store).
+      let title = node?.title;
+      if (!title) {
+        const { home } = await shopLinks();
+        const num = ids.plannerProductId.split("/").pop();
+        const list = (await fetch(`${home}/products.json?limit=250`, { signal: AbortSignal.timeout(6000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null)) as { products?: { id: number; title: string }[] } | null;
+        title = list?.products?.find((p) => String(p.id) === num)?.title;
+      }
+      if (!title) return { ...out, ok: false, error: "Il prodotto planner non esiste in questo negozio" };
+      out.plannerTitle = title;
     }
     return out;
   } catch (e) {
