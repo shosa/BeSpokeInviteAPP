@@ -52,7 +52,7 @@ import { renderMail } from "./mail";
 import { registerAdminInvitations } from "./adminInvitations";
 import { registerAdminConsole } from "./adminConsole";
 import { registerAdminMedia } from "./adminMedia";
-import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, shopLinks, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
+import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant, resolveCreditsId, shopLinks, shopifyStatus, saveShopifyIds, testShopify, validateShopifyIds } from "./shopifySettings";
 import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
@@ -1051,10 +1051,12 @@ export async function buildApp() {
   type AiCreditsOrder = { id: number | string; currency?: string; note_attributes?: { name: string; value: string }[]; line_items?: { variant_id?: number | string | null; quantity?: number; properties?: { name: string; value: string }[] }[] };
   async function applyAiCredits(order: AiCreditsOrder): Promise<number> {
     const ids = getShopifyIds();
-    const variant = normalizeVariant(ids.variantAiCreditsId);
-    if (!variant) return 0;
-    // In console può esserci l'ID del prodotto invece della variante: valgono tutte le sue varianti.
-    const productNum = variant.split("/").pop();
+    if (!ids.variantAiCreditsId) return 0;
+    // In console c'è una variante o un prodotto: con il prodotto valgono tutte le sue varianti.
+    const savedNum = ids.variantAiCreditsId.split("/").pop();
+    const isProduct = ids.variantAiCreditsId.includes("/Product/");
+    const variant = isProduct ? null : `gid://shopify/ProductVariant/${savedNum}`;
+    const productNum = isProduct ? savedNum : undefined;
     const perPack = Number(ids.aiCreditsPerPack) || 20;
     const cartFor = order.note_attributes?.find((a) => a.name === "aiCreditsFor")?.value;
     let added = 0;
@@ -1486,6 +1488,8 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     const checked = validateShopifyIds((req.body ?? {}) as Record<string, unknown>);
     if (!checked.ok) return reply.code(400).send({ error: checked.error });
+    // Crediti: un numero da solo diventa variante o prodotto secondo quello che risponde Shopify.
+    if (checked.value.variantAiCreditsId) checked.value.variantAiCreditsId = await resolveCreditsId(checked.value.variantAiCreditsId);
     await saveShopifyIds(checked.value);
     return shopifyPayload();
   });

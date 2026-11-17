@@ -35,6 +35,37 @@ export function normalizeVariant(raw: string): string | null {
   return m ? `gid://shopify/ProductVariant/${m[2]}` : null;
 }
 
+// Crediti BeSpoke AI: può essere una variante o un prodotto. Il gid dice quale; un numero da solo resta da risolvere
+// (resolveCreditsId lo chiede a Shopify). Restituisce null se il valore non è un ID.
+const CREDITS_RE = /^(?:gid:\/\/shopify\/(Product|ProductVariant)\/)?(\d{1,20})$/;
+export function normalizeCredits(raw: string): string | null {
+  const m = CREDITS_RE.exec(raw.trim());
+  if (!m) return null;
+  return m[1] ? `gid://shopify/${m[1]}/${m[2]}` : m[2];
+}
+
+// Un numero da solo: se Shopify lo conosce come variante è una variante, altrimenti si salva come prodotto.
+export async function resolveCreditsId(value: string): Promise<string> {
+  if (!/^\d+$/.test(value)) return value;
+  const ids = getShopifyIds();
+  const token = storefrontToken();
+  if (ids.storeDomain && token) {
+    try {
+      const res = await fetch(`https://${ids.storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+        body: JSON.stringify({ query: `query V($id: ID!) { node(id: $id) { ... on ProductVariant { id } } }`, variables: { id: `gid://shopify/ProductVariant/${value}` } }),
+        signal: AbortSignal.timeout(6000),
+      });
+      const d = (await res.json().catch(() => ({}))) as { data?: { node?: { id?: string } | null } };
+      if (d.data?.node?.id) return `gid://shopify/ProductVariant/${value}`;
+    } catch {
+      /* negozio non raggiungibile: si salva come prodotto, il pagamento prova comunque entrambi */
+    }
+  }
+  return `gid://shopify/Product/${value}`;
+}
+
 // Un ID di prodotto come gid completo. Accetta anche il solo numero dell'admin di Shopify.
 export function normalizeProduct(raw: string): string | null {
   const m = PRODUCT_RE.exec(raw.trim());
@@ -66,7 +97,7 @@ export async function loadShopifySettings(): Promise<void> {
   if (typeof v.variantPremiumId === "string" && normalizeVariant(v.variantPremiumId)) stored.variantPremiumId = normalizeVariant(v.variantPremiumId)!;
   if (typeof v.plannerProductId === "string" && normalizeProduct(v.plannerProductId)) stored.plannerProductId = normalizeProduct(v.plannerProductId)!;
   if (typeof v.variantBasicId === "string" && normalizeVariant(v.variantBasicId)) stored.variantBasicId = normalizeVariant(v.variantBasicId)!;
-  if (typeof v.variantAiCreditsId === "string" && normalizeVariant(v.variantAiCreditsId)) stored.variantAiCreditsId = normalizeVariant(v.variantAiCreditsId)!;
+  if (typeof v.variantAiCreditsId === "string" && normalizeCredits(v.variantAiCreditsId)) stored.variantAiCreditsId = normalizeCredits(v.variantAiCreditsId)!;
   if (typeof v.aiCreditsPerPack === "string" && /^\d{1,3}$/.test(v.aiCreditsPerPack) && Number(v.aiCreditsPerPack) > 0) stored.aiCreditsPerPack = v.aiCreditsPerPack;
 }
 
@@ -82,7 +113,7 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
   const basic = typeof input.variantBasicId === "string" ? input.variantBasicId.trim() : "";
   if (basic && !normalizeVariant(basic)) return { ok: false, error: "L'ID della variante dell'invito base non è valido: usa il numero della variante" };
   const credits = typeof input.variantAiCreditsId === "string" ? input.variantAiCreditsId.trim() : "";
-  if (credits && !normalizeVariant(credits)) return { ok: false, error: "L'ID della variante dei crediti BeSpoke AI non è valido: usa il numero della variante" };
+  if (credits && !normalizeCredits(credits)) return { ok: false, error: "L'ID della variante dei crediti BeSpoke AI non è valido: usa il numero della variante" };
   const perPack = typeof input.aiCreditsPerPack === "string" || typeof input.aiCreditsPerPack === "number" ? String(input.aiCreditsPerPack).trim() : "20";
   if (!/^\d{1,3}$/.test(perPack) || Number(perPack) < 1) return { ok: false, error: "Le richieste per pacchetto devono essere un numero da 1 a 999" };
   if (base && !normalizeVariant(base)) return { ok: false, error: "L'ID della variante base non è valido: usa il numero della variante" };
@@ -96,7 +127,7 @@ export function validateShopifyIds(input: Partial<Record<keyof ShopifyIds, unkno
       variantPremiumId: normalizeVariant(premium) ?? "",
       plannerProductId: normalizeProduct(planner) ?? "",
       variantBasicId: normalizeVariant(basic) ?? "",
-      variantAiCreditsId: normalizeVariant(credits) ?? "",
+      variantAiCreditsId: normalizeCredits(credits) ?? "",
       aiCreditsPerPack: perPack,
     },
   };
@@ -124,7 +155,7 @@ export function shopifyStatus(): ShopifyItem[] {
   return [
     { key: "storeDomain", label: "Dominio del negozio", required: true, source: srcOf(stored.storeDomain, env.storeDomain), value: ids.storeDomain || null, secret: false },
     { key: "variantId", label: "Variante dell'invito", required: true, source: srcOf(stored.variantId, env.variantId), value: ids.variantId || null, secret: false },
-    { key: "variantAiCreditsId", label: "Variante dei crediti BeSpoke AI", required: false, source: srcOf(stored.variantAiCreditsId, env.variantAiCreditsId), value: ids.variantAiCreditsId || null, secret: false },
+    { key: "variantAiCreditsId", label: "Prodotto o variante dei crediti BeSpoke AI", required: false, source: srcOf(stored.variantAiCreditsId, env.variantAiCreditsId), value: ids.variantAiCreditsId || null, secret: false },
     { key: "variantBasicId", label: "Variante dell'invito base (template non Premium)", required: false, source: srcOf(stored.variantBasicId, env.variantBasicId), value: ids.variantBasicId || null, secret: false },
     { key: "plannerProductId", label: "Prodotto planner (venduto a parte)", required: false, source: srcOf(stored.plannerProductId, env.plannerProductId), value: ids.plannerProductId || null, secret: false },
     { key: "variantPremiumId", label: "Variante del pacchetto invito + planner", required: false, source: srcOf(stored.variantPremiumId, env.variantPremiumId), value: ids.variantPremiumId || null, secret: false },
