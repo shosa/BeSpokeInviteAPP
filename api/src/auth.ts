@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { promisify } from "util";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { pool } from "./db";
 
@@ -7,7 +8,26 @@ const SESSION_DAYS = 30;
 const ACCESS_DAYS = 365;
 const isProd = process.env.NODE_ENV === "production";
 
+const scrypt = promisify(crypto.scrypt) as (pw: string, salt: Buffer, keylen: number) => Promise<Buffer>;
+
 export const hashToken = (t: string) => crypto.createHash("sha256").update(t).digest("hex");
+
+// Password del cliente (facoltativa, in aggiunta al link): scrypt con sale casuale, formato «scrypt$sale$chiave» in base64.
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.randomBytes(16);
+  const key = await scrypt(password, salt, 64);
+  return `scrypt$${salt.toString("base64")}$${key.toString("base64")}`;
+}
+
+export async function verifyPassword(password: string, stored: string | null | undefined): Promise<boolean> {
+  const [scheme, saltB64, keyB64] = String(stored ?? "").split("$");
+  if (scheme !== "scrypt" || !saltB64 || !keyB64) return false;
+  const expected = Buffer.from(keyB64, "base64");
+  const actual = await scrypt(password, Buffer.from(saltB64, "base64"), expected.length);
+  return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+}
+
+export const PASSWORD_MIN = 8;
 export const randomToken = () => crypto.randomBytes(32).toString("base64url");
 
 export type SessionUser = { id: string; email: string; name: string; role: "user" | "admin" };

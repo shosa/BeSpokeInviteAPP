@@ -2,7 +2,8 @@ import { Nav } from "@/components/Nav";
 import { CopyLink } from "@/components/CopyLink";
 import { DeleteDraft } from "@/components/DeleteDraft";
 import { DemoCreate } from "@/components/DemoCreate";
-import { RequestLoginLink } from "@/components/RequestLoginLink";
+import { LoginPanel } from "@/components/account/LoginPanel";
+import { PasswordSetup } from "@/components/account/PasswordSetup";
 import { ShareLinkButton } from "@/components/account/ShareLinkButton";
 import { ApiError, apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
@@ -139,9 +140,9 @@ export default async function Account({ searchParams }: { searchParams: Promise<
           <p className="lede">
             {expired
               ? (lang === "en" ? "This link is not valid or has expired. Use the link we sent you after your purchase." : "Il link non è valido o è scaduto. Usa quello che ti abbiamo inviato dopo l'acquisto.")
-              : (lang === "en" ? "Open the link we sent you after your purchase to see your invitations." : "Apri il link che ti abbiamo inviato dopo l'acquisto per vedere i tuoi inviti.")}
+              : (lang === "en" ? "Sign in with your email and password, or get a personal link by email." : "Entra con email e password, oppure ricevi il link personale via email.")}
           </p>
-          <RequestLoginLink />
+          <LoginPanel />
           {demo ? <DemoCreate label={createLabel} themes={demoThemes} models={demoModels} /> : null}
         </main>
       </>
@@ -151,7 +152,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const [pending, planners, me] = await Promise.all([
     apiServer<PendingPurchase[]>("/api/account/pending").catch(() => [] as PendingPurchase[]),
     apiServer<PlannerRow[]>("/api/account/planners").catch(() => [] as PlannerRow[]),
-    apiServer<{ user: { name?: string } | null }>("/api/auth/me").catch(() => ({ user: null })),
+    apiServer<{ user: { name?: string; email?: string; hasPassword?: boolean } | null }>("/api/auth/me").catch(() => ({ user: null })),
   ]);
   const firstName = (me.user?.name ?? "").trim().split(/\s+/)[0] ?? "";
   const online = rows.filter((r) => r.status === "paid" && r.published);
@@ -177,10 +178,12 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   return (
     <>
       <Nav current="account" lang={lang} />
+      {me.user && me.user.hasPassword === false && <PasswordSetup email={me.user.email ?? ""} />}
       <main className="acx">
         <section className="acx-hero">
           <div>
             <h1>{c.hello}{firstName ? <>, <em>{firstName}</em></> : null}</h1>
+            {me.user?.email && <p className="acx-email">{lang === "en" ? "Signed in as" : "Hai effettuato l'accesso come"} <strong>{me.user.email}</strong></p>}
             <p>{c.summary(online.length, prep.length, planners.length, pending.length)}</p>
           </div>
           <div className="acx-buy">

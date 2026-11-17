@@ -44,7 +44,7 @@ import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
 import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
-import { SESSION_COOKIE, adminAllowed, currentUser, endSession, startSession, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
+import { PASSWORD_MIN, SESSION_COOKIE, adminAllowed, currentUser, endSession, hashPassword, startSession, verifyPassword, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { getAllMailTemplates, isMailKind, loadMailTemplates, rsvpVerdict, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
@@ -204,9 +204,50 @@ export async function buildApp() {
     return reply200;
   });
 
+  // hasPassword: se il cliente ha già una password; altrimenti l'area cliente gli chiede di impostarla.
   app.get("/api/auth/me", async (req) => {
     const user = await currentUser(req);
-    return { user };
+    if (!user) return { user: null };
+    const { rows } = await pool.query("SELECT password_hash FROM users WHERE id = $1", [user.id]);
+    return { user: { ...user, hasPassword: String(rows[0]?.password_hash ?? "").startsWith("scrypt$") } };
+  });
+
+  // Accesso con email e password (in alternativa al link). Al massimo 6 tentativi ogni 15 minuti per email, e 300 in tutto
+  // (non per IP: dietro i proxy l'API vede sempre lo stesso indirizzo).
+  const loginAttempts = new Map<string, { n: number; at: number }>();
+  const tooMany = (key: string, max: number) => {
+    const now = Date.now();
+    const a = loginAttempts.get(key);
+    if (!a || now - a.at > 15 * 60_000) { loginAttempts.set(key, { n: 1, at: now }); return false; }
+    a.n += 1;
+    return a.n > max;
+  };
+  app.post("/api/auth/login", async (req, reply) => {
+    const b = (req.body ?? {}) as { email?: unknown; password?: unknown };
+    const email = String(b.email ?? "").trim().toLowerCase();
+    const password = String(b.password ?? "");
+    if (!EMAIL.test(email) || !password) return reply.code(400).send({ error: "Inserisci email e password" });
+    if (loginAttempts.size > 10_000) loginAttempts.clear();
+    if (tooMany(`e:${email}`, 6) || tooMany("all", 300)) return reply.code(429).send({ error: "Troppi tentativi: riprova tra qualche minuto, o entra con il link via email" });
+    const { rows } = await pool.query("SELECT id, email, name, role, password_hash FROM users WHERE email = $1", [email]);
+    const ok = rows[0] ? await verifyPassword(password, rows[0].password_hash) : await verifyPassword(password, "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$AAAA");
+    if (!rows[0] || !ok) return reply.code(401).send({ error: "Email o password non corretti" });
+    loginAttempts.delete(`e:${email}`);
+    const role = roleForEmail(rows[0].email) === "admin" ? "admin" : rows[0].role;
+    if (role !== rows[0].role) await pool.query("UPDATE users SET role = $2 WHERE id = $1", [rows[0].id, role]);
+    await startSession(reply, rows[0].id);
+    return { id: rows[0].id, email: rows[0].email, name: rows[0].name, role };
+  });
+
+  // Imposta (o cambia) la password del cliente già entrato. Le altre sessioni restano aperte.
+  app.post("/api/auth/password", async (req, reply) => {
+    const user = await currentUser(req);
+    if (!user) return reply.code(401).send({ error: "Accedi per continuare" });
+    const password = String(((req.body ?? {}) as { password?: unknown }).password ?? "");
+    if (password.length < PASSWORD_MIN || password.length > 200) return reply.code(400).send({ error: "La password deve avere almeno 8 caratteri" });
+    if (password.trim().toLowerCase() === user.email.toLowerCase()) return reply.code(400).send({ error: "La password non può essere la tua email" });
+    await pool.query("UPDATE users SET password_hash = $2 WHERE id = $1", [user.id, await hashPassword(password)]);
+    return { ok: true };
   });
 
   app.delete("/api/auth/me", async (req, reply) => {
