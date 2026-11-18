@@ -6,7 +6,8 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "snapshot:planner": "node scripts/planner-demo-snapshot.mjs"
   },
   "dependencies": {
     "@inviteme/shared": "*",

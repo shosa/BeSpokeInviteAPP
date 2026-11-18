@@ -35,13 +35,13 @@ function Stars({ value, onChange, label, of }: { value: number; onChange?: (n: n
   );
 }
 
-export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call, act }: { quotes: Quote[]; payments: Payment[]; budgetCents: number; guestQuota: number; call: Call; act: (fn: () => Promise<unknown>) => Promise<void> }) {
+export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call, act, initialView = "voci" }: { quotes: Quote[]; payments: Payment[]; budgetCents: number; guestQuota: number; call: Call; act: (fn: () => Promise<unknown>) => Promise<void>; initialView?: View }) {
   const en = useLang() === "en";
   const t = (it: string, eng: string) => (en ? eng : it);
   LOC = en ? "en-GB" : "it-IT";
   const catLabel = (k: string) => { const c = CATS.find((x) => x.key === k) ?? CATS[CATS.length - 1]; return en ? c.en : c.it; };
   const monthOf = (iso: string | null) => (iso ? new Date(`${iso}T12:00:00`).toLocaleDateString(LOC, { month: "long", year: "numeric" }) : t("Senza data", "No date"));
-  const [view, setView] = useState<View>("voci");
+  const [view, setView] = useState<View>(initialView);
   const [cat, setCat] = useState<string>(() => quotes.find((q) => !q.booked)?.category ?? CATS[0].key);
   const [editing, setEditing] = useState<string | null>(null);
   const [openVendor, setOpenVendor] = useState<string | null>(null);
@@ -82,37 +82,45 @@ export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call,
 
   return (
     <div className="bg">
-      <header className="bg-head">
-        <div>
-          <span className="pp-kicker">Budget</span>
-          {editBudget ? (
-            <form className="bg-total-form" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); void act(() => call("PUT", "", { budgetCents: toCents(f.get("total")), guestQuota: Math.max(0, Math.round(Number(f.get("guests")) || 0)) })).then(() => setEditBudget(false)); }}>
-              <label><span>{t("Budget totale (€)", "Total budget (€)")}</span><input name="total" inputMode="decimal" defaultValue={budgetCents ? String(budgetCents / 100) : ""} placeholder="25000" /></label>
-              <label><span>{t("Invitati", "Guests")}</span><input name="guests" inputMode="numeric" defaultValue={guestQuota || ""} placeholder="120" /></label>
-              <button type="submit" className="btn solid small">{t("Salva", "Save")}</button>
-              <button type="button" className="pp-link" onClick={() => setEditBudget(false)}>{t("Annulla", "Cancel")}</button>
-            </form>
-          ) : (
-            <h2 className="bg-total">
-              {budgetCents ? euro(budgetCents) : t("Imposta il budget", "Set the budget")}{guestQuota ? <small> {t(`per ${guestQuota} invitati`, `for ${guestQuota} guests`)}</small> : null}
-              <button type="button" className="pp-link" onClick={() => setEditBudget(true)}>{t("Modifica", "Edit")}</button>
-            </h2>
-          )}
-        </div>
-        {budgetCents > 0 && (
-          <div className={`bg-gauge${pct > 100 ? " is-over" : ""}`} role="img" aria-label={t(`Previsto ${pct}% del budget`, `Planned ${pct}% of the budget`)}>
-            <svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.5" /><circle cx="18" cy="18" r="15.5" style={{ strokeDasharray: `${Math.min(100, pct) * 0.974} 100` }} /></svg>
-            <strong>{pct}%</strong>
-          </div>
+      <section className="y-w bg-card">
+        {editBudget ? (
+          <form className="y-form" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget); void act(() => call("PUT", "", { budgetCents: toCents(f.get("total")), guestQuota: Math.max(0, Math.round(Number(f.get("guests")) || 0)) })).then(() => setEditBudget(false)); }}>
+            <div className="y-form-row">
+              <label className="y-field">{t("Budget totale (€)", "Total budget (€)")}<input name="total" inputMode="decimal" defaultValue={budgetCents ? String(budgetCents / 100) : ""} placeholder="25000" /></label>
+              <label className="y-field">{t("Invitati", "Guests")}<input name="guests" inputMode="numeric" defaultValue={guestQuota || ""} placeholder="120" /></label>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button type="submit" className="y-btn y-btn-fill y-btn-sm">{t("Salva", "Save")}</button>
+              <button type="button" className="y-btn y-btn-gray y-btn-sm" onClick={() => setEditBudget(false)}>{t("Annulla", "Cancel")}</button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="y-sum-top">
+              <div>
+                <span className="y-cap">{t("Previsto", "Planned")}</span>
+                <div className="y-sum-n tn">{euro(planned)}</div>
+              </div>
+              <div className="y-cap" style={{ textAlign: "right" }}>
+                {budgetCents > 0 && <>{t(`su ${euro(budgetCents)}`, `of ${euro(budgetCents)}`)}<br /><b style={{ color: budgetCents - planned < 0 ? "var(--red)" : "var(--label)" }}>{budgetCents - planned < 0 ? t(`${euro(planned - budgetCents)} oltre`, `${euro(planned - budgetCents)} over`) : t(`${euro(budgetCents - planned)} liberi`, `${euro(budgetCents - planned)} left`)}</b><br /></>}
+                <button type="button" className="y-tbtn" style={{ fontSize: 13, padding: 0 }} onClick={() => setEditBudget(true)}>{budgetCents ? t("Modifica", "Edit") : t("Imposta il budget", "Set the budget")}</button>
+              </div>
+            </div>
+            <div className="y-stack" role="img" aria-label={t(`Previsto ${pct}% del budget`, `Planned ${pct}% of the budget`)}>
+              {byCat.filter((c) => c.total > 0).map((c) => <i key={c.key} className={`cat-${c.key}`} style={{ flex: c.total }} />)}
+              {budgetCents > planned && <i style={{ flex: budgetCents - planned, background: "transparent" }} />}
+            </div>
+            <div className="y-legend-row">
+              {byCat.filter((c) => c.total > 0).map((c) => <span key={c.key} className={`cat-${c.key}`}><i />{c.label}</span>)}
+            </div>
+            <div className="y-kpis">
+              <div><span>{t("Pagato", "Paid")}</span><b className="tn">{euro(paid)}</b></div>
+              <div><span>{t("Da pagare", "To pay")}</span><b className="tn">{euro(due)}</b></div>
+              <div><span>{t("Fornitori scelti", "Vendors booked")}</span><b className="tn">{booked.length}</b></div>
+            </div>
+          </>
         )}
-      </header>
-
-      <div className="bg-sum" role="list">
-        <div role="listitem"><span>{t("Previsto", "Planned")}</span><strong>{euro(planned)}</strong></div>
-        <div role="listitem"><span>{t("Pagato", "Paid")}</span><strong>{euro(paid)}</strong></div>
-        <div role="listitem"><span>{t("Da pagare", "To pay")}</span><strong>{euro(due)}</strong></div>
-        {budgetCents > 0 && <div role="listitem" className={budgetCents - planned < 0 ? "is-over" : ""}><span>{budgetCents - planned < 0 ? t("Oltre il budget", "Over budget") : t("Ancora libero", "Still available")}</span><strong>{euro(Math.abs(budgetCents - planned))}</strong></div>}
-      </div>
+      </section>
 
       <div className="bg-tabs" role="tablist" aria-label={t("Viste del budget", "Budget views")}>
         {(["voci", "pagamenti", "contratti", "confronta"] as View[]).map((v) => (
@@ -129,7 +137,7 @@ export function BudgetSection({ quotes, payments, budgetCents, guestQuota, call,
               const ratio = c.guide ? c.total / c.guide : 0;
               return (
                 <li key={c.key}>
-                  <button type="button" className="bg-cat" onClick={() => { setCat(c.key); setView("confronta"); }}>
+                  <button type="button" className={`bg-cat cat-${c.key}`} onClick={() => { setCat(c.key); setView("confronta"); }}>
                     <span className="bg-cat-text"><strong>{c.label}</strong><small>{c.names.length ? c.names.join(", ") : t("Ancora niente", "Nothing yet")}</small></span>
                     <span className="bg-cat-num"><strong>{euro(c.total)}</strong>{c.guide > 0 && <small>{t("consigliato", "suggested")} {euro(c.guide)}</small>}</span>
                     {c.guide > 0 && <span className={`bg-meter${ratio > 1 ? " is-over" : ""}`} aria-hidden="true"><i style={{ width: `${Math.min(100, ratio * 100)}%` }} /></span>}

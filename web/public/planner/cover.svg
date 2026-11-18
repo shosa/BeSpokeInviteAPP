@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 736 832" preserveAspectRatio="xMidYMid slice">
+  <!-- Copertina d'esempio del planner: giardino al tramonto con luci appese e tavolate, disegno nostro. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8d8a5f"/>
+      <stop offset="0.35" stop-color="#5d6440"/>
+      <stop offset="0.7" stop-color="#3b3a2b"/>
+      <stop offset="1" stop-color="#241f1b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.18" r="0.55">
+      <stop offset="0" stop-color="#e8cf98" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#e8cf98" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tree" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2f3b24"/>
+      <stop offset="1" stop-color="#2f3b24" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="light" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff3d2"/>
+      <stop offset="0.35" stop-color="#ffe2a0" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3ede2"/>
+      <stop offset="1" stop-color="#b9b0a2"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <rect width="736" height="832" fill="url(#sky)"/>
+  <rect width="736" height="832" fill="url(#glow)"/>
+  <g filter="url(#soft)">
+    <ellipse cx="90" cy="250" rx="190" ry="230" fill="url(#tree)"/>
+    <ellipse cx="660" cy="300" rx="170" ry="250" fill="url(#tree)"/>
+    <ellipse cx="380" cy="150" rx="120" ry="90" fill="#4b5634" opacity="0.6"/>
+    <path d="M0 520 C200 470 520 470 736 520 V832 H0Z" fill="#2c2620"/>
+  </g>
+  <g stroke="#2a2418" stroke-opacity="0.35" fill="none" stroke-width="1.2">
+    <path d="M40 210 Q368 330 700 200"/>
+    <path d="M20 300 Q368 420 720 290"/>
+  </g>
+  <g>
+    <circle cx="80" cy="226" r="9" fill="url(#light)"/><circle cx="150" cy="252" r="9" fill="url(#light)"/><circle cx="225" cy="272" r="9" fill="url(#light)"/>
+    <circle cx="300" cy="283" r="9" fill="url(#light)"/><circle cx="380" cy="286" r="9" fill="url(#light)"/><circle cx="455" cy="280" r="9" fill="url(#light)"/>
+    <circle cx="530" cy="265" r="9" fill="url(#light)"/><circle cx="605" cy="242" r="9" fill="url(#light)"/><circle cx="670" cy="215" r="9" fill="url(#light)"/>
+    <circle cx="70" cy="320" r="10" fill="url(#light)"/><circle cx="160" cy="348" r="10" fill="url(#light)"/><circle cx="250" cy="368" r="10" fill="url(#light)"/>
+    <circle cx="340" cy="378" r="10" fill="url(#light)"/><circle cx="430" cy="378" r="10" fill="url(#light)"/><circle cx="520" cy="366" r="10" fill="url(#light)"/>
+    <circle cx="610" cy="344" r="10" fill="url(#light)"/><circle cx="690" cy="312" r="10" fill="url(#light)"/>
+  </g>
+  <g opacity="0.92">
+    <path d="M300 470 L436 470 L560 832 L176 832Z" fill="url(#cloth)" opacity="0.85"/>
+    <path d="M300 470 L436 470 L470 560 L266 560Z" fill="#faf5ec" opacity="0.6"/>
+  </g>
+  <g fill="#6e7f5e" opacity="0.8" filter="url(#soft)">
+    <ellipse cx="330" cy="560" rx="26" ry="10"/><ellipse cx="406" cy="560" rx="26" ry="10"/>
+    <ellipse cx="300" cy="650" rx="34" ry="12"/><ellipse cx="436" cy="650" rx="34" ry="12"/>
+    <ellipse cx="262" cy="760" rx="42" ry="14"/><ellipse cx="474" cy="760" rx="42" ry="14"/>
+  </g>
+  <g fill="#fff0c8">
+    <circle cx="350" cy="520" r="2.4"/><circle cx="386" cy="520" r="2.4"/><circle cx="320" cy="610" r="3"/><circle cx="416" cy="610" r="3"/>
+    <circle cx="290" cy="710" r="3.4"/><circle cx="446" cy="710" r="3.4"/>
+  </g>
+</svg>

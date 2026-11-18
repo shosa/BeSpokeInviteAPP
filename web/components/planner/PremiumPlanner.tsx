@@ -34,6 +34,7 @@ export type PremiumData = {
   notes: string;
   budgetCents: number;
   guestQuota: number;
+  groupQuotas?: Record<string, number>;
   bannerImage: string | null;
   archImage: string | null;
 };

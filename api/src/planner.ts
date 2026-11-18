@@ -170,7 +170,9 @@ export function sanitizeDocs(input: unknown): Record<string, FolderValue> | null
 }
 
 // Meteo del giorno dell'evento (Open-Meteo, senza chiave). Le previsioni arrivano a circa 16 giorni.
-export type Forecast = { date: string; tmaxC: number; tminC: number; precipMm: number; precipProb: number | null };
+// Con le ore (temperatura e pioggia ora per ora) il planner dice se piove intorno alla cerimonia.
+export type ForecastHour = { hour: number; tempC: number; precipMm: number };
+export type Forecast = { date: string; tmaxC: number; tminC: number; precipMm: number; precipProb: number | null; hourly?: ForecastHour[] };
 const FORECAST_MS = 6 * 3600_000;
 const forecastCache = new Map<string, { at: number; value: Forecast | null }>();
 
@@ -180,9 +182,9 @@ export async function forecastFor(lat: number, lon: number, date: string): Promi
   if (hit && Date.now() - hit.at < FORECAST_MS) return hit.value;
   let value: Forecast | null = null;
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=auto&start_date=${date}&end_date=${date}`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=temperature_2m,precipitation&timezone=auto&start_date=${date}&end_date=${date}`;
     const res = await fetch(url, { headers: { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" } });
-    const d = (await res.json()) as { daily?: Record<string, (number | null)[]> };
+    const d = (await res.json()) as { daily?: Record<string, (number | null)[]>; hourly?: { time?: string[]; temperature_2m?: (number | null)[]; precipitation?: (number | null)[] } };
     const day = d.daily;
     if (day?.time && day.temperature_2m_max?.[0] != null) {
       value = {
@@ -192,6 +194,10 @@ export async function forecastFor(lat: number, lon: number, date: string): Promi
         precipMm: Math.round(((day.precipitation_sum?.[0] as number) ?? 0) * 10) / 10,
         precipProb: day.precipitation_probability_max?.[0] ?? null,
       };
+      const h = d.hourly;
+      if (h?.time?.length) {
+        value.hourly = h.time.map((time, i) => ({ hour: Number(time.slice(11, 13)), tempC: Math.round(h.temperature_2m?.[i] ?? 0), precipMm: Math.round((h.precipitation?.[i] ?? 0) * 10) / 10 }));
+      }
     }
   } catch {
     value = null;

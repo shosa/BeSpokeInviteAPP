@@ -22,7 +22,19 @@ type Deps = {
 };
 
 // bannerImage e archImage: foto scelte dal cliente per la testata del planner (sfondo e arco). Solo file caricati qui.
-export type PlannerData = { notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number; bannerImage?: string; archImage?: string };
+// groupQuotas: quante persone può invitare ogni gruppo (es. «Famiglia di Marco»: 20), per avvisare quando lo supera.
+export type PlannerData = { notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number; groupQuotas?: Record<string, number>; bannerImage?: string; archImage?: string };
+
+// Limiti per gruppo: nomi di gruppo come nella lista invitati (fino a 80 caratteri), numeri da 1 a 5000; 0 toglie il limite.
+function sanitizeGroupQuotas(v: unknown): Record<string, number> | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const out: Record<string, number> = {};
+  for (const [k, n] of Object.entries(v as Record<string, unknown>).slice(0, 200)) {
+    const name = k.trim().slice(0, 80);
+    if (name && typeof n === "number" && n >= 1) out[name] = Math.min(5000, Math.round(n));
+  }
+  return out;
+}
 const IMAGE_SLOTS = { banner: "bannerImage", arch: "archImage" } as const;
 
 const validDate = (v: unknown): string | null => (typeof v === "string" && ISO_DATE.test(v) && !Number.isNaN(Date.parse(v + "T00:00:00")) ? v : null);
@@ -194,6 +206,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       archImage: data.archImage ?? null,
       budgetCents: data.budgetCents ?? 0,
       guestQuota: data.guestQuota ?? 0,
+      groupQuotas: data.groupQuotas ?? {},
     };
   });
 
@@ -211,6 +224,11 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     if (typeof b.notes === "string") data.notes = b.notes.slice(0, 4000);
     if (typeof b.budgetCents === "number" && b.budgetCents >= 0) data.budgetCents = Math.min(1_000_000_000, Math.round(b.budgetCents));
     if (typeof b.guestQuota === "number" && b.guestQuota >= 0) data.guestQuota = Math.min(5000, Math.round(b.guestQuota));
+    if (b.groupQuotas !== undefined) {
+      const quotas = sanitizeGroupQuotas(b.groupQuotas);
+      if (!quotas) return reply.code(400).send({ error: "Limiti dei gruppi non validi" });
+      data.groupQuotas = quotas;
+    }
     const title = b.title !== undefined ? text(b.title, 120) : p.title;
     if (!title) return reply.code(400).send({ error: "Il nome dell'evento non può essere vuoto" });
     let eventDate = p.event_date;
