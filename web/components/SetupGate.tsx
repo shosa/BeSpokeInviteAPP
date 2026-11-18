@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { presetQuestions, setupDefaults, type InviteConfig, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
 import { ArrowLeft, ArrowRight, CalendarDays, Check, Heart, ListChecks, MailCheck, MapPin, PenLine, Plus, Trash2, type LucideIcon } from "lucide-react";
@@ -38,7 +38,14 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
   const start = useMemo(() => setupDefaults(config), [config]);
   const presets = useMemo(() => presetQuestions(locale), [locale]);
 
-  const [done, setDone] = useState(setupDone);
+  // Dopo il salvataggio il builder si apre solo con i dati nuovi della pagina (setupDone dal server): aperto subito,
+  // partirebbe dall'invito di prima (nomi d'esempio) e al primo salvataggio cancellerebbe quelli appena scritti.
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const t = setTimeout(() => window.location.reload(), 5000); // aggiornamento non arrivato: si ricarica la pagina
+    return () => clearTimeout(t);
+  }, [saved]);
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState(start.title);
   const [eventDate, setEventDate] = useState(start.eventDate);
@@ -101,7 +108,7 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
       });
       const out = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(out.error ?? t("Non è stato possibile salvare", "Could not save"));
-      setDone(true);
+      setSaved(true);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("Errore", "Error"));
@@ -116,7 +123,7 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
     else setStep((s) => s + 1);
   }
 
-  if (done) return <>{children}</>;
+  if (setupDone) return <>{children}</>;
 
   return (
     <>
