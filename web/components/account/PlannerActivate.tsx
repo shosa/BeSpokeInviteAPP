@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { AddressField } from "@/components/builder/AddressField";
 import { EVENT_TYPES, defaultPlannerIcon, eventPhrases, type EventType, type PlannerIcon } from "@inviteme/shared";
 import { PlannerIconPicker } from "@/components/planner/PlannerIcon";
 
@@ -15,6 +16,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
   const [icon, setIcon] = useState<PlannerIcon | null>(null); // senza scelta, quella del tipo di evento
   const [eventDate, setEventDate] = useState("");
   const [venue, setVenue] = useState("");
+  const [address, setAddress] = useState("");
   const [invitationId, setInvitationId] = useState(invitations.length === 1 ? invitations[0].id : "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
     const res = await fetch("/api/account/planner-claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, eventType, icon: icon ?? defaultPlannerIcon(eventType), title, eventDate: eventDate || undefined, venue, invitationId: invitationId || undefined }),
+      body: JSON.stringify({ orderId, eventType, icon: icon ?? defaultPlannerIcon(eventType), title, eventDate: eventDate || undefined, venue, address, invitationId: invitationId || undefined }),
     });
     const body = (await res.json().catch(() => ({}))) as { error?: string; plannerId?: string };
     if (!res.ok || !body.plannerId) {
@@ -67,6 +69,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
         <span>{en ? "Venue (optional)" : "Luogo (facoltativo)"}</span>
         <input value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Villa Aurelia, Roma" maxLength={160} />
       </label>
+      <AddressField className="demo-field" label={en ? "Address (optional, for the weather)" : "Indirizzo (facoltativo, per il meteo)"} value={address} onChange={setAddress} placeholder={en ? "Start typing: street, city…" : "Inizia a scrivere: via, città…"} />
       <fieldset className="acx-plan-link">
         <legend>{en ? "Link an invitation (optional)" : "Collega un invito (facoltativo)"}</legend>
         <p className="hint">{en ? "Linked, the planner shows the replies of the invitation and its link to share. You can do it later too." : "Collegato, il planner mostra le risposte dell'invito e il link da condividere. Puoi farlo anche dopo."}</p>

@@ -657,15 +657,29 @@ export async function buildApp() {
     if (q.length < 3) return { results: [] };
     const hit = geoCache.get(q);
     if (hit && Date.now() - hit.at < 600_000) return { results: hit.results };
+    // Prima Photon (OpenStreetMap, completa anche le parole a metà mentre si scrive), poi Nominatim come riserva.
+    const UA = { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" };
     let results: string[] = [];
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=it&q=${encodeURIComponent(q)}`, {
-        headers: { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" },
-      });
-      const list = (await res.json()) as { display_name?: string }[];
-      results = list.map((x) => x.display_name ?? "").filter(Boolean);
+      const res = await fetch(`https://photon.komoot.io/api/?limit=6&q=${encodeURIComponent(q)}`, { headers: UA, signal: AbortSignal.timeout(4000) });
+      const data = (await res.json()) as { features?: { properties?: Record<string, string> }[] };
+      const label = (p: Record<string, string>) => {
+        const street = p.street ? [p.street, p.housenumber].filter(Boolean).join(" ") : "";
+        const place = [p.postcode, p.city ?? p.town ?? p.village ?? p.locality].filter(Boolean).join(" ");
+        return [p.name !== street ? p.name : "", street, place, p.state, p.country].filter(Boolean).join(", ");
+      };
+      results = [...new Set((data.features ?? []).map((f) => label(f.properties ?? {})).filter(Boolean))].slice(0, 5);
     } catch {
       results = [];
+    }
+    if (!results.length) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=it&q=${encodeURIComponent(q)}`, { headers: UA, signal: AbortSignal.timeout(4000) });
+        const list = (await res.json()) as { display_name?: string }[];
+        results = list.map((x) => x.display_name ?? "").filter(Boolean);
+      } catch {
+        results = [];
+      }
     }
     geoCache.set(q, { at: Date.now(), results });
     return { results };

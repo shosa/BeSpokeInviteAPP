@@ -8,6 +8,7 @@ import { Folder } from "../Folder";
 import { ShareInvite } from "../ShareInvite";
 import { eventCopy, type Ctx, type Guest } from "./YesPlanner";
 import { PlannerIconPicker } from "../PlannerIcon";
+import { AddressField } from "../../builder/AddressField";
 import { IcCheck, IcChevron, IcClock, IcGlobe, IcList, IcPhone, IcPrint, IcSearch } from "./icons";
 import { TASK_BANDS, docCount, euro, hue, initials, stats, taskWhen, validIso } from "./model";
 
@@ -378,7 +379,7 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
           <label className="y-field">{t("Budget totale (€)", "Total budget (€)")}<input value={budget} onChange={(e) => setBudget(e.target.value)} inputMode="decimal" placeholder="25000" /></label>
         </div>
         <label className="y-field">{t("Luogo", "Venue")}<input value={ev.venue} onChange={(e) => setEv({ ...ev, venue: e.target.value })} maxLength={160} /></label>
-        <label className="y-field">{t("Indirizzo (per il meteo)", "Address (for the weather)")}<input value={ev.address} onChange={(e) => setEv({ ...ev, address: e.target.value })} maxLength={200} /></label>
+        <AddressField className="y-field" label={t("Indirizzo (per il meteo)", "Address (for the weather)")} value={ev.address} onChange={(address) => setEv({ ...ev, address })} placeholder={t("Inizia a scrivere: via, città…", "Start typing: street, city…")} />
         <div><button className="y-btn y-btn-fill y-btn-sm" type="submit">{t("Salva", "Save")}</button></div>
       </form>
 
