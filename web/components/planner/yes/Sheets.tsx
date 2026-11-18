@@ -85,7 +85,7 @@ export function TaskSheet({ ctx, task, onClose }: { ctx: Ctx; task?: Task; onClo
     <Sheet title={task ? t("Attività", "Task") : t("Nuova attività", "New task")} onClose={onClose}>
       <form className="y-form" onSubmit={save}>
         <label className="y-field">{t("Cosa c'è da fare", "What needs doing")}<input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={160} autoFocus={!task} /></label>
-        <label className="y-field">{t("Quanti giorni prima del matrimonio", "How many days before the wedding")}<input type="number" min={0} max={1000} value={days} onChange={(e) => setDays(e.target.value)} /></label>
+        <label className="y-field">{ctx.ev.daysBefore}<input type="number" min={0} max={1000} value={days} onChange={(e) => setDays(e.target.value)} /></label>
         {task && (
           <button className="y-btn y-btn-tinted y-btn-block" type="button" onClick={async () => { await ctx.act(() => ctx.call("PATCH", `/tasks/${task.id}`, { done: !task.done })); onClose(); }}>
             {task.done ? t("Segna come da fare", "Mark as not done") : t("Segna come fatta", "Mark as done")}
@@ -113,8 +113,8 @@ export function DaySheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
   const current = plan[cur] ?? plan[0];
   const after = plan.slice(cur + 1, cur + 4);
   return (
-    <Sheet title={t("Il giorno del sì", "The big day")} onClose={onClose}>
-      <p className="y-gf" style={{ padding: 0 }}>{t("Così sarà il planner il giorno del matrimonio. Le voci vengono dal programma e da «Chi chiamare» nella cartella.", "This is how the planner looks on the wedding day. It uses the schedule and «Who to call» from the binder.")}</p>
+    <Sheet title={ctx.ev.bigDay} onClose={onClose}>
+      <p className="y-gf" style={{ padding: 0 }}>{t(`Così sarà il planner ${ctx.ev.onTheDay}. Le voci vengono dal programma e da «Chi chiamare» nella cartella.`, `This is how the planner looks ${ctx.ev.onTheDay}. It uses the schedule and «Who to call» from the binder.`)}</p>
       <div className="y-day">
         <section className="y-day-now">
           <p className="y-eyebrow">{t("Adesso", "Now")}{current?.time ? ` · ${current.time}` : ""}</p>

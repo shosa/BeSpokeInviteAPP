@@ -814,3 +814,10 @@ img {
 .seat-center small { font-size: 12px; }
 .seat-table { overflow: hidden; }
 .seat-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+
+/* Attivazione invito: tipo di evento, scelto prima del template. */
+.act-type { display: grid; gap: 10px; margin-bottom: 18px; justify-items: center; text-align: center; }
+.act-type-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.act-type-chip { min-height: 40px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: inherit; font: inherit; font-size: 14px; white-space: nowrap; cursor: pointer; transition: border-color .2s, background .2s; }
+.act-type-chip:hover { border-color: var(--brass, #b8893f); }
+.act-type-chip.is-on { border-color: var(--brass, #b8893f); background: #f7f1e7; font-weight: 600; }

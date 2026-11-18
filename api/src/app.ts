@@ -9,6 +9,7 @@ import staticFiles from "@fastify/static";
 import {
   ADDON_KEYS,
   EVENT_TYPES,
+  isEventType,
   activeFeatures,
   defaultConfig,
   editRules,
@@ -280,6 +281,7 @@ export async function buildApp() {
       guests: (r.guests ?? []).length,
       rsvps: r.rsvps,
       themeId: (r.config?.themeId as string) ?? "",
+      eventType: (r.config?.eventType as string) ?? "wedding",
       plannerId: (r.planner_id as string | null) ?? null,
     }));
   });
@@ -1163,9 +1165,10 @@ export async function buildApp() {
   app.post("/api/account/claim", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
-    const b = (req.body ?? {}) as { orderId?: unknown; themeId?: unknown };
+    const b = (req.body ?? {}) as { orderId?: unknown; themeId?: unknown; eventType?: unknown };
     const orderId = typeof b.orderId === "string" ? b.orderId : "";
     const themeId = typeof b.themeId === "string" ? b.themeId : "";
+    if (b.eventType !== undefined && !isEventType(b.eventType)) return reply.code(400).send({ error: "Tipo di evento non valido" });
     const { rows } = await pool.query(
       "SELECT id, user_id, draft, amount_cents FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND COALESCE(draft->>'product', '') <> 'planner'",
       [orderId, user.id],
@@ -1178,7 +1181,8 @@ export async function buildApp() {
     // Invito base: i template Premium si vedono ma non si scelgono.
     if (row.draft.plan === "base" && c.themes.some((t) => t.manifest.id === themeId && t.premium)) return reply.code(403).send({ error: "Questo template è Premium: non è incluso nell'invito base" });
     const id = await createInvitationFromOrder(
-      { id: row.id, user_id: row.user_id, draft: { ...row.draft, model, themeId }, amount_cents: row.amount_cents },
+      // Il tipo di evento scelto qui vale più di quello dell'ordine (gli ordini manuali e Shopify partono da matrimonio).
+      { id: row.id, user_id: row.user_id, draft: { ...row.draft, model, themeId, ...(isEventType(b.eventType) ? { eventType: b.eventType } : {}) }, amount_cents: row.amount_cents },
       "shopify",
       row.id,
     );

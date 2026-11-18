@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FOLDER } from "@inviteme/shared";
+import { EVENT_TYPES, FOLDER } from "@inviteme/shared";
 import { BudgetSection } from "../BudgetSection";
 import { Seating } from "../Seating";
 import { Folder } from "../Folder";
 import { ShareInvite } from "../ShareInvite";
-import type { Ctx, Guest } from "./YesPlanner";
+import { eventCopy, type Ctx, type Guest } from "./YesPlanner";
 import { IcCheck, IcChevron, IcClock, IcGlobe, IcList, IcPhone, IcPrint, IcSearch } from "./icons";
 import { TASK_BANDS, docCount, euro, hue, initials, stats, taskWhen, validIso } from "./model";
 
@@ -244,7 +244,7 @@ export function TasksView({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="y-page">
-      <Head title={t("Attività", "Tasks")} sub={validIso(data.event.eventDate) ? t("Le date si calcolano da sole dalla data del matrimonio.", "Dates are worked out automatically from the wedding date.") : t("Imposta la data del matrimonio: le scadenze si calcolano da sole.", "Set the wedding date and the due dates work themselves out.")} />
+      <Head title={t("Attività", "Tasks")} sub={validIso(data.event.eventDate) ? t(`Le date si calcolano da sole dalla ${ctx.ev.date.replace(/^la /, "")}.`, `Dates are worked out automatically from ${ctx.ev.date}.`) : t(`Imposta ${ctx.ev.date}: le scadenze si calcolano da sole.`, `Set ${ctx.ev.date} and the due dates work themselves out.`)} />
       <section className="y-w">
         <div className="y-sum-top"><div className="y-sum-n tn">{pct}%</div><span className="y-cap">{t(`${done} di ${data.tasks.length} fatte`, `${done} of ${data.tasks.length} done`)}</span></div>
         <span className="y-bar ok"><i style={{ transform: `scaleX(${pct / 100})` }} /></span>
@@ -292,7 +292,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
     <div className="y-page">
       <Head title={t("Cartella", "Binder")} sub={t("Tutto quello che serve il giorno del sì, pronto da stampare.", "Everything you need on the big day, ready to print.")} />
       <section className="y-w" style={{ padding: 16 }}>
-        <span className="y-cap">{t("La cartella del matrimonio", "Your wedding binder")}</span>
+        <span className="y-cap">{ctx.ev.binder}</span>
         <h2 className="y-heading" style={{ fontSize: 28, marginBottom: 14 }}>{t(`${s.docsDone} su ${FOLDER.length} sezioni con qualcosa di pronto`, `${s.docsDone} of ${FOLDER.length} sections with something prepared`)}</h2>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <span className="y-cap">{t(`${items} voci pronte`, `${items} items ready`)}</span>
@@ -337,12 +337,17 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
   const inv = data.invitation;
   return (
     <div className="y-page">
-      <Head title={t("Impostazioni del matrimonio", "Wedding settings")} sub={t("Nomi, data e luogo: da qui si calcolano conto alla rovescia, scadenze e meteo.", "Names, date and place: the countdown, due dates and weather come from here.")} />
+      <Head title={ctx.ev.settings} sub={t("Nomi, data e luogo: da qui si calcolano conto alla rovescia, scadenze e meteo.", "Names, date and place: the countdown, due dates and weather come from here.")} />
       <form className="y-w y-form" onSubmit={(e) => {
         e.preventDefault();
         void ctx.act(() => ctx.call("PUT", "", { ...ev, budgetCents: Math.max(0, Math.round(Number(budget.replace(/\./g, "").replace(",", ".")) * 100) || 0) })).then(() => ctx.toast(t("Salvato", "Saved")));
       }}>
-        <label className="y-field">{t("Nomi degli sposi", "Couple's names")}<input value={ev.title} onChange={(e) => setEv({ ...ev, title: e.target.value })} maxLength={120} required placeholder="Giulia & Marco" /></label>
+        <label className="y-field">{t("Tipo di evento", "Event type")}
+          <select value={ev.eventType ?? "wedding"} onChange={(e) => setEv({ ...ev, eventType: e.target.value })}>
+            {EVENT_TYPES.map((x) => <option key={x.id} value={x.id}>{en ? x.labelEn : x.label}</option>)}
+          </select>
+        </label>
+        <label className="y-field">{eventCopy(ev.eventType, en).names}<input value={ev.title} onChange={(e) => setEv({ ...ev, title: e.target.value })} maxLength={120} required placeholder={eventCopy(ev.eventType, en).namesHint} /></label>
         <div className="y-form-row">
           <label className="y-field">{t("Data", "Date")}<input type="date" value={ev.eventDate} onChange={(e) => setEv({ ...ev, eventDate: e.target.value })} /></label>
           <label className="y-field">{t("Budget totale (€)", "Total budget (€)")}<input value={budget} onChange={(e) => setBudget(e.target.value)} inputMode="decimal" placeholder="25000" /></label>

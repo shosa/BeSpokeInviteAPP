@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FOLDER } from "@inviteme/shared";
+import { FOLDER, eventPhrases, type EventPhrases } from "@inviteme/shared";
 import type { PremiumData } from "../PremiumPlanner";
 import { PdfDialog } from "../PdfDialog";
 import { IcBinder, IcChevron, IcClose, IcGear, IcGuests, IcHome, IcPlus, IcPrint, IcSearch, IcTasks, IcWallet } from "./icons";
@@ -21,9 +21,20 @@ export type Guest = PremiumData["guests"][number];
 export type Task = PremiumData["tasks"][number];
 export type Sheet = { kind: "guest"; guest?: Guest } | { kind: "task"; task?: Task } | { kind: "day" } | { kind: "photo" } | null;
 
+// Frasi del tipo di evento (matrimonio, compleanno…), già nella lingua del planner.
+export type EventCopy = EventPhrases & { settings: string; date: string; daysBefore: string; binder: string; onTheDay: string; bigDay: string };
+export function eventCopy(type: string | undefined, en: boolean): EventCopy {
+  const p = eventPhrases(type, en ? "en" : "it");
+  const wedding = (type ?? "wedding") === "wedding";
+  return en
+    ? { ...p, settings: `${p.of[0].toUpperCase()}${p.of.slice(1)} settings`, date: `the ${p.of} date`, daysBefore: `How many days before the ${p.of}`, binder: `Your ${p.of} binder`, onTheDay: `on the ${p.of} day`, bigDay: "The big day" }
+    : { ...p, settings: `Impostazioni ${p.of}`, date: `la data ${p.of}`, daysBefore: `Quanti giorni prima ${p.of}`, binder: `La cartella ${p.of}`, onTheDay: `il giorno ${p.of}`, bigDay: wedding ? "Il giorno del sì" : "Il grande giorno" };
+}
+
 export type Ctx = {
   id: string;
   data: PremiumData;
+  ev: EventCopy;
   en: boolean;
   demo: boolean;
   t: (it: string, en: string) => string;
@@ -163,15 +174,16 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   };
 
   const openPdf = () => (demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
-  const ctx: Ctx = { id, data, en, demo, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
+  const ev = eventCopy(data.event.eventType, en);
+  const ctx: Ctx = { id, data, ev, en, demo, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
   const navIndex = NAV.findIndex((n) => n.view === view);
-  const couple = data.event.title || t("Il vostro matrimonio", "Your wedding");
+  const couple = data.event.title || ev.your;
 
   // Pulsanti in alto a destra di ogni sezione (come nell'app: aggiungi, stampa).
   const actions: { label: string; icon: React.ReactNode; onClick: () => void }[] = [];
   if (view === "home") {
     actions.push({ label: t("Cerca", "Search"), icon: <IcSearch />, onClick: () => setPalette(true) });
-    actions.push({ label: t("Impostazioni del matrimonio", "Wedding settings"), icon: <IcGear />, onClick: () => go("settings") });
+    actions.push({ label: ev.settings, icon: <IcGear />, onClick: () => go("settings") });
   }
   if (view === "tasks") actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
   if (view === "binder") actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
@@ -182,7 +194,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   return (
     <div className={`yp${demo ? " is-demo" : ""}${view === "home" ? " y-home" : ""}`}>
       <aside className="y-sidebar" aria-label={t("Sezioni", "Sections")}>
-        <div className="y-brand"><b>Planner</b><span>Bespoke Invite</span></div>
+        <div className="y-brand"><b>Bespoke Invite</b><span>Planner</span></div>
         <nav>
           <button type="button" onClick={() => setPalette(true)}>
             <IcSearch /><span>{t("Cerca", "Search")}</span><kbd>Ctrl K</kbd>
@@ -200,18 +212,18 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
             <div>
               <p className="y-cap">{couple}</p>
               <p className="tn" style={{ fontFamily: "var(--brand)", fontStyle: "italic", fontWeight: 500, fontSize: "1.5rem" }} suppressHydrationWarning>
-                {days === null ? t("Data da fissare", "Date to set") : days > 0 ? `${days} ${days === 1 ? t("giorno", "day") : t("giorni", "days")}` : days === 0 ? t("È oggi", "It's today") : t("Sposati!", "Married!")}
+                {days === null ? t("Data da fissare", "Date to set") : days > 0 ? `${days} ${days === 1 ? t("giorno", "day") : t("giorni", "days")}` : days === 0 ? t("È oggi", "It's today") : ev.after}
               </p>
             </div>
           </div>
-          <button type="button" aria-current={view === "settings" ? "page" : undefined} onClick={() => go("settings")}><IcGear /><span>{t("Impostazioni del matrimonio", "Wedding settings")}</span></button>
+          <button type="button" aria-current={view === "settings" ? "page" : undefined} onClick={() => go("settings")}><IcGear /><span>{ev.settings}</span></button>
         </div>
       </aside>
 
       <div className="y-content">
         <header className={`y-nb${scrolled ? " is-scrolled" : ""}`}>
           <div className="y-nb-in">
-            <div className="y-nb-l">{view === "home" ? <span className="y-home-brand">Planner</span> : null}</div>
+            <div className="y-nb-l">{view === "home" ? <span className="y-home-brand">Bespoke Invite <small>Planner</small></span> : null}</div>
             <div className="y-nb-t" aria-hidden="true">{view === "home" ? couple : view === "settings" ? t("Impostazioni", "Settings") : t(NAV[navIndex]?.it ?? "", NAV[navIndex]?.en ?? "")}</div>
             <div className="y-nb-r">
               {actions.map((a) => <button key={a.label} type="button" className="y-nbtn" aria-label={a.label} title={a.label} onClick={a.onClick}>{a.icon}</button>)}
@@ -276,7 +288,7 @@ function Palette({ ctx, onClose, openSheet }: { ctx: Ctx; onClose: () => void; o
     const sections: Item[] = [
       ...NAV.map((n) => ({ key: `s-${n.view}`, label: t(n.it, n.en), run: () => go(n.view) })),
       { key: "s-tables", label: t("Tavoli", "Tables"), run: () => go("guests", "tavoli") },
-      { key: "s-settings", label: t("Impostazioni del matrimonio", "Wedding settings"), run: () => go("settings") },
+      { key: "s-settings", label: ctx.ev.settings, run: () => go("settings") },
     ].filter((x) => has(x.label));
     const guests = data.guests.filter((g) => has(g.name) || has(g.group_name)).slice(0, 6).map((g) => ({ key: `g-${g.id}`, label: g.name, sub: g.group_name, run: () => openSheet({ kind: "guest", guest: g }) }));
     const tasks = data.tasks.filter((x) => has(x.title)).slice(0, 6).map((x) => ({ key: `t-${x.id}`, label: x.title, run: () => openSheet({ kind: "task", task: x }) }));

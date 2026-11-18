@@ -10,10 +10,10 @@ import { daysUntil, dayMonth, docFilled, euro, hue, initials, longDate, stats, t
 // budget, invitati, pagamenti, tavoli e cartella. Da 1200px è una griglia a 12 colonne.
 
 export function Home({ ctx }: { ctx: Ctx }) {
-  const { data, t, en, go, demo } = ctx;
+  const { data, t, en, go, demo, ev } = ctx;
   const s = useMemo(() => stats(data), [data]);
   const days = daysUntil(data.event.eventDate);
-  const title = data.event.title || t("Il vostro matrimonio", "Your wedding");
+  const title = data.event.title || ev.your;
   const today = new Date().toLocaleDateString(en ? "en-GB" : "it-IT", { weekday: "long", day: "numeric", month: "long" });
 
   // Da sistemare: contratti da firmare, pagamenti scaduti, invitati oltre il limite, budget superato.
@@ -138,7 +138,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
                 : w.reason === "date" ? t("Imposta la data per vedere il meteo", "Set the date to see the weather")
                 : t("Aggiungi l'indirizzo per vedere il meteo", "Add the address to see the weather")}
             </h2>
-            {w && <p className="y-caption">{validIso(dateIso) && days !== null && days > 0 ? t(`Mancano ${days} giorni: ti avvisiamo qui appena c'è la previsione.`, `${days} days to go: it shows up here as soon as there's a forecast.`) : t("Dalle impostazioni del matrimonio.", "From the wedding settings.")}</p>}
+            {w && <p className="y-caption">{validIso(dateIso) && days !== null && days > 0 ? t(`Mancano ${days} giorni: ti avvisiamo qui appena c'è la previsione.`, `${days} days to go: it shows up here as soon as there's a forecast.`) : (en ? `From the ${ev.settings.toLowerCase()}.` : `Dalle ${ev.settings.toLowerCase()}.`)}</p>}
           </div>
         )}
         {risk ? (
@@ -154,7 +154,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
       </section>
 
       <div className="y-home-top">
-        <section className="y-hero" aria-label={t("Il vostro matrimonio", "Your wedding")}>
+        <section className="y-hero" aria-label={ev.your}>
           {data.bannerImage || data.archImage ? <img src={(data.bannerImage || data.archImage)!} alt="" /> : <img src="/planner/cover.svg" alt="" width={736} height={832} />}
           <button className="y-hero-set" type="button" aria-label={t("Cambia la foto di copertina", "Change the cover photo")} onClick={() => ctx.sheet({ kind: "photo" })}><IcCamera /></button>
           <div className="y-hero-in">
@@ -202,7 +202,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
           <section className="y-card y-tease">
             <span className="y-ri"><IcSun /></span>
             <div>
-              <h2 className="y-heading">{t("Il giorno del sì, l'app cambia", "On the big day, the app changes")}</h2>
+              <h2 className="y-heading">{en ? "On the big day, the app changes" : `${ev.bigDay}, l'app cambia`}</h2>
               <p className="y-caption">{t("Vedrai cosa succede adesso, cosa viene dopo e chi chiamare.", "You'll see what's happening now, what's next and who to call.")}</p>
             </div>
             <button className="y-btn y-btn-tinted y-btn-sm" type="button" onClick={() => ctx.sheet({ kind: "day" })}>{t("Provalo ora", "Try it now")}</button>
@@ -340,7 +340,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
         <section className="y-folder" aria-labelledby="yFolderT">
           <div className="y-folder-copy">
             <div>
-              <p className="y-eyebrow">{t("La cartella del matrimonio", "Your wedding binder")}</p>
+              <p className="y-eyebrow">{ev.binder}</p>
               <h2 id="yFolderT" className="y-folder-t">{t(`${s.docsDone} su ${FOLDER.length} sezioni con qualcosa di pronto`, `${s.docsDone} of ${FOLDER.length} sections with something prepared`)}</h2>
               <p className="y-caption y-folder-sugg">{t(`Utili adesso: ${suggest}`, `Useful right now: ${suggest}`)}</p>
               <div className="y-folder-pills">

@@ -228,6 +228,9 @@ UPDATE planner_tasks x SET planner_id = p.id FROM planners p WHERE x.planner_id 
 UPDATE planner_vendors x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
 UPDATE planner_guests x SET planner_id = p.id FROM planners p WHERE x.planner_id IS NULL AND x.invitation_id = p.invitation_id;
 UPDATE invitations SET tier = 'rsvp' WHERE tier = 'premium';
+-- Tipo di evento del planner (matrimonio, compleanno…): quelli già creati lo prendono dall'invito collegato, altrimenti matrimonio.
+ALTER TABLE planners ADD COLUMN IF NOT EXISTS event_type text;
+UPDATE planners p SET event_type = COALESCE((SELECT i.config->>'eventType' FROM invitations i WHERE i.id = p.invitation_id), 'wedding') WHERE p.event_type IS NULL;
 -- Acquisti «premium» non ancora attivati: restano un invito da attivare e ricevono anche un planner da attivare.
 INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url, created_at)
 SELECT o.id || '-planner', o.user_id, NULL, 0, o.currency, o.source, 'paid', 'initial', '{"product":"planner"}'::jsonb, o.status_url, o.created_at

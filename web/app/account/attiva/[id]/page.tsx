@@ -26,8 +26,8 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
 
   // Acquisto di un planner: nome e data dell'evento, invito da collegare facoltativo.
   if (item.product === "planner") {
-    const rows = await apiServer<{ id: string; title: string; status: string; plannerId: string | null }[]>("/api/account/invitations").catch(() => []);
-    const free = rows.filter((r) => r.status === "paid" && !r.plannerId).map((r) => ({ id: r.id, title: r.title }));
+    const rows = await apiServer<{ id: string; title: string; status: string; eventType?: string; plannerId: string | null }[]>("/api/account/invitations").catch(() => []);
+    const free = rows.filter((r) => r.status === "paid" && !r.plannerId).map((r) => ({ id: r.id, title: r.title, eventType: r.eventType }));
     return (
       <>
         <Nav current="account" lang={lang} />

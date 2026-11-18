@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { EVENT_TYPES, eventPhrases, type EventType } from "@inviteme/shared";
 
 // Attivazione di un acquisto planner: nome e data dell'evento, luogo facoltativo e, se si vuole, l'invito da collegare.
-export function PlannerActivate({ orderId, invitations, lang }: { orderId: string; invitations: { id: string; title: string }[]; lang: "it" | "en" }) {
+export function PlannerActivate({ orderId, invitations, lang }: { orderId: string; invitations: { id: string; title: string; eventType?: string }[]; lang: "it" | "en" }) {
   const en = lang === "en";
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [eventType, setEventType] = useState<EventType>("wedding");
   const [eventDate, setEventDate] = useState("");
   const [venue, setVenue] = useState("");
   const [invitationId, setInvitationId] = useState(invitations.length === 1 ? invitations[0].id : "");
@@ -20,6 +22,9 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
     setInvitationId(id);
     const inv = invitations.find((i) => i.id === id);
     if (inv && !title.trim()) setTitle(inv.title);
+    // Il tipo di evento parte da quello dell'invito collegato.
+    const type = EVENT_TYPES.find((x) => x.id === inv?.eventType);
+    if (type) setEventType(type.id);
   }
 
   async function submit(e: React.FormEvent) {
@@ -29,7 +34,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
     const res = await fetch("/api/account/planner-claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, title, eventDate: eventDate || undefined, venue, invitationId: invitationId || undefined }),
+      body: JSON.stringify({ orderId, eventType, title, eventDate: eventDate || undefined, venue, invitationId: invitationId || undefined }),
     });
     const body = (await res.json().catch(() => ({}))) as { error?: string; plannerId?: string };
     if (!res.ok || !body.plannerId) {
@@ -42,8 +47,14 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
   return (
     <form className="acx-plan-form" onSubmit={submit}>
       <label className="demo-field">
-        <span>{en ? "Event name" : "Nome dell'evento"}</span>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={en ? "Anna & Marco's wedding" : "Matrimonio di Anna e Marco"} maxLength={120} required />
+        <span>{en ? "Event type" : "Tipo di evento"}</span>
+        <select value={eventType} onChange={(e) => setEventType(e.target.value as EventType)}>
+          {EVENT_TYPES.map((x) => <option key={x.id} value={x.id}>{en ? x.labelEn : x.label}</option>)}
+        </select>
+      </label>
+      <label className="demo-field">
+        <span>{eventPhrases(eventType, lang).names}</span>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={eventPhrases(eventType, lang).namesHint} maxLength={120} required />
       </label>
       <DatePicker label={en ? "Date (optional)" : "Data (facoltativa)"} value={eventDate} onChange={setEventDate} lang={lang} />
       <label className="demo-field">

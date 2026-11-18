@@ -207,7 +207,7 @@ export function demoData(en: boolean): PremiumData {
   const q = (id: string, category: string, name: string, amount: number, booked = true, signed = true) => ({ id, category, name, amount_cents: amount * 100, rating: booked ? 5 : 3, notes: "", booked, signed, arrival: "", contact: "", tip_cents: 0, envelope: false });
   return {
     id: "demo",
-    event: { title: "Giulia & Marco", eventDate: date, venue: L("Villa sul lago, Como", "A lakeside villa, Como"), address: "Como" },
+    event: { title: "Giulia & Marco", eventType: "wedding", eventDate: date, venue: L("Villa sul lago, Como", "A lakeside villa, Como"), address: "Como" },
     invitation: null,
     linkable: [],
     guests,

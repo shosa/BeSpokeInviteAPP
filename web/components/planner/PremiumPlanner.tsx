@@ -20,7 +20,7 @@ import { useLang, useT } from "@/lib/lang";
 export type LinkedInvitation = { id: string; title: string; slug: string; published: boolean; themeId: string; themeColor: string; rsvps: number };
 export type PremiumData = {
   id: string;
-  event: { title: string; eventDate: string; venue: string; address: string };
+  event: { title: string; eventDate: string; venue: string; address: string; eventType?: string };
   invitation: LinkedInvitation | null;
   linkable: { id: string; title: string }[];
   guests: { id: string; name: string; group_name: string; party_size: number; response: "pending" | "yes" | "no"; table_id: string | null }[];

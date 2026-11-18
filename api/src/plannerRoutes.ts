@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import type { Catalog } from "@inviteme/shared";
+import { isEventType, type Catalog } from "@inviteme/shared";
 import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
@@ -44,7 +44,7 @@ const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slic
 async function ownedPlanner(id: string, userId: string): Promise<Row | null> {
   if (!UUID.test(id)) return null;
   const { rows } = await pool.query(
-    "SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, data, created_at FROM planners WHERE id = $1 AND user_id = $2",
+    "SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, created_at FROM planners WHERE id = $1 AND user_id = $2",
     [id, userId],
   );
   return rows[0] ?? null;
@@ -147,16 +147,19 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
         await client.query("ROLLBACK");
         return reply.code(404).send({ error: "Acquisto non trovato o già attivato" });
       }
+      // Tipo di evento: quello scelto; senza, quello dell'invito collegato; altrimenti matrimonio.
+      let eventType = isEventType(b.eventType) ? b.eventType : "wedding";
       if (invitationId) {
-        const inv = await client.query("SELECT id FROM invitations WHERE id = $1 AND user_id = $2", [invitationId, user.id]);
+        const inv = await client.query("SELECT id, config->>'eventType' AS event_type FROM invitations WHERE id = $1 AND user_id = $2", [invitationId, user.id]);
+        if (inv.rows[0] && !isEventType(b.eventType) && isEventType(inv.rows[0].event_type)) eventType = inv.rows[0].event_type;
         if (!inv.rows[0]) { await client.query("ROLLBACK"); return reply.code(404).send({ error: "Invito non trovato" }); }
         const taken = await client.query("SELECT id FROM planners WHERE invitation_id = $1", [invitationId]);
         if (taken.rows[0]) { await client.query("ROLLBACK"); return reply.code(409).send({ error: "Quell'invito ha già un planner collegato" }); }
       }
       const id = randomUUID();
       await client.query(
-        "INSERT INTO planners (id, user_id, invitation_id, title, event_date, venue, address, data, order_ref) VALUES ($1, $2, $3, $4, $5, $6, $7, '{}', $8)",
-        [id, user.id, invitationId, title, eventDate, text(b.venue, 160), text(b.address, 200), orderId],
+        "INSERT INTO planners (id, user_id, invitation_id, title, event_date, venue, address, data, order_ref, event_type) VALUES ($1, $2, $3, $4, $5, $6, $7, '{}', $8, $9)",
+        [id, user.id, invitationId, title, eventDate, text(b.venue, 160), text(b.address, 200), orderId, eventType],
       );
       await client.query("UPDATE orders SET planner_id = $1 WHERE id = $2", [id, orderId]);
       await client.query("COMMIT");
@@ -190,7 +193,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     const data = (p.data ?? {}) as PlannerData;
     return {
       id: p.id,
-      event: { title: p.title, eventDate: p.event_date ?? "", venue: p.venue, address: p.address },
+      event: { title: p.title, eventDate: p.event_date ?? "", venue: p.venue, address: p.address, eventType: p.event_type },
       invitation,
       linkable: linkable.rows.map((r) => ({ id: r.id, title: r.title || "Invito senza titolo" })),
       tables: tables.rows,
@@ -236,8 +239,10 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       eventDate = b.eventDate === "" ? null : validDate(b.eventDate);
       if (b.eventDate !== "" && !eventDate) return reply.code(400).send({ error: "Inserite una data valida" });
     }
-    await pool.query("UPDATE planners SET title = $2, event_date = $3, venue = $4, address = $5, data = $6 WHERE id = $1", [
+    if (b.eventType !== undefined && !isEventType(b.eventType)) return reply.code(400).send({ error: "Tipo di evento non valido" });
+    await pool.query("UPDATE planners SET title = $2, event_date = $3, venue = $4, address = $5, data = $6, event_type = $7 WHERE id = $1", [
       p.id, title, eventDate, b.venue !== undefined ? text(b.venue, 160) : p.venue, b.address !== undefined ? text(b.address, 200) : p.address, JSON.stringify(data),
+      isEventType(b.eventType) ? b.eventType : p.event_type,
     ]);
     return { ok: true };
   });

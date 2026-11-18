@@ -65,6 +65,41 @@ export const EVENT_TYPES: { id: EventType; label: string; labelEn: string; sampl
   { id: "graduation", label: "Laurea", labelEn: "Graduation", sampleTitle: "Laurea di Giulia" },
 ];
 
+// Frasi che cambiano con il tipo di evento (planner, creazione): «Impostazioni del matrimonio», «della laurea»…
+// of: complemento («del matrimonio»; in inglese il nome: «wedding»), your: titolo di riserva, names: cosa va nel titolo,
+// after: cosa dice il conto alla rovescia a evento passato.
+export type EventPhrases = { of: string; your: string; names: string; namesHint: string; after: string };
+const EVENT_PHRASES: Record<EventType, { it: EventPhrases; en: EventPhrases }> = {
+  wedding: {
+    it: { of: "del matrimonio", your: "Il vostro matrimonio", names: "Nomi degli sposi", namesHint: "Giulia & Marco", after: "Sposati!" },
+    en: { of: "wedding", your: "Your wedding", names: "Couple's names", namesHint: "Giulia & Marco", after: "Married!" },
+  },
+  birthday: {
+    it: { of: "del compleanno", your: "La festa di compleanno", names: "Nome o titolo della festa", namesHint: "I 40 di Marco", after: "Che festa!" },
+    en: { of: "birthday", your: "The birthday party", names: "Name or party title", namesHint: "Marco's 40th", after: "What a party!" },
+  },
+  baby: {
+    it: { of: "del baby shower", your: "Il baby shower", names: "Nome o titolo della festa", namesHint: "Aspettiamo Bea", after: "Che festa!" },
+    en: { of: "baby shower", your: "The baby shower", names: "Name or party title", namesHint: "Waiting for Bea", after: "What a party!" },
+  },
+  corporate: {
+    it: { of: "dell'evento", your: "Il vostro evento", names: "Nome dell'evento", namesHint: "Cena di Gala 2027", after: "Fatto!" },
+    en: { of: "event", your: "Your event", names: "Event name", namesHint: "Gala Dinner 2027", after: "Done!" },
+  },
+  graduation: {
+    it: { of: "della laurea", your: "La festa di laurea", names: "Nome o titolo della festa", namesHint: "Laurea di Giulia", after: "Congratulazioni!" },
+    en: { of: "graduation", your: "The graduation party", names: "Name or party title", namesHint: "Giulia's graduation", after: "Congratulations!" },
+  },
+};
+export function eventPhrases(type: string | undefined, lang: "it" | "en"): EventPhrases {
+  const p = EVENT_PHRASES[(type ?? "") as EventType] ?? EVENT_PHRASES.wedding;
+  return p[lang];
+}
+export function isEventType(v: unknown): v is EventType {
+  return typeof v === "string" && EVENT_TYPES.some((e) => e.id === v);
+}
+
+
 export const CURRENCY = "EUR";
 
 export function enabledModels(c: Catalog) {
