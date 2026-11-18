@@ -279,7 +279,7 @@ export function Inspector(p: Props) {
       <section className="bl-group" aria-labelledby="bl-lang">
         <h3 id="bl-lang">{L.pageLang}</h3>
         <div className="bl-fields">
-          <Field label={L.pageLang}>
+          <Field label={L.pageLangField}>
             <select value={p.config.locale} onChange={(e) => p.onSetLocale(e.target.value as "it" | "en")}>
               <option value="it">Italiano</option>
               <option value="en">English</option>
