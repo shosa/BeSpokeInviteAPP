@@ -1,4 +1,4 @@
-/* Planner in stile app (Yes): barra laterale fissa da 960px, colonna di 720px per le sezioni,
+/* Planner in stile app (Yes): barra laterale fissa da 960px, colonna di 960px per le sezioni,
    Riepilogo a schede (bento) che da 1200px diventa una griglia a 12 colonne.
    Tutto è racchiuso in .yp, così il resto del sito non cambia. Valori presi dall'originale. */
 
@@ -44,11 +44,11 @@ body:has(.yp) { background: #fdfbf7; }
 
 /* ---------- struttura ---------- */
 .y-content { min-height: 100vh; padding-bottom: var(--tabh); }
-.y-page { max-width: 720px; margin: 0 auto; padding: 0 16px 40px; display: flex; flex-direction: column; gap: 1.75rem; }
+.y-page { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; display: flex; flex-direction: column; gap: 1.75rem; }
 .yp.is-demo .y-page { padding-bottom: calc(40px + 2.375rem + 16px); }
 .y-nb { position: sticky; top: 0; z-index: 30; transition: background-color 0.2s ease, box-shadow 0.2s ease; }
 .y-nb.is-scrolled { background: var(--material); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 0.5px 0 var(--sep); }
-.y-nb-in { max-width: 752px; margin: 0 auto; height: 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; padding: 0 8px; }
+.y-nb-in { max-width: 992px; margin: 0 auto; height: 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; padding: 0 8px; }
 .y-nb-l { justify-self: start; display: flex; min-width: 0; }
 .y-nb-r { justify-self: end; display: flex; gap: 2px; }
 .y-nb-t { font-size: 1.0625rem; font-weight: 600; opacity: 0; transition: opacity 0.2s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 56vw; }
@@ -62,7 +62,12 @@ body:has(.yp) { background: #fdfbf7; }
 .y-nb.is-scrolled .y-home-brand { display: none; }
 /* Logo: «Bespoke Invite» in grande, «Planner» piccolo accanto. */
 
-.y-ph { display: flex; flex-direction: column; gap: 4px; margin-top: -2px; }
+/* Intestazione della sezione: testo a sinistra, pulsanti (aggiungi, stampa) a destra; sul telefono vanno sotto. */
+.y-ph { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin-top: 18px; }
+.y-ph-text { display: flex; flex-direction: column; gap: 4px; min-width: min(100%, 260px); flex: 1 1 320px; }
+.y-ph-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.y-ph-acts .y-btn { height: 2.5rem; padding: 0 16px; white-space: nowrap; }
+.y-ph-acts .y-btn svg { width: 18px; height: 18px; }
 .y-lt { font-family: var(--brand); font-style: normal; font-weight: 400; font-size: 2.125rem; line-height: 1.2; letter-spacing: -0.01em; }
 .y-lt-sub { font-size: 0.9375rem; color: var(--label-2); letter-spacing: -0.016em; line-height: 1.35; }
 
@@ -101,11 +106,14 @@ body:has(.yp) { background: #fdfbf7; }
   .y-side-foot { margin-top: auto; display: flex; flex-direction: column; }
   .y-side-count { margin: 0 12px 14px; padding: 12px; border-radius: 14px; background: var(--cell); display: flex; align-items: center; gap: 12px; }
   .y-side-count > div { min-width: 0; overflow-wrap: anywhere; }
-  .y-side-count img { width: 54px; height: 53px; flex: none; object-fit: contain; }
+  .y-side-count .y-side-ico { width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--tint-soft); color: var(--tint); }
   .y-lt { font-size: 2.25rem; }
   .y-page { padding: 0 32px 64px; }
   .y-nb-in { padding: 0 24px; }
   .y-nb-t { display: none; }
+  /* Al computer la barra in alto resta vuota (titolo nella pagina, pulsanti accanto al titolo): non occupa spazio. */
+  .y-nb { display: none; }
+  .y-page { padding-top: 12px; }
   .y-home .y-home-brand, .y-home .y-nb-r { display: none; }
 }
 @media (hover: hover) {
@@ -164,10 +172,10 @@ body:has(.yp) { background: #fdfbf7; }
 .t-bad { color: var(--red); }
 
 /* controllo a segmenti */
-.y-seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--fill); border-radius: 9px; padding: 2px; height: 2rem; isolation: isolate; }
-.y-seg button { position: relative; z-index: 1; font-size: 0.8125rem; font-weight: 500; letter-spacing: -0.006em; color: var(--label); border-radius: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
-.y-seg button[aria-selected="true"] { font-weight: 600; }
-.y-seg-thumb { position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px; width: calc((100% - 4px) / var(--n)); background: var(--thumb); border-radius: 7px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.04); transform: translateX(calc(100% * var(--i))); transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
+.y-seg { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--cell-hi); border: 1px solid var(--sep); border-radius: 999px; padding: 3px; height: 2.75rem; isolation: isolate; }
+.y-seg button { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; height: 100%; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.01em; color: var(--label-2); border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 12px; text-align: center; transition: color 0.2s ease; }
+.y-seg button[aria-selected="true"] { font-weight: 600; color: var(--on-tint); }
+.y-seg-thumb { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / var(--n)); background: var(--tint); border-radius: 999px; box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--tint) 70%, transparent); transform: translateX(calc(100% * var(--i))); transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1); }
 .y-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; flex-wrap: nowrap; }
 .y-pills::-webkit-scrollbar { display: none; }
 .y-pill { flex: none; height: 2rem; padding: 0 14px; border-radius: 999px; background: var(--fill); color: var(--label); font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.2s ease; }

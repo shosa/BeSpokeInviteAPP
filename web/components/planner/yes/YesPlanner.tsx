@@ -11,6 +11,7 @@ import { Home } from "./Home";
 import { BudgetView, BinderView, GuestsView, SettingsView, TasksView } from "./Sections";
 import { DaySheet, GuestSheet, PhotoSheet, TaskSheet } from "./Sheets";
 import "./yes.css";
+import { PlannerIcon } from "../PlannerIcon";
 
 // Planner con l'aspetto e il comportamento di un'app: barra laterale sul computer, barra in basso sul telefono,
 // Riepilogo a schede, sezioni Budget, Invitati, Attività e Cartella, ricerca con Ctrl K.
@@ -30,6 +31,8 @@ export function eventCopy(type: string | undefined, en: boolean): EventCopy {
     : { ...p, settings: `Impostazioni ${p.of}`, date: `la data ${p.of}`, daysBefore: `Quanti giorni prima ${p.of}`, binder: `La cartella ${p.of}`, onTheDay: `il giorno ${p.of}`, bigDay: "Il grande giorno" };
 }
 
+export type PageAction = { label: string; icon: React.ReactNode; onClick: () => void; primary?: boolean };
+
 export type Ctx = {
   id: string;
   data: PremiumData;
@@ -48,6 +51,8 @@ export type Ctx = {
   pdf: () => void;
   search: () => void;
   accountHref: string;
+  // Pulsanti della sezione aperta (aggiungi, stampa): stanno nell'intestazione della pagina, accanto al titolo.
+  actions: PageAction[];
   buyHref: string;
 };
 
@@ -174,21 +179,21 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
 
   const openPdf = () => (demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
   const ev = eventCopy(data.event.eventType, en);
-  const ctx: Ctx = { id, data, ev, en, demo, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
+  const ctx: Ctx = { actions: [], id, data, ev, en, demo, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
   const navIndex = NAV.findIndex((n) => n.view === view);
   const couple = data.event.title || ev.your;
 
-  // Pulsanti in alto a destra di ogni sezione (come nell'app: aggiungi, stampa).
-  const actions: { label: string; icon: React.ReactNode; onClick: () => void }[] = [];
+  // Riepilogo: cerca e impostazioni come icone nella barra in alto (telefono). Le altre sezioni hanno pulsanti veri
+  // nell'intestazione della pagina (ctx.actions, vedi Head in Sections.tsx).
+  const actions: PageAction[] = [];
   if (view === "home") {
     actions.push({ label: t("Cerca", "Search"), icon: <IcSearch />, onClick: () => setPalette(true) });
     actions.push({ label: ev.settings, icon: <IcGear />, onClick: () => go("settings") });
   }
-  if (view === "tasks") actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
-  if (view === "binder") actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
-  if (view === "tasks") actions.push({ label: t("Nuova attività", "New task"), icon: <IcPlus />, onClick: () => setSheet({ kind: "task" }) });
-  if (view === "guests") actions.push({ label: t("Aggiungi invitato", "Add guest"), icon: <IcPlus />, onClick: () => setSheet({ kind: "guest" }) });
-  if (view === "budget") actions.push({ label: t("Aggiungi o cerca", "Add or search"), icon: <IcPlus />, onClick: () => setPalette(true) });
+  if (view === "tasks" || view === "binder") ctx.actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
+  if (view === "tasks") ctx.actions.push({ label: t("Nuova attività", "New task"), icon: <IcPlus />, onClick: () => setSheet({ kind: "task" }), primary: true });
+  if (view === "guests") ctx.actions.push({ label: t("Aggiungi invitato", "Add guest"), icon: <IcPlus />, onClick: () => setSheet({ kind: "guest" }), primary: true });
+  if (view === "budget") ctx.actions.push({ label: t("Aggiungi o cerca", "Add or search"), icon: <IcPlus />, onClick: () => setPalette(true), primary: true });
 
   return (
     <div className={`yp${demo ? " is-demo" : ""}${view === "home" ? " y-home" : ""}`}>
@@ -207,7 +212,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
         </nav>
         <div className="y-side-foot">
           <div className="y-side-count">
-            <img src="/planner/rings.svg" alt="" width={60} height={58} />
+            <span className="y-side-ico"><PlannerIcon icon={data.icon} eventType={data.event.eventType} size={26} /></span>
             <div>
               <p className="y-cap">{couple}</p>
               <p className="tn" style={{ fontFamily: "var(--brand)", fontStyle: "normal", fontWeight: 400, fontSize: "1.5rem" }} suppressHydrationWarning>
@@ -230,7 +235,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
           </div>
         </header>
 
-        {error && view !== "home" && <p className="y-error" role="alert" style={{ maxWidth: 720, margin: "0 auto 12px", padding: "0 16px" }}>{error}</p>}
+        {error && view !== "home" && <p className="y-error" role="alert" style={{ maxWidth: 960, margin: "0 auto 12px", padding: "0 16px" }}>{error}</p>}
         <div key={view} className="y-enter">
           {view === "home" && <Home ctx={ctx} />}
           {view === "budget" && <BudgetView ctx={ctx} />}

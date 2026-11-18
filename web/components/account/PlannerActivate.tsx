@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { EVENT_TYPES, eventPhrases, type EventType } from "@inviteme/shared";
+import { EVENT_TYPES, defaultPlannerIcon, eventPhrases, type EventType, type PlannerIcon } from "@inviteme/shared";
+import { PlannerIconPicker } from "@/components/planner/PlannerIcon";
 
 // Attivazione di un acquisto planner: nome e data dell'evento, luogo facoltativo e, se si vuole, l'invito da collegare.
 export function PlannerActivate({ orderId, invitations, lang }: { orderId: string; invitations: { id: string; title: string; eventType?: string }[]; lang: "it" | "en" }) {
@@ -11,6 +12,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState<EventType>("wedding");
+  const [icon, setIcon] = useState<PlannerIcon | null>(null); // senza scelta, quella del tipo di evento
   const [eventDate, setEventDate] = useState("");
   const [venue, setVenue] = useState("");
   const [invitationId, setInvitationId] = useState(invitations.length === 1 ? invitations[0].id : "");
@@ -34,7 +36,7 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
     const res = await fetch("/api/account/planner-claim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, eventType, title, eventDate: eventDate || undefined, venue, invitationId: invitationId || undefined }),
+      body: JSON.stringify({ orderId, eventType, icon: icon ?? defaultPlannerIcon(eventType), title, eventDate: eventDate || undefined, venue, invitationId: invitationId || undefined }),
     });
     const body = (await res.json().catch(() => ({}))) as { error?: string; plannerId?: string };
     if (!res.ok || !body.plannerId) {
@@ -52,6 +54,10 @@ export function PlannerActivate({ orderId, invitations, lang }: { orderId: strin
           {EVENT_TYPES.map((x) => <option key={x.id} value={x.id}>{en ? x.labelEn : x.label}</option>)}
         </select>
       </label>
+      <div className="demo-field">
+        <span>{en ? "Planner icon" : "Icona del planner"}</span>
+        <PlannerIconPicker value={icon} eventType={eventType} onChange={setIcon} lang={lang} />
+      </div>
       <label className="demo-field">
         <span>{eventPhrases(eventType, lang).names}</span>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={eventPhrases(eventType, lang).namesHint} maxLength={120} required />

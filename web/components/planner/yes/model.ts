@@ -115,6 +115,7 @@ export function demoApply(d: PremiumData, method: Method, path: string, body: un
     if ("guestQuota" in b) next.guestQuota = Number(b.guestQuota) || 0;
     if ("groupQuotas" in b) next.groupQuotas = b.groupQuotas as Record<string, number>;
     if ("notes" in b) next.notes = String(b.notes);
+    if ("icon" in b) next.icon = String(b.icon);
     return next;
   }
   const m = path.match(/^\/(\w+)(?:\/([^/]+))?$/);

@@ -35,6 +35,7 @@ export type PremiumData = {
   budgetCents: number;
   guestQuota: number;
   groupQuotas?: Record<string, number>;
+  icon?: string | null; // icona scelta dal cliente (PLANNER_ICONS)
   bannerImage: string | null;
   archImage: string | null;
 };

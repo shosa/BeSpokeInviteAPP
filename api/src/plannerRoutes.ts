@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { isEventType, type Catalog } from "@inviteme/shared";
+import { isEventType, isPlannerIcon, type Catalog } from "@inviteme/shared";
 import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
@@ -23,7 +23,7 @@ type Deps = {
 
 // bannerImage e archImage: foto scelte dal cliente per la testata del planner (sfondo e arco). Solo file caricati qui.
 // groupQuotas: quante persone può invitare ogni gruppo (es. «Famiglia di Marco»: 20), per avvisare quando lo supera.
-export type PlannerData = { notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number; groupQuotas?: Record<string, number>; bannerImage?: string; archImage?: string };
+export type PlannerData = { icon?: string; notes?: string; docs?: Record<string, FolderValue>; budgetCents?: number; guestQuota?: number; groupQuotas?: Record<string, number>; bannerImage?: string; archImage?: string };
 
 // Limiti per gruppo: nomi di gruppo come nella lista invitati (fino a 80 caratteri), numeri da 1 a 5000; 0 toglie il limite.
 function sanitizeGroupQuotas(v: unknown): Record<string, number> | null {
@@ -158,8 +158,8 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       }
       const id = randomUUID();
       await client.query(
-        "INSERT INTO planners (id, user_id, invitation_id, title, event_date, venue, address, data, order_ref, event_type) VALUES ($1, $2, $3, $4, $5, $6, $7, '{}', $8, $9)",
-        [id, user.id, invitationId, title, eventDate, text(b.venue, 160), text(b.address, 200), orderId, eventType],
+        "INSERT INTO planners (id, user_id, invitation_id, title, event_date, venue, address, data, order_ref, event_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+        [id, user.id, invitationId, title, eventDate, text(b.venue, 160), text(b.address, 200), JSON.stringify(isPlannerIcon(b.icon) ? { icon: b.icon } : {}), orderId, eventType],
       );
       await client.query("UPDATE orders SET planner_id = $1 WHERE id = $2", [id, orderId]);
       await client.query("COMMIT");
@@ -210,6 +210,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       budgetCents: data.budgetCents ?? 0,
       guestQuota: data.guestQuota ?? 0,
       groupQuotas: data.groupQuotas ?? {},
+      icon: data.icon ?? null,
     };
   });
 
@@ -225,6 +226,10 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       data.docs = docs;
     }
     if (typeof b.notes === "string") data.notes = b.notes.slice(0, 4000);
+    if (b.icon !== undefined) {
+      if (!isPlannerIcon(b.icon)) return reply.code(400).send({ error: "Icona non valida" });
+      data.icon = b.icon;
+    }
     if (typeof b.budgetCents === "number" && b.budgetCents >= 0) data.budgetCents = Math.min(1_000_000_000, Math.round(b.budgetCents));
     if (typeof b.guestQuota === "number" && b.guestQuota >= 0) data.guestQuota = Math.min(5000, Math.round(b.guestQuota));
     if (b.groupQuotas !== undefined) {

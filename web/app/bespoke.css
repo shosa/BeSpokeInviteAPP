@@ -821,3 +821,9 @@ img {
 .act-type-chip { min-height: 40px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: inherit; font: inherit; font-size: 14px; white-space: nowrap; cursor: pointer; transition: border-color .2s, background .2s; }
 .act-type-chip:hover { border-color: var(--brass, #b8893f); }
 .act-type-chip.is-on { border-color: var(--brass, #b8893f); background: #f7f1e7; font-weight: 600; }
+
+/* Icona del planner: griglia di scelta (creazione e impostazioni del planner). */
+.pi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
+.pi-btn { display: grid; place-items: center; aspect-ratio: 1; min-height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink-soft); cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.pi-btn:hover { border-color: var(--brass-light); color: var(--ink); }
+.pi-btn.is-on { border-color: var(--brass); background: #f7f1e7; color: var(--brass); box-shadow: 0 0 0 1px var(--brass) inset; }

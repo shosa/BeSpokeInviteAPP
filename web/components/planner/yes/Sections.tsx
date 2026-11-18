@@ -7,6 +7,7 @@ import { Seating } from "../Seating";
 import { Folder } from "../Folder";
 import { ShareInvite } from "../ShareInvite";
 import { eventCopy, type Ctx, type Guest } from "./YesPlanner";
+import { PlannerIconPicker } from "../PlannerIcon";
 import { IcCheck, IcChevron, IcClock, IcGlobe, IcList, IcPhone, IcPrint, IcSearch } from "./icons";
 import { TASK_BANDS, docCount, euro, hue, initials, stats, taskWhen, validIso } from "./model";
 
@@ -22,11 +23,21 @@ function Seg<T extends string>({ value, options, onChange, label }: { value: T; 
   );
 }
 
-function Head({ title, sub }: { title: string; sub?: string }) {
+// Intestazione della sezione: titolo e sottotitolo a sinistra, pulsanti della sezione (aggiungi, stampa) a destra.
+function Head({ ctx, title, sub }: { ctx: Ctx; title: string; sub?: string }) {
   return (
     <div className="y-ph">
-      <h1 className="y-lt">{title}</h1>
-      {sub && <p className="y-lt-sub">{sub}</p>}
+      <div className="y-ph-text">
+        <h1 className="y-lt">{title}</h1>
+        {sub && <p className="y-lt-sub">{sub}</p>}
+      </div>
+      {ctx.actions.length > 0 && (
+        <div className="y-ph-acts">
+          {ctx.actions.map((a) => (
+            <button key={a.label} type="button" className={`y-btn y-btn-sm ${a.primary ? "y-btn-fill" : "y-btn-tinted"}`} onClick={a.onClick}>{a.icon}<span>{a.label}</span></button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -37,7 +48,7 @@ export function BudgetView({ ctx }: { ctx: Ctx }) {
   const initial = (["voci", "pagamenti", "contratti", "confronta"] as const).find((v) => v === ctx.sub) ?? "voci";
   return (
     <div className="y-page">
-      <Head title="Budget" sub={data.budgetCents ? (data.guestQuota ? t(`${euro(data.budgetCents, en)} per ${data.guestQuota} invitati`, `${euro(data.budgetCents, en)} for ${data.guestQuota} guests`) : euro(data.budgetCents, en)) : t("Imposta il budget totale per vedere quanto resta.", "Set the total budget to see what's left.")} />
+      <Head ctx={ctx} title="Budget" sub={data.budgetCents ? (data.guestQuota ? t(`${euro(data.budgetCents, en)} per ${data.guestQuota} invitati`, `${euro(data.budgetCents, en)} for ${data.guestQuota} guests`) : euro(data.budgetCents, en)) : t("Imposta il budget totale per vedere quanto resta.", "Set the total budget to see what's left.")} />
       <BudgetSection key={initial} initialView={initial} quotes={data.quotes} payments={data.budget} budgetCents={data.budgetCents} guestQuota={data.guestQuota} call={ctx.call} act={ctx.act} />
       <Vendors ctx={ctx} />
     </div>
@@ -106,7 +117,7 @@ export function GuestsView({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="y-page">
-      <Head title={t("Invitati", "Guests")} sub={s.total ? t(`${s.yes} vengono, ${s.pending} devono rispondere e ${s.no} non vengono.`, `${s.yes} attending, ${s.pending} yet to reply and ${s.no} can't make it.`) : t("Aggiungi gli invitati per gruppo: famiglie, amici, colleghi.", "Add your guests by group: family, friends, colleagues.")} />
+      <Head ctx={ctx} title={t("Invitati", "Guests")} sub={s.total ? t(`${s.yes} vengono, ${s.pending} devono rispondere e ${s.no} non vengono.`, `${s.yes} attending, ${s.pending} yet to reply and ${s.no} can't make it.`) : t("Aggiungi gli invitati per gruppo: famiglie, amici, colleghi.", "Add your guests by group: family, friends, colleagues.")} />
       <Seg label={t("Viste degli invitati", "Guest views")} value={tab} onChange={(v) => ctx.go("guests", v === "lista" ? "" : v)} options={[{ v: "lista", label: t("Lista", "List") }, { v: "famiglie", label: t("Famiglie", "Families") }, { v: "tavoli", label: t("Tavoli", "Tables") }]} />
 
       {tab === "lista" && (
@@ -244,7 +255,7 @@ export function TasksView({ ctx }: { ctx: Ctx }) {
 
   return (
     <div className="y-page">
-      <Head title={t("Attività", "Tasks")} sub={validIso(data.event.eventDate) ? t(`Le date si calcolano da sole dalla ${ctx.ev.date.replace(/^la /, "")}.`, `Dates are worked out automatically from ${ctx.ev.date}.`) : t(`Imposta ${ctx.ev.date}: le scadenze si calcolano da sole.`, `Set ${ctx.ev.date} and the due dates work themselves out.`)} />
+      <Head ctx={ctx} title={t("Attività", "Tasks")} sub={validIso(data.event.eventDate) ? t(`Le date si calcolano da sole dalla ${ctx.ev.date.replace(/^la /, "")}.`, `Dates are worked out automatically from ${ctx.ev.date}.`) : t(`Imposta ${ctx.ev.date}: le scadenze si calcolano da sole.`, `Set ${ctx.ev.date} and the due dates work themselves out.`)} />
       <section className="y-w">
         <div className="y-sum-top"><div className="y-sum-n tn">{pct}%</div><span className="y-cap">{t(`${done} di ${data.tasks.length} fatte`, `${done} of ${data.tasks.length} done`)}</span></div>
         <span className="y-bar ok"><i style={{ transform: `scaleX(${pct / 100})` }} /></span>
@@ -292,7 +303,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
   const unit = (kind: string, n: number) => (kind === "contacts" ? t(`${n} contatti`, `${n} contacts`) : kind === "timeline" ? t(`${n} momenti`, `${n} entries`) : kind === "text" ? (n ? t("Scritto", "Written") : t("Da scrivere", "To write")) : t(`${n} voci`, `${n} items`));
   return (
     <div className="y-page">
-      <Head title={t("Cartella", "Binder")} sub={t("Tutto quello che serve il grande giorno, pronto da stampare.", "Everything you need on the big day, ready to print.")} />
+      <Head ctx={ctx} title={t("Cartella", "Binder")} sub={t("Tutto quello che serve il grande giorno, pronto da stampare.", "Everything you need on the big day, ready to print.")} />
       <section className="y-w" style={{ padding: 16 }}>
         <span className="y-cap">{ctx.ev.binder}</span>
         <h2 className="y-heading" style={{ fontSize: 28, marginBottom: 14 }}>{t(`${s.docsDone} su ${FOLDER.length} sezioni con qualcosa di pronto`, `${s.docsDone} of ${FOLDER.length} sections with something prepared`)}</h2>
@@ -341,7 +352,7 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
   const inv = data.invitation;
   return (
     <div className="y-page">
-      <Head title={ctx.ev.settings} sub={t("Nomi, data e luogo: da qui si calcolano conto alla rovescia, scadenze e meteo.", "Names, date and place: the countdown, due dates and weather come from here.")} />
+      <Head ctx={ctx} title={ctx.ev.settings} sub={t("Nomi, data e luogo: da qui si calcolano conto alla rovescia, scadenze e meteo.", "Names, date and place: the countdown, due dates and weather come from here.")} />
       <form className="y-w y-form" onSubmit={(e) => {
         e.preventDefault();
         void ctx.act(() => ctx.call("PUT", "", { ...ev, budgetCents: Math.max(0, Math.round(Number(budget.replace(/\./g, "").replace(",", ".")) * 100) || 0) })).then(() => ctx.toast(t("Salvato", "Saved")));
@@ -360,6 +371,13 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
         <label className="y-field">{t("Indirizzo (per il meteo)", "Address (for the weather)")}<input value={ev.address} onChange={(e) => setEv({ ...ev, address: e.target.value })} maxLength={200} /></label>
         <div><button className="y-btn y-btn-fill y-btn-sm" type="submit">{t("Salva", "Save")}</button></div>
       </form>
+
+      <section className="y-grp">
+        <h2 className="y-gh">{t("Icona del planner", "Planner icon")}</h2>
+        <div className="y-w">
+          <PlannerIconPicker value={data.icon} eventType={data.event.eventType} lang={en ? "en" : "it"} onChange={(icon) => void ctx.act(() => ctx.call("PUT", "", { icon })).then(() => ctx.toast(t("Icona cambiata", "Icon changed")))} />
+        </div>
+      </section>
 
       <section className="y-grp">
         <h2 className="y-gh">{t("Aspetto", "Look")}</h2>
