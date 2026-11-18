@@ -241,7 +241,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
               <EventCard data={data} onSaveEvent={(ev) => act(() => call("PUT", "", ev))} onLink={(invitationId) => act(() => call("POST", "/link", { invitationId }))} />
               <div className="pp-hero-stats">
                 <div className="pp-stat pp-stat-days">
-                  <span className="pp-kicker">{t("Giorno del sì", "The big day")}</span>
+                  <span className="pp-kicker">{t("Il grande giorno", "The big day")}</span>
                   <strong>{days === null ? "—" : days > 0 ? days : days === 0 ? t("Oggi", "Today") : t("Passato", "Past")}</strong>
                   <small>{days !== null && days > 0 ? (days === 1 ? t("giorno", "day") : t("giorni", "days")) : validIso(data.event.eventDate) ? longDate(data.event.eventDate, en) : t("Imposta la data dell'evento", "Set the event date")}</small>
                 </div>
@@ -272,7 +272,7 @@ export function PremiumPlanner({ id, initial, lang }: { id: string; initial: Pre
                   {alerts.length === 0 ? <p className="hint">{t("Nulla di urgente.", "Nothing urgent.")}</p> : <ul className="pp-list">{alerts.map((a) => <li key={a}>{a}</li>)}</ul>}
                 </div>
                 <div className="pp-card">
-                  <span className="pp-kicker">{t("Meteo il giorno del sì", "Weather on the day")}</span>
+                  <span className="pp-kicker">{t("Meteo del grande giorno", "Weather on the day")}</span>
                   {!weather ? <p className="hint">{t("Caricamento…", "Loading…")}</p> : weather.forecast ? (
                     <>
                       <strong className="pp-weather"><CloudSun size={22} strokeWidth={1.5} aria-hidden="true" /> {weather.forecast.tmaxC}° / {weather.forecast.tminC}°</strong>

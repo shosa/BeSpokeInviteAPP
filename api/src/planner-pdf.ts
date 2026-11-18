@@ -1,7 +1,7 @@
-// Cartella del matrimonio in PDF: l'organizzatore sceglie cosa includere, e il documento è impaginato a mano
+// Cartella dell'evento in PDF: l'organizzatore sceglie cosa includere, e il documento è impaginato a mano
 // (copertina, indice con numeri di pagina, una sezione per volta, tavoli disegnati, piè di pagina).
 import PDFDocument from "pdfkit";
-import { BUDGET_CATEGORIES, FOLDER, FOLDER_GROUPS, FOLDER_GROUPS_EN, type FolderSection } from "@inviteme/shared";
+import { BUDGET_CATEGORIES, FOLDER_GROUPS, FOLDER_GROUPS_EN, eventPhrases, folderFor, type FolderSection } from "@inviteme/shared";
 
 export const PDF_CHOICES = [
   "riepilogo",
@@ -16,6 +16,7 @@ export type PdfChoice = (typeof PDF_CHOICES)[number];
 
 export type PdfData = {
   title: string;
+  eventType?: string; // matrimonio, compleanno…: testi e sezioni della cartella
   eventDate: string;
   venue: string;
   accent: string; // colore del tema, #rrggbb
@@ -76,7 +77,7 @@ export async function buildPlannerPdf(data: PdfData, choices: PdfChoice[]): Prom
   // Spesa prevista: fornitori prenotati più le voci senza fornitore (come nella sezione Budget del planner).
   const spent = booked.reduce((n, q) => n + q.amount_cents, 0) + data.budget.filter((b) => !b.quote_id).reduce((n, b) => n + b.amount_cents, 0);
   const paidTotal = data.budget.filter((b) => b.paid).reduce((n, b) => n + b.amount_cents, 0);
-  const doc = new PDFDocument({ size: "A4", margins: { top: MARGIN, left: MARGIN, right: MARGIN, bottom: 0 }, bufferPages: true, info: { Title: `${t("La cartella del matrimonio", "The wedding folder")}: ${data.title}`, Author: "Bespoke Invites" } });
+  const doc = new PDFDocument({ size: "A4", margins: { top: MARGIN, left: MARGIN, right: MARGIN, bottom: 0 }, bufferPages: true, info: { Title: `${t(`La cartella ${eventPhrases(data.eventType, "it").of}`, `The ${eventPhrases(data.eventType, "en").of} folder`)}: ${data.title}`, Author: "Bespoke Invites" } });
   const chunks: Buffer[] = [];
   doc.on("data", (c: Buffer) => chunks.push(c));
   const done = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
@@ -140,8 +141,8 @@ export async function buildPlannerPdf(data: PdfData, choices: PdfChoice[]): Prom
   // Copertina.
   doc.rect(0, 0, doc.page.width, doc.page.height).fill("#fdfbf7");
   doc.rect(MARGIN, 200, 60, 3).fill(accent);
-  doc.font("Helvetica-Bold").fontSize(9).fillColor(accent).text(t("LA CARTELLA DEL MATRIMONIO", "THE WEDDING FOLDER"), MARGIN, 220, { characterSpacing: 2 });
-  doc.font("Times-Roman").fontSize(44).fillColor(INK).text(data.title || t("Il vostro matrimonio", "Your wedding"), MARGIN, 250, { width });
+  doc.font("Helvetica-Bold").fontSize(9).fillColor(accent).text(t(`LA CARTELLA ${eventPhrases(data.eventType, "it").of.toUpperCase()}`, `THE ${eventPhrases(data.eventType, "en").of.toUpperCase()} FOLDER`), MARGIN, 220, { characterSpacing: 2 });
+  doc.font("Times-Roman").fontSize(44).fillColor(INK).text(data.title || t(eventPhrases(data.eventType, "it").your, eventPhrases(data.eventType, "en").your), MARGIN, 250, { width });
   doc.font("Helvetica").fontSize(13).fillColor(SOFT).text([dateLabel(data.eventDate), data.venue].filter(Boolean).join("  ·  "), MARGIN, doc.y + 14, { width });
   doc.font("Helvetica").fontSize(8.5).fillColor(SOFT).text("Bespoke Invites", MARGIN, doc.page.height - MARGIN - 10);
 
@@ -264,7 +265,7 @@ export async function buildPlannerPdf(data: PdfData, choices: PdfChoice[]): Prom
 
   const groups = choices.filter((c) => c.startsWith("cartella:")).map((c) => c.slice(9));
   for (const group of FOLDER_GROUPS.filter((g) => groups.includes(g))) {
-    const sections = FOLDER.filter((s) => s.group === group);
+    const sections = folderFor(data.eventType).filter((s) => s.group === group);
     sectionStart(t("La cartella", "The folder"), groupName(group));
     entries.push({ label: groupName(group), page: doc.bufferedPageRange().count - 1 });
     for (const s of sections) renderFolderSection(s);

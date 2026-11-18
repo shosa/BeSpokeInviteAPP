@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FOLDER, FOLDER_GROUPS, FOLDER_GROUPS_EN, type FolderSection } from "@inviteme/shared";
+import { FOLDER_GROUPS, FOLDER_GROUPS_EN, eventPhrases, folderFor, type FolderSection } from "@inviteme/shared";
 import { ArrowLeft, ChevronLeft, ChevronRight, Armchair, Car, Building2, Cake, Camera, Church, Clock, FileText, Flower2, Gift, Heart, Hotel, Images, ListChecks, Luggage, MapPin, Mic, Music, Package, Palette, PartyPopper, Phone, Shield, Shirt, Sparkles, Store, Tent, Users, Utensils, Wallet, Wine, type LucideIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { useLang } from "@/lib/lang";
@@ -93,7 +93,9 @@ export function Folder({
   onSave,
   onPdf,
   request,
+  eventType,
 }: {
+  eventType?: string; // matrimonio, compleanno…: le sezioni da matrimonio solo ai matrimoni
   // Apertura di una sezione chiesta da fuori (le schede «Utili adesso» del planner): n cambia a ogni richiesta.
   request?: { key: string; n: number } | null;
   docs: Record<string, FolderValue>;
@@ -107,6 +109,7 @@ export function Folder({
 }) {
   const en = useLang() === "en";
   const t = (it: string, eng: string) => (en ? eng : it);
+  const FOLDER = folderFor(eventType);
   const [local, setLocal] = useState<Record<string, FolderValue>>(docs);
   const [open, setOpenState] = useState<string | null>(null);
   // Direzione dell'animazione: avanti (la sezione entra da destra) o indietro (torna l'elenco da sinistra).
@@ -228,7 +231,7 @@ export function Folder({
     <div className={`fo fo-page${dir === "back" ? " is-back" : ""}`} ref={top}>
       <header className="fo-head pp-noprint">
         <div>
-          <p className="pp-kicker">{t("La cartella del matrimonio", "The wedding folder")}</p>
+          <p className="pp-kicker">{en ? `The ${eventPhrases(eventType, "en").of} folder` : `La cartella ${eventPhrases(eventType, "it").of}`}</p>
           <h2>{t(`${written} di ${FOLDER.length} sezioni con qualcosa di preparato`, `${written} of ${FOLDER.length} sections with something prepared`)}</h2>
           <p className="hint">{t(`${readyItems} elementi pronti`, `${readyItems} items ready`)}{checkable ? t(` · ${checked} di ${checkable} spuntati`, ` · ${checked} of ${checkable} ticked`) : ""}</p>
         </div>

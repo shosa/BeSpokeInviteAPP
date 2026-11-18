@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { FOLDER } from "@inviteme/shared";
+import { folderFor } from "@inviteme/shared";
 import type { Ctx, View } from "./YesPlanner";
 import { IcCamera, IcCheck, IcChevron, IcCloud, IcPlus, IcPrint, IcSearch, IcSun } from "./icons";
 import { daysUntil, dayMonth, docFilled, euro, hue, initials, longDate, stats, taskWhen, todayIso, validIso } from "./model";
@@ -61,6 +61,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
     return { ...tb, dots: Array.from({ length: n }, (_, i) => ({ a: (360 / n) * i, on: i < used })) };
   });
 
+  const FOLDER = folderFor(data.event.eventType);
   const priority = FOLDER.filter((f) => f.priority);
   const suggest = new Intl.ListFormat(en ? "en-GB" : "it-IT", { style: "long", type: "conjunction" }).format(priority.map((f) => (en ? f.titleEn : f.title)));
 
@@ -89,7 +90,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
     ctx.toast(t("Aggiunta alle attività", "Added to your tasks"));
   }
   async function warnGuests() {
-    const text = t(`Per il ${validIso(dateIso) ? dayMonth(dateIso, false) : "giorno del sì"} è prevista un po' di pioggia: portate un ombrello, il piano B è pronto!`, `A little rain is forecast for ${validIso(dateIso) ? dayMonth(dateIso, true) : "the big day"}: bring an umbrella, the rain plan is ready!`);
+    const text = t(`Per il ${validIso(dateIso) ? dayMonth(dateIso, false) : "grande giorno"} è prevista un po' di pioggia: portate un ombrello, il piano B è pronto!`, `A little rain is forecast for ${validIso(dateIso) ? dayMonth(dateIso, true) : "the big day"}: bring an umbrella, the rain plan is ready!`);
     try {
       if (navigator.share) await navigator.share({ text });
       else { await navigator.clipboard.writeText(text); ctx.toast(t("Messaggio copiato: incollalo nella chat degli invitati", "Message copied: paste it in the guests' chat")); }
@@ -110,7 +111,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
       </div>
 
       <section className={`y-card y-wx${risk ? " is-risk" : ""}`} aria-labelledby="ywxT">
-        <p className="y-eyebrow">{validIso(dateIso) ? t(`Il meteo per il ${dayMonth(dateIso, false)}`, `The weather for ${dayMonth(dateIso, true)}`) : t("Il meteo del giorno del sì", "The weather on the big day")}</p>
+        <p className="y-eyebrow">{validIso(dateIso) ? t(`Il meteo per il ${dayMonth(dateIso, false)}`, `The weather for ${dayMonth(dateIso, true)}`) : t("Il meteo del grande giorno", "The weather on the big day")}</p>
         {f ? (
           <div className="y-wx-main">
             <p className="y-wx-temp tn"><IcCloud rain={risk} /><span className="mid">{Math.round(f.tmaxC)}°</span><span className="y-cap"> / {Math.round(f.tminC)}°</span></p>
@@ -120,8 +121,8 @@ export function Home({ ctx }: { ctx: Ctx }) {
                   ? t(`Potrebbe piovere intorno alla cerimonia: ${aroundMm} mm tra le ${hh(ceremony - 1)} e le ${hh(ceremony + 1)}`, `It may rain around the ceremony: ${aroundMm} mm between ${hh(ceremony - 1)} and ${hh(ceremony + 1)}`)
                   : t(`Niente pioggia intorno alla cerimonia, tra le ${hh(ceremony - 1)} e le ${hh(ceremony + 1)}`, `No rain around the ceremony, between ${hh(ceremony - 1)} and ${hh(ceremony + 1)}`)
                 : risk
-                  ? t(`Potrebbe piovere il giorno del sì: ${f.precipMm} mm${f.precipProb !== null ? `, probabilità ${f.precipProb}%` : ""}`, `It may rain on the day: ${f.precipMm} mm${f.precipProb !== null ? `, ${f.precipProb}% chance` : ""}`)
-                  : t("Tempo asciutto previsto per il giorno del sì", "Dry weather forecast for the big day")}
+                  ? t(`Potrebbe piovere ${ev.onTheDay}: ${f.precipMm} mm${f.precipProb !== null ? `, probabilità ${f.precipProb}%` : ""}`, `It may rain on the day: ${f.precipMm} mm${f.precipProb !== null ? `, ${f.precipProb}% chance` : ""}`)
+                  : t("Tempo asciutto previsto per il grande giorno", "Dry weather forecast for the big day")}
             </h2>
             <p className="y-caption">
               {atCeremony && ceremony !== null
@@ -202,10 +203,10 @@ export function Home({ ctx }: { ctx: Ctx }) {
           <section className="y-card y-tease">
             <span className="y-ri"><IcSun /></span>
             <div>
-              <h2 className="y-heading">{en ? "On the big day, the app changes" : `${ev.bigDay}, l'app cambia`}</h2>
-              <p className="y-caption">{t("Vedrai cosa succede adesso, cosa viene dopo e chi chiamare.", "You'll see what's happening now, what's next and who to call.")}</p>
+              <h2 className="y-heading">{t("Vista del grande giorno", "Big-day view")}</h2>
+              <p className="y-caption">{t("Cosa succede adesso, cosa viene dopo e chi chiamare: dal programma e dai contatti della cartella. Tienila aperta durante l'evento.", "What's happening now, what's next and who to call, from the binder's schedule and contacts. Keep it open during the event.")}</p>
             </div>
-            <button className="y-btn y-btn-tinted y-btn-sm" type="button" onClick={() => ctx.sheet({ kind: "day" })}>{t("Provalo ora", "Try it now")}</button>
+            <button className="y-btn y-btn-tinted y-btn-sm" type="button" onClick={() => ctx.sheet({ kind: "day" })}>{t("Apri", "Open")}</button>
           </section>
           {next.length > 0 && <p className="y-gf y-task-note">{t("Trascina un'attività verso destra per segnarla come fatta.", "Swipe a task right to mark it as done.")}</p>}
         </div>

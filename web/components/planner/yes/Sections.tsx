@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { EVENT_TYPES, FOLDER } from "@inviteme/shared";
+import { EVENT_TYPES, folderFor } from "@inviteme/shared";
 import { BudgetSection } from "../BudgetSection";
 import { Seating } from "../Seating";
 import { Folder } from "../Folder";
@@ -281,6 +281,7 @@ export function TasksView({ ctx }: { ctx: Ctx }) {
 // ---------- Cartella ----------
 export function BinderView({ ctx }: { ctx: Ctx }) {
   const { data, t, en } = ctx;
+  const FOLDER = folderFor(data.event.eventType);
   const s = stats(data);
   const items = FOLDER.reduce((n, f) => n + docCount(data, f.key), 0);
   const C = 2 * Math.PI * 26;
@@ -291,7 +292,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
   const unit = (kind: string, n: number) => (kind === "contacts" ? t(`${n} contatti`, `${n} contacts`) : kind === "timeline" ? t(`${n} momenti`, `${n} entries`) : kind === "text" ? (n ? t("Scritto", "Written") : t("Da scrivere", "To write")) : t(`${n} voci`, `${n} items`));
   return (
     <div className="y-page">
-      <Head title={t("Cartella", "Binder")} sub={t("Tutto quello che serve il giorno del sì, pronto da stampare.", "Everything you need on the big day, ready to print.")} />
+      <Head title={t("Cartella", "Binder")} sub={t("Tutto quello che serve il grande giorno, pronto da stampare.", "Everything you need on the big day, ready to print.")} />
       <section className="y-w" style={{ padding: 16 }}>
         <span className="y-cap">{ctx.ev.binder}</span>
         <h2 className="y-heading" style={{ fontSize: 28, marginBottom: 14 }}>{t(`${s.docsDone} su ${FOLDER.length} sezioni con qualcosa di pronto`, `${s.docsDone} of ${FOLDER.length} sections with something prepared`)}</h2>
@@ -299,7 +300,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
           <span className="y-cap">{t(`${items} voci pronte`, `${items} items ready`)}</span>
           <svg className="y-binder-ring" viewBox="0 0 64 64" aria-hidden="true"><circle className="trk" cx="32" cy="32" r="26" /><circle className="prg" cx="32" cy="32" r="26" strokeDasharray={C} strokeDashoffset={C * (1 - pct)} /></svg>
         </div>
-        <p className="y-lt-sub" style={{ margin: "14px 0" }}>{t("Programmi, contatti, allestimento, valigie e checklist. Modifica tutto e portala stampata il giorno del sì.", "Timelines, contacts, setup, packing and checklists. Edit everything and bring it printed on the big day.")}</p>
+        <p className="y-lt-sub" style={{ margin: "14px 0" }}>{t("Programmi, contatti, allestimento, valigie e checklist. Modifica tutto e portala stampata il grande giorno.", "Timelines, contacts, setup, packing and checklists. Edit everything and bring it printed on the big day.")}</p>
         <button className="y-btn y-btn-fill y-btn-block" type="button" onClick={ctx.pdf}><IcPrint />{t("Crea il PDF da stampare", "Create printable PDF")}</button>
       </section>
       <section className="y-grp">
@@ -323,6 +324,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
         eventDate={data.event.eventDate}
         onPdf={ctx.pdf}
         request={request}
+        eventType={data.event.eventType}
         onSave={async (next) => { await ctx.act(() => ctx.call("PUT", "", { docs: next })); }}
       />
     </div>

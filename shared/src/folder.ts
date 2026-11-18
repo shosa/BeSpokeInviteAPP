@@ -3,7 +3,7 @@
 export const FOLDER_KINDS = ["timeline", "contacts", "checklist", "text"] as const;
 export type FolderKind = (typeof FOLDER_KINDS)[number];
 
-export type FolderSection = { key: string; title: string; titleEn: string; group: string; kind: FolderKind; hint: string; hintEn: string; priority?: boolean };
+export type FolderSection = { key: string; title: string; titleEn: string; group: string; kind: FolderKind; hint: string; hintEn: string; priority?: boolean; wedding?: boolean }; // wedding: solo per i matrimoni
 
 export const FOLDER_GROUPS = [
   "Programmi",
@@ -34,8 +34,8 @@ export const FOLDER: FolderSection[] = [
   { key: "programma-generale", title: "Programma generale", group: "Programmi", kind: "timeline", hint: "Un momento per riga: orario e cosa succede", priority: true, titleEn: "Overall schedule", hintEn: "One moment per line: time and what happens" },
   { key: "programma-cerimonia", title: "Cerimonia", group: "Programmi", kind: "timeline", hint: "Dall'ingresso alla fine della cerimonia", titleEn: "Ceremony", hintEn: "From the entrance to the end of the ceremony" },
   { key: "programma-ricevimento", title: "Ricevimento e festa", group: "Programmi", kind: "timeline", hint: "Dall'aperitivo al taglio della torta", titleEn: "Reception and party", hintEn: "From the aperitif to cutting the cake" },
-  { key: "programma-sposa", title: "Programma della sposa", group: "Programmi", kind: "timeline", hint: "La giornata della sposa, dal risveglio", titleEn: "Bride's schedule", hintEn: "The bride's day, from waking up" },
-  { key: "programma-sposo", title: "Programma dello sposo", group: "Programmi", kind: "timeline", hint: "La giornata dello sposo", titleEn: "Groom's schedule", hintEn: "The groom's day" },
+  { key: "programma-sposa", title: "Programma della sposa", group: "Programmi", kind: "timeline", hint: "La giornata della sposa, dal risveglio", titleEn: "Bride's schedule", hintEn: "The bride's day, from waking up", wedding: true },
+  { key: "programma-sposo", title: "Programma dello sposo", group: "Programmi", kind: "timeline", hint: "La giornata dello sposo", titleEn: "Groom's schedule", hintEn: "The groom's day", wedding: true },
   { key: "programma-invitati", title: "Programma per gli invitati", group: "Programmi", kind: "timeline", hint: "Cosa devono sapere gli ospiti, in ordine", titleEn: "Schedule for guests", hintEn: "What guests need to know, in order" },
   { key: "trasporti", title: "Trasporti", group: "Programmi", kind: "timeline", hint: "Partenze e tragitti: ora e punto di partenza", titleEn: "Transport", hintEn: "Departures and routes: time and starting point" },
   { key: "ordine-cerimonia", title: "Ordine della cerimonia", group: "Cerimonia e festa", kind: "timeline", hint: "I passaggi in ordine, uno per riga", priority: true, titleEn: "Order of ceremony", hintEn: "The steps in order, one per line" },
@@ -43,8 +43,8 @@ export const FOLDER: FolderSection[] = [
   { key: "musica", title: "Musica", group: "Cerimonia e festa", kind: "checklist", hint: "Canzoni per ogni momento della giornata", titleEn: "Music", hintEn: "Songs for every moment of the day" },
   { key: "intrattenimento", title: "Intrattenimento e spettacoli", group: "Cerimonia e festa", kind: "checklist", hint: "Attività e spettacoli previsti", titleEn: "Entertainment and shows", hintEn: "Planned activities and shows" },
   { key: "piano-b", title: "Se qualcosa va storto", group: "Cerimonia e festa", kind: "checklist", hint: "Cosa fare in caso di pioggia, ritardi, malori", titleEn: "If something goes wrong", hintEn: "What to do in case of rain, delays, illness" },
-  { key: "chi-chiamare", title: "Chi chiamare", group: "Persone", kind: "contacts", hint: "I numeri utili il giorno del sì", priority: true, titleEn: "Who to call", hintEn: "Useful numbers on the day" },
-  { key: "corteo", title: "Corteo e testimoni", group: "Persone", kind: "contacts", hint: "Testimoni e damigelle, con il loro ruolo", titleEn: "Wedding party and witnesses", hintEn: "Witnesses and bridesmaids, with their role" },
+  { key: "chi-chiamare", title: "Chi chiamare", group: "Persone", kind: "contacts", hint: "I numeri utili il grande giorno", priority: true, titleEn: "Who to call", hintEn: "Useful numbers on the day" },
+  { key: "corteo", title: "Corteo e testimoni", group: "Persone", kind: "contacts", hint: "Testimoni e damigelle, con il loro ruolo", titleEn: "Wedding party and witnesses", hintEn: "Witnesses and bridesmaids, with their role", wedding: true },
   { key: "famiglia", title: "Genitori e famiglia", group: "Persone", kind: "contacts", hint: "Famiglie e persone da avvisare", titleEn: "Parents and family", hintEn: "Families and people to keep informed" },
   { key: "fornitori", title: "Contatti dei fornitori", group: "Persone", kind: "contacts", hint: "Si compila nella scheda Fornitori del planner", titleEn: "Vendor contacts", hintEn: "Filled in from the planner's Vendors tab" },
   { key: "ringraziamenti", title: "Regali e ringraziamenti", group: "Persone", kind: "checklist", hint: "Chi ha fatto un regalo e chi ha ringraziato", titleEn: "Gifts and thank-yous", hintEn: "Who gave a gift and who has been thanked" },
@@ -58,14 +58,19 @@ export const FOLDER: FolderSection[] = [
   { key: "bevande", title: "Bevande e bar", group: "Cibo e bevande", kind: "checklist", hint: "Vini, birre, cocktail, analcolici", titleEn: "Drinks and bar", hintEn: "Wines, beers, cocktails, soft drinks" },
   { key: "lista-foto", title: "Lista delle foto", group: "Foto e video", kind: "checklist", hint: "Le foto da fare, una per riga", titleEn: "Shot list", hintEn: "The photos to take, one per line" },
   { key: "programma-foto", title: "Programma delle foto", group: "Foto e video", kind: "timeline", hint: "Dove e quando, con il fotografo", titleEn: "Photo schedule", hintEn: "Where and when, with the photographer" },
-  { key: "valigia-sposa", title: "Valigia della sposa", group: "Valigie", kind: "checklist", hint: "Tutto il necessario per la sposa", titleEn: "Bride's bag", hintEn: "Everything the bride needs" },
-  { key: "valigia-sposo", title: "Valigia dello sposo", group: "Valigie", kind: "checklist", hint: "Tutto il necessario per lo sposo", titleEn: "Groom's bag", hintEn: "Everything the groom needs" },
+  { key: "valigia-sposa", title: "Valigia della sposa", group: "Valigie", kind: "checklist", hint: "Tutto il necessario per la sposa", titleEn: "Bride's bag", hintEn: "Everything the bride needs", wedding: true },
+  { key: "valigia-sposo", title: "Valigia dello sposo", group: "Valigie", kind: "checklist", hint: "Tutto il necessario per lo sposo", titleEn: "Groom's bag", hintEn: "Everything the groom needs", wedding: true },
   { key: "kit-emergenza", title: "Kit di emergenza", group: "Valigie", kind: "checklist", hint: "Cerotti, ago e filo, medicine, caricatore", titleEn: "Emergency kit", hintEn: "Plasters, needle and thread, medicine, charger" },
   { key: "altre-cose", title: "Altre cose", group: "Valigie", kind: "checklist", hint: "Tutto quello che non rientra altrove", titleEn: "Other things", hintEn: "Everything that doesn't fit elsewhere" },
   { key: "prenotare", title: "Cosa prenotare e comprare", group: "Checklist", kind: "checklist", hint: "Le cose da fare in anticipo", titleEn: "What to book and buy", hintEn: "Things to do in advance" },
   { key: "ultima-settimana", title: "Ultima settimana", group: "Checklist", kind: "checklist", hint: "Le cose da fare negli ultimi sette giorni", titleEn: "Last week", hintEn: "Things to do in the last seven days" },
-  { key: "dopo-matrimonio", title: "Dopo il matrimonio", group: "Checklist", kind: "checklist", hint: "Cambio nome, documenti, foto da ritirare", titleEn: "After the wedding", hintEn: "Name change, documents, photos to collect" },
+  { key: "dopo-matrimonio", title: "Dopo l'evento", group: "Checklist", kind: "checklist", hint: "Documenti, foto da ritirare, conti da chiudere", titleEn: "After the event", hintEn: "Documents, photos to collect, bills to settle" },
 ];
+
+// Sezioni della cartella per il tipo di evento: quelle da matrimonio (sposa, sposo, corteo) solo ai matrimoni.
+export function folderFor(eventType?: string): FolderSection[] {
+  return eventType && eventType !== "wedding" ? FOLDER.filter((s) => !s.wedding) : FOLDER;
+}
 
 export const FOLDER_KEYS = new Set(FOLDER.map((s) => s.key));
 

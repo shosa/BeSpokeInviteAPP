@@ -100,7 +100,7 @@ export function TaskSheet({ ctx, task, onClose }: { ctx: Ctx; task?: Task; onClo
 
 type Row = { time?: string; item?: string; name?: string; role?: string; phone?: string };
 
-// Il giorno del sì: cosa succede adesso, cosa viene dopo (dal programma della cartella) e chi chiamare.
+// Il grande giorno: cosa succede adesso, cosa viene dopo (dal programma della cartella) e chi chiamare.
 export function DaySheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
   const { t, data } = ctx;
   const rows = (key: string) => (((data.docs[key] as { items?: Row[] } | undefined)?.items ?? []) as Row[]);
@@ -114,7 +114,7 @@ export function DaySheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
   const after = plan.slice(cur + 1, cur + 4);
   return (
     <Sheet title={ctx.ev.bigDay} onClose={onClose}>
-      <p className="y-gf" style={{ padding: 0 }}>{t(`Così sarà il planner ${ctx.ev.onTheDay}. Le voci vengono dal programma e da «Chi chiamare» nella cartella.`, `This is how the planner looks ${ctx.ev.onTheDay}. It uses the schedule and «Who to call» from the binder.`)}</p>
+      <p className="y-gf" style={{ padding: 0 }}>{t("Le voci vengono dal «Programma generale» e da «Chi chiamare» nella cartella; «Adesso» segue l'ora attuale.", "Entries come from the «Overall schedule» and «Who to call» in the binder; «Now» follows the current time.")}</p>
       <div className="y-day">
         <section className="y-day-now">
           <p className="y-eyebrow">{t("Adesso", "Now")}{current?.time ? ` · ${current.time}` : ""}</p>

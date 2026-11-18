@@ -1,4 +1,4 @@
-import { BUDGET_CATEGORIES, FOLDER } from "@inviteme/shared";
+import { BUDGET_CATEGORIES, folderFor } from "@inviteme/shared";
 import type { PremiumData } from "../PremiumPlanner";
 
 // Calcoli del planner (budget, invitati, attività, cartella) e la demo: dati d'esempio che si modificano solo in memoria.
@@ -75,7 +75,7 @@ export function stats(data: PremiumData) {
   const due = data.budget.filter((p) => !p.paid).reduce((n, p) => n + p.amount_cents, 0);
   const unpaid = data.budget.filter((p) => !p.paid).sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999"));
   const tasksDone = data.tasks.filter((t) => t.done).length;
-  const docsDone = FOLDER.filter((s) => docFilled(data, s.key)).length;
+  const docsDone = folderFor(data.event.eventType).filter((s) => docFilled(data, s.key)).length;
   const seats = data.tables.reduce((n, t) => n + t.seats, 0);
   const seated = data.guests.filter((g) => g.table_id && data.tables.some((t) => t.id === g.table_id)).reduce((n, g) => n + g.party_size, 0);
   return { yes, pending, no, total: yes + pending + no, byCat, planned, paid, due, unpaid, tasksDone, docsDone, seats, seated };

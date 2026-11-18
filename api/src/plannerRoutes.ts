@@ -330,6 +330,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     const pdf = await buildPlannerPdf(
       {
         title: p.title,
+        eventType: p.event_type,
         eventDate: p.event_date ?? "",
         venue: p.venue,
         accent: invitation?.themeColor ?? "#8a6427",
