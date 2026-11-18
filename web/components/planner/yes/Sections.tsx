@@ -286,6 +286,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
   const C = 2 * Math.PI * 26;
   const pct = s.docsDone / FOLDER.length;
   const useful = FOLDER.filter((f) => f.priority);
+  const [request, setRequest] = useState<{ key: string; n: number } | null>(null);
   const icon = (kind: string) => (kind === "contacts" ? <IcPhone /> : kind === "timeline" ? <IcClock /> : <IcList />);
   const unit = (kind: string, n: number) => (kind === "contacts" ? t(`${n} contatti`, `${n} contacts`) : kind === "timeline" ? t(`${n} momenti`, `${n} entries`) : kind === "text" ? (n ? t("Scritto", "Written") : t("Da scrivere", "To write")) : t(`${n} voci`, `${n} items`));
   return (
@@ -305,11 +306,11 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
         <h2 className="y-gh">{t("Utili adesso", "Useful right now")}</h2>
         <div className="y-tiles">
           {useful.map((f) => (
-            <div key={f.key} className="y-tile">
+            <button key={f.key} type="button" className="y-tile" onClick={() => setRequest((r) => ({ key: f.key, n: (r?.n ?? 0) + 1 }))}>
               <span className="y-ri">{icon(f.kind)}</span>
               <span className="y-tile-n">{en ? f.titleEn : f.title}</span>
               <span className="y-tile-m">{unit(f.kind, docCount(data, f.key))}</span>
-            </div>
+            </button>
           ))}
         </div>
       </section>
@@ -321,6 +322,7 @@ export function BinderView({ ctx }: { ctx: Ctx }) {
         eventTitle={data.event.title}
         eventDate={data.event.eventDate}
         onPdf={ctx.pdf}
+        request={request}
         onSave={async (next) => { await ctx.act(() => ctx.call("PUT", "", { docs: next })); }}
       />
     </div>

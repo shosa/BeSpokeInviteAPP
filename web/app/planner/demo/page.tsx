@@ -4,6 +4,7 @@ import { plannerFonts } from "@/components/planner/yes/fonts";
 import { demoData } from "@/components/planner/yes/model";
 import { getLang } from "@/lib/i18n";
 import { LangProvider } from "@/lib/lang";
+import { Nav } from "@/components/Nav";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,13 @@ export default async function PlannerDemo({ searchParams }: { searchParams: Prom
   const q = await searchParams;
   const lang = q.lang === "en" || q.lang === "it" ? q.lang : await getLang();
   return (
+    <>
+    <Nav lang={lang} />
     <main className={plannerFonts} lang={lang}>
       <LangProvider lang={lang}>
         <YesPlanner id="demo" initial={demoData(lang === "en")} lang={lang} demo />
       </LangProvider>
     </main>
+    </>
   );
 }

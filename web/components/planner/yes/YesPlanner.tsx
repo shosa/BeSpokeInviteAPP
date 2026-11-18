@@ -211,7 +211,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
             <img src="/planner/rings.svg" alt="" width={60} height={58} />
             <div>
               <p className="y-cap">{couple}</p>
-              <p className="tn" style={{ fontFamily: "var(--brand)", fontStyle: "italic", fontWeight: 500, fontSize: "1.5rem" }} suppressHydrationWarning>
+              <p className="tn" style={{ fontFamily: "var(--brand)", fontStyle: "normal", fontWeight: 400, fontSize: "1.5rem" }} suppressHydrationWarning>
                 {days === null ? t("Data da fissare", "Date to set") : days > 0 ? `${days} ${days === 1 ? t("giorno", "day") : t("giorni", "days")}` : days === 0 ? t("È oggi", "It's today") : ev.after}
               </p>
             </div>

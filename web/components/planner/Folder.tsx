@@ -92,7 +92,10 @@ export function Folder({
   eventDate,
   onSave,
   onPdf,
+  request,
 }: {
+  // Apertura di una sezione chiesta da fuori (le schede «Utili adesso» del planner): n cambia a ogni richiesta.
+  request?: { key: string; n: number } | null;
   docs: Record<string, FolderValue>;
   onPdf: () => void;
   vendors: FolderVendor[];
@@ -151,6 +154,10 @@ export function Folder({
   }
 
   // Apre una sezione come pagina a sé. La voce nella cronologia fa funzionare il tasto indietro del telefono.
+  useEffect(() => {
+    if (request) void openSection(request.key);
+  }, [request?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function openSection(key: string) {
     await flushDraft();
     setDir("fwd");

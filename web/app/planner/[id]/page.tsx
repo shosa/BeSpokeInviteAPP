@@ -4,6 +4,7 @@ import { YesPlanner } from "@/components/planner/yes/YesPlanner";
 import { plannerFonts } from "@/components/planner/yes/fonts";
 import { ApiError, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
+import { Nav } from "@/components/Nav";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +24,13 @@ export default async function Planner({ params }: { params: Promise<{ id: string
     throw e;
   });
 
+  // Come la pagina dell'invito: barra del sito in alto, poi il planner con la palette del sito.
   return (
-    <main className={plannerFonts}>
-      <YesPlanner id={id} initial={data} lang={lang} />
-    </main>
+    <>
+      <Nav current="account" lang={lang} />
+      <main className={plannerFonts}>
+        <YesPlanner id={id} initial={data} lang={lang} />
+      </main>
+    </>
   );
 }

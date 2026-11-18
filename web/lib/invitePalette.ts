@@ -14,3 +14,4 @@ export function accentOf(hex: string): string {
   const d = (c: number) => Math.round(c * 0.45).toString(16).padStart(2, "0");
   return `#${d((n >> 16) & 255)}${d((n >> 8) & 255)}${d(n & 255)}`;
 }
+
