@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { folderFor } from "@inviteme/shared";
 import type { Ctx, View } from "./YesPlanner";
 import { IcCamera, IcCheck, IcChevron, IcCloud, IcPlus, IcPrint, IcSearch, IcSun } from "./icons";
-import { daysUntil, dayMonth, docFilled, euro, hue, initials, longDate, stats, taskWhen, todayIso, validIso } from "./model";
+import { daysUntil, dayMonth, docFilled, euro, hue, initials, longDate, stats, taskWhen, todayIso, validIso, weatherArt } from "./model";
 
 // Riepilogo: meteo del giorno, foto con il conto alla rovescia, prossime attività, da sistemare,
 // budget, invitati, pagamenti, tavoli e cartella. Da 1200px è una griglia a 12 colonne.
@@ -114,6 +114,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
         <p className="y-eyebrow">{validIso(dateIso) ? t(`Il meteo per il ${dayMonth(dateIso, false)}`, `The weather for ${dayMonth(dateIso, true)}`) : t("Il meteo del grande giorno", "The weather on the big day")}</p>
         {f ? (
           <div className="y-wx-main">
+            <img className="y-wx-art" src={weatherArt(f)} alt="" aria-hidden="true" width={120} height={120} />
             <p className="y-wx-temp tn"><IcCloud rain={risk} /><span className="mid">{Math.round(f.tmaxC)}°</span><span className="y-cap"> / {Math.round(f.tminC)}°</span></p>
             <h2 id="ywxT" className={`y-heading y-wx-h${risk ? " t-warn" : ""}`}>
               {around.length && ceremony !== null
@@ -323,7 +324,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
 
       <div className={`y-bottom${miniTables.length ? " has-tables" : ""}`}>
         {miniTables.length > 0 && (
-          <button className="y-card y-tables" type="button" onClick={() => go("guests", "tavoli")}>
+          <button className="y-card y-tables" type="button" onClick={() => go("tables")}>
             <span>
               <span className="y-eyebrow">{t("Tavoli", "Tables")}</span>
               <span className="y-heading">{t(`${s.seated} su ${s.seats} seduti`, `${s.seated} of ${s.seats} seated`)}</span>

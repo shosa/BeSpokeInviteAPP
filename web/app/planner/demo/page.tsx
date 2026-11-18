@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { YesPlanner } from "@/components/planner/yes/YesPlanner";
+import { PlannerShell } from "@/components/planner/yes/PlannerShell";
 import { plannerFonts } from "@/components/planner/yes/fonts";
 import { demoData } from "@/components/planner/yes/model";
 import { getLang } from "@/lib/i18n";
@@ -23,7 +23,7 @@ export default async function PlannerDemo({ searchParams }: { searchParams: Prom
     <Nav lang={lang} />
     <main className={plannerFonts} lang={lang}>
       <LangProvider lang={lang}>
-        <YesPlanner id="demo" initial={demoData(lang === "en")} lang={lang} demo />
+        <PlannerShell id="demo" initial={demoData(lang === "en")} lang={lang} demo />
       </LangProvider>
     </main>
     </>

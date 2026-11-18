@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { isEventType, isPlannerIcon, type Catalog } from "@inviteme/shared";
+import { isEventType, isPlannerIcon, plannerPdfName, type Catalog } from "@inviteme/shared";
 import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
@@ -352,7 +352,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       },
       include,
     );
-    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", `attachment; filename="${lang === "en" ? "event-folder" : "cartella-evento"}.pdf"`).send(pdf);
+    return reply.header("Content-Type", "application/pdf").header("Content-Disposition", `attachment; filename="${plannerPdfName(p.event_type, p.title, lang === "en" ? "en" : "it")}"`).send(pdf);
   });
 
   app.post<{ Params: { id: string; kind: string } }>("/api/planners/:id/:kind", async (req, reply) => {

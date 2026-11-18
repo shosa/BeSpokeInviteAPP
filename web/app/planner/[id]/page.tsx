@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { PremiumData } from "@/components/planner/PremiumPlanner";
-import { YesPlanner } from "@/components/planner/yes/YesPlanner";
+import { PlannerShell } from "@/components/planner/yes/PlannerShell";
 import { plannerFonts } from "@/components/planner/yes/fonts";
 import { ApiError, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
@@ -24,12 +24,12 @@ export default async function Planner({ params }: { params: Promise<{ id: string
     throw e;
   });
 
-  // Come la pagina dell'invito: barra del sito in alto, poi il planner con la palette del sito.
+  // Pagina del sito con la copertina del planner; «Accedi al planner» lo apre a tutto schermo.
   return (
     <>
       <Nav current="account" lang={lang} />
       <main className={plannerFonts}>
-        <YesPlanner id={id} initial={data} lang={lang} />
+        <PlannerShell id={id} initial={data} lang={lang} backLabel={lang === "en" ? "My account" : "La mia area"} />
       </main>
     </>
   );

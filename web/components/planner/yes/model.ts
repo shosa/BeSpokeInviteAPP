@@ -4,7 +4,7 @@ import type { PremiumData } from "../PremiumPlanner";
 // Calcoli del planner (budget, invitati, attività, cartella) e la demo: dati d'esempio che si modificano solo in memoria.
 
 export type Method = "POST" | "PATCH" | "DELETE" | "PUT";
-export type Weather = { forecast: { tmaxC: number; tminC: number; precipMm: number; precipProb: number | null; hourly?: { hour: number; tempC: number; precipMm: number }[] } | null; reason?: string; place?: string; sample?: boolean };
+export type Weather = { forecast: { tmaxC: number; tminC: number; precipMm: number; precipProb: number | null; code?: number | null; hourly?: { hour: number; tempC: number; precipMm: number }[] } | null; reason?: string; place?: string; sample?: boolean };
 
 export const CATS = [...BUDGET_CATEGORIES.map((c) => ({ key: c.key as string, it: c.it as string, en: c.en as string, share: c.share as number })), { key: "altro", it: "Altro", en: "Other", share: 0 }];
 
@@ -262,4 +262,25 @@ export function demoData(en: boolean): PremiumData {
 // Previsione d'esempio: un acquazzone a mezzogiorno, proprio intorno alla cerimonia delle 13.
 const DEMO_RAIN: Record<number, number> = { 12: 1, 13: 0.4, 14: 0.8 };
 const DEMO_TEMP = [18, 18, 18, 18, 18, 18, 18, 19, 20, 21, 23, 24, 24, 25, 25, 25, 24, 23, 22, 21, 20, 19, 19, 18];
-export const DEMO_WEATHER: Weather = { forecast: { tmaxC: 25, tminC: 18, precipMm: 2.2, precipProb: 60, hourly: DEMO_TEMP.map((tempC, hour) => ({ hour, tempC, precipMm: DEMO_RAIN[hour] ?? 0 })) }, place: "Como", sample: true };
+export const DEMO_WEATHER: Weather = { forecast: { tmaxC: 25, tminC: 18, precipMm: 2.2, precipProb: 60, code: 80, hourly: DEMO_TEMP.map((tempC, hour) => ({ hour, tempC, precipMm: DEMO_RAIN[hour] ?? 0 })) }, place: "Como", sample: true };
+
+// Disegno del meteo previsto (Meteocons di Bas Milius, MIT, in public/planner/weather): dal codice WMO di Open-Meteo,
+// altrimenti dalla pioggia prevista.
+export function weatherArt(f: { code?: number | null; precipMm: number }): string {
+  const c = f.code;
+  const name =
+    c == null ? (f.precipMm >= 5 ? "rain" : f.precipMm > 0.2 ? "partly-cloudy-day-rain" : "clear-day")
+    : c === 0 ? "clear-day"
+    : c <= 2 ? "partly-cloudy-day"
+    : c === 3 ? "overcast-day"
+    : c === 45 || c === 48 ? "fog-day"
+    : c >= 51 && c <= 57 ? "drizzle"
+    : c === 66 || c === 67 ? "sleet"
+    : (c >= 71 && c <= 77) || c === 85 || c === 86 ? "snow"
+    : c === 80 ? "partly-cloudy-day-rain"
+    : c >= 61 && c <= 82 ? "rain"
+    : c === 96 || c === 99 ? "hail"
+    : c >= 95 ? "thunderstorms-day-rain"
+    : "partly-cloudy-day";
+  return `/planner/weather/${name}.svg`;
+}

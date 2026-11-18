@@ -97,7 +97,7 @@ type Filter = "all" | "yes" | "pending" | "no";
 export function GuestsView({ ctx }: { ctx: Ctx }) {
   const { data, t, en } = ctx;
   const s = useMemo(() => stats(data), [data]);
-  const tab = ctx.sub === "tavoli" ? "tavoli" : ctx.sub === "famiglie" ? "famiglie" : "lista";
+  const tab = ctx.sub === "famiglie" ? "famiglie" : "lista";
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const tableName = (id: string | null) => data.tables.find((x) => x.id === id)?.name;
@@ -118,7 +118,7 @@ export function GuestsView({ ctx }: { ctx: Ctx }) {
   return (
     <div className="y-page">
       <Head ctx={ctx} title={t("Invitati", "Guests")} sub={s.total ? t(`${s.yes} vengono, ${s.pending} devono rispondere e ${s.no} non vengono.`, `${s.yes} attending, ${s.pending} yet to reply and ${s.no} can't make it.`) : t("Aggiungi gli invitati per gruppo: famiglie, amici, colleghi.", "Add your guests by group: family, friends, colleagues.")} />
-      <Seg label={t("Viste degli invitati", "Guest views")} value={tab} onChange={(v) => ctx.go("guests", v === "lista" ? "" : v)} options={[{ v: "lista", label: t("Lista", "List") }, { v: "famiglie", label: t("Famiglie", "Families") }, { v: "tavoli", label: t("Tavoli", "Tables") }]} />
+      <Seg label={t("Viste degli invitati", "Guest views")} value={tab} onChange={(v) => ctx.go("guests", v === "lista" ? "" : v)} options={[{ v: "lista", label: t("Lista", "List") }, { v: "famiglie", label: t("Famiglie", "Families") }]} />
 
       {tab === "lista" && (
         <>
@@ -159,11 +159,21 @@ export function GuestsView({ ctx }: { ctx: Ctx }) {
 
       {tab === "famiglie" && <GroupsView ctx={ctx} />}
 
-      {tab === "tavoli" && (
-        <div className="y-tables-view">
-          <Seating tables={data.tables} guests={data.guests} call={(m, p, b) => ctx.act(() => ctx.call(m, p, b))} />
-        </div>
-      )}
+    </div>
+  );
+}
+
+// ---------- Tavoli ----------
+export function TablesView({ ctx }: { ctx: Ctx }) {
+  const { data, t } = ctx;
+  const seated = data.guests.filter((g) => g.table_id).reduce((n, g) => n + (g.party_size || 1), 0);
+  const seats = data.tables.reduce((n, tb) => n + tb.seats, 0);
+  return (
+    <div className="y-page">
+      <Head ctx={ctx} title={t("Tavoli", "Tables")} sub={data.tables.length ? t(`${data.tables.length} tavoli, ${seated} persone sedute su ${seats} posti.`, `${data.tables.length} tables, ${seated} people seated out of ${seats} seats.`) : t("Crea i tavoli e trascina gli invitati ai loro posti.", "Create the tables and drag guests to their seats.")} />
+      <div className="y-tables-view">
+        <Seating tables={data.tables} guests={data.guests} call={(m, p, b) => ctx.act(() => ctx.call(m, p, b))} />
+      </div>
     </div>
   );
 }

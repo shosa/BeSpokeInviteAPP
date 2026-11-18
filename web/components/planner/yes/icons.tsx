@@ -45,6 +45,15 @@ export function IcBinder({ on, className }: P) {
   );
 }
 
+// Tavolo rotondo visto dall'alto, con i posti intorno.
+export function IcTables({ on, className }: P) {
+  return on ? (
+    <svg {...base} className={className}><circle cx="12" cy="12" r="4.6" fill="currentColor" /><circle cx="12" cy="3.9" r="1.7" fill="currentColor" /><circle cx="12" cy="20.1" r="1.7" fill="currentColor" /><circle cx="3.9" cy="12" r="1.7" fill="currentColor" /><circle cx="20.1" cy="12" r="1.7" fill="currentColor" /></svg>
+  ) : (
+    <svg {...base} className={className}><circle {...line} cx="12" cy="12" r="4.4" /><circle {...line} cx="12" cy="4" r="1.5" /><circle {...line} cx="12" cy="20" r="1.5" /><circle {...line} cx="4" cy="12" r="1.5" /><circle {...line} cx="20" cy="12" r="1.5" /></svg>
+  );
+}
+
 export function IcSearch({ className }: P) {
   return <svg {...base} className={className}><circle {...line} cx="10.6" cy="10.6" r="6.4" /><path {...line} d="m15.4 15.4 4.8 4.8" /></svg>;
 }

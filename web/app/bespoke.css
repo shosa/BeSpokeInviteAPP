@@ -827,3 +827,26 @@ img {
 .pi-btn { display: grid; place-items: center; aspect-ratio: 1; min-height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink-soft); cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
 .pi-btn:hover { border-color: var(--brass-light); color: var(--ink); }
 .pi-btn.is-on { border-color: var(--brass); background: #f7f1e7; color: var(--brass); box-shadow: 0 0 0 1px var(--brass) inset; }
+
+/* Creazione del PDF del planner: documento animato, passi, barra e tempo trascorso. */
+.pdfp { display: grid; justify-items: center; gap: 10px; padding: 18px 4px 6px; text-align: center; }
+.pdfp-doc { position: relative; width: 92px; height: 112px; margin-bottom: 8px; }
+.pdfp-page { position: absolute; inset: 0; border-radius: 8px; background: #fff; border: 1px solid var(--line); box-shadow: 0 10px 24px -14px rgba(110, 78, 28, 0.45); }
+.pdfp-page.p3 { transform: rotate(-8deg) translate(-8px, 4px); animation: pdfpFan 2.4s ease-in-out infinite; }
+.pdfp-page.p2 { transform: rotate(5deg) translate(6px, 2px); animation: pdfpFan 2.4s ease-in-out infinite reverse; }
+.pdfp-page.p1 { display: grid; align-content: start; gap: 8px; padding: 18px 14px; }
+.pdfp-page.p1 i { display: block; height: 6px; border-radius: 3px; background: var(--paper-deep, #f7f1e7); overflow: hidden; position: relative; }
+.pdfp-page.p1 i:first-child { width: 60%; height: 9px; background: var(--brass-light, #b8893f); opacity: .55; }
+.pdfp-page.p1 i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(184, 137, 63, 0.45), transparent); transform: translateX(-100%); animation: pdfpScan 1.4s ease-in-out infinite; }
+.pdfp-page.p1 i:nth-child(2)::after { animation-delay: .2s; } .pdfp-page.p1 i:nth-child(3)::after { animation-delay: .4s; } .pdfp-page.p1 i:nth-child(4)::after { animation-delay: .6s; }
+.pdfp-check { position: absolute; right: -10px; bottom: -10px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--brass, #8a6427); color: #fff; font-size: 17px; font-weight: 700; transform: scale(0); transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+.pdfp-doc.is-done .pdfp-check { transform: scale(1); }
+.pdfp-doc.is-done .pdfp-page { animation: none; }
+.pdfp .pdfp-title { margin: 4px 0 0; font: 400 1.35rem var(--font-display), serif; }
+.pdfp .pdfp-step { margin: 0; color: var(--ink-soft); font-size: 14px; min-height: 1.4em; }
+.pdfp-bar { width: 100%; max-width: 360px; height: 8px; border-radius: 999px; background: var(--paper-deep, #f7f1e7); overflow: hidden; }
+.pdfp-bar span { display: block; height: 100%; border-radius: inherit; background: var(--iv-grad-gold, #b8893f); transition: width .25s linear; }
+.pdfp-meta { width: 100%; max-width: 360px; display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+@keyframes pdfpFan { 50% { transform: rotate(-3deg) translate(-3px, 0); } }
+@keyframes pdfpScan { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .pdfp-page, .pdfp-page.p1 i::after { animation: none !important; } }

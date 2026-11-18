@@ -95,6 +95,13 @@ export function eventPhrases(type: string | undefined, lang: "it" | "en"): Event
   const p = EVENT_PHRASES[(type ?? "") as EventType] ?? EVENT_PHRASES.wedding;
   return p[lang];
 }
+// Nome del file PDF del planner: tipo di evento e nome, in minuscolo e senza accenti («cartella-compleanno-30-anni-di-stefano.pdf»).
+export function plannerPdfName(type: string | undefined, title: string, lang: "it" | "en"): string {
+  const slug = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+  const noun = eventPhrases(type, lang).of.replace(/^(del|della|dello|dell')\s*/, "");
+  const head = lang === "en" ? `${noun}-folder` : `cartella-${noun}`;
+  return `${[slug(head), slug(title)].filter(Boolean).join("-")}.pdf`;
+}
 export function isEventType(v: unknown): v is EventType {
   return typeof v === "string" && EVENT_TYPES.some((e) => e.id === v);
 }

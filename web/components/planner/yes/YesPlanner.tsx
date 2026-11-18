@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { eventPhrases, folderFor, type EventPhrases } from "@inviteme/shared";
 import type { PremiumData } from "../PremiumPlanner";
 import { PdfDialog } from "../PdfDialog";
-import { IcBinder, IcChevron, IcClose, IcGear, IcGuests, IcHome, IcPlus, IcPrint, IcSearch, IcTasks, IcWallet } from "./icons";
+import { IcBinder, IcChevron, IcClose, IcGear, IcGuests, IcHome, IcPlus, IcPrint, IcSearch, IcTasks, IcWallet, IcTables } from "./icons";
 import { DEMO_WEATHER, daysUntil, demoApply, stats, type Method, type Weather } from "./model";
 import { Home } from "./Home";
-import { BudgetView, BinderView, GuestsView, SettingsView, TasksView } from "./Sections";
+import { BudgetView, BinderView, GuestsView, SettingsView, TasksView, TablesView } from "./Sections";
 import { DaySheet, GuestSheet, PhotoSheet, TaskSheet } from "./Sheets";
 import "./yes.css";
 import { PlannerIcon } from "../PlannerIcon";
@@ -17,7 +17,7 @@ import { PlannerIcon } from "../PlannerIcon";
 // Riepilogo a schede, sezioni Budget, Invitati, Attività e Cartella, ricerca con Ctrl K.
 // Ogni modifica va alle rotte /api/planners/:id/… ; nella demo resta in memoria e non si salva.
 
-export type View = "home" | "budget" | "guests" | "tasks" | "binder" | "settings";
+export type View = "home" | "budget" | "guests" | "tables" | "tasks" | "binder" | "settings";
 export type Guest = PremiumData["guests"][number];
 export type Task = PremiumData["tasks"][number];
 export type Sheet = { kind: "guest"; guest?: Guest } | { kind: "task"; task?: Task } | { kind: "day" } | { kind: "photo" } | null;
@@ -60,11 +60,12 @@ const NAV: { view: View; it: string; en: string; Icon: (p: { on?: boolean }) => 
   { view: "home", it: "Riepilogo", en: "Summary", Icon: IcHome },
   { view: "budget", it: "Budget", en: "Budget", Icon: IcWallet },
   { view: "guests", it: "Invitati", en: "Guests", Icon: IcGuests },
+  { view: "tables", it: "Tavoli", en: "Tables", Icon: IcTables },
   { view: "tasks", it: "Attività", en: "Tasks", Icon: IcTasks },
   { view: "binder", it: "Cartella", en: "Binder", Icon: IcBinder },
 ];
 
-export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner" }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string }) {
+export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void }) {
   const router = useRouter();
   const en = lang === "en";
   const t = useCallback((it: string, eng: string) => (en ? eng : it), [en]);
@@ -87,7 +88,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   }, []);
 
   // Le sezioni hanno un indirizzo (#budget, #invitati/tavoli…): il tasto Indietro del browser torna alla precedente.
-  const HASH: Record<View, string> = { home: "", budget: "budget", guests: "invitati", tasks: "attivita", binder: "cartella", settings: "impostazioni" };
+  const HASH: Record<View, string> = { home: "", budget: "budget", guests: "invitati", tables: "tavoli", tasks: "attivita", binder: "cartella", settings: "impostazioni" };
   const go = useCallback((next: View, nextSub = "") => {
     setView(next);
     setSub(nextSub);
@@ -101,7 +102,9 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   }, []);
   useEffect(() => {
     const read = () => {
-      const [h, s] = window.location.hash.slice(1).split("/");
+      const [h0, s0] = window.location.hash.slice(1).split("/");
+      // I vecchi link #invitati/tavoli portano alla sezione Tavoli.
+      const [h, s] = h0 === "invitati" && s0 === "tavoli" ? ["tavoli", ""] : [h0, s0];
       const found = (Object.keys(HASH) as View[]).find((k) => HASH[k] === h && h);
       setView(found ?? "home");
       setSub(found ? s ?? "" : "");
@@ -172,6 +175,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     home: null,
     budget: budgetPct === null ? null : `${budgetPct} %`,
     guests: s.total ? `${s.yes}/${s.total}` : null,
+    tables: data.tables.length ? String(data.tables.length) : null,
     tasks: data.tasks.length ? `${s.tasksDone}/${data.tasks.length}` : null,
     binder: `${s.docsDone}/${folderFor(data.event.eventType).length}`,
     settings: null,
@@ -199,6 +203,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     <div className={`yp${demo ? " is-demo" : ""}${view === "home" ? " y-home" : ""}`}>
       <aside className="y-sidebar" aria-label={t("Sezioni", "Sections")}>
         <div className="y-brand"><b>Bespoke Invite</b><span>Planner</span></div>
+        {onClose && <button type="button" className="y-close" onClick={onClose} aria-label={t("Chiudi il planner", "Close the planner")} title={t("Chiudi il planner", "Close the planner")}><IcClose /></button>}
         <nav>
           <button type="button" onClick={() => setPalette(true)}>
             <IcSearch /><span>{t("Cerca", "Search")}</span><kbd>Ctrl K</kbd>
@@ -227,7 +232,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
       <div className="y-content">
         <header className={`y-nb${scrolled ? " is-scrolled" : ""}`}>
           <div className="y-nb-in">
-            <div className="y-nb-l">{view === "home" ? <span className="y-home-brand">Planner</span> : null}</div>
+            <div className="y-nb-l">{onClose && <button type="button" className="y-nbtn y-nb-close" onClick={onClose} aria-label={t("Chiudi il planner", "Close the planner")}><IcClose /></button>}{view === "home" ? <span className="y-home-brand">Planner</span> : null}</div>
             <div className="y-nb-t" aria-hidden="true">{view === "home" ? couple : view === "settings" ? t("Impostazioni", "Settings") : t(NAV[navIndex]?.it ?? "", NAV[navIndex]?.en ?? "")}</div>
             <div className="y-nb-r">
               {actions.map((a) => <button key={a.label} type="button" className="y-nbtn" aria-label={a.label} title={a.label} onClick={a.onClick}>{a.icon}</button>)}
@@ -240,6 +245,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
           {view === "home" && <Home ctx={ctx} />}
           {view === "budget" && <BudgetView ctx={ctx} />}
           {view === "guests" && <GuestsView ctx={ctx} />}
+          {view === "tables" && <TablesView ctx={ctx} />}
           {view === "tasks" && <TasksView ctx={ctx} />}
           {view === "binder" && <BinderView ctx={ctx} />}
           {view === "settings" && <SettingsView ctx={ctx} />}
@@ -263,7 +269,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
       {sheet?.kind === "task" && <TaskSheet ctx={ctx} task={sheet.task} onClose={() => setSheet(null)} />}
       {sheet?.kind === "day" && <DaySheet ctx={ctx} onClose={() => setSheet(null)} />}
       {sheet?.kind === "photo" && <PhotoSheet ctx={ctx} onClose={() => setSheet(null)} />}
-      {pdfOpen && <PdfDialog id={id} onClose={() => setPdfOpen(false)} />}
+      {pdfOpen && <PdfDialog id={id} title={data.event.title} eventType={data.event.eventType} onClose={() => setPdfOpen(false)} />}
       {toastText && <div className="y-toast" role="status" aria-live="polite">{toastText}</div>}
     </div>
   );
@@ -291,8 +297,7 @@ function Palette({ ctx, onClose, openSheet }: { ctx: Ctx; onClose: () => void; o
     const has = (s: string) => s.toLowerCase().includes(query);
     const sections: Item[] = [
       ...NAV.map((n) => ({ key: `s-${n.view}`, label: t(n.it, n.en), run: () => go(n.view) })),
-      { key: "s-tables", label: t("Tavoli", "Tables"), run: () => go("guests", "tavoli") },
-      { key: "s-settings", label: ctx.ev.settings, run: () => go("settings") },
+            { key: "s-settings", label: ctx.ev.settings, run: () => go("settings") },
     ].filter((x) => has(x.label));
     const guests = data.guests.filter((g) => has(g.name) || has(g.group_name)).slice(0, 6).map((g) => ({ key: `g-${g.id}`, label: g.name, sub: g.group_name, run: () => openSheet({ kind: "guest", guest: g }) }));
     const tasks = data.tasks.filter((x) => has(x.title)).slice(0, 6).map((x) => ({ key: `t-${x.id}`, label: x.title, run: () => openSheet({ kind: "task", task: x }) }));
