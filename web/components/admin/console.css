@@ -579,3 +579,23 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
   .tpl-catman-del { grid-column: 2; grid-row: 3; justify-self: end; }
   .tpl-catman-n { display: none; }
 }
+/* Categorie nella pagina: una riga compatta (chip che scorrono) e il pulsante per aprire l'editor. */
+.tpl-catbar { display: flex; align-items: center; gap: 12px; margin-top: 22px; padding: 10px 12px 10px 18px; background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--iv-shadow); min-width: 0; }
+.tpl-catbar-k { flex: none; font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); }
+.tpl-catbar-list { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.tpl-catbar-list::-webkit-scrollbar { display: none; }
+.tpl-catbar-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--paper); font-size: 13px; white-space: nowrap; }
+.tpl-catbar-chip svg { color: var(--brass); }
+.tpl-catbar-chip b { font-weight: 500; opacity: .6; }
+.tpl-catbar .btn { flex: none; white-space: nowrap; }
+@media (max-width: 760px) { .tpl-catbar-k { display: none; } .tpl-catbar { padding-left: 12px; } }
+/* Editor delle categorie in finestra. */
+.demo-modal.tpl-catman { margin: 0; width: min(760px, calc(100% - 24px)); max-height: calc(100dvh - 48px); overflow: auto; }
+.tpl-catman .tpl-catman-acts { margin-top: 14px; }
+.demo-modal.tpl-catman .tpl-catman-head { flex-wrap: nowrap; }
+.demo-modal.tpl-catman .tpl-catman-head > div { min-width: 0; }
+.demo-modal.tpl-catman .demo-close { flex: none; }
+@media (max-width: 760px) {
+  .demo-modal.tpl-catman .tpl-catman-acts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .demo-modal.tpl-catman .tpl-catman-acts .btn { padding: 0 8px; font-size: 11px; letter-spacing: .08em; justify-content: center; }
+}

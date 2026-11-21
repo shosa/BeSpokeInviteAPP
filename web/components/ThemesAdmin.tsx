@@ -202,21 +202,39 @@ function CategoryManager({ categories, counts, onSaved }: { categories: Template
     if (!res.ok) return toast.error(((await res.json().catch(() => ({}))) as { error?: string }).error ?? t("Categorie non salvate", "Categories not saved"));
     toast.success(t("Categorie salvate", "Categories saved"));
     setIconFor(null);
+    setOpen(false);
     onSaved();
   }
 
+  const [open, setOpen] = useState(false);
+  const closeEditor = () => { if (dirty && !window.confirm(t("Chiudere senza salvare le modifiche?", "Close without saving the changes?"))) return; setRows(fresh()); setIconFor(null); setOpen(false); };
+
+  // Nella pagina: una riga compatta con le categorie; l'editor completo si apre in una finestra.
+  if (!open) return (
+    <section className="tpl-catbar" aria-label={t("Categorie", "Categories")}>
+      <span className="tpl-catbar-k">{t("Categorie", "Categories")}</span>
+      <div className="tpl-catbar-list">
+        {categories.map((c) => <span key={c.id} className="tpl-catbar-chip"><LibraryIcon icon={c.icon} size={15} />{lang === "en" ? c.nameEn : c.name}<b>{counts[c.id] ?? 0}</b></span>)}
+        {categories.length === 0 && <span className="hint">{t("Nessuna categoria", "No categories")}</span>}
+      </div>
+      <button type="button" className="btn outline small" onClick={() => setOpen(true)}>{t("Modifica categorie", "Edit categories")}</button>
+    </section>
+  );
+
   return (
-    <section className="tpl-catman">
+    <div className="demo-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) closeEditor(); }}>
+    <section className="demo-modal tpl-catman" role="dialog" aria-modal="true" aria-labelledby="tpl-catman-t">
       <div className="tpl-catman-head">
         <div>
-          <h3>{t("Categorie", "Categories")}</h3>
-          <p className="hint">{t("Guidano la scelta del template per i clienti (Matrimoni, Compleanni…). Ogni template può stare in più categorie: si assegnano dalle schede qui sotto.", "They guide customers when choosing a template (Weddings, Birthdays…). A template can be in several categories: assign them from the cards below.")}</p>
+          <h3 id="tpl-catman-t">{t("Categorie", "Categories")}</h3>
+          <p className="hint">{t("Guidano la scelta del template per i clienti. Ogni template può stare in più categorie: si assegnano dalle schede dei template.", "They guide customers when choosing a template. A template can be in several categories: assign them from the template cards.")}</p>
         </div>
-        <div className="tpl-catman-acts">
+        <button type="button" className="demo-close" aria-label={t("Chiudi", "Close")} onClick={closeEditor}>×</button>
+      </div>
+      <div className="tpl-catman-acts">
           <button type="button" className="btn outline small" onClick={() => { const key = `new-${Date.now()}`; setRows((l) => [...l, { key, id: "", name: "", nameEn: "", icon: "sparkles" }]); setIconFor(key); }}>{t("Aggiungi categoria", "Add category")}</button>
           <button type="button" className="btn solid small" disabled={!dirty || busy} onClick={save}>{busy ? t("Salvo…", "Saving…") : t("Salva categorie", "Save categories")}</button>
         </div>
-      </div>
       <ul className="tpl-catman-list">
         {rows.map((r, i) => (
           <li key={r.key} className="tpl-catman-row">
@@ -238,5 +256,6 @@ function CategoryManager({ categories, counts, onSaved }: { categories: Template
       </ul>
       {dirty && <p className="hint tpl-catman-dirty">{t("Modifiche non salvate", "Unsaved changes")}</p>}
     </section>
+    </div>
   );
 }
