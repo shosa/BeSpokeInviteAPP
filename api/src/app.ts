@@ -10,6 +10,8 @@ import {
   ADDON_KEYS,
   EVENT_TYPES,
   isEventType,
+  isLibraryIcon,
+  type TemplateCategory,
   activeFeatures,
   defaultConfig,
   editRules,
@@ -1376,14 +1378,40 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     const c = await loadFullCatalog();
     if (!c.themes.some((t) => t.manifest.id === req.params.id)) return reply.code(404).send({ error: "Tema non trovato" });
-    // Si cambia l'attivazione, il segno Premium, o entrambi: ciò che non è nella richiesta resta com'è.
-    const b = (req.body ?? {}) as { enabled?: unknown; premium?: unknown };
+    // Si cambia l'attivazione, il segno Premium, le categorie: ciò che non è nella richiesta resta com'è.
+    const b = (req.body ?? {}) as { enabled?: unknown; premium?: unknown; categories?: unknown };
+    const knownCats = new Set(c.categories.map((x) => x.id));
+    const cats = Array.isArray(b.categories) ? [...new Set(b.categories.map(String).filter((x) => knownCats.has(x)))] : null;
     const next = c.themes.map((t) => t.manifest.id === req.params.id
-      ? { id: t.manifest.id, enabled: typeof b.enabled === "boolean" ? b.enabled : t.enabled, premium: typeof b.premium === "boolean" ? b.premium : t.premium }
-      : { id: t.manifest.id, enabled: t.enabled, premium: t.premium });
+      ? { id: t.manifest.id, enabled: typeof b.enabled === "boolean" ? b.enabled : t.enabled, premium: typeof b.premium === "boolean" ? b.premium : t.premium, categories: cats ?? t.categories }
+      : { id: t.manifest.id, enabled: t.enabled, premium: t.premium, categories: t.categories });
     if (!next.some((t) => t.enabled)) return reply.code(400).send({ error: "Serve almeno un tema attivo" });
     await saveCatalog({ models: c.models, addons: c.addons, themes: next });
     return { ok: true };
+  });
+
+  // Categorie dei template: la console manda l'elenco completo, nell'ordine voluto. Una categoria senza id è nuova
+  // (l'id nasce dal nome); quelle tolte dall'elenco spariscono anche dai temi.
+  app.put("/api/admin/categories", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    const b = (req.body ?? {}) as { categories?: unknown };
+    if (!Array.isArray(b.categories)) return reply.code(400).send({ error: "Elenco categorie mancante" });
+    const text = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
+    const slug = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+    const seen = new Set<string>();
+    const categories: TemplateCategory[] = [];
+    for (const raw of b.categories.slice(0, 40) as Record<string, unknown>[]) {
+      const name = text(raw?.name, 40);
+      if (!name) return reply.code(400).send({ error: "Ogni categoria ha bisogno di un nome" });
+      let id = slug(text(raw?.id, 40)) || slug(name) || "categoria";
+      for (let n = 2; seen.has(id); n++) id = `${slug(name)}-${n}`;
+      seen.add(id);
+      categories.push({ id, name, nameEn: text(raw?.nameEn, 40) || name, icon: isLibraryIcon(raw?.icon) ? (raw.icon as string) : "sparkles" });
+    }
+    const c = await loadFullCatalog();
+    const themesNext = c.themes.map((t) => ({ id: t.manifest.id, enabled: t.enabled, premium: t.premium, categories: t.categories.filter((x) => seen.has(x)) }));
+    await saveCatalog({ models: c.models, addons: c.addons, themes: themesNext, categories });
+    return { ok: true, categories };
   });
 
   app.get("/api/admin/music", async (req, reply) => {

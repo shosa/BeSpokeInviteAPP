@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EVENT_TYPES, type EventType, type ThemeManifest } from "@inviteme/shared";
+import { EVENT_TYPES, type EventType, type TemplateCategory, type ThemeManifest } from "@inviteme/shared";
+import { LibraryIcon } from "@/components/planner/PlannerIcon";
 import { TemplateCarousel } from "@/components/TemplateCarousel";
 import { ThemePreview } from "@/components/ThemePreview";
 import { CreatingOverlay } from "@/components/CreatingOverlay";
@@ -11,12 +12,20 @@ import { themeCopy } from "@/lib/catalogCopy";
 
 // Attivazione di un acquisto: il cliente sceglie il template e il suo invito nasce con quello.
 // locked: template Premium che l'invito base non può scegliere (si vedono con il lucchetto).
-export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId: string; templates: ThemeManifest[]; locked?: string[] }) {
+export function ActivateTemplate({ orderId, templates, locked = [], categories = [], themeCategories = {} }: { orderId: string; templates: ThemeManifest[]; locked?: string[]; categories?: TemplateCategory[]; themeCategories?: Record<string, string[]> }) {
   const router = useRouter();
   const lang = useLang();
   const t = (it: string, en: string) => (lang === "en" ? en : it);
   const lockedSet = new Set(locked);
   const [eventType, setEventType] = useState<EventType | null>(null);
+  // Categoria sfogliata: «Tutti» o una categoria della console. Cambiandola, si sceglie il primo template disponibile.
+  const [category, setCategory] = useState<string>("");
+  const visible = useMemo(() => (category ? templates.filter((x) => themeCategories[x.id]?.includes(category)) : templates), [category, templates, themeCategories]);
+  function pickCategory(id: string) {
+    setCategory(id);
+    const list = id ? templates.filter((x) => themeCategories[x.id]?.includes(id)) : templates;
+    if (!list.some((x) => x.id === themeId)) setThemeId(list.find((x) => !lockedSet.has(x.id))?.id ?? list[0]?.id ?? "");
+  }
   const [themeId, setThemeId] = useState(templates.find((x) => !lockedSet.has(x.id))?.id ?? "");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,8 +60,20 @@ export function ActivateTemplate({ orderId, templates, locked = [] }: { orderId:
           ))}
         </div>
       </div>
-      {templates.length > 0 ? (
-        <TemplateCarousel templates={templates} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} locked={lockedSet} />
+      {categories.length > 0 && (
+        <div className="act-cats" role="tablist" aria-label={t("Categorie di template", "Template categories")}>
+          {[{ id: "", name: "Tutti", nameEn: "All", icon: "sparkles" }, ...categories].map((c) => {
+            const n = c.id ? templates.filter((x) => themeCategories[x.id]?.includes(c.id)).length : templates.length;
+            return (
+              <button key={c.id || "all"} type="button" role="tab" aria-selected={category === c.id} className={`act-cat${category === c.id ? " is-on" : ""}`} onClick={() => pickCategory(c.id)}>
+                <LibraryIcon icon={c.icon} size={18} /><span>{lang === "en" ? c.nameEn : c.name}</span><b>{n}</b>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {visible.length > 0 ? (
+        <TemplateCarousel key={category} templates={visible} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} locked={lockedSet} />
       ) : (
         <p className="hint">{t("Nessun template disponibile al momento.", "No templates available right now.")}</p>
       )}

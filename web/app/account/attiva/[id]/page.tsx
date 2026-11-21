@@ -5,7 +5,7 @@ import { PlannerActivate } from "@/components/account/PlannerActivate";
 import "../../account.css";
 import { apiPublic, apiServer } from "@/lib/api";
 import { getLang } from "@/lib/i18n";
-import type { ThemeManifest } from "@inviteme/shared";
+import type { TemplateCategory, ThemeManifest } from "@inviteme/shared";
 import type { PendingPurchase } from "@/lib/pending";
 
 export const dynamic = "force-dynamic";
@@ -45,12 +45,15 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
       </>
     );
   }
-  const catalog = await apiPublic<{ themes?: { enabled: boolean; premium?: boolean; manifest: ThemeManifest }[] }>("/api/catalog");
+  const catalog = await apiPublic<{ themes?: { enabled: boolean; premium?: boolean; categories?: string[]; manifest: ThemeManifest }[]; categories?: TemplateCategory[] }>("/api/catalog");
   const enabled = (catalog?.themes ?? []).filter((t) => t.enabled);
   // Invito base: i template Premium restano visibili, in fondo e con il lucchetto.
   const basic = item.plan === "base";
   const templates = (basic ? [...enabled.filter((t) => !t.premium), ...enabled.filter((t) => t.premium)] : enabled).map((t) => t.manifest);
   const locked = basic ? enabled.filter((t) => t.premium).map((t) => t.manifest.id) : [];
+  // Categorie per la navigazione (Matrimoni, Compleanni…): solo quelle con almeno un template attivo.
+  const themeCategories = Object.fromEntries(enabled.map((t) => [t.manifest.id, t.categories ?? []]));
+  const categories = (catalog?.categories ?? []).filter((c) => enabled.some((t) => t.categories?.includes(c.id)));
 
   return (
     <>
@@ -75,7 +78,7 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
               : "Hai acquistato l'invito base: scegli tra i template inclusi. Quelli con il lucchetto Premium fanno parte dell'invito completo."}
           </p>
         )}
-        <ActivateTemplate orderId={id} templates={templates} locked={locked} />
+        <ActivateTemplate orderId={id} templates={templates} locked={locked} categories={categories} themeCategories={themeCategories} />
       </main>
     </>
   );

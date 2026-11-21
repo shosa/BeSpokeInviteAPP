@@ -374,6 +374,8 @@ Il validatore controlla, in ordine: il manifest (chiavi ammesse, tipi, `themeCol
 
 Uno stile finito si installa anche dalla console admin, scheda **Template → Carica un template**, senza rilascio: lo ZIP viene controllato con lo stesso validatore di `validate-theme` e, se passa, il server lo installa in `themes/<id>/`, la stessa cartella di tutti gli stili. Il tema nuovo nasce **disattivato**: si controlla con «Apri anteprima» e poi si attiva.
 
+Le **categorie** (Matrimoni, Compleanni, Feste…) non stanno in `theme.json`: si creano nella stessa scheda (nome italiano e inglese, icona dalla libreria, ordine) e si assegnano a ogni template dalla sua scheda. Un template può stare in più categorie; uno appena caricato non ne ha, e finché non gliene dai una il cliente lo trova solo in «Tutti».
+
 ### Formato esatto
 
 Lo ZIP contiene **solo** la cartella dello stile, così:

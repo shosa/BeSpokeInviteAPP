@@ -1,4 +1,4 @@
-import { ADDON_KEYS, DEFAULT_CATALOG, MODEL_ID, type Catalog, type ModelDef, type AddonDef, type MusicTrack, type ThemeEntry } from "@inviteme/shared";
+import { ADDON_KEYS, DEFAULT_CATALOG, DEFAULT_TEMPLATE_CATEGORIES, MODEL_ID, type Catalog, type ModelDef, type AddonDef, type MusicTrack, type TemplateCategory, type ThemeEntry } from "@inviteme/shared";
 import { pool } from "./db";
 import { loadThemes, type LoadedTheme } from "./engine/themes";
 
@@ -7,7 +7,9 @@ import { loadThemes, type LoadedTheme } from "./engine/themes";
 export type StoredCatalog = {
   models: ModelDef[];
   addons: AddonDef[];
-  themes?: { id: string; enabled: boolean; premium?: boolean }[];
+  themes?: { id: string; enabled: boolean; premium?: boolean; categories?: string[] }[];
+  // Categorie dei template; finché la console non le salva valgono quelle predefinite.
+  categories?: TemplateCategory[];
 };
 
 // Temi caricati all'avvio dalla cartella themes/; si ricaricano quando la console installa o elimina un tema.
@@ -26,12 +28,15 @@ export function themes(): LoadedTheme[] {
   return themeFiles;
 }
 
-export function themeEntries(stored: StoredCatalog["themes"]): ThemeEntry[] {
-  return themes().map((t) => ({
-    enabled: stored?.find((s) => s.id === t.manifest.id)?.enabled !== false,
-    premium: stored?.find((s) => s.id === t.manifest.id)?.premium === true,
-    manifest: t.manifest,
-  }));
+// Categorie di un tema: quelle salvate (solo categorie che esistono). Prima che la console salvi le categorie,
+// i temi presenti stanno in «Matrimoni» (sono tutti inviti di nozze); un tema caricato dopo non ha categorie.
+export function themeEntries(stored: StoredCatalog["themes"], categories?: TemplateCategory[]): ThemeEntry[] {
+  const known = new Set((categories ?? DEFAULT_TEMPLATE_CATEGORIES).map((c) => c.id));
+  return themes().map((t) => {
+    const s = stored?.find((x) => x.id === t.manifest.id);
+    const cats = s?.categories ?? (categories ? [] : ["matrimoni"]);
+    return { enabled: s?.enabled !== false, premium: s?.premium === true, categories: cats.filter((c) => known.has(c)), manifest: t.manifest };
+  });
 }
 
 // Cache in memoria: si invalida a ogni salvataggio e dopo 15 secondi al massimo (per la libreria musicale).
@@ -52,7 +57,8 @@ async function readFull(): Promise<Catalog> {
   const full: Catalog = {
     models: stored?.models ?? DEFAULT_CATALOG.models,
     addons: stored?.addons ?? DEFAULT_CATALOG.addons,
-    themes: themeEntries(stored?.themes),
+    themes: themeEntries(stored?.themes, stored?.categories),
+    categories: stored?.categories ?? DEFAULT_TEMPLATE_CATEGORIES,
     music: t.map((r) => ({ id: r.id, title: r.title, artist: r.artist, url: r.url, license: r.license, enabled: r.enabled })) as MusicTrack[],
   };
   cache = { at: Date.now(), full };
@@ -70,11 +76,19 @@ export async function loadCatalog(opts: { includeDisabled?: boolean } = {}): Pro
   const models = singleModel(full.models);
   if (opts.includeDisabled) return { ...full, models };
   const on = <T extends { enabled: boolean }>(list: T[]) => list.filter((x) => x.enabled);
-  return { models, addons: on(full.addons), themes: on(full.themes), music: on(full.music) };
+  return { models, addons: on(full.addons), themes: on(full.themes), music: on(full.music), categories: full.categories };
 }
 
 // Salva modelli, funzioni e attivazione dei temi. Il resto (contenuto dei temi) non è modificabile dalla console.
-export async function saveCatalog(next: StoredCatalog): Promise<void> {
+// Chi salva solo modelli e temi non perde categorie e associazioni: ciò che manca si prende dal catalogo attuale.
+export async function saveCatalog(input: StoredCatalog): Promise<void> {
+  const now = await readFull();
+  const catsOf = new Map(now.themes.map((t) => [t.manifest.id, t.categories]));
+  const next: StoredCatalog = {
+    ...input,
+    categories: input.categories ?? now.categories,
+    themes: input.themes?.map((t) => ({ ...t, categories: t.categories ?? catsOf.get(t.id) ?? [] })),
+  };
   await pool.query(
     `INSERT INTO settings (key, value, updated_at) VALUES ('catalog', $1, now())
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`,

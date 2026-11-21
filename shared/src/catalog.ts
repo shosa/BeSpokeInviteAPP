@@ -27,13 +27,25 @@ export type AddonDef = { key: AddonKey; label: string; description: string; cent
 
 // Un tema è una cartella in themes/ (vedi docs/TEMI.md). Il catalogo salva solo se è attivo.
 // premium: template riservato all'invito completo; con l'invito base si vede, ma con il lucchetto.
-export type ThemeEntry = { enabled: boolean; premium: boolean; manifest: ThemeManifest };
+// Categoria dei template (Matrimoni, Compleanni…): creata e ordinata dalla console, con un'icona della libreria
+// (shared/src/plannerIcons.ts). Un template può stare in più categorie.
+export type TemplateCategory = { id: string; name: string; nameEn: string; icon: string };
+export const DEFAULT_TEMPLATE_CATEGORIES: TemplateCategory[] = [
+  { id: "matrimoni", name: "Matrimoni", nameEn: "Weddings", icon: "gem" },
+  { id: "compleanni", name: "Compleanni", nameEn: "Birthdays", icon: "cake" },
+  { id: "feste", name: "Feste", nameEn: "Parties", icon: "party-popper" },
+  { id: "battesimi", name: "Battesimi e nascite", nameEn: "Christenings and births", icon: "baby" },
+  { id: "lauree", name: "Lauree", nameEn: "Graduations", icon: "graduation-cap" },
+  { id: "aziendali", name: "Eventi aziendali", nameEn: "Corporate events", icon: "briefcase" },
+];
+
+export type ThemeEntry = { enabled: boolean; premium: boolean; categories: string[]; manifest: ThemeManifest };
 
 export type MusicTrack = { id: string; title: string; artist: string; url: string; enabled: boolean; license: string };
 
-export type Catalog = { models: ModelDef[]; addons: AddonDef[]; themes: ThemeEntry[]; music: MusicTrack[] };
+export type Catalog = { models: ModelDef[]; addons: AddonDef[]; themes: ThemeEntry[]; music: MusicTrack[]; categories: TemplateCategory[] };
 
-export const DEFAULT_CATALOG: Omit<Catalog, "themes" | "music"> = {
+export const DEFAULT_CATALOG: Omit<Catalog, "themes" | "music" | "categories"> = {
   models: [
     {
       id: MODEL_ID,

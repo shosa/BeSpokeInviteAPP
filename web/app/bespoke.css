@@ -850,3 +850,14 @@ img {
 @keyframes pdfpFan { 50% { transform: rotate(-3deg) translate(-3px, 0); } }
 @keyframes pdfpScan { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .pdfp-page, .pdfp-page.p1 i::after { animation: none !important; } }
+
+/* Scelta del template: categorie (Tutti, Matrimoni, Compleanni…) in una riga che scorre, mai a capo. */
+.act-cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 18px; padding: 2px 16px 6px; justify-content: safe center; }
+.act-cats::-webkit-scrollbar { display: none; }
+.act-cat { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink); font: 500 14px var(--font-text), sans-serif; white-space: nowrap; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.act-cat svg { color: var(--brass); }
+.act-cat b { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--paper-deep); font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+.act-cat:hover { border-color: var(--brass-light); }
+.act-cat.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.act-cat.is-on svg { color: #f3dfae; }
+.act-cat.is-on b { background: rgba(255, 255, 255, 0.18); color: #fff; }

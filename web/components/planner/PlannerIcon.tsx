@@ -23,11 +23,17 @@ export function PlannerIcon({ icon, eventType, size = 24 }: { icon?: string | nu
   return <I size={size} strokeWidth={1.5} aria-hidden="true" />;
 }
 
+// Icona della libreria per chiave (categorie dei template): senza una chiave valida, le scintille.
+export function LibraryIcon({ icon, size = 20 }: { icon?: string | null; size?: number }) {
+  const I = ICONS[isPlannerIcon(icon) ? icon : "sparkles"];
+  return <I size={size} strokeWidth={1.5} aria-hidden="true" />;
+}
+
 // Griglia di scelta: un pulsante per icona, quella scelta evidenziata.
-export function PlannerIconPicker({ value, eventType, onChange, lang }: { value?: string | null; eventType?: string; onChange: (key: IconKey) => void; lang: "it" | "en" }) {
+export function PlannerIconPicker({ value, eventType, onChange, lang, label }: { value?: string | null; eventType?: string; onChange: (key: IconKey) => void; lang: "it" | "en"; label?: string }) {
   const current = isPlannerIcon(value) ? value : defaultPlannerIcon(eventType);
   return (
-    <div className="pi-grid" role="radiogroup" aria-label={lang === "en" ? "Planner icon" : "Icona del planner"}>
+    <div className="pi-grid" role="radiogroup" aria-label={label ?? (lang === "en" ? "Planner icon" : "Icona del planner")}>
       {PLANNER_ICONS.map((i) => {
         const I = ICONS[i.key];
         const on = current === i.key;

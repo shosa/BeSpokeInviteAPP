@@ -53,3 +53,7 @@ export function isPlannerIcon(v: unknown): v is PlannerIcon {
 export function defaultPlannerIcon(eventType?: string): PlannerIcon {
   return ({ wedding: "gem", birthday: "cake", baby: "baby", corporate: "briefcase", graduation: "graduation-cap" } as Record<string, PlannerIcon>)[eventType ?? ""] ?? "sparkles";
 }
+
+// La stessa libreria vale anche per le categorie dei template.
+export const ICON_LIBRARY = PLANNER_ICONS;
+export const isLibraryIcon = isPlannerIcon;
