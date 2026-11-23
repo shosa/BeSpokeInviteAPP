@@ -1525,8 +1525,9 @@ export async function buildApp() {
   // anche se l'invito non è mai stato pubblicato. Sola visualizzazione: il modulo di conferma non invia nulla.
   app.get<{ Params: { id: string }; Querystring: { v?: string } }>("/api/admin/invitations/:id/view", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
-    if (!UUID.test(req.params.id)) return reply.code(404).type("text/plain; charset=utf-8").send("Invito non trovato");
-    const { rows } = await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE id = $1", [req.params.id]);
+    // Per id o per slug: la pagina pubblica /i/<slug> ripiega qui quando l'invito non è pubblicato e chi guarda è admin.
+    const key = String(req.params.id).slice(0, 80);
+    const { rows } = await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE slug = $1 OR id::text = $1 LIMIT 1", [key]);
     const inv = rows[0];
     if (!inv) return reply.code(404).type("text/plain; charset=utf-8").send("Invito non trovato");
     const published = req.query.v === "published" && inv.edit_count >= 1;
