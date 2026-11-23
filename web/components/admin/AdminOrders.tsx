@@ -28,6 +28,8 @@ export type OrderDetail = {
   email: string | null;
   user_name: string | null;
   planner_id?: string | null;
+  manual_at?: string | null;
+  owner_id?: string | null;
   edit_count?: number | null;
   assistant_calls?: number | null;
   assistant_limit?: number | null;
@@ -48,13 +50,39 @@ const isManual = (o: OrderDetail) => o.id.startsWith("manuale-");
 // Da attivare: pagato, ma il cliente non ha ancora creato l'invito o il planner.
 const isPending = (o: OrderDetail) => o.status === "paid" && !o.invitation_id && !o.planner_id;
 
+// Righe dello stesso acquisto: un ordine Shopify con le sue righe («…-planner», «…-2», «…-base»), oppure gli
+// acquisti assegnati a mano nello stesso momento allo stesso cliente (es. invito + planner).
+type Group = { key: string; items: OrderDetail[]; first: OrderDetail };
+function groupKey(o: OrderDetail): string {
+  const shop = o.id.match(/^(\d+)(?:-|$)/);
+  if (shop) return `s:${shop[1]}`;
+  if (isManual(o) && o.manual_at) return `m:${o.owner_id ?? o.user_id}:${o.manual_at}`;
+  return `o:${o.id}`;
+}
+function groupOrders(list: OrderDetail[]): Group[] {
+  const map = new Map<string, OrderDetail[]>();
+  for (const o of list) { const k = groupKey(o); map.set(k, [...(map.get(k) ?? []), o]); }
+  return [...map.entries()].map(([key, items]) => {
+    const sorted = [...items].sort((a, b) => (a.product === "planner" ? 1 : 0) - (b.product === "planner" ? 1 : 0) || a.id.length - b.id.length);
+    return { key, items: sorted, first: sorted[0]! };
+  });
+}
+const productOf = (o: OrderDetail, t: (it: string, en: string) => string) => (o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation"));
+function statusOf(g: Group, t: (it: string, en: string) => string): { label: string; cls: string } {
+  const pending = g.items.filter(isPending).length;
+  if (!g.items.every((o) => o.status === "paid")) return { label: t("In attesa", "Pending"), cls: "draft" };
+  if (pending === 0) return { label: t("Attivato", "Activated"), cls: "yes" };
+  if (pending === g.items.length) return { label: t("Da attivare", "To activate"), cls: "draft" };
+  return { label: t(`${pending} di ${g.items.length} da attivare`, `${pending} of ${g.items.length} to activate`), cls: "draft" };
+}
+
 export function AdminOrders({ go }: { go?: Go }) {
   const t = useT();
   const [rows, setRows] = useState<OrderDetail[] | null>(null);
   const [filter, setFilter] = useState<Filter>("tutti");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<OrderDetail | null>(null);
+  const [sheet, setSheet] = useState<Group | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/orders").then((r) => (r.ok ? r.json() : [])).then(setRows).catch(() => setRows([]));
@@ -72,6 +100,8 @@ export function AdminOrders({ go }: { go?: Go }) {
       return true;
     });
   }, [rows, filter, query]);
+
+  const groups = useMemo(() => groupOrders(shown), [shown]);
 
   function exportCsv() {
     const head = t("id_ordine,data,cliente,email,invito,id_invito,fonte,stato,piano,tipo,riferimento", "order_id,date,customer,email,invitation,invitation_id,source,status,plan,kind,reference").split(",");
@@ -100,32 +130,36 @@ export function AdminOrders({ go }: { go?: Go }) {
         <button type="button" className="btn outline small" onClick={exportCsv} disabled={shown.length === 0}>{t("Esporta CSV", "Export CSV")}</button>
       </div>
 
-      <p className="hint">{shown.length} {shown.length === 1 ? t("ordine", "order") : t("ordini", "orders")}{rows.length !== shown.length ? ` ${t("su", "of")} ${rows.length}` : ""}</p>
+      <p className="hint">{groups.length} {groups.length === 1 ? t("ordine", "order") : t("ordini", "orders")}</p>
 
       {/* Telefono: una riga per ordine (cliente, prodotto, data, stato); il dettaglio si apre in un pannello dal basso. */}
-      {shown.length > 0 && (
+      {groups.length > 0 && (
         <ul className="ord-list" aria-label={t("Ordini", "Orders")}>
-          {shown.map((o) => (
-            <li key={o.id}>
-              <button type="button" className="ord-item" onClick={() => setSheet(o)}>
-                <span className="ord-main">
-                  <b>{o.user_name || o.email || "–"}</b>
-                  <small>{o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation")} · {isManual(o) ? t("a mano", "by hand") : o.source === "shopify" ? "Shopify" : t("prova", "test")} · {fmtDate(o.created_at)}</small>
-                </span>
-                <span className={`pill ${isPending(o) ? "draft" : o.status === "paid" ? "yes" : "draft"}`}>{isPending(o) ? t("Da attivare", "To activate") : o.status === "paid" ? t("Attivato", "Activated") : t("In attesa", "Pending")}</span>
-              </button>
-            </li>
-          ))}
+          {groups.map((g) => {
+            const st = statusOf(g, t);
+            const o = g.first;
+            return (
+              <li key={g.key}>
+                <button type="button" className="ord-item" onClick={() => setSheet(g)}>
+                  <span className="ord-main">
+                    <b>{o.user_name || o.email || "–"}</b>
+                    <small>{g.items.map((x) => productOf(x, t)).join(" + ")} · {isManual(o) ? t("a mano", "by hand") : o.source === "shopify" ? "Shopify" : t("prova", "test")} · {fmtDate(o.created_at)}</small>
+                  </span>
+                  <span className={`pill ${st.cls}`}>{st.label}</span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
       {sheet && (
         <div className="ord-sheet-back" onMouseDown={(e) => { if (e.target === e.currentTarget) setSheet(null); }}>
           <div className="ord-sheet" role="dialog" aria-modal="true" aria-label={t("Dettaglio ordine", "Order details")}>
             <div className="ord-sheet-head">
-              <div><b>{sheet.user_name || sheet.email || "–"}</b><small>{fmtDate(sheet.created_at)}</small></div>
+              <div><b>{sheet.first.user_name || sheet.first.email || "–"}</b><small>{fmtDate(sheet.first.created_at)}</small></div>
               <button type="button" className="ord-x" aria-label={t("Chiudi", "Close")} onClick={() => setSheet(null)}>×</button>
             </div>
-            <OrderDetailBody o={sheet} go={go} t={t} />
+            <GroupDetail g={sheet} go={go} t={t} />
           </div>
         </div>
       )}
@@ -139,32 +173,34 @@ export function AdminOrders({ go }: { go?: Go }) {
               <tr><th>{t("Data", "Date")}</th><th>{t("ID ordine", "Order ID")}</th><th>{t("Cliente", "Customer")}</th><th>{t("Invito", "Invitation")}</th><th>{t("Fonte", "Source")}</th><th>{t("Stato", "Status")}</th><th>{t("Prodotto", "Product")}</th></tr>
             </thead>
             <tbody>
-              {shown.map((o) => (
-                <Fragment key={o.id}>
-                  <tr className={open === o.id ? "is-open" : ""} onClick={() => setOpen(open === o.id ? null : o.id)} aria-expanded={open === o.id}>
+              {groups.map((g) => {
+                const o = g.first;
+                const st = statusOf(g, t);
+                const inv = g.items.find((x) => x.invitation_id);
+                return (
+                <Fragment key={g.key}>
+                  <tr className={open === g.key ? "is-open" : ""} onClick={() => setOpen(open === g.key ? null : g.key)} aria-expanded={open === g.key}>
                     <td>{fmtDate(o.created_at)}</td>
-                    <td><CopyId value={o.id} /></td>
+                    <td><CopyId value={o.id.replace(/-.*$/, "") || o.id} /></td>
                     <td>
                       <b>{o.user_name || "–"}</b>
                       <small className="ac-sub">{o.email ?? t("email sconosciuta", "unknown email")}</small>
                     </td>
-                    <td>
-                      {o.title ?? <span className="hint">{t("nessun invito", "no invitation")}</span>}
-                      {o.slug && <small className="ac-sub">/i/{o.slug}</small>}
-                    </td>
+                    <td>{inv?.title ?? <span className="hint">{t("nessun invito", "no invitation")}</span>}</td>
                     <td><span className="ac-tag">{isManual(o) ? t("A mano", "By hand") : o.source === "shopify" ? "Shopify" : t("Prova", "Test")}</span></td>
-                    <td><span className={`pill ${isPending(o) ? "draft" : o.status === "paid" ? "yes" : "draft"}`}>{isPending(o) ? t("Da attivare", "To activate") : o.status === "paid" ? t("Attivato", "Activated") : t("In attesa di pagamento", "Awaiting payment")}</span></td>
-                    <td>{o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation")}</td>
+                    <td><span className={`pill ${st.cls}`}>{st.label}</span></td>
+                    <td>{g.items.map((x) => productOf(x, t)).join(" + ")}</td>
                   </tr>
-                  {open === o.id && (
+                  {open === g.key && (
                     <tr className="ac-detail-row">
                       <td colSpan={7}>
-                        <OrderDetailBody o={o} go={go} t={t} />
+                        <GroupDetail g={g} go={go} t={t} />
                       </td>
                     </tr>
                   )}
                 </Fragment>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -173,29 +209,46 @@ export function AdminOrders({ go }: { go?: Go }) {
   );
 }
 
-// Dettaglio di un ordine: dati, collegamenti e azioni. In tabella (computer) si apre sotto la riga, al telefono in un pannello.
-function OrderDetailBody({ o, go, t }: { o: OrderDetail; go?: Go; t: (it: string, en: string) => string }) {
+// Dettaglio di un acquisto: dati comuni (cliente, Shopify), poi una scheda per ogni prodotto (invito, planner) con il
+// suo stato e le sue azioni. In tabella (computer) si apre sotto la riga, al telefono in un pannello.
+function GroupDetail({ g, go, t }: { g: Group; go?: Go; t: (it: string, en: string) => string }) {
+  const o = g.first;
+  const pending = g.items.some(isPending);
   return (
     <>
       <dl className="ac-meta">
-        <div><dt>{t("ID ordine", "Order ID")}</dt><dd><CopyId value={o.id} keep={24} /></dd></div>
-        <div><dt>{t("Riferimento", "Reference")}</dt><dd>{o.order_ref ?? "–"}</dd></div>
         <div><dt>{t("Cliente", "Customer")}</dt><dd>{o.user_name || "–"} · {o.email ?? "–"}</dd></div>
         <div><dt>{t("ID cliente", "Customer ID")}</dt><dd>{o.user_id ? <CopyId value={o.user_id} /> : "–"}</dd></div>
-        <div><dt>{t("ID invito", "Invitation ID")}</dt><dd>{o.invitation_id ? <CopyId value={o.invitation_id} /> : "–"}</dd></div>
-        <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_id ? ((o.edit_count ?? 0) >= 1 ? t("Online", "Live") : t("Mai pubblicato", "Never published")) : t("non creato", "not created")}</dd></div>
-        {o.invitation_id && o.assistant_limit != null && <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} richieste rimaste su ${o.assistant_limit}`, `${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} requests left of ${o.assistant_limit}`)}</dd></div>}
-        <div><dt>{t("Modello", "Model")}</dt><dd>{o.model ?? "–"}</dd></div>
-        <div><dt>{t("Tipo", "Kind")}</dt><dd>{o.kind === "upgrade" ? t("Aggiornamento", "Upgrade") : t("Acquisto", "Purchase")}</dd></div>
         <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(o.created_at)}</dd></div>
         <div><dt>{t("Ordine su Shopify", "Order on Shopify")}</dt><dd>{o.status_url ? <a href={o.status_url} target="_blank" rel="noopener noreferrer">{t("Apri la pagina dell'ordine", "Open the order page")}</a> : "–"}</dd></div>
       </dl>
+      <div className="ord-items">
+        {g.items.map((x) => (
+          <div key={x.id} className="ord-part">
+            <div className="ord-part-head">
+              <b>{productOf(x, t)}</b>
+              <span className={`pill ${isPending(x) ? "draft" : "yes"}`}>{isPending(x) ? t("Da attivare", "To activate") : t("Attivato", "Activated")}</span>
+            </div>
+            <dl className="ac-meta">
+              <div><dt>{t("ID riga", "Line ID")}</dt><dd><CopyId value={x.id} keep={24} /></dd></div>
+              {x.product !== "planner" && <div><dt>{t("Invito", "Invitation")}</dt><dd>{x.invitation_id ? `${x.title ?? t("senza titolo", "untitled")} · ${(x.edit_count ?? 0) >= 1 ? t("online", "live") : t("mai pubblicato", "never published")}` : t("non creato", "not created")}</dd></div>}
+              {x.invitation_id && x.assistant_limit != null && <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, x.assistant_limit - (x.assistant_calls ?? 0))} rimaste su ${x.assistant_limit}`, `${Math.max(0, x.assistant_limit - (x.assistant_calls ?? 0))} left of ${x.assistant_limit}`)}</dd></div>}
+              {x.product === "planner" && <div><dt>Planner</dt><dd>{x.planner_id ? t("creato", "created") : t("non creato", "not created")}</dd></div>}
+            </dl>
+            {(x.invitation_id || x.planner_id) && (
+              <div className="ac-order-acts">
+                {x.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${x.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
+                {x.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: x.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
+                {x.planner_id && <a className="btn outline small" href={`/planner/${x.planner_id}`} target="_blank" rel="noopener">{t("Apri planner", "Open planner")}</a>}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
       {o.user_id && (
         <div className="ac-order-acts">
           {go && <button type="button" className="btn outline small" onClick={() => go("clienti", { userId: o.user_id! })}>{t("Scheda cliente", "Customer profile")}</button>}
-          {o.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${o.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
-          {o.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: o.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
-          {isPending(o) && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
+          {pending && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
         </div>
       )}
     </>

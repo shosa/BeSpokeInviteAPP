@@ -749,3 +749,10 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .ord-sheet .ac-order-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 @keyframes ordUp { from { transform: translateY(40px); opacity: 0; } }
 @media (min-width: 761px) { .ord-sheet-back { display: none; } }
+/* Dettaglio di un acquisto con più prodotti: una scheda per prodotto. */
+.ord-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin-top: 12px; }
+.ord-part { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ord-part-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ord-part-head b { font-weight: 600; font-size: 14px; }
+.ord-part .ac-meta { margin: 0; }
+.ord-part .ac-order-acts { margin-top: 2px; }

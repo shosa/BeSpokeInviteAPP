@@ -1546,6 +1546,7 @@ export async function buildApp() {
     const { rows } = await pool.query(
       `SELECT o.id, o.source, o.status, o.kind, o.created_at, o.status_url, o.draft->>'tier' AS tier, o.draft->>'model' AS model,
               COALESCE(o.draft->>'product', 'invitation') AS product, COALESCE(o.draft->>'plan', 'full') AS plan, o.planner_id,
+              o.draft->'manual'->>'at' AS manual_at, o.user_id AS owner_id,
               o.invitation_id, i.slug, i.status AS invitation_status, i.order_ref, i.config->>'title' AS title,
               i.edit_count, i.assistant_calls, i.assistant_bonus,
               u.id AS user_id, u.email, u.name AS user_name
