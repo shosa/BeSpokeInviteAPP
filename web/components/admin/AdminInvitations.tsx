@@ -12,6 +12,7 @@ type Row = {
   model: string | null; theme: string | null; title: string | null; user_id: string; email: string; name: string;
   rsvps: number; guests: number;
   last_edit_at: string | null; last_published_at: string | null; live: boolean; dirty: boolean;
+  assistant_calls: number; assistant_limit: number;
 };
 type Session = { start: string; end: string; saves: number; sections: string[]; published: boolean };
 type Detail = Row & {
@@ -106,7 +107,7 @@ export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { in
       <div className="adm-table-wrap">
         <table className="adm-table">
           <thead>
-            <tr><th>{t("Invito", "Invitation")}</th><th>{t("Cliente", "Customer")}</th><th>{t("Stato", "Status")}</th><th>{t("Ultima modifica", "Last edit")}</th><th>{t("Creato", "Created")}</th><th className="num">{t("Visite", "Visits")}</th><th className="num">{t("Risposte", "Replies")}</th></tr>
+            <tr><th>{t("Invito", "Invitation")}</th><th>{t("Cliente", "Customer")}</th><th>{t("Stato", "Status")}</th><th>{t("Ultima modifica", "Last edit")}</th><th>{t("Creato", "Created")}</th><th className="num">{t("Visite", "Visits")}</th><th className="num">{t("Risposte", "Replies")}</th><th className="num">BeSpoke AI</th></tr>
           </thead>
           <tbody>
             {rows.map((r) => (
@@ -126,6 +127,7 @@ export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { in
                 <td>{fmtDate(r.created_at)}</td>
                 <td className="num">{r.views}</td>
                 <td className="num">{r.rsvps}</td>
+                <td className="num" title={t("Richieste rimaste su disponibili", "Requests left of available")}>{Math.max(0, r.assistant_limit - r.assistant_calls)}/{r.assistant_limit}</td>
               </tr>
             ))}
           </tbody>
@@ -204,11 +206,12 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <div><dt>{t("Editor", "Editor")}</dt><dd>{d.live ? <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span> : t(`Ultima modifica ${ago(d.last_edit_at, t("it", "en") === "en")}`, `Last edit ${ago(d.last_edit_at, true)}`)}</dd></div>
             <div><dt>{t("Pubblicazione", "Publishing")}</dt><dd>{d.edit_count >= 1 ? `${d.dirty ? t("Modifiche da pubblicare · ", "Changes to publish · ") : ""}${t(`${d.edit_count} ${d.edit_count === 1 ? "volta" : "volte"}`, `${d.edit_count} ${d.edit_count === 1 ? "time" : "times"}`)}${d.last_published_at ? ` · ${ago(d.last_published_at, t("it", "en") === "en")}` : ""}` : t("Mai pubblicato", "Never published")}</dd></div>
             <div><dt>{t("Wizard iniziale", "Setup wizard")}</dt><dd>{d.planner?.setupDone ? t("Completato", "Done") : t("Non completato", "Not done")}</dd></div>
-            <div><dt>BeSpoke AI</dt><dd>{t(`${Math.min(d.assistant_calls, d.assistant_limit)} usate su ${d.assistant_limit}`, `${Math.min(d.assistant_calls, d.assistant_limit)} used of ${d.assistant_limit}`)}{d.assistant_bonus ? t(` (di cui ${d.assistant_bonus} ricaricate)`, ` (${d.assistant_bonus} topped up)`) : ""}</dd></div>
+            <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, d.assistant_limit - d.assistant_calls)} rimaste · ${Math.min(d.assistant_calls, d.assistant_limit)} usate su ${d.assistant_limit}`, `${Math.max(0, d.assistant_limit - d.assistant_calls)} left · ${Math.min(d.assistant_calls, d.assistant_limit)} used of ${d.assistant_limit}`)}{d.assistant_bonus ? t(` (di cui ${d.assistant_bonus} ricaricate)`, ` (${d.assistant_bonus} topped up)`) : ""}</dd></div>
           </dl>
 
           <div className="adm-actions">
-            <a className="btn outline small" href={`/i/${d.slug}`} target="_blank" rel="noopener"><ExternalLink size={15} aria-hidden="true" /> {t("Apri la pagina", "Open the page")}</a>
+            <a className="btn outline small" href={`/api/admin/invitations/${d.id}/view`} target="_blank" rel="noopener"><ExternalLink size={15} aria-hidden="true" /> {d.edit_count >= 1 ? t("Anteprima bozza", "Draft preview") : t("Anteprima", "Preview")}</a>
+            {d.edit_count >= 1 && <a className="btn outline small" href={`/i/${d.slug}`} target="_blank" rel="noopener"><Globe size={15} aria-hidden="true" /> {t("Pagina pubblica", "Public page")}</a>}
             <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(0)}>{t("Azzera richieste AI", "Reset AI requests")}</button>
             <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(d.assistant_limit)}>{t("Esaurisci richieste AI", "Use up AI requests")}</button>
           </div>

@@ -10,7 +10,7 @@ import { CopyId } from "./CopyId";
 type UserRow = { id: string; email: string; name: string; role: string; invitations: number; created_at: string };
 type Detail = {
   user: { id: string; email: string; name: string; role: string; created_at: string };
-  invitations: { id: string; slug: string; status: string; edit_count: number; views: number; created_at: string; theme: string | null; title: string | null; event_date: string | null; rsvps: number }[];
+  invitations: { id: string; slug: string; status: string; edit_count: number; views: number; created_at: string; theme: string | null; title: string | null; event_date: string | null; rsvps: number; assistant_calls: number; assistant_limit: number; live: boolean }[];
   planners: { id: string; title: string; event_date: string | null; invitation_id: string | null; created_at: string; tasks: number; tasks_done: number }[];
   pending: { id: string; created_at: string; product: string; plan?: string; manual: { reason: string } | null }[];
   orders: { id: string; created_at: string; status: string; kind: string; product: string; plan?: string; manual: { reason: string } | null; invitation_id: string | null; planner_id: string | null }[];
@@ -161,10 +161,10 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
         ))}
         {d.invitations.map((i) => (
           <article key={i.id} className="cu-item">
-            <div className="cu-item-top"><span className="chip-inv"><Mail size={13} aria-hidden="true" />{t("Invito", "Invitation")}</span><span className={i.edit_count >= 1 ? "chip-ok" : "chip-soft"}>{i.edit_count >= 1 ? t("Online", "Live") : i.status === "paid" ? t("In preparazione", "In progress") : t("Bozza", "Draft")}</span></div>
+            <div className="cu-item-top"><span className="chip-inv"><Mail size={13} aria-hidden="true" />{t("Invito", "Invitation")}</span><span className={i.edit_count >= 1 ? "chip-ok" : "chip-soft"}>{i.edit_count >= 1 ? t("Online", "Live") : i.status === "paid" ? t("In preparazione", "In progress") : t("Bozza", "Draft")}</span>{i.live && <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span>}</div>
             <strong>{i.title || t("Senza titolo", "Untitled")}</strong>
-            <small>{[i.event_date, `${i.views} ${t("visite", "visits")}`, `${i.rsvps} ${t("risposte", "replies")}`].filter(Boolean).join(" · ")}</small>
-            <div className="cu-links"><a href={`/i/${i.slug}`} target="_blank" rel="noopener">{t("Apri", "Open")}</a><a href={`/inviti/${i.id}/risposte`} target="_blank" rel="noopener">{t("Risposte", "Replies")}</a><button type="button" onClick={() => onOpenInvitations(u.id)}>{t("Nella lista inviti", "In the invitations list")}</button></div>
+            <small>{[i.event_date, `${i.views} ${t("visite", "visits")}`, `${i.rsvps} ${t("risposte", "replies")}`, t(`BeSpoke AI ${Math.max(0, i.assistant_limit - i.assistant_calls)} su ${i.assistant_limit} rimaste`, `BeSpoke AI ${Math.max(0, i.assistant_limit - i.assistant_calls)} of ${i.assistant_limit} left`)].filter(Boolean).join(" · ")}</small>
+            <div className="cu-links"><a href={`/api/admin/invitations/${i.id}/view`} target="_blank" rel="noopener">{i.edit_count >= 1 ? t("Anteprima bozza", "Draft preview") : t("Anteprima", "Preview")}</a>{i.edit_count >= 1 && <a href={`/i/${i.slug}`} target="_blank" rel="noopener">{t("Pagina pubblica", "Public page")}</a>}<a href={`/inviti/${i.id}/risposte`} target="_blank" rel="noopener">{t("Risposte", "Replies")}</a><button type="button" onClick={() => onOpenInvitations(u.id)}>{t("Nella lista inviti", "In the invitations list")}</button></div>
           </article>
         ))}
         {d.planners.map((p) => (

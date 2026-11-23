@@ -28,6 +28,9 @@ export type OrderDetail = {
   email: string | null;
   user_name: string | null;
   planner_id?: string | null;
+  edit_count?: number | null;
+  assistant_calls?: number | null;
+  assistant_limit?: number | null;
 };
 
 type Filter = "tutti" | "attivare" | "inviti" | "planner" | "manuali" | "prova";
@@ -133,7 +136,8 @@ export function AdminOrders({ go }: { go?: Go }) {
                           <div><dt>{t("Cliente", "Customer")}</dt><dd>{o.user_name || "–"} · {o.email ?? "–"}</dd></div>
                           <div><dt>{t("ID cliente", "Customer ID")}</dt><dd>{o.user_id ? <CopyId value={o.user_id} /> : "–"}</dd></div>
                           <div><dt>{t("ID invito", "Invitation ID")}</dt><dd>{o.invitation_id ? <CopyId value={o.invitation_id} /> : "–"}</dd></div>
-                          <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_status ?? t("non creato", "not created")}</dd></div>
+                          <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_id ? ((o.edit_count ?? 0) >= 1 ? t("Online", "Live") : t("Mai pubblicato", "Never published")) : t("non creato", "not created")}</dd></div>
+                          {o.invitation_id && o.assistant_limit != null && <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} richieste rimaste su ${o.assistant_limit}`, `${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} requests left of ${o.assistant_limit}`)}</dd></div>}
                           <div><dt>{t("Modello", "Model")}</dt><dd>{o.model ?? "–"}</dd></div>
                           <div><dt>{t("Tipo", "Kind")}</dt><dd>{o.kind === "upgrade" ? t("Aggiornamento", "Upgrade") : t("Acquisto", "Purchase")}</dd></div>
                           <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(o.created_at)}</dd></div>
@@ -142,6 +146,8 @@ export function AdminOrders({ go }: { go?: Go }) {
                         {o.user_id && (
                           <div className="ac-order-acts">
                             {go && <button type="button" className="btn outline small" onClick={() => go("clienti", { userId: o.user_id! })}>{t("Scheda cliente", "Customer profile")}</button>}
+                            {o.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${o.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
+                            {o.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: o.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
                             {isPending(o) && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
                           </div>
                         )}

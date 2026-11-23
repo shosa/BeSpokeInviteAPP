@@ -64,13 +64,16 @@ export function registerAdminInvitations(app: FastifyInstance, requireAdmin: Gua
                jsonb_array_length(i.guests) AS guests,
                i.last_edit_at, i.last_published_at,
                (i.editor_seen_at > now() - interval '90 seconds') AS live,
-               (i.edit_count >= 1 AND i.config IS DISTINCT FROM i.published_config) AS dirty
+               (i.edit_count >= 1 AND i.config IS DISTINCT FROM i.published_config) AS dirty,
+               i.assistant_calls, i.assistant_bonus
         FROM invitations i JOIN users u ON u.id = i.user_id
         ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
         ORDER BY ${f.activity ? "COALESCE(i.editor_seen_at, i.last_edit_at, i.created_at) DESC" : "i.created_at DESC"}
         LIMIT ${PAGE + 1} OFFSET ${offset}`;
       const { rows } = await pool.query(sql, args);
-      return { rows: rows.slice(0, PAGE), hasMore: rows.length > PAGE, offset };
+      // Richieste di BeSpoke AI: limite = quello delle impostazioni + le ricariche dell'invito.
+      const base = (await loadAssistantSettings()).settings.callLimit;
+      return { rows: rows.slice(0, PAGE).map((r) => ({ ...r, assistant_limit: base + (r.assistant_bonus ?? 0) })), hasMore: rows.length > PAGE, offset };
     },
   );
 

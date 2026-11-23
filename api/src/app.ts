@@ -10,6 +10,7 @@ import {
   ADDON_KEYS,
   EVENT_TYPES,
   isEventType,
+  escapeHtml,
   isLibraryIcon,
   type TemplateCategory,
   activeFeatures,
@@ -1520,19 +1521,39 @@ export async function buildApp() {
     return { ok: true };
   });
 
+  // Anteprima dell'invito per l'amministratore: la bozza attuale (v=draft) o la versione pubblicata (v=published),
+  // anche se l'invito non è mai stato pubblicato. Sola visualizzazione: il modulo di conferma non invia nulla.
+  app.get<{ Params: { id: string }; Querystring: { v?: string } }>("/api/admin/invitations/:id/view", async (req, reply) => {
+    if (!(await requireAdmin(req, reply))) return;
+    if (!UUID.test(req.params.id)) return reply.code(404).type("text/plain; charset=utf-8").send("Invito non trovato");
+    const { rows } = await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE id = $1", [req.params.id]);
+    const inv = rows[0];
+    if (!inv) return reply.code(404).type("text/plain; charset=utf-8").send("Invito non trovato");
+    const published = req.query.v === "published" && inv.edit_count >= 1;
+    const c = await loadFullCatalog();
+    const html = renderFor(c, inv.slug, (published ? inv.published_config : inv.config) as InviteConfig);
+    if (!html) return reply.code(410).type("text/plain; charset=utf-8").send("Il tema dell'invito non esiste più");
+    const label = published ? "Anteprima amministratore · versione pubblicata" : inv.edit_count >= 1 ? "Anteprima amministratore · bozza attuale (non ancora pubblicata)" : "Anteprima amministratore · invito mai pubblicato";
+    const banner = `<div style="position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:2147483647;padding:8px 16px;border-radius:999px;background:#2a2119;color:#fff;font:500 13px/1.3 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none;white-space:nowrap;max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis">${escapeHtml(label)}</div>`;
+    const viewOnly = html.replace(/data-rsvp-form(?=[\s>])/g, 'data-rsvp-form data-endpoint="about:blank"').replace("</body>", `${banner}</body>`);
+    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").header("X-Robots-Tag", "noindex").send(viewOnly);
+  });
+
   app.get("/api/admin/orders", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
+    const aiLimit = (await loadAssistantSettings()).settings.callLimit;
     const { rows } = await pool.query(
       `SELECT o.id, o.source, o.status, o.kind, o.created_at, o.status_url, o.draft->>'tier' AS tier, o.draft->>'model' AS model,
               COALESCE(o.draft->>'product', 'invitation') AS product, COALESCE(o.draft->>'plan', 'full') AS plan, o.planner_id,
               o.invitation_id, i.slug, i.status AS invitation_status, i.order_ref, i.config->>'title' AS title,
+              i.edit_count, i.assistant_calls, i.assistant_bonus,
               u.id AS user_id, u.email, u.name AS user_name
        FROM orders o
        LEFT JOIN invitations i ON i.id = o.invitation_id
        LEFT JOIN users u ON u.id = COALESCE(i.user_id, o.user_id)
        ORDER BY o.created_at DESC LIMIT 300`,
     );
-    return rows;
+    return rows.map((r) => ({ ...r, assistant_limit: r.invitation_id ? aiLimit + (r.assistant_bonus ?? 0) : null }));
   });
 
   app.get("/api/admin/users", async (req, reply) => {

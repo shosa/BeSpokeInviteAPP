@@ -5,6 +5,7 @@ import { createAccessToken, currentUser } from "./auth";
 import { accessEmail, appUrl, purchaseEmail, sendMail } from "./mail";
 import { getLastMailResult } from "./mailSettings";
 import { getShopifyIds } from "./shopifySettings";
+import { loadAssistantSettings } from "./assistantSettings";
 
 // Console admin: panoramica (cose da fare e attività, niente importi: quelli stanno su Shopify), scheda cliente,
 // acquisti assegnati a mano, link di accesso, elenco planner, ricerca ovunque e uso dei template.
@@ -83,7 +84,8 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     const [invitations, planners, pending, orders] = await Promise.all([
       pool.query(`SELECT i.id, i.slug, i.status, i.edit_count, i.views, i.created_at, i.config->>'themeId' AS theme,
                          i.config->'event'->>'title' AS title, i.config->'event'->>'eventDate' AS event_date,
-                         (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps
+                         (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps,
+                         i.assistant_calls, i.assistant_bonus, (i.editor_seen_at > now() - interval '90 seconds') AS live, i.last_edit_at
                   FROM invitations i WHERE i.user_id = $1 ORDER BY i.created_at DESC`, [id]),
       pool.query(`SELECT p.id, p.title, to_char(p.event_date, 'YYYY-MM-DD') AS event_date, p.invitation_id, p.created_at,
                          (SELECT count(*)::int FROM planner_tasks t WHERE t.planner_id = p.id) AS tasks,
@@ -96,7 +98,8 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
                   FROM orders o LEFT JOIN invitations i ON i.id = o.invitation_id
                   WHERE COALESCE(i.user_id, o.user_id) = $1 ORDER BY o.created_at DESC LIMIT 30`, [id]),
     ]);
-    return { user: users[0], invitations: invitations.rows, planners: planners.rows, pending: pending.rows, orders: orders.rows };
+    const aiLimit = (await loadAssistantSettings()).settings.callLimit;
+    return { user: users[0], invitations: invitations.rows.map((r) => ({ ...r, assistant_limit: aiLimit + (r.assistant_bonus ?? 0) })), planners: planners.rows, pending: pending.rows, orders: orders.rows };
   });
 
   // Assegna un acquisto a mano: compare nell'area del cliente come «da attivare», come uno dal negozio.
