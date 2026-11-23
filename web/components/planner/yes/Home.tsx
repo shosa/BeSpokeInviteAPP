@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { folderFor } from "@inviteme/shared";
 import type { Ctx, View } from "./YesPlanner";
-import { IcCamera, IcCheck, IcChevron, IcCloud, IcPlus, IcPrint, IcSearch, IcSun } from "./icons";
+import { IcCamera, IcCheck, IcChevron, IcCloud, IcPlus, IcPrint, IcSearch } from "./icons";
 import { daysUntil, dayMonth, docFilled, euro, hue, initials, longDate, stats, taskWhen, todayIso, validIso, weatherArt } from "./model";
 
 // Riepilogo: meteo del giorno, foto con il conto alla rovescia, prossime attività, da sistemare,
@@ -200,14 +200,6 @@ export function Home({ ctx }: { ctx: Ctx }) {
             </div>
             {next.length === 0 && <p className="y-task-empty">{data.tasks.length ? t("Tutto fatto. Bravissimi!", "All done. Well done!") : t("Nessuna attività ancora: parti da quelle consigliate.", "No tasks yet: start from the suggested ones.")}</p>}
             <button className="y-row y-task-all" type="button" onClick={() => go("tasks")}><span>{t("Vedi tutte le attività", "See all tasks")}</span><IcChevron /></button>
-          </section>
-          <section className="y-card y-tease">
-            <span className="y-ri"><IcSun /></span>
-            <div>
-              <h2 className="y-heading">{t("Vista del grande giorno", "Big-day view")}</h2>
-              <p className="y-caption">{t("Cosa succede adesso, cosa viene dopo e chi chiamare: dal programma e dai contatti della cartella. Tienila aperta durante l'evento.", "What's happening now, what's next and who to call, from the binder's schedule and contacts. Keep it open during the event.")}</p>
-            </div>
-            <button className="y-btn y-btn-tinted y-btn-sm" type="button" onClick={() => ctx.sheet({ kind: "day" })}>{t("Apri", "Open")}</button>
           </section>
           {next.length > 0 && <p className="y-gf y-task-note">{t("Trascina un'attività verso destra per segnarla come fatta.", "Swipe a task right to mark it as done.")}</p>}
         </div>

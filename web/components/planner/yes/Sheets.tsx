@@ -100,50 +100,6 @@ export function TaskSheet({ ctx, task, onClose }: { ctx: Ctx; task?: Task; onClo
 
 type Row = { time?: string; item?: string; name?: string; role?: string; phone?: string };
 
-// Il grande giorno: cosa succede adesso, cosa viene dopo (dal programma della cartella) e chi chiamare.
-export function DaySheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
-  const { t, data } = ctx;
-  const rows = (key: string) => (((data.docs[key] as { items?: Row[] } | undefined)?.items ?? []) as Row[]);
-  const plan = rows("programma-generale").filter((r) => r.time || r.item).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
-  const people = rows("chi-chiamare").filter((r) => r.name || r.phone);
-  const now = new Date();
-  const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  let cur = -1;
-  plan.forEach((r, i) => { if ((r.time ?? "") <= hm) cur = i; });
-  const current = plan[cur] ?? plan[0];
-  const after = plan.slice(cur + 1, cur + 4);
-  return (
-    <Sheet title={ctx.ev.bigDay} onClose={onClose}>
-      <p className="y-gf" style={{ padding: 0 }}>{t("Le voci vengono dal «Programma generale» e da «Chi chiamare» nella cartella; «Adesso» segue l'ora attuale.", "Entries come from the «Overall schedule» and «Who to call» in the binder; «Now» follows the current time.")}</p>
-      <div className="y-day">
-        <section className="y-day-now">
-          <p className="y-eyebrow">{t("Adesso", "Now")}{current?.time ? ` · ${current.time}` : ""}</p>
-          <p className="y-heading">{current?.item || t("Compila il programma generale nella cartella", "Fill in the overall schedule in the binder")}</p>
-        </section>
-        {after.length > 0 && (
-          <section className="y-grp">
-            <h3 className="y-gh">{t("Dopo", "Next")}</h3>
-            <div className="y-gl">{after.map((r, i) => <div key={i} className="y-row"><span className="y-r-v tn" style={{ minWidth: 48 }}>{r.time}</span><span className="y-r-m"><span className="y-r-t y-wrap">{r.item}</span></span></div>)}</div>
-          </section>
-        )}
-        <section className="y-grp">
-          <h3 className="y-gh">{t("Chi chiamare", "Who to call")}</h3>
-          <div className="y-gl">
-            {people.map((p, i) => (
-              <a key={i} className="y-row" href={p.phone ? `tel:${p.phone.replace(/\s+/g, "")}` : undefined}>
-                <span className="y-r-m"><span className="y-r-t">{p.name}</span><span className="y-r-s">{[p.role, p.phone].filter(Boolean).join(" · ")}</span></span>
-                {p.phone && <span className="y-ri"><IcPhone /></span>}
-              </a>
-            ))}
-            {people.length === 0 && <p className="y-row y-cap">{t("Aggiungi i numeri utili in «Chi chiamare» nella cartella.", "Add useful numbers in «Who to call» in the binder.")}</p>}
-          </div>
-        </section>
-        <button className="y-btn y-btn-tinted y-btn-block" type="button" onClick={() => { onClose(); ctx.go("binder"); }}>{t("Apri la cartella", "Open the binder")}</button>
-      </div>
-    </Sheet>
-  );
-}
-
 export function PhotoSheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) {
   const { t, data, demo, id } = ctx;
   const input = useRef<HTMLInputElement>(null);

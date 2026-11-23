@@ -311,12 +311,6 @@ button.y-card { font: inherit; }
 .y-task-empty { padding: 12px 0 14px; border-top: 1px solid var(--sep); font-size: 14px; color: var(--label-2); }
 .y-task-note { padding: 0 8px; }
 @media (hover: hover) and (pointer: fine) { .y-task-note { display: none; } }
-.y-tease { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.y-tease > div { flex: 1 1 180px; min-width: 0; }
-.y-tease.y-card { padding: 12px; background: var(--fill); box-shadow: none; }
-.y-tease .y-ri { background: var(--tint); color: #fff; }
-.y-tease .y-heading { font-size: 1rem; }
-.y-tease .y-caption { font-size: 0.8125rem; }
 
 /* da sistemare */
 .y-alerts { order: 8; padding-bottom: 4px; }
@@ -473,10 +467,6 @@ button.y-card { font: inherit; }
 .y-binder-ring circle { fill: none; stroke-width: 6; }
 .y-binder-ring .trk { stroke: var(--fill); }
 .y-binder-ring .prg { stroke: var(--green); stroke-linecap: round; }
-.y-day { display: flex; flex-direction: column; gap: 12px; }
-.y-day-now { background: var(--tint); color: #fff; border-radius: 22px; padding: 18px; }
-.y-day-now .y-eyebrow { color: rgba(255, 255, 255, 0.75); }
-.y-day-now .y-heading { font-size: 1.625rem; }
 .y-settings-link { display: flex; align-items: center; gap: 12px; }
 
 /* ---------- componenti del planner già esistenti, con l'aspetto dell'app ---------- */

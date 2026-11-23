@@ -9,7 +9,7 @@ import { IcBinder, IcChevron, IcClose, IcGear, IcGuests, IcHome, IcPlus, IcPrint
 import { DEMO_WEATHER, daysUntil, demoApply, stats, type Method, type Weather } from "./model";
 import { Home } from "./Home";
 import { BudgetView, BinderView, GuestsView, SettingsView, TasksView, TablesView } from "./Sections";
-import { DaySheet, GuestSheet, PhotoSheet, TaskSheet } from "./Sheets";
+import { GuestSheet, PhotoSheet, TaskSheet } from "./Sheets";
 import "./yes.css";
 import { PlannerIcon } from "../PlannerIcon";
 
@@ -20,7 +20,7 @@ import { PlannerIcon } from "../PlannerIcon";
 export type View = "home" | "budget" | "guests" | "tables" | "tasks" | "binder" | "settings";
 export type Guest = PremiumData["guests"][number];
 export type Task = PremiumData["tasks"][number];
-export type Sheet = { kind: "guest"; guest?: Guest } | { kind: "task"; task?: Task } | { kind: "day" } | { kind: "photo" } | null;
+export type Sheet = { kind: "guest"; guest?: Guest } | { kind: "task"; task?: Task } | { kind: "photo" } | null;
 
 // Frasi del tipo di evento (matrimonio, compleanno…), già nella lingua del planner.
 export type EventCopy = EventPhrases & { settings: string; date: string; daysBefore: string; binder: string; onTheDay: string; bigDay: string };
@@ -267,7 +267,6 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
       {palette && <Palette ctx={ctx} onClose={() => setPalette(false)} openSheet={(x) => { setPalette(false); setSheet(x); }} />}
       {sheet?.kind === "guest" && <GuestSheet ctx={ctx} guest={sheet.guest} onClose={() => setSheet(null)} />}
       {sheet?.kind === "task" && <TaskSheet ctx={ctx} task={sheet.task} onClose={() => setSheet(null)} />}
-      {sheet?.kind === "day" && <DaySheet ctx={ctx} onClose={() => setSheet(null)} />}
       {sheet?.kind === "photo" && <PhotoSheet ctx={ctx} onClose={() => setSheet(null)} />}
       {pdfOpen && <PdfDialog id={id} title={data.event.title} eventType={data.event.eventType} onClose={() => setPdfOpen(false)} />}
       {toastText && <div className="y-toast" role="status" aria-live="polite">{toastText}</div>}
