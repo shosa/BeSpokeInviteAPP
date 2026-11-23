@@ -725,3 +725,27 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
   .adm-kpi b { font-size: 24px !important; }
   .adm-kpi small { font-size: 10.5px; }
 }
+
+/* Ordini al telefono: lista compatta (una riga per ordine) e dettaglio in un pannello dal basso. Al computer: la tabella. */
+.ord-list { display: none; }
+@media (max-width: 760px) {
+  .ac-card.ac-table-wrap:has(.ac-orders) { display: none; }
+  .ord-list { display: block; list-style: none; margin: 0; padding: 0; background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .ord-list li + li { border-top: 1px solid var(--line); }
+  .ord-item { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 0; background: #fff; text-align: left; font: inherit; color: var(--ink); cursor: pointer; }
+  .ord-item:active { background: var(--paper); }
+  .ord-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ord-main b { font-weight: 500; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ord-main small { font-size: 12px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ord-item .pill { flex: none; font-size: 10.5px; }
+}
+.ord-sheet-back { position: fixed; inset: 0; z-index: 120; background: rgba(42, 33, 25, 0.4); display: flex; align-items: flex-end; }
+.ord-sheet { width: 100%; max-height: 85dvh; overflow: auto; background: #fdfbf7; border-radius: 22px 22px 0 0; padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -20px 50px -20px rgba(42, 33, 25, 0.5); animation: ordUp 0.25s cubic-bezier(0.23, 1, 0.32, 1); }
+.ord-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.ord-sheet-head b { display: block; font: 400 22px var(--font-display), Georgia, serif; }
+.ord-sheet-head small { color: var(--ink-soft); font-size: 13px; }
+.ord-x { width: 40px; height: 40px; flex: none; border: 1px solid var(--line); border-radius: 50%; background: #fff; font-size: 22px; line-height: 1; color: var(--ink); cursor: pointer; }
+.ord-sheet .ac-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ord-sheet .ac-order-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+@keyframes ordUp { from { transform: translateY(40px); opacity: 0; } }
+@media (min-width: 761px) { .ord-sheet-back { display: none; } }

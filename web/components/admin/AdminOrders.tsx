@@ -54,6 +54,7 @@ export function AdminOrders({ go }: { go?: Go }) {
   const [filter, setFilter] = useState<Filter>("tutti");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<OrderDetail | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/orders").then((r) => (r.ok ? r.json() : [])).then(setRows).catch(() => setRows([]));
@@ -101,6 +102,34 @@ export function AdminOrders({ go }: { go?: Go }) {
 
       <p className="hint">{shown.length} {shown.length === 1 ? t("ordine", "order") : t("ordini", "orders")}{rows.length !== shown.length ? ` ${t("su", "of")} ${rows.length}` : ""}</p>
 
+      {/* Telefono: una riga per ordine (cliente, prodotto, data, stato); il dettaglio si apre in un pannello dal basso. */}
+      {shown.length > 0 && (
+        <ul className="ord-list" aria-label={t("Ordini", "Orders")}>
+          {shown.map((o) => (
+            <li key={o.id}>
+              <button type="button" className="ord-item" onClick={() => setSheet(o)}>
+                <span className="ord-main">
+                  <b>{o.user_name || o.email || "–"}</b>
+                  <small>{o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation")} · {isManual(o) ? t("a mano", "by hand") : o.source === "shopify" ? "Shopify" : t("prova", "test")} · {fmtDate(o.created_at)}</small>
+                </span>
+                <span className={`pill ${isPending(o) ? "draft" : o.status === "paid" ? "yes" : "draft"}`}>{isPending(o) ? t("Da attivare", "To activate") : o.status === "paid" ? t("Attivato", "Activated") : t("In attesa", "Pending")}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {sheet && (
+        <div className="ord-sheet-back" onMouseDown={(e) => { if (e.target === e.currentTarget) setSheet(null); }}>
+          <div className="ord-sheet" role="dialog" aria-modal="true" aria-label={t("Dettaglio ordine", "Order details")}>
+            <div className="ord-sheet-head">
+              <div><b>{sheet.user_name || sheet.email || "–"}</b><small>{fmtDate(sheet.created_at)}</small></div>
+              <button type="button" className="ord-x" aria-label={t("Chiudi", "Close")} onClick={() => setSheet(null)}>×</button>
+            </div>
+            <OrderDetailBody o={sheet} go={go} t={t} />
+          </div>
+        </div>
+      )}
+
       {shown.length === 0 ? (
         <div className="ac-card"><p className="hint">{rows.length === 0 ? t("Nessun ordine ancora.", "No orders yet.") : t("Nessun ordine con questi filtri.", "No orders match these filters.")}</p></div>
       ) : (
@@ -130,27 +159,7 @@ export function AdminOrders({ go }: { go?: Go }) {
                   {open === o.id && (
                     <tr className="ac-detail-row">
                       <td colSpan={7}>
-                        <dl className="ac-meta">
-                          <div><dt>{t("ID ordine", "Order ID")}</dt><dd><CopyId value={o.id} keep={24} /></dd></div>
-                          <div><dt>{t("Riferimento", "Reference")}</dt><dd>{o.order_ref ?? "–"}</dd></div>
-                          <div><dt>{t("Cliente", "Customer")}</dt><dd>{o.user_name || "–"} · {o.email ?? "–"}</dd></div>
-                          <div><dt>{t("ID cliente", "Customer ID")}</dt><dd>{o.user_id ? <CopyId value={o.user_id} /> : "–"}</dd></div>
-                          <div><dt>{t("ID invito", "Invitation ID")}</dt><dd>{o.invitation_id ? <CopyId value={o.invitation_id} /> : "–"}</dd></div>
-                          <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_id ? ((o.edit_count ?? 0) >= 1 ? t("Online", "Live") : t("Mai pubblicato", "Never published")) : t("non creato", "not created")}</dd></div>
-                          {o.invitation_id && o.assistant_limit != null && <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} richieste rimaste su ${o.assistant_limit}`, `${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} requests left of ${o.assistant_limit}`)}</dd></div>}
-                          <div><dt>{t("Modello", "Model")}</dt><dd>{o.model ?? "–"}</dd></div>
-                          <div><dt>{t("Tipo", "Kind")}</dt><dd>{o.kind === "upgrade" ? t("Aggiornamento", "Upgrade") : t("Acquisto", "Purchase")}</dd></div>
-                          <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(o.created_at)}</dd></div>
-                          <div><dt>{t("Ordine su Shopify", "Order on Shopify")}</dt><dd>{o.status_url ? <a href={o.status_url} target="_blank" rel="noopener noreferrer">{t("Apri la pagina dell'ordine", "Open the order page")}</a> : "–"}</dd></div>
-                        </dl>
-                        {o.user_id && (
-                          <div className="ac-order-acts">
-                            {go && <button type="button" className="btn outline small" onClick={() => go("clienti", { userId: o.user_id! })}>{t("Scheda cliente", "Customer profile")}</button>}
-                            {o.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${o.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
-                            {o.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: o.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
-                            {isPending(o) && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
-                          </div>
-                        )}
+                        <OrderDetailBody o={o} go={go} t={t} />
                       </td>
                     </tr>
                   )}
@@ -161,5 +170,34 @@ export function AdminOrders({ go }: { go?: Go }) {
         </div>
       )}
     </div>
+  );
+}
+
+// Dettaglio di un ordine: dati, collegamenti e azioni. In tabella (computer) si apre sotto la riga, al telefono in un pannello.
+function OrderDetailBody({ o, go, t }: { o: OrderDetail; go?: Go; t: (it: string, en: string) => string }) {
+  return (
+    <>
+      <dl className="ac-meta">
+        <div><dt>{t("ID ordine", "Order ID")}</dt><dd><CopyId value={o.id} keep={24} /></dd></div>
+        <div><dt>{t("Riferimento", "Reference")}</dt><dd>{o.order_ref ?? "–"}</dd></div>
+        <div><dt>{t("Cliente", "Customer")}</dt><dd>{o.user_name || "–"} · {o.email ?? "–"}</dd></div>
+        <div><dt>{t("ID cliente", "Customer ID")}</dt><dd>{o.user_id ? <CopyId value={o.user_id} /> : "–"}</dd></div>
+        <div><dt>{t("ID invito", "Invitation ID")}</dt><dd>{o.invitation_id ? <CopyId value={o.invitation_id} /> : "–"}</dd></div>
+        <div><dt>{t("Stato invito", "Invitation status")}</dt><dd>{o.invitation_id ? ((o.edit_count ?? 0) >= 1 ? t("Online", "Live") : t("Mai pubblicato", "Never published")) : t("non creato", "not created")}</dd></div>
+        {o.invitation_id && o.assistant_limit != null && <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} richieste rimaste su ${o.assistant_limit}`, `${Math.max(0, o.assistant_limit - (o.assistant_calls ?? 0))} requests left of ${o.assistant_limit}`)}</dd></div>}
+        <div><dt>{t("Modello", "Model")}</dt><dd>{o.model ?? "–"}</dd></div>
+        <div><dt>{t("Tipo", "Kind")}</dt><dd>{o.kind === "upgrade" ? t("Aggiornamento", "Upgrade") : t("Acquisto", "Purchase")}</dd></div>
+        <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(o.created_at)}</dd></div>
+        <div><dt>{t("Ordine su Shopify", "Order on Shopify")}</dt><dd>{o.status_url ? <a href={o.status_url} target="_blank" rel="noopener noreferrer">{t("Apri la pagina dell'ordine", "Open the order page")}</a> : "–"}</dd></div>
+      </dl>
+      {o.user_id && (
+        <div className="ac-order-acts">
+          {go && <button type="button" className="btn outline small" onClick={() => go("clienti", { userId: o.user_id! })}>{t("Scheda cliente", "Customer profile")}</button>}
+          {o.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${o.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
+          {o.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: o.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
+          {isPending(o) && <button type="button" className="btn solid small" onClick={async () => { const r = await fetch(`/api/admin/users/${o.user_id}/access-link`, { method: "POST" }); if (r.ok) toast.success(t("Link di accesso rimandato.", "Sign-in link sent again.")); else toast.error(t("Email non inviata", "Email not sent")); }}>{t("Rimanda il link", "Resend the link")}</button>}
+        </div>
+      )}
+    </>
   );
 }
