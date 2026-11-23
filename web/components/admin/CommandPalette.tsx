@@ -44,7 +44,7 @@ export function CommandPalette({ go, onClose }: { go: Go; onClose: () => void })
     for (const s of sections) if (!ql || s.it.toLowerCase().includes(ql) || s.en.toLowerCase().includes(ql)) out.push({ key: `s-${s.id}`, group: t("Sezioni", "Sections"), icon: s.icon, title: t(s.it, s.en), sub: t("Apri la sezione", "Open the section"), run: () => go(s.id) });
     if (res) {
       for (const u of res.users) out.push({ key: `u-${u.id}`, group: t("Clienti", "Customers"), icon: User, title: u.name || u.email, sub: u.email, run: () => go("clienti", { userId: u.id }) });
-      for (const i of res.invitations) out.push({ key: `i-${i.id}`, group: t("Inviti", "Invitations"), icon: Mail, title: i.title || i.slug, sub: `${i.live ? t("online", "live") : t("non pubblicato", "not published")} · ${i.email}`, run: () => window.open(`/i/${i.slug}`, "_blank") });
+      for (const i of res.invitations) out.push({ key: `i-${i.id}`, group: t("Inviti", "Invitations"), icon: Mail, title: i.title || i.slug, sub: `${i.live ? t("online", "live") : t("non pubblicato", "not published")} · ${i.email}`, run: () => go("inviti", { invitationId: i.id }) });
       for (const p of res.planners) out.push({ key: `p-${p.id}`, group: "Planner", icon: BookOpen, title: p.title || t("Senza titolo", "Untitled"), sub: p.email, run: () => window.open(`/planner/${p.id}`, "_blank") });
       for (const o of res.orders) out.push({ key: `o-${o.id}`, group: t("Ordini", "Orders"), icon: ShoppingBag, title: o.id, sub: `${o.product === "planner" ? "Planner" : t("Invito", "Invitation")} · ${o.email ?? ""}`, run: () => (o.user_id ? go("clienti", { userId: o.user_id }) : go("ordini")) });
     }

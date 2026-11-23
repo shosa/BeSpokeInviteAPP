@@ -675,3 +675,5 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .ov-ico.is-edit { background: #e3f1e1; color: #2f5a2a; }
 .ov-ico.is-publish { background: #e8eef6; color: #2c4a6e; }
 .ov-live-tag { font-size: 12px; font-weight: 600; color: #2f5a2a; white-space: nowrap; }
+.adm-open { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--brass); text-decoration: none; }
+.adm-open:hover { text-decoration: underline; }

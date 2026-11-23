@@ -115,6 +115,8 @@ export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { in
                 <td>
                   <strong>{r.title || t("Senza titolo", "Untitled")}</strong>
                   <small>{r.slug}</small>
+                  {/* Anteprima riservata all'admin: si apre anche se l'invito non è pubblicato. */}
+                  <a className="adm-open" href={`/api/admin/invitations/${r.id}/view`} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}><ExternalLink size={13} aria-hidden="true" />{t("Apri", "Open")}</a>
                 </td>
                 <td><span className="adm-mail">{r.email}</span></td>
                 <td>
