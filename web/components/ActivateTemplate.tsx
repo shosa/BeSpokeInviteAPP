@@ -12,12 +12,13 @@ import { themeCopy } from "@/lib/catalogCopy";
 
 // Attivazione di un acquisto: il cliente sceglie il template e il suo invito nasce con quello.
 // locked: template Premium che l'invito base non può scegliere (si vedono con il lucchetto).
-export function ActivateTemplate({ orderId, templates, locked = [], categories = [], themeCategories = {} }: { orderId: string; templates: ThemeManifest[]; locked?: string[]; categories?: TemplateCategory[]; themeCategories?: Record<string, string[]> }) {
+export function ActivateTemplate({ orderId, templates, locked = [], categories = [], themeCategories = {}, initialEventType }: { orderId: string; templates: ThemeManifest[]; locked?: string[]; categories?: TemplateCategory[]; themeCategories?: Record<string, string[]>; initialEventType?: string }) {
   const router = useRouter();
   const lang = useLang();
   const t = (it: string, en: string) => (lang === "en" ? en : it);
   const lockedSet = new Set(locked);
-  const [eventType, setEventType] = useState<EventType | null>(null);
+  // Invito di uno studio Pro: il tipo di evento del cliente è già scelto (si può cambiare).
+  const [eventType, setEventType] = useState<EventType | null>((EVENT_TYPES.find((x) => x.id === initialEventType)?.id as EventType | undefined) ?? null);
   // Categoria sfogliata: «Tutti» o una categoria della console. Cambiandola, si sceglie il primo template disponibile.
   const [category, setCategory] = useState<string>("");
   const visible = useMemo(() => (category ? templates.filter((x) => themeCategories[x.id]?.includes(category)) : templates), [category, templates, themeCategories]);

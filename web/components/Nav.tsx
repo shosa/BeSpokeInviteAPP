@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ui, type Lang } from "@/lib/ui";
 import "./nav.css";
 
-type Me = { id: string; name: string; email: string; role: "user" | "admin" } | null;
+type Me = { id: string; name: string; email: string; role: "user" | "admin"; pro?: boolean } | null;
 
 // Barra superiore con la stessa grafica del sito di vendita (thebespokeinvite.com): logo testuale,
 // link in maiuscolo con filetto d'oro, lingua a pillola, pulsante in vetro e menu a panino sotto i 990 px.
@@ -34,7 +34,7 @@ function ripple(e: React.PointerEvent<HTMLElement>) {
   setTimeout(() => d.remove(), 700);
 }
 
-export function Nav({ current, lang = "it" }: { current?: "account" | "admin"; lang?: Lang }) {
+export function Nav({ current, lang = "it" }: { current?: "account" | "admin" | "pro"; lang?: Lang }) {
   const t = ui(lang);
   const T = COPY[lang];
   const router = useRouter();
@@ -71,6 +71,7 @@ export function Nav({ current, lang = "it" }: { current?: "account" | "admin"; l
   const links = (
     <>
       <a href="/account" aria-current={current === "account" ? "page" : undefined}>{t.myInvites}</a>
+      {me?.pro && <a href="/pro" aria-current={current === "pro" ? "page" : undefined}>{lang === "en" ? "Pro area" : "Area Pro"}</a>}
       {me?.role === "admin" && <a href="/admin" aria-current={current === "admin" ? "page" : undefined}>{t.console}</a>}
       <a href={SHOP_URL}>{T.shop}</a>
     </>

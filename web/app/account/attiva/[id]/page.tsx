@@ -59,7 +59,7 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
     <>
       <Nav current="account" lang={lang} />
       <main className="wrap narrow act-page">
-        <a className="link act-back" href="/account">{isEn ? "← My invitations" : "← I miei inviti"}</a>
+        <a className="link act-back" href={item.pro ? "/pro" : "/account"}>{item.pro ? (isEn ? "← Pro area" : "← Area Pro") : isEn ? "← My invitations" : "← I miei inviti"}</a>
         <ol className="act-steps" aria-label={isEn ? "Steps" : "Passi"}>
           <li className="is-done"><span>1</span>{isEn ? "Purchase" : "Acquisto"}</li>
           <li className="is-on"><span>2</span>{isEn ? "Template" : "Template"}</li>
@@ -78,7 +78,7 @@ export default async function Activate({ params }: { params: Promise<{ id: strin
               : "Hai acquistato l'invito base: scegli tra i template inclusi. Quelli con il lucchetto Premium fanno parte dell'invito completo."}
           </p>
         )}
-        <ActivateTemplate orderId={id} templates={templates} locked={locked} categories={categories} themeCategories={themeCategories} />
+        <ActivateTemplate orderId={id} templates={templates} locked={locked} categories={categories} themeCategories={themeCategories} initialEventType={item.pro ? item.eventType : undefined} />
       </main>
     </>
   );

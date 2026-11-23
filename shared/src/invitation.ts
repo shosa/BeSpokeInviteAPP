@@ -21,11 +21,11 @@ export type InviteConfig = {
   rsvpQuestions: RsvpQuestion[];
 };
 
-// Regole dell'invito acquistato: si modifica finché non si conferma; dopo l'acquisto il template non cambia più.
+// Regole dell'invito acquistato: le modifiche sono illimitate (ogni pubblicazione aggiorna l'invito degli ospiti);
+// dopo l'acquisto il template non cambia più e, dopo la prima pubblicazione, nemmeno il link.
 // Usata sia dalla modifica dell'invito sia dall'assistente del builder: non duplicare la logica altrove.
 export function editRules(inv: { status: string; edit_count: number }): { readOnly: boolean; themeLocked: boolean } {
-  const paid = inv.status === "paid";
-  return { readOnly: paid && inv.edit_count >= 1, themeLocked: paid };
+  return { readOnly: false, themeLocked: inv.status === "paid" };
 }
 
 // Lo slug del link: minuscole, numeri e trattini, da 3 a 60 caratteri, senza trattini agli estremi.

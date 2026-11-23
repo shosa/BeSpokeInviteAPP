@@ -59,6 +59,7 @@ import { getShopifyIds, loadShopifySettings, normalizeProduct, normalizeVariant,
 import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
+import { isStudio, registerProRoutes } from "./pro";
 import { errorToEnglish } from "./errorsEn";
 import { CreditsCheckoutError, createAiCreditsCheckout, createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
@@ -160,7 +161,12 @@ export async function buildApp() {
   // Carica un invito verificando che appartenga all'utente. Non rivela l'esistenza di inviti altrui.
   async function ownedInvitation(id: string, userId: string): Promise<Row | null> {
     if (!UUID.test(id)) return null;
-    const { rows } = await pool.query("SELECT * FROM invitations WHERE id = $1 AND user_id = $2", [id, userId]);
+    // Proprietario, oppure la coppia a cui lo studio Pro ha dato accesso all'invito.
+    const { rows } = await pool.query(
+      `SELECT * FROM invitations i WHERE i.id = $1 AND (i.user_id = $2 OR EXISTS (
+         SELECT 1 FROM pro_access a WHERE a.client_id = i.pro_client_id AND a.user_id = $2 AND a.can_invite))`,
+      [id, userId],
+    );
     return rows[0] ?? null;
   }
 
@@ -212,7 +218,7 @@ export async function buildApp() {
     const user = await currentUser(req);
     if (!user) return { user: null };
     const { rows } = await pool.query("SELECT password_hash FROM users WHERE id = $1", [user.id]);
-    return { user: { ...user, hasPassword: String(rows[0]?.password_hash ?? "").startsWith("scrypt$") } };
+    return { user: { ...user, hasPassword: String(rows[0]?.password_hash ?? "").startsWith("scrypt$"), pro: await isStudio(user.id) } };
   });
 
   // Accesso con email e password (in alternativa al link). Al massimo 6 tentativi ogni 15 minuti per email, e 300 in tutto
@@ -267,7 +273,9 @@ export async function buildApp() {
       `SELECT i.id, i.slug, i.status, i.tier, i.edit_count, i.config, i.views, i.guests, i.created_at,
               (SELECT count(*)::int FROM rsvps r WHERE r.invitation_id = i.id) AS rsvps,
               (SELECT p.id FROM planners p WHERE p.invitation_id = i.id) AS planner_id
-       FROM invitations i WHERE i.user_id = $1 ORDER BY i.created_at DESC`,
+       FROM invitations i WHERE (i.user_id = $1 AND i.pro_client_id IS NULL)
+          OR EXISTS (SELECT 1 FROM pro_access a WHERE a.client_id = i.pro_client_id AND a.user_id = $1 AND a.can_invite)
+       ORDER BY i.created_at DESC`,
       [user.id],
     );
     return rows.map((r) => ({
@@ -508,14 +516,14 @@ export async function buildApp() {
     return { ok: true };
   });
 
-  // Conferma della modifica dopo l'acquisto: chiude la possibilità di modificare l'invito.
+  // Pubblicazione: la bozza diventa la versione che vedono gli ospiti. Si può ripubblicare quante volte si vuole;
+  // il link si sceglie alla prima pubblicazione e poi resta quello (gli ospiti lo hanno già ricevuto).
   app.post<{ Params: { id: string } }>("/api/invitations/:id/confirm-edit", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     if (inv.status !== "paid") return reply.code(409).send({ error: "L'invito non è ancora pagato" });
-    if (inv.edit_count >= 1) return reply.code(409).send({ error: "Modifica già confermata" });
     // Funzioni nuove in bozza: prima va pagata la differenza, altrimenti la pubblicazione non le includerebbe.
     const pending = pendingOf(inv);
     if (pending.length) {
@@ -529,18 +537,19 @@ export async function buildApp() {
       if (!chosen) return reply.code(400).send({ error: "Scegli un link: lettere minuscole, numeri e trattini (3–60 caratteri)." });
       slug = chosen;
     }
-    // Conferma = pubblicazione: la bozza diventa la versione che vedono gli ospiti, e la modifica si chiude.
+    // edit_count conta le pubblicazioni (da 1 in su l'invito è online).
     try {
-      await pool.query("UPDATE invitations SET edit_count = 1, published_config = config, slug = $2 WHERE id = $1", [inv.id, slug]);
+      await pool.query("UPDATE invitations SET edit_count = edit_count + 1, published_config = config, slug = $2 WHERE id = $1", [inv.id, slug]);
     } catch (e) {
       if ((e as { code?: string }).code === "23505") return reply.code(409).send({ error: "Questo link è già in uso: scegline un altro." });
       throw e;
     }
-    return { ok: true, editCount: 1, slug };
+    return { ok: true, editCount: inv.edit_count + 1, slug };
   });
 
   // Il planner è un servizio a sé, con le sue rotte (/api/planners/…): plannerRoutes.ts.
   registerPlannerRoutes(app, { requireUser, loadCatalog });
+  registerProRoutes(app, { requireUser, requireAdmin, loadCatalog });
 
   // Note del pianificatore: testo libero per l'organizzatore (promemoria, nota del conto alla rovescia). Non va nella pagina invito.
   // Dati primari dell'invito (nomi o titolo, data, luogo): si chiedono la prima volta che si apre il builder o il planner.
@@ -1170,11 +1179,12 @@ export async function buildApp() {
     const user = await requireUser(req, reply);
     if (!user) return;
     const { rows } = await pool.query(
-      "SELECT id, draft, created_at, status_url FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND planner_id IS NULL ORDER BY created_at",
+      "SELECT id, draft, created_at, status_url, pro_client_id FROM orders WHERE user_id = $1 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND planner_id IS NULL ORDER BY created_at",
       [user.id],
     );
     // Due prodotti: l'invito (si sceglie il template) e il planner (si dà un nome all'evento).
-    return rows.map((r) => ({ id: r.id, product: r.draft?.product === "planner" ? "planner" : "invitation", plan: r.draft?.plan === "base" ? "base" : "full", createdAt: r.created_at, statusUrl: r.status_url ?? null }));
+    // pro: invito di un cliente dello studio (si attiva dall'area Pro, non compare tra gli acquisti personali).
+    return rows.map((r) => ({ id: r.id, product: r.draft?.product === "planner" ? "planner" : "invitation", plan: r.draft?.plan === "base" ? "base" : "full", createdAt: r.created_at, statusUrl: r.status_url ?? null, pro: Boolean(r.pro_client_id), eventType: r.draft?.eventType ?? "wedding" }));
   });
 
   // Il cliente sceglie il template in galleria: si crea l'invito con quel tema.
@@ -1186,7 +1196,7 @@ export async function buildApp() {
     const themeId = typeof b.themeId === "string" ? b.themeId : "";
     if (b.eventType !== undefined && !isEventType(b.eventType)) return reply.code(400).send({ error: "Tipo di evento non valido" });
     const { rows } = await pool.query(
-      "SELECT id, user_id, draft, amount_cents FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND COALESCE(draft->>'product', '') <> 'planner'",
+      "SELECT id, user_id, draft, amount_cents, pro_client_id FROM orders WHERE id = $1 AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND invitation_id IS NULL AND COALESCE(draft->>'product', '') <> 'planner'",
       [orderId, user.id],
     );
     if (!rows[0] || !rows[0].draft) return reply.code(404).send({ error: "Acquisto non trovato o già attivato" });
@@ -1202,6 +1212,19 @@ export async function buildApp() {
       "shopify",
       row.id,
     );
+    // Invito di un cliente dello studio Pro: parte con i dati del cliente e si collega al suo planner, se c'è.
+    if (row.pro_client_id) {
+      const { rows: cl } = await pool.query("SELECT name, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address FROM pro_clients WHERE id = $1", [row.pro_client_id]);
+      const pc = cl[0];
+      if (pc) {
+        const event = { title: pc.name, ...(pc.event_date ? { eventDate: pc.event_date } : {}), ...(pc.venue ? { venue: pc.venue } : {}), ...(pc.address ? { address: pc.address } : {}) };
+        await pool.query(
+          "UPDATE invitations SET pro_client_id = $2, config = jsonb_set(config, '{event}', (config->'event') || $3::jsonb), published_config = jsonb_set(published_config, '{event}', (published_config->'event') || $3::jsonb) WHERE id = $1",
+          [id, row.pro_client_id, JSON.stringify(event)],
+        );
+        await pool.query("UPDATE planners SET invitation_id = $1 WHERE id = (SELECT id FROM planners WHERE pro_client_id = $2 AND invitation_id IS NULL ORDER BY created_at LIMIT 1)", [id, row.pro_client_id]);
+      }
+    }
     return { ok: true, invitationId: id };
   });
 

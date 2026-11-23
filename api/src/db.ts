@@ -231,6 +231,59 @@ UPDATE invitations SET tier = 'rsvp' WHERE tier = 'premium';
 -- Tipo di evento del planner (matrimonio, compleanno…): quelli già creati lo prendono dall'invito collegato, altrimenti matrimonio.
 ALTER TABLE planners ADD COLUMN IF NOT EXISTS event_type text;
 UPDATE planners p SET event_type = COALESCE((SELECT i.config->>'eventType' FROM invitations i WHERE i.id = p.invitation_id), 'wedding') WHERE p.event_type IS NULL;
+-- Bespoke Pro (wedding planner): lo studio è un utente con una riga qui, con i suoi crediti e il piano mensile.
+-- I crediti si scalano quando lo studio crea l'invito o il planner di un cliente; ogni movimento va in pro_ledger.
+CREATE TABLE IF NOT EXISTS pro_studios (
+  user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  active boolean NOT NULL DEFAULT true,
+  inv_credits int NOT NULL DEFAULT 0 CHECK (inv_credits >= 0),
+  pl_credits int NOT NULL DEFAULT 0 CHECK (pl_credits >= 0),
+  monthly_inv int NOT NULL DEFAULT 0 CHECK (monthly_inv >= 0),
+  monthly_pl int NOT NULL DEFAULT 0 CHECK (monthly_pl >= 0),
+  renew_day int NOT NULL DEFAULT 1 CHECK (renew_day BETWEEN 1 AND 28),
+  rollover boolean NOT NULL DEFAULT false, -- false: al rinnovo i crediti non usati si perdono
+  last_renewal date,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS pro_clients (
+  id uuid PRIMARY KEY,
+  studio_id uuid NOT NULL REFERENCES pro_studios(user_id) ON DELETE CASCADE,
+  name text NOT NULL,
+  email text NOT NULL DEFAULT '',
+  phone text NOT NULL DEFAULT '',
+  event_type text NOT NULL DEFAULT 'wedding',
+  event_date date,
+  venue text NOT NULL DEFAULT '',
+  address text NOT NULL DEFAULT '',
+  notes text NOT NULL DEFAULT '',
+  archived boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS pro_clients_studio_idx ON pro_clients(studio_id);
+CREATE TABLE IF NOT EXISTS pro_ledger (
+  id bigserial PRIMARY KEY,
+  studio_id uuid NOT NULL REFERENCES pro_studios(user_id) ON DELETE CASCADE,
+  delta_inv int NOT NULL DEFAULT 0,
+  delta_pl int NOT NULL DEFAULT 0,
+  reason text NOT NULL,
+  by_email text,
+  client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS pro_ledger_studio_idx ON pro_ledger(studio_id, created_at DESC);
+-- Accesso della coppia: un utente vede l'invito e/o il planner di un cliente dello studio, finché lo studio non lo toglie.
+CREATE TABLE IF NOT EXISTS pro_access (
+  client_id uuid NOT NULL REFERENCES pro_clients(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  can_invite boolean NOT NULL DEFAULT true,
+  can_planner boolean NOT NULL DEFAULT true,
+  sent_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (client_id, user_id)
+);
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
+ALTER TABLE planners ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
 -- Acquisti «premium» non ancora attivati: restano un invito da attivare e ricevono anche un planner da attivare.
 INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url, created_at)
 SELECT o.id || '-planner', o.user_id, NULL, 0, o.currency, o.source, 'paid', 'initial', '{"product":"planner"}'::jsonb, o.status_url, o.created_at

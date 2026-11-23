@@ -44,7 +44,7 @@ const COPY = {
     dateTbd: "Data da definire",
     stats: (v: number, r: number) => `${v} ${v === 1 ? "visita" : "visite"} · ${r ? `${r} ${r === 1 ? "risposta" : "risposte"}` : "nessuna risposta ancora"}`,
     linked: "Planner collegato", organize: "Organizzalo con un planner",
-    share: "Condividi", copied: "Link copiato", replies: "Risposte", open: "Apri l'invito",
+    share: "Condividi", copied: "Link copiato", replies: "Risposte", manage: "Gestisci", manageHint: "Risposte, link e modifiche dell'invito", open: "Apri l'invito",
     stepTpl: "Template", stepData: "Dati", stepLink: "Link",
     missLink: "manca il link", missData: "dati da completare",
     cont: "Continua",
@@ -77,7 +77,7 @@ const COPY = {
     dateTbd: "Date to be set",
     stats: (v: number, r: number) => `${v} ${v === 1 ? "visit" : "visits"} · ${r ? `${r} ${r === 1 ? "reply" : "replies"}` : "no replies yet"}`,
     linked: "Planner linked", organize: "Organise it with a planner",
-    share: "Share", copied: "Link copied", replies: "Replies", open: "Open the invitation",
+    share: "Share", copied: "Link copied", replies: "Replies", manage: "Manage", manageHint: "Replies, link and changes to the invitation", open: "Open the invitation",
     stepTpl: "Template", stepData: "Details", stepLink: "Link",
     missLink: "link missing", missData: "details to complete",
     cont: "Continue",
@@ -101,7 +101,7 @@ const euro = (cents: number, lang: string) => (cents / 100).toLocaleString(lang 
 
 // Icone a tratto (24px): planner, risposte, apri, copia.
 const Ico = {
-  replies: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M4 12l5 5L20 6" /></svg>,
+  replies: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M4 10.4 12 3.8l8 6.6V20a.9.9 0 0 1-.9.9h-4.3v-5.6H9.2v5.6H4.9A.9.9 0 0 1 4 20z" /></svg>,
   open: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>,
   link: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" /></svg>,
   plus: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
@@ -150,9 +150,9 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   }
 
   const [pending, planners, me] = await Promise.all([
-    apiServer<PendingPurchase[]>("/api/account/pending").catch(() => [] as PendingPurchase[]),
+    apiServer<PendingPurchase[]>("/api/account/pending").then((l) => l.filter((p) => !p.pro)).catch(() => [] as PendingPurchase[]),
     apiServer<PlannerRow[]>("/api/account/planners").catch(() => [] as PlannerRow[]),
-    apiServer<{ user: { name?: string; email?: string; hasPassword?: boolean } | null }>("/api/auth/me").catch(() => ({ user: null })),
+    apiServer<{ user: { name?: string; email?: string; hasPassword?: boolean; pro?: boolean } | null }>("/api/auth/me").catch(() => ({ user: null })),
   ]);
   const firstName = (me.user?.name ?? "").trim().split(/\s+/)[0] ?? "";
   const online = rows.filter((r) => r.status === "paid" && r.published);
@@ -183,6 +183,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
         <section className="acx-hero">
           <div>
             <h1>{c.hello}{firstName ? <>, <em>{firstName}</em></> : null}</h1>
+            {me.user?.pro && <a className="acx-pro" href="/pro">{lang === "en" ? "Go to your Pro area: clients, events and credits →" : "Vai all'Area Pro: clienti, eventi e crediti →"}</a>}
             {me.user?.email && <p className="acx-email">{lang === "en" ? "Signed in as" : "Hai effettuato l'accesso come"} <strong>{me.user.email}</strong></p>}
             <p>{c.summary(online.length, prep.length, planners.length, pending.length)}</p>
           </div>
@@ -243,7 +244,8 @@ export default async function Account({ searchParams }: { searchParams: Promise<
                         : <a className="acx-soft" href={buyPlannerUrl}>{c.organize}</a>}
                       <div className="acx-actions">
                         <ShareLinkButton className="acx-cta is-dark" path={`/i/${r.slug}`} title={r.title} label={c.share} copiedLabel={c.copied} />
-                        <a className="acx-ico" href={`/inviti/${r.id}/risposte`} aria-label={c.replies} title={c.replies}>{Ico.replies}</a>
+                        {/* Gestione dell'invito (risposte, link, modifiche): casetta con la scritta, non solo un'icona. */}
+                        <a className="acx-manage" href={`/inviti/${r.id}/risposte`} title={c.manageHint}>{Ico.replies}<span>{c.manage}</span></a>
                         <a className="acx-ico" href={`/i/${r.slug}`} target="_blank" rel="noreferrer" aria-label={c.open} title={c.open}>{Ico.open}</a>
                         <span className="acx-copy"><CopyLink path={`/i/${r.slug}`} lang={lang} /></span>
                       </div>

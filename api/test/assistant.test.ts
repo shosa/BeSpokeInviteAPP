@@ -124,13 +124,12 @@ describe("assistente: risposte del modello", () => {
     assert.equal(sent[0].is_error, true);
   });
 
-  it("a invito confermato l'assistente risponde ma non propone modifiche", async () => {
-    const model = fakeModel([{ content: [{ type: "text", text: "Posso solo rispondere." }], stop_reason: "end_turn" }]);
+  it("a invito pubblicato l'assistente può ancora proporre modifiche (modifiche illimitate)", async () => {
+    const model = fakeModel([{ content: [{ type: "text", text: "Ecco." }], stop_reason: "end_turn" }]);
     const { d } = deps({ model, findOwned: async () => invitation({ status: "paid", edit_count: 1 }) });
     const out = await handleAssistant(d, { id: INV_ID, userId: OWNER, body: chat });
     assert.equal(out.status, 200);
-    assert.equal(model.calls[0].tools, undefined, "nessuno strumento in sola lettura");
-    assert.deepEqual((out.body as { actions: unknown[] }).actions, []);
+    assert.ok(model.calls[0].tools, "gli strumenti di modifica restano disponibili");
   });
 
   it("un rifiuto del modello non applica nulla e mostra un messaggio gentile", async () => {

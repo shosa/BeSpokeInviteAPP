@@ -44,7 +44,9 @@ const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slic
 async function ownedPlanner(id: string, userId: string): Promise<Row | null> {
   if (!UUID.test(id)) return null;
   const { rows } = await pool.query(
-    "SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, created_at FROM planners WHERE id = $1 AND user_id = $2",
+    // Proprietario, oppure la coppia a cui lo studio Pro ha dato accesso al planner.
+    `SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, created_at FROM planners p
+     WHERE p.id = $1 AND (p.user_id = $2 OR EXISTS (SELECT 1 FROM pro_access a WHERE a.client_id = p.pro_client_id AND a.user_id = $2 AND a.can_planner))`,
     [id, userId],
   );
   return rows[0] ?? null;
@@ -109,7 +111,9 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     if (!user) return;
     const catalog = await deps.loadCatalog();
     const { rows } = await pool.query(
-      "SELECT id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, data FROM planners WHERE user_id = $1 ORDER BY event_date NULLS LAST, created_at",
+      `SELECT id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, data FROM planners p
+       WHERE (p.user_id = $1 AND p.pro_client_id IS NULL) OR EXISTS (SELECT 1 FROM pro_access a WHERE a.client_id = p.pro_client_id AND a.user_id = $1 AND a.can_planner)
+       ORDER BY event_date NULLS LAST, created_at`,
       [user.id],
     );
     return Promise.all(

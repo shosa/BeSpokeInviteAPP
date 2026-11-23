@@ -13,14 +13,15 @@ import { AdminUsers } from "./admin/AdminUsers";
 import { AdminShopify } from "./admin/AdminShopify";
 import { AdminOverview } from "./admin/AdminOverview";
 import { AdminPlanners } from "./admin/AdminPlanners";
+import { AdminPro } from "./admin/AdminPro";
 import { CommandPalette } from "./admin/CommandPalette";
 import { MusicLibrary } from "./admin/MusicLibrary";
-import { BookOpen, LayoutDashboard, MoreHorizontal, ShoppingBag, Users, Mail, LayoutTemplate, Music, Image as ImageIcon, Search, Store, Send, Sparkles, X, type LucideIcon } from "lucide-react";
+import { BookOpen, Briefcase, LayoutDashboard, MoreHorizontal, ShoppingBag, Users, Mail, LayoutTemplate, Music, Image as ImageIcon, Search, Store, Send, Sparkles, X, type LucideIcon } from "lucide-react";
 import "./admin/console.css";
 import { useT } from "@/lib/lang";
 
 // Navigazione per gruppi: la panoramica in cima, poi vendite, prodotti e impostazioni.
-const ICON: Record<Tab, LucideIcon> = { panoramica: LayoutDashboard, ordini: ShoppingBag, clienti: Users, inviti: Mail, planner: BookOpen, template: LayoutTemplate, musica: Music, file: ImageIcon, shopify: Store, email: Send, assistente: Sparkles };
+const ICON: Record<Tab, LucideIcon> = { panoramica: LayoutDashboard, ordini: ShoppingBag, clienti: Users, inviti: Mail, planner: BookOpen, template: LayoutTemplate, musica: Music, file: ImageIcon, shopify: Store, email: Send, assistente: Sparkles, pro: Briefcase };
 type Pair = [string, string]; // [italiano, inglese]
 const GROUPS: { title: Pair | null; items: { id: Tab; label: Pair; hint: Pair }[] }[] = [
   { title: null, items: [{ id: "panoramica", label: ["Panoramica", "Overview"], hint: ["Cosa fare oggi e cosa è successo", "What to do today and what happened"] }] },
@@ -29,6 +30,7 @@ const GROUPS: { title: Pair | null; items: { id: Tab; label: Pair; hint: Pair }[
     items: [
       { id: "ordini", label: ["Ordini", "Orders"], hint: ["Acquisti e attivazioni", "Purchases and activations"] },
       { id: "clienti", label: ["Clienti", "Customers"], hint: ["Schede, acquisti assegnati, accesso", "Profiles, assigned purchases, access"] },
+      { id: "pro", label: ["Wedding planner", "Wedding planners"], hint: ["Studi Pro, crediti e piani mensili", "Pro studios, credits and monthly plans"] },
     ],
   },
   {
@@ -158,6 +160,7 @@ export function AdminConsole() {
           {tab === "clienti" && <AdminUsers openId={openUser} onOpen={setOpenUser} onOpenInvitations={(id) => go("inviti", { userId: id })} />}
           {tab === "inviti" && <AdminInvitations initialUser={clientId} onClearUser={() => setClientId(undefined)} />}
           {tab === "planner" && <AdminPlanners go={go} />}
+          {tab === "pro" && <AdminPro />}
           {tab === "template" && (catalog ? <ThemesAdmin catalog={catalog} onChanged={reload} /> : <p className="hint">{tt("Caricamento…", "Loading…")}</p>)}
           {tab === "musica" && <MusicLibrary tracks={catalog?.music ?? []} onChange={reload} />}
           {tab === "file" && <AdminMedia />}

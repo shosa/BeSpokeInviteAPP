@@ -108,8 +108,9 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   const catalog = initial.catalog;
   const history = useHistory<InviteConfig>(initial.config);
   const config = history.present;
-  // Dopo l'acquisto l'invito si modifica finché non si conferma la modifica: poi è chiuso.
-  const locked = initial.status === "paid" && initial.editCount >= 1;
+  // Modifiche illimitate: l'invito resta sempre modificabile e ogni pubblicazione aggiorna quello degli ospiti.
+  // (Il link non cambia dopo la prima pubblicazione; il template non cambia dopo l'acquisto.)
+  const locked = false;
   // Pubblicato = prima conferma: solo allora l'invito ha il suo link pubblico.
   const published = initial.editCount >= 1;
   const [publishOpen, setPublishOpen] = useState(false);
@@ -790,20 +791,20 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
           <div className="bl-modal confirm-summary" role="dialog" aria-modal="true" aria-labelledby="confirm-summary-title">
             <header className="bl-modal-head">
               <div>
-                <h2 id="confirm-summary-title">{lang === "en" ? "Summary before confirming" : "Riepilogo prima della conferma"}</h2>
+                <h2 id="confirm-summary-title">{lang === "en" ? "Summary before publishing" : "Riepilogo prima di pubblicare"}</h2>
               </div>
             </header>
             <p><strong>{lang === "en" ? "Purchased" : "Acquistato"}:</strong> {(() => { const m = getModel(catalog, initial.config.model); return m ? modelCopy(m, lang).name : initial.config.model; })()}{initial.purchasedAddons.length ? ` · ${initial.purchasedAddons.map((k) => { const a = getAddon(catalog, k); return a ? addonCopy(k, a.label, a.description, lang).label : k; }).join(", ")}` : ""}</p>
             <p><strong>{lang === "en" ? "In the draft" : "Nella bozza"}:</strong> {config.addons.length ? config.addons.map((k) => { const a = getAddon(catalog, k); return a ? addonCopy(k, a.label, a.description, lang).label : k; }).join(", ") : lang === "en" ? "no extra functions" : "nessuna funzione extra"}</p>
             {extra > 0 && <p><strong>{lang === "en" ? "To pay now" : "Da pagare ora"}:</strong> {formatPrice(extra)} {lang === "en" ? "for the new functions" : "per le funzioni nuove"}</p>}
             <p className="confirm-warning">{lang === "en"
-              ? "After confirming, the invitation can no longer be edited. Until then it stays a draft: you can edit it as many times as you want, and guests keep seeing the previous version."
-              : "Dopo la conferma l'invito non si potrà più modificare. Fino ad allora resta una bozza: puoi modificarla quante volte vuoi, e gli ospiti vedono ancora la versione precedente."}</p>
+              ? "Publishing updates the invitation guests see, at the same link. You can keep editing and publish again whenever you like."
+              : "Pubblicando, gli ospiti vedono subito la nuova versione allo stesso link. Puoi continuare a modificarlo e ripubblicare quando vuoi."}</p>
             <div className="bl-modal-actions">
               <button type="button" className="btn outline" onClick={() => setSummary(false)}>{lang === "en" ? "Back to draft" : "Torna alla bozza"}</button>
               <button type="button" className="btn solid" onClick={confirmEdit} disabled={checkingOut}>{extra > 0
                 ? (lang === "en" ? "Pay the difference and confirm" : "Paga la differenza e conferma")
-                : (lang === "en" ? "Confirm and close the edit" : "Conferma e chiudi la modifica")}</button>
+                : (lang === "en" ? "Publish the changes" : "Pubblica le modifiche")}</button>
             </div>
           </div>
         </div>
@@ -812,8 +813,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       <footer className="bl-footer">
         {paidAlready && editable ? (
           <div className="confirm-edit">
-            <p>{lang === "en" ? "You can edit the invitation once. When you are done, confirm the edit to close it." : "Puoi modificare l'invito una sola volta. Quando hai finito, conferma la modifica per chiuderla."}</p>
-            <button type="button" className="confirm-edit-btn" onClick={() => setSummary(true)}>{lang === "en" ? "Confirm edit" : "Conferma modifica"}</button>
+            <p>{published
+              ? (lang === "en" ? "Changes stay a draft until you publish them: guests keep seeing the current version." : "Le modifiche restano in bozza finché non le pubblichi: gli ospiti vedono ancora la versione attuale.")
+              : (lang === "en" ? "When you are ready, publish the invitation and choose its link." : "Quando sei pronto, pubblica l'invito e scegli il suo link.")}</p>
+            <button type="button" className="confirm-edit-btn" onClick={() => setSummary(true)}>{published ? (lang === "en" ? "Publish changes" : "Pubblica modifiche") : (lang === "en" ? "Publish" : "Pubblica")}</button>
             <button type="button" className="link confirm-edit-summary" onClick={() => setSummary(true)}>{lang === "en" ? "Summary" : "Riepilogo"}</button>
             {extra > 0 && <span className="confirm-edit-extra">{formatPrice(extra)}</span>}
           </div>

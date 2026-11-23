@@ -861,3 +861,24 @@ img {
 .act-cat.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .act-cat.is-on svg { color: #f3dfae; }
 .act-cat.is-on b { background: rgba(255, 255, 255, 0.18); color: #fff; }
+
+/* Pannello «Condividi» (components/share/ShareSheet.tsx): QR dell'invito, immagine da scaricare o condividere. */
+.shs-back { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(42, 33, 25, 0.42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.shs { width: min(420px, 100%); max-height: calc(100dvh - 32px); overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 22px; background: #fdfbf7; color: #2a2119; border-radius: 26px; box-shadow: 0 30px 80px -20px rgba(42, 33, 25, 0.55); font-family: var(--font-text), "Helvetica Neue", Arial, sans-serif; animation: shsIn 0.28s cubic-bezier(0.23, 1, 0.32, 1); }
+.shs .shs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.shs .shs-head h2 { margin: 0; font: 400 24px/1.15 var(--font-iv-display), Georgia, serif; color: #2a2119; }
+.shs .shs-x { width: 40px; height: 40px; flex: none; display: grid; place-items: center; padding: 0; border: 1px solid rgba(160, 115, 45, 0.24); border-radius: 50%; background: #fff; color: #2a2119; cursor: pointer; }
+.shs .shs-qr { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; background: #fff; border: 1px solid rgba(160, 115, 45, 0.18); border-radius: 20px; text-align: center; }
+.shs .shs-qr img, .shs .shs-qr-ph { width: 220px; height: 220px; border-radius: 12px; }
+.shs .shs-qr-ph { display: block; background: #f7f1e7; }
+.shs .shs-qr p { margin: 4px 0 0; font-size: 14px; color: #7b6a57; }
+.shs .shs-url { font-size: 13px; font-weight: 500; color: #2a2119; overflow-wrap: anywhere; }
+.shs .shs-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.shs .shs-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 12px; border: 1px solid rgba(160, 115, 45, 0.3); border-radius: 999px; background: #fff; color: #2a2119; font: 500 14px var(--font-text), sans-serif; white-space: nowrap; cursor: pointer; }
+.shs .shs-btn.is-primary { background: #2a2119; border-color: #2a2119; color: #fff; }
+.shs .shs-more { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; }
+.shs .shs-link { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 4px; border: 0; background: none; color: #8a6427; font: 500 14px var(--font-text), sans-serif; cursor: pointer; }
+.shs .shs-note { margin: 0; font-size: 13px; color: #7b6a57; text-align: center; }
+@keyframes shsIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .shs { animation: none; } }
+@media (max-width: 380px) { .shs .shs-main { grid-template-columns: minmax(0, 1fr); } }

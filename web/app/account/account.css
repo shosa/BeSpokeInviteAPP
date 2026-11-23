@@ -188,3 +188,11 @@
 .acx-login .lg-form .btn, .acx-login .claim-form .btn { justify-self: stretch; justify-content: center; }
 .acx-login .claim { margin: 0; }
 .acx-login .claim-form input { max-width: none; }
+
+/* Studio Bespoke Pro: collegamento all'area dei clienti. */
+.acx-pro { display: inline-flex; align-items: center; min-height: 44px; margin: 6px 0 4px; padding: 0 18px; border-radius: 999px; background: #2a2119; color: #fff; font-weight: 500; font-size: 14px; text-decoration: none; }
+.acx-pro:hover { background: #3a2f24; color: #fff; }
+
+/* «Gestisci»: accesso alla pagina di gestione dell'invito (risposte, link, modifiche). */
+.acx-manage { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 16px; flex: none; border-radius: 999px; color: #8a6427; background: #fff; box-shadow: inset 0 0 0 1px rgba(160, 115, 45, 0.28); font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
+.acx-manage:hover { box-shadow: inset 0 0 0 1px var(--gold); color: #6e4f1d; }

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Check, Copy, Pencil, Share2 } from "lucide-react";
+import { ShareSheet } from "@/components/share/ShareSheet";
 
-// Condivisione dell'invito dal planner premium: «Condividi» apre il pannello di condivisione del sistema
-// (navigator.share); dove non c'è, copia il link. «Copia link» copia sempre.
+// Condivisione dell'invito: «Condividi» apre il nostro pannello (QR code, immagine da scaricare o condividere),
+// che porta anche a quello del sistema. «Copia link» copia sempre.
 // Senza link pubblico (invito non ancora pubblicato) rimanda al builder.
 const COPY = {
   it: { label: "Il tuo invito", share: "Condividi", copy: "Copia link", copied: "Link copiato", text: "Vi invitiamo! Trovate tutti i dettagli qui", unpublished: "Pubblica l'invito per avere il link", publish: "Pubblica" },
@@ -14,6 +15,7 @@ const COPY = {
 export function ShareInvite({ path, title, editHref, lang = "it" }: { path: string | null; title: string; editHref: string; lang?: "it" | "en" }) {
   const T = COPY[lang];
   const [copied, setCopied] = useState(false);
+  const [sheet, setSheet] = useState(false);
   const url = () => `${window.location.origin}${path}`;
 
   async function copy() {
@@ -26,17 +28,7 @@ export function ShareInvite({ path, title, editHref, lang = "it" }: { path: stri
     }
   }
 
-  async function share() {
-    if (typeof navigator.share === "function") {
-      try {
-        await navigator.share({ title, text: T.text, url: url() });
-        return;
-      } catch (e) {
-        if ((e as DOMException)?.name === "AbortError") return; // chiuso dall'utente
-      }
-    }
-    await copy();
-  }
+  const share = () => setSheet(true);
 
   return (
     <div className="pp-share" role="group" aria-label={T.label}>
@@ -58,6 +50,7 @@ export function ShareInvite({ path, title, editHref, lang = "it" }: { path: stri
         </a>
       )}
       <span className="visually-hidden" role="status">{copied ? T.copied : ""}</span>
+      {sheet && path && <ShareSheet url={url()} title={title} lang={lang} onClose={() => setSheet(false)} />}
     </div>
   );
 }

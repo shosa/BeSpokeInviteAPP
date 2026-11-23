@@ -599,3 +599,53 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
   .demo-modal.tpl-catman .tpl-catman-acts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .demo-modal.tpl-catman .tpl-catman-acts .btn { padding: 0 8px; font-size: 11px; letter-spacing: .08em; justify-content: center; }
 }
+
+/* Wedding planner (Bespoke Pro): elenco degli studi a sinistra, scheda dello studio a destra. */
+.apro-grid { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.apro-list { background: #fff; border: 1px solid var(--line); border-radius: 22px; overflow: hidden; }
+.apro-list ul { list-style: none; margin: 0; padding: 0; }
+.apro-list li + li { border-top: 1px solid var(--line); }
+.apro-list button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 0; background: #fff; font: inherit; color: var(--ink); text-align: left; cursor: pointer; }
+.apro-list button:hover { background: var(--paper); }
+.apro-list button.is-on { background: #f7f1e7; }
+.apro-mono { width: 40px; height: 40px; flex: none; border-radius: 12px; background: var(--ink); color: #f3dfae; display: grid; place-items: center; font: 400 17px var(--font-display), Georgia, serif; }
+.apro-mono.is-lg { width: 56px; height: 56px; border-radius: 16px; font-size: 23px; }
+.apro-who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.apro-who strong, .apro-who h3 { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apro-who h3 { margin: 0; font: 400 26px/1.15 var(--font-display), Georgia, serif; white-space: normal; overflow-wrap: anywhere; }
+.apro-who small { font-size: 12.5px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apro-cr { font-size: 13px; color: #5e5040; white-space: nowrap; }
+.apro-detail { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.apro-card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--iv-shadow); }
+.apro-head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.apro-k { font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brass); }
+.apro-credits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.apro-credit { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.apro-credit strong { font: 300 40px/1 var(--font-display), Georgia, serif; }
+.apro-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.apro-steps button { min-height: 36px; padding: 0 14px; border: 1px solid rgba(160, 115, 45, 0.3); border-radius: 999px; background: #fff; font: 500 13px var(--font-text), sans-serif; color: var(--ink); cursor: pointer; white-space: nowrap; }
+.apro-steps button.is-main { border: 0; background: var(--brass); color: #fff; font-weight: 600; }
+.apro-steps button:disabled { opacity: 0.4; cursor: default; }
+.apro-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.apro-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-soft); min-width: 0; }
+.apro-field input { min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; font: 400 15px var(--font-text), sans-serif; color: var(--ink); background: var(--paper); }
+.apro-seg { display: inline-flex !important; width: auto !important; grid-template-columns: none !important; align-self: flex-start; }
+.apro-seg button { white-space: nowrap; }
+.apro-log { list-style: none; margin: 0; padding: 0; }
+.apro-log li { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.apro-log li:last-child { border-bottom: 0; }
+.apro-log time { width: 76px; flex: none; color: var(--ink-soft); font-size: 13px; }
+.apro-log span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.apro-log small { color: var(--ink-soft); }
+.apro-log b { font-weight: 500; white-space: nowrap; }
+.apro-log b.is-plus { color: #2f5a2a; }
+.apro-log b.is-minus { color: #9b3b2f; }
+.apro-empty { background: #fff; border: 1px dashed var(--line); border-radius: 22px; padding: 28px; text-align: center; }
+.apro-empty h3 { margin: 0 0 6px; }
+.apro-modal { width: min(480px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 14px; }
+.apro-check { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.apro-check input { width: 18px; height: 18px; accent-color: var(--brass); }
+@media (max-width: 1040px) {
+  .apro-grid { grid-template-columns: minmax(0, 1fr); }
+  .apro-credits { grid-template-columns: minmax(0, 1fr); }
+}
