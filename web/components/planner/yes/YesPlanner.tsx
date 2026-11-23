@@ -77,7 +77,9 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   const [sub, setSub] = useState("");
   const [weather, setWeather] = useState<Weather | null>(demo ? DEMO_WEATHER : null);
   const [error, setError] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<Sheet>(null);
+  const [sheet, setSheetRaw] = useState<Sheet>(null);
+  // In sola lettura le finestre di modifica (invitato, attività, foto) non si aprono; chiuderle sì.
+  const setSheet = useCallback((x: Sheet) => { if (x === null || !readOnly) setSheetRaw(x); }, [readOnly]);
   const [palette, setPalette] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [toastText, setToastText] = useState<string | null>(null);
@@ -191,6 +193,23 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
 
   const openPdf = () => (readOnly ? toast(t("Anteprima in sola lettura: il PDF lo crea il cliente.", "Read-only preview: the customer creates the PDF.")) : demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
   const ev = eventCopy(data.event.eventType, en);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Sola lettura: campi, menu a tendina e trascinamenti disattivati in tutto il planner, anche in ciò che compare dopo.
+  useEffect(() => {
+    if (!readOnly || !rootRef.current) return;
+    const root = rootRef.current;
+    const lock = () => {
+      root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea").forEach((el) => {
+        if (el.closest(".y-palette, .y-search-field")) return; // la ricerca resta usabile
+        el.disabled = true;
+      });
+      root.querySelectorAll<HTMLElement>("[draggable=true]").forEach((el) => { el.draggable = false; });
+    };
+    lock();
+    const mo = new MutationObserver(lock);
+    mo.observe(root, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [readOnly]);
   const ctx: Ctx = { actions: [], id, data, ev, en, demo, readOnly, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
   const navIndex = NAV.findIndex((n) => n.view === view);
   const couple = data.event.title || ev.your;
@@ -202,13 +221,15 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     actions.push({ label: t("Cerca", "Search"), icon: <IcSearch />, onClick: () => setPalette(true) });
     actions.push({ label: ev.settings, icon: <IcGear />, onClick: () => go("settings") });
   }
+  if (!readOnly) {
   if (view === "tasks" || view === "binder") ctx.actions.push({ label: t("Crea PDF", "Create PDF"), icon: <IcPrint />, onClick: openPdf });
   if (view === "tasks") ctx.actions.push({ label: t("Nuova attività", "New task"), icon: <IcPlus />, onClick: () => setSheet({ kind: "task" }), primary: true });
   if (view === "guests") ctx.actions.push({ label: t("Aggiungi invitato", "Add guest"), icon: <IcPlus />, onClick: () => setSheet({ kind: "guest" }), primary: true });
   if (view === "budget") ctx.actions.push({ label: t("Aggiungi o cerca", "Add or search"), icon: <IcPlus />, onClick: () => setPalette(true), primary: true });
+  }
 
   return (
-    <div className={`yp${demo ? " is-demo" : ""}${view === "home" ? " y-home" : ""}`}>
+    <div ref={rootRef} className={`yp${demo ? " is-demo" : ""}${readOnly ? " is-readonly" : ""}${view === "home" ? " y-home" : ""}`}>
       <aside className="y-sidebar" aria-label={t("Sezioni", "Sections")}>
         <div className="y-brand"><b>Bespoke Invite</b><span>Planner</span></div>
         {onClose && <button type="button" className="y-close" onClick={onClose} aria-label={t("Chiudi il planner", "Close the planner")} title={t("Chiudi il planner", "Close the planner")}><IcClose /></button>}
@@ -294,7 +315,8 @@ function Palette({ ctx, onClose, openSheet }: { ctx: Ctx; onClose: () => void; o
 
   type Item = { key: string; label: string; sub?: string; run: () => void };
   const groups: { title: string; items: Item[] }[] = [];
-  if (!query) {
+  // In sola lettura la ricerca serve solo a trovare e aprire: niente scorciatoie per aggiungere.
+  if (!query && !ctx.readOnly) {
     groups.push({ title: "", items: [
       { key: "a-guest", label: t("Aggiungi invitato", "Add guest"), run: () => openSheet({ kind: "guest" }) },
       { key: "a-item", label: t("Aggiungi voce di spesa", "Add item"), run: () => go("budget") },

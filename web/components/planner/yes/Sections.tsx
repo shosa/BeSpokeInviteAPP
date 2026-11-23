@@ -66,7 +66,7 @@ function Vendors({ ctx }: { ctx: Ctx }) {
         {data.vendors.map((v) => (
           <div key={v.id} className="y-row">
             <span className="y-r-m"><span className="y-r-t">{v.name}</span><span className="y-r-s">{[v.role, v.contact].filter(Boolean).join(" · ") || t("Nessun contatto", "No contact")}</span></span>
-            <button type="button" className={`y-pill${v.contract_status === "signed" ? "" : ""}`} onClick={() => ctx.act(() => ctx.call("PATCH", `/vendors/${v.id}`, { contract_status: v.contract_status === "signed" ? "unsigned" : "signed" }))}>
+            <button type="button" data-edit className={`y-pill${v.contract_status === "signed" ? "" : ""}`} onClick={() => ctx.act(() => ctx.call("PATCH", `/vendors/${v.id}`, { contract_status: v.contract_status === "signed" ? "unsigned" : "signed" }))}>
               <span className={v.contract_status === "signed" ? "t-ok" : "t-warn"}>{v.contract_status === "signed" ? t("Firmato", "Signed") : t("Da firmare", "To sign")}</span>
             </button>
             <button type="button" className="y-tbtn" style={{ color: "var(--label-2)" }} aria-label={`${t("Elimina", "Delete")} ${v.name}`} onClick={() => { if (window.confirm(t(`Eliminare ${v.name}?`, `Delete ${v.name}?`))) void ctx.act(() => ctx.call("DELETE", `/vendors/${v.id}`)); }}>×</button>
@@ -86,7 +86,7 @@ function Vendors({ ctx }: { ctx: Ctx }) {
             <div style={{ display: "flex", gap: 8 }}><button className="y-btn y-btn-fill y-btn-sm" type="submit">{t("Aggiungi", "Add")}</button><button className="y-btn y-btn-gray y-btn-sm" type="button" onClick={() => setAdding(false)}>{t("Annulla", "Cancel")}</button></div>
           </form>
         ) : (
-          <button type="button" className="y-row" style={{ color: "var(--tint)", fontWeight: 500 }} onClick={() => setAdding(true)}>{t("Aggiungi un fornitore", "Add a vendor")}</button>
+          <button type="button" data-edit className="y-row" style={{ color: "var(--tint)", fontWeight: 500 }} onClick={() => setAdding(true)}>{t("Aggiungi un fornitore", "Add a vendor")}</button>
         )}
       </div>
     </section>
