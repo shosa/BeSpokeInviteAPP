@@ -1132,7 +1132,8 @@ export async function buildApp() {
       const q = Math.max(1, Math.min(20, Math.round(Number(l.quantity) || 1)));
       if (plannerProduct && prod === plannerProduct) planners += q;
       else if (v && basic && v === basic) basics += q;
-      else if (v && v === base) invitations += q;
+      // L'invito completo include il planner (l'invito base no).
+      else if (v && v === base) { invitations += q; planners += q; }
       else if (v && bundle && v === bundle) { invitations += q; planners += q; }
     }
     if (invitations === 0 && basics === 0 && planners === 0) return false;

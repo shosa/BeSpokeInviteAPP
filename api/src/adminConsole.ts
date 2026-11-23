@@ -93,7 +93,8 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Utente non trovato" });
     const b = (req.body ?? {}) as { product?: unknown; qty?: unknown; reason?: unknown; notify?: unknown };
-    // invitation: invito completo; basic: invito base (solo template non Premium); planner; bundle: invito + planner.
+    // invitation: invito completo (include il planner); basic: invito base (solo template non Premium, senza planner);
+    // planner: solo il planner; bundle: invito + planner (come l'invito completo).
     const product = b.product === "planner" || b.product === "bundle" || b.product === "basic" ? b.product : "invitation";
     const qty = Math.max(1, Math.min(10, Math.round(Number(b.qty) || 1)));
     const reason = (GRANT_REASONS as readonly string[]).includes(String(b.reason)) ? String(b.reason) : "omaggio";
@@ -104,7 +105,7 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     const rows: Record<string, unknown>[] = [];
     for (let n = 0; n < qty; n++) {
       if (product !== "planner") rows.push(invitationDraft);
-      if (product === "planner" || product === "bundle") rows.push({ product: "planner", manual });
+      if (product === "planner" || product === "bundle" || product === "invitation") rows.push({ product: "planner", manual });
     }
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     for (const draft of rows) {

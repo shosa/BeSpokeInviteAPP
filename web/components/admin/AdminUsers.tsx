@@ -183,7 +183,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
           <h3>{t("Assegna un acquisto", "Assign a purchase")}</h3>
           <p className="hint">{t("Compare nella sua area come «da attivare», come un acquisto dal negozio. Non entra negli ordini di Shopify.", "It appears in their account as «to activate», like a shop purchase. It doesn't go into Shopify orders.")}</p>
           <div className="cu-seg" role="radiogroup" aria-label={t("Prodotto", "Product")}>
-            {([["invitation", t("Invito", "Invitation"), t("tutti i template", "all templates")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")], ["bundle", t("Pacchetto", "Bundle"), t("invito + planner", "invitation + planner")]] as const).map(([v, label, hint]) => (
+            {([["invitation", t("Invito", "Invitation"), t("tutti i template + planner", "all templates + planner")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")], ["bundle", t("Pacchetto", "Bundle"), t("invito + planner", "invitation + planner")]] as const).map(([v, label, hint]) => (
               <button key={v} type="button" role="radio" aria-checked={product === v} className={product === v ? "is-on" : ""} onClick={() => setProduct(v)}><b>{label}</b><small>{hint}</small></button>
             ))}
           </div>
