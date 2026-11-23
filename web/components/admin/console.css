@@ -649,3 +649,29 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
   .apro-grid { grid-template-columns: minmax(0, 1fr); }
   .apro-credits { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Attività nell'editor: chi sta modificando ora, bozze da pubblicare, cronologia delle sessioni. */
+.adm-pill.is-live { gap: 6px; background: #e3f1e1; color: #2f5a2a; }
+.adm-pill.is-live i, .ov-live-dot { width: 8px; height: 8px; border-radius: 50%; background: #3f8f3a; box-shadow: 0 0 0 0 rgba(63, 143, 58, 0.5); animation: admLive 1.8s ease-out infinite; display: inline-block; }
+.adm-pill.is-dirty { background: #fbeee4; color: #8a4a1c; }
+@keyframes admLive { 70% { box-shadow: 0 0 0 7px rgba(63, 143, 58, 0); } 100% { box-shadow: 0 0 0 0 rgba(63, 143, 58, 0); } }
+@media (prefers-reduced-motion: reduce) { .adm-pill.is-live i, .ov-live-dot { animation: none; } }
+.adm-ago { white-space: nowrap; }
+.adm-table td small { display: block; }
+.adm-sessions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.adm-sessions li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.adm-sessions li:first-child { border-top: 0; }
+.adm-sessions b { font-weight: 500; font-size: 14px; }
+.adm-sessions small { display: block; color: var(--ink-soft); font-size: 12.5px; }
+.adm-sess-ico { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #f7f1e7; color: var(--brass); }
+.adm-sess-ico.is-pub { background: #e3f1e1; color: #2f5a2a; }
+.adm-sess-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.adm-sess-tags em { font-style: normal; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); }
+.ov-live { margin-bottom: 18px; }
+.ov-live .ov-card-head h2 { display: inline-flex; align-items: center; gap: 10px; }
+.ov-live ul { list-style: none; margin: 0; padding: 0; }
+.ov-live li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.ov-live li:first-child { border-top: 0; }
+.ov-ico.is-edit { background: #e3f1e1; color: #2f5a2a; }
+.ov-ico.is-publish { background: #e8eef6; color: #2c4a6e; }
+.ov-live-tag { font-size: 12px; font-weight: 600; color: #2f5a2a; white-space: nowrap; }

@@ -65,6 +65,7 @@ export function AdminConsole() {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [shopify, setShopify] = useState<ShopifyState | null>(null);
   const [clientId, setClientId] = useState<string | undefined>(undefined);
+  const [invitationId, setInvitationId] = useState<string | undefined>(undefined);
   const [openUser, setOpenUser] = useState<string | undefined>(undefined);
   const [searching, setSearching] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -96,7 +97,7 @@ export function AdminConsole() {
 
   const go: Go = (next, target) => {
     if (next === "clienti") setOpenUser(target?.userId);
-    if (next === "inviti") setClientId(target?.userId);
+    if (next === "inviti") { setClientId(target?.userId); setInvitationId(target?.invitationId); }
     setTab(next);
     setSearching(false);
     setMoreOpen(false);
@@ -158,7 +159,7 @@ export function AdminConsole() {
           {tab === "panoramica" && <AdminOverview go={go} />}
           {tab === "ordini" && <AdminOrders go={go} />}
           {tab === "clienti" && <AdminUsers openId={openUser} onOpen={setOpenUser} onOpenInvitations={(id) => go("inviti", { userId: id })} />}
-          {tab === "inviti" && <AdminInvitations initialUser={clientId} onClearUser={() => setClientId(undefined)} />}
+          {tab === "inviti" && <AdminInvitations initialUser={clientId} onClearUser={() => setClientId(undefined)} initialOpen={invitationId} />}
           {tab === "planner" && <AdminPlanners go={go} />}
           {tab === "pro" && <AdminPro />}
           {tab === "template" && (catalog ? <ThemesAdmin catalog={catalog} onChanged={reload} /> : <p className="hint">{tt("Caricamento…", "Loading…")}</p>)}

@@ -284,6 +284,20 @@ CREATE TABLE IF NOT EXISTS pro_access (
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
 ALTER TABLE planners ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
+-- Attività nell'editor, per la console: ultimo salvataggio, ultima pubblicazione, presenza (l'editor aperto segnala
+-- ogni 30 secondi) e un registro di salvataggi e pubblicazioni con le sezioni cambiate.
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS last_edit_at timestamptz;
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS last_published_at timestamptz;
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS editor_seen_at timestamptz;
+CREATE TABLE IF NOT EXISTS invitation_edits (
+  id bigserial PRIMARY KEY,
+  invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
+  user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+  kind text NOT NULL CHECK (kind IN ('save', 'publish')),
+  sections text[] NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS invitation_edits_inv_idx ON invitation_edits(invitation_id, created_at DESC);
 -- Acquisti «premium» non ancora attivati: restano un invito da attivare e ricevono anche un planner da attivare.
 INSERT INTO orders (id, user_id, invitation_id, amount_cents, currency, source, status, kind, draft, status_url, created_at)
 SELECT o.id || '-planner', o.user_id, NULL, 0, o.currency, o.source, 'paid', 'initial', '{"product":"planner"}'::jsonb, o.status_url, o.created_at

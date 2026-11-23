@@ -60,6 +60,7 @@ import { isInviteTier } from "@inviteme/shared";
 import { sanitizeDocs } from "./planner";
 import { registerPlannerRoutes } from "./plannerRoutes";
 import { isStudio, registerProRoutes } from "./pro";
+import { changedSections, recordPublish, recordSave } from "./editActivity";
 import { errorToEnglish } from "./errorsEn";
 import { CreditsCheckoutError, createAiCreditsCheckout, createCheckout, demoMode, invitationIdFromOrder, orderIdFromOrder, localCheckoutAllowed, shopifyConfigured, verifyShopifyWebhook } from "./shopify";
 
@@ -513,6 +514,17 @@ export async function buildApp() {
     if (rules.themeLocked && config.themeId !== (inv.config as InviteConfig).themeId) return reply.code(409).send({ error: "Dopo l'acquisto il template non si cambia" });
     // Funzioni nuove: restano in bozza finché non sono pagate (vedi confirm-edit e checkout). Quelle già pagate sono gratuite.
     await pool.query("UPDATE invitations SET config = $1 WHERE id = $2", [JSON.stringify(config), inv.id]);
+    await recordSave(inv.id, user.id, changedSections(inv.config as InviteConfig, config)).catch((e) => req.log.warn({ err: e }, "attività dell'editor non registrata"));
+    return { ok: true };
+  });
+
+  // Presenza nell'editor: l'editor aperto lo segnala ogni 30 secondi; la console mostra chi sta modificando adesso.
+  app.post<{ Params: { id: string } }>("/api/invitations/:id/presence", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    await pool.query("UPDATE invitations SET editor_seen_at = now() WHERE id = $1", [inv.id]);
     return { ok: true };
   });
 
@@ -540,6 +552,7 @@ export async function buildApp() {
     // edit_count conta le pubblicazioni (da 1 in su l'invito è online).
     try {
       await pool.query("UPDATE invitations SET edit_count = edit_count + 1, published_config = config, slug = $2 WHERE id = $1", [inv.id, slug]);
+      await recordPublish(inv.id, user.id).catch((e) => req.log.warn({ err: e }, "pubblicazione non registrata"));
     } catch (e) {
       if ((e as { code?: string }).code === "23505") return reply.code(409).send({ error: "Questo link è già in uso: scegline un altro." });
       throw e;
@@ -583,6 +596,7 @@ export async function buildApp() {
     const config = { ...clean, event: { ...clean.event, venue } };
     const planner = { ...(inv.planner ?? {}), setupDone: true };
     await pool.query("UPDATE invitations SET config = $2, published_config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
+    await recordSave(inv.id, user.id, ["Wizard iniziale"]).catch(() => undefined);
     return { ok: true };
   });
 

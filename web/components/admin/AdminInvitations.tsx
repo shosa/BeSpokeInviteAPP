@@ -2,15 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ExternalLink, RotateCcw, Search, Trash2, X } from "lucide-react";
+import { ExternalLink, Globe, PenLine, Search, Trash2, X } from "lucide-react";
 import { useT } from "@/lib/lang";
 
-// Inviti dei clienti: ricerca, filtri, dettaglio e azioni (riapri la modifica, elimina con conferma dello slug).
+// Inviti dei clienti: ricerca, filtri (anche per attività nell'editor), dettaglio con la cronologia delle modifiche,
+// azioni (richieste AI, elimina con conferma dello slug).
 type Row = {
   id: string; slug: string; status: "draft" | "paid"; created_at: string; views: number; edit_count: number;
   model: string | null; theme: string | null; title: string | null; user_id: string; email: string; name: string;
   rsvps: number; guests: number;
+  last_edit_at: string | null; last_published_at: string | null; live: boolean; dirty: boolean;
 };
+type Session = { start: string; end: string; saves: number; sections: string[]; published: boolean };
 type Detail = Row & {
   assistant_calls: number;
   assistant_bonus: number;
@@ -19,13 +22,29 @@ type Detail = Row & {
   guests: unknown[];
   rsvps: { id: string; answers: Record<string, unknown>; created_at: string }[];
   orders: { id: string; amount_cents: number; currency: string; source: string; status: string; created_at: string }[];
+  sessions: Session[];
+  planner: { setupDone?: boolean } | null;
 };
 
 const loc = () => (typeof document !== "undefined" && document.documentElement.lang === "en" ? "en-GB" : "it-IT");
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(loc(), { day: "numeric", month: "short", year: "numeric" });
+const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit" });
+// «3 minuti fa», «ieri», «12 nov»: quando è stato modificato l'ultima volta.
+function ago(iso: string | null, en: boolean): string {
+  if (!iso) return "—";
+  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (m < 1) return en ? "just now" : "adesso";
+  if (m < 60) return en ? `${m} min ago` : `${m} min fa`;
+  const h = Math.round(m / 60);
+  if (h < 24) return en ? `${h} h ago` : `${h} ore fa`;
+  const d = Math.round(h / 24);
+  if (d === 1) return en ? "yesterday" : "ieri";
+  if (d < 7) return en ? `${d} days ago` : `${d} giorni fa`;
+  return fmtDate(iso);
+}
 const fmtEur = (cents: number, currency = "EUR") => new Intl.NumberFormat(loc(), { style: "currency", currency }).format(cents / 100);
 
-export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: string; onClearUser?: () => void }) {
+export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { initialUser?: string; onClearUser?: () => void; initialOpen?: string }) {
   const t = useT();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"" | "paid" | "draft">("");
@@ -33,9 +52,12 @@ export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: s
   const [rows, setRows] = useState<Row[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(initialOpen ?? null);
+  const [activity, setActivity] = useState<"" | "live" | "dirty" | "never" | "stale">("");
+  const en = t("it", "en") === "en";
 
   useEffect(() => setUser(initialUser ?? ""), [initialUser]);
+  useEffect(() => { if (initialOpen) setOpenId(initialOpen); }, [initialOpen]);
 
   const load = useCallback(async (offset: number, append: boolean) => {
     setLoading(true);
@@ -43,13 +65,14 @@ export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: s
     if (q.trim()) p.set("q", q.trim());
     if (status) p.set("status", status);
     if (user) p.set("user", user);
+    if (activity) p.set("activity", activity);
     const res = await fetch(`/api/admin/invitations?${p}`);
     setLoading(false);
     if (!res.ok) return toast.error(t("Elenco non disponibile", "List not available"));
     const data = (await res.json()) as { rows: Row[]; hasMore: boolean };
     setRows((r) => (append ? [...r, ...data.rows] : data.rows));
     setHasMore(data.hasMore);
-  }, [q, status, user]);
+  }, [q, status, user, activity]);
 
   useEffect(() => {
     const timer = setTimeout(() => load(0, false), 250);
@@ -68,6 +91,11 @@ export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: s
             <button key={v} type="button" className={status === v ? "is-on" : ""} aria-pressed={status === v} onClick={() => setStatus(v)}>{t(label, en)}</button>
           ))}
         </div>
+        <div className="adm-seg" role="group" aria-label={t("Attività nell'editor", "Editor activity")}>
+          {([["", "Ogni attività", "Any activity"], ["live", "In modifica ora", "Editing now"], ["dirty", "Modifiche non pubblicate", "Unpublished changes"], ["never", "Mai pubblicati", "Never published"], ["stale", "Fermi da 7 giorni", "Idle 7 days"]] as const).map(([v, label, enl]) => (
+            <button key={v} type="button" className={activity === v ? "is-on" : ""} aria-pressed={activity === v} onClick={() => setActivity(v)}>{t(label, enl)}</button>
+          ))}
+        </div>
         {user && (
           <button type="button" className="adm-chip" onClick={() => { setUser(""); onClearUser?.(); }}>
             {t("Solo di un cliente", "One customer only")} <X size={14} aria-hidden="true" />
@@ -78,7 +106,7 @@ export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: s
       <div className="adm-table-wrap">
         <table className="adm-table">
           <thead>
-            <tr><th>{t("Invito", "Invitation")}</th><th>{t("Cliente", "Customer")}</th><th>{t("Stato", "Status")}</th><th>{t("Modello", "Model")}</th><th>{t("Creato", "Created")}</th><th className="num">{t("Visite", "Visits")}</th><th className="num">{t("Risposte", "Replies")}</th></tr>
+            <tr><th>{t("Invito", "Invitation")}</th><th>{t("Cliente", "Customer")}</th><th>{t("Stato", "Status")}</th><th>{t("Ultima modifica", "Last edit")}</th><th>{t("Creato", "Created")}</th><th className="num">{t("Visite", "Visits")}</th><th className="num">{t("Risposte", "Replies")}</th></tr>
           </thead>
           <tbody>
             {rows.map((r) => (
@@ -88,8 +116,13 @@ export function AdminInvitations({ initialUser, onClearUser }: { initialUser?: s
                   <small>{r.slug}</small>
                 </td>
                 <td><span className="adm-mail">{r.email}</span></td>
-                <td><span className={`adm-pill ${r.status === "paid" ? "is-paid" : "is-draft"}`}>{r.status === "paid" ? t("Pagato", "Paid") : t("Bozza", "Draft")}</span></td>
-                <td>{r.model ?? "—"}</td>
+                <td>
+                  {r.live ? <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span>
+                    : r.dirty ? <span className="adm-pill is-dirty">{t("Da pubblicare", "To publish")}</span>
+                    : r.edit_count >= 1 ? <span className="adm-pill is-paid">{t("Online", "Live")}</span>
+                    : <span className="adm-pill is-draft">{r.status === "paid" ? t("Mai pubblicato", "Never published") : t("Bozza", "Draft")}</span>}
+                </td>
+                <td><span className="adm-ago">{ago(r.last_edit_at, en)}</span>{r.last_published_at && <small>{t("pubbl.", "publ.")} {ago(r.last_published_at, en)}</small>}</td>
                 <td>{fmtDate(r.created_at)}</td>
                 <td className="num">{r.views}</td>
                 <td className="num">{r.rsvps}</td>
@@ -128,16 +161,6 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
     fetchDetail();
     setConfirm("");
   }, [fetchDetail]);
-
-  async function reopen() {
-    setBusy(true);
-    const res = await fetch(`/api/admin/invitations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reopenEdit: true }) });
-    setBusy(false);
-    if (!res.ok) return toast.error(t("Operazione non riuscita", "Something went wrong"));
-    toast.success(t("Modifica riaperta: il cliente può di nuovo cambiare l'invito.", "Editing reopened: the customer can change the invitation again."));
-    fetchDetail();
-    onChanged();
-  }
 
   // Richieste di BeSpoke AI usate: azzera (tutte di nuovo disponibili) o esaurisce (per provare la ricarica).
   async function setCalls(n: number) {
@@ -178,7 +201,9 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <div><dt>{t("Tema", "Style")}</dt><dd>{d.theme ?? "—"}</dd></div>
             <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(d.created_at)}</dd></div>
             <div><dt>{t("Visite", "Visits")}</dt><dd>{d.views}</dd></div>
-            <div><dt>{t("Modifiche", "Edits")}</dt><dd>{d.edit_count >= 1 ? t("Confermata", "Confirmed") : t("Aperta", "Open")}</dd></div>
+            <div><dt>{t("Editor", "Editor")}</dt><dd>{d.live ? <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span> : t(`Ultima modifica ${ago(d.last_edit_at, t("it", "en") === "en")}`, `Last edit ${ago(d.last_edit_at, true)}`)}</dd></div>
+            <div><dt>{t("Pubblicazione", "Publishing")}</dt><dd>{d.edit_count >= 1 ? `${d.dirty ? t("Modifiche da pubblicare · ", "Changes to publish · ") : ""}${t(`${d.edit_count} ${d.edit_count === 1 ? "volta" : "volte"}`, `${d.edit_count} ${d.edit_count === 1 ? "time" : "times"}`)}${d.last_published_at ? ` · ${ago(d.last_published_at, t("it", "en") === "en")}` : ""}` : t("Mai pubblicato", "Never published")}</dd></div>
+            <div><dt>{t("Wizard iniziale", "Setup wizard")}</dt><dd>{d.planner?.setupDone ? t("Completato", "Done") : t("Non completato", "Not done")}</dd></div>
             <div><dt>BeSpoke AI</dt><dd>{t(`${Math.min(d.assistant_calls, d.assistant_limit)} usate su ${d.assistant_limit}`, `${Math.min(d.assistant_calls, d.assistant_limit)} used of ${d.assistant_limit}`)}{d.assistant_bonus ? t(` (di cui ${d.assistant_bonus} ricaricate)`, ` (${d.assistant_bonus} topped up)`) : ""}</dd></div>
           </dl>
 
@@ -186,10 +211,26 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <a className="btn outline small" href={`/i/${d.slug}`} target="_blank" rel="noopener"><ExternalLink size={15} aria-hidden="true" /> {t("Apri la pagina", "Open the page")}</a>
             <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(0)}>{t("Azzera richieste AI", "Reset AI requests")}</button>
             <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(d.assistant_limit)}>{t("Esaurisci richieste AI", "Use up AI requests")}</button>
-            {d.status === "paid" && d.edit_count >= 1 && (
-              <button type="button" className="btn outline small" disabled={busy} onClick={reopen}><RotateCcw size={15} aria-hidden="true" /> {t("Riapri la modifica", "Reopen editing")}</button>
-            )}
           </div>
+
+          <section className="adm-section">
+            <h3>{t("Cronologia delle modifiche", "Edit history")}</h3>
+            {d.sessions.length === 0 && <p className="hint">{t("Nessuna modifica registrata (la cronologia parte dal 23 novembre 2026).", "No edits recorded (history starts on 23 November 2026).")}</p>}
+            <ol className="adm-sessions">
+              {d.sessions.map((s, i) => (
+                <li key={i}>
+                  <span className={`adm-sess-ico${s.published ? " is-pub" : ""}`} aria-hidden="true">{s.published ? <Globe size={14} /> : <PenLine size={14} />}</span>
+                  <div>
+                    <b>{fmtDate(s.start)}, {fmtTime(s.start)}{s.end !== s.start ? `–${fmtTime(s.end)}` : ""}</b>
+                    <small>
+                      {[s.saves ? t(`${s.saves} ${s.saves === 1 ? "salvataggio" : "salvataggi"}`, `${s.saves} ${s.saves === 1 ? "save" : "saves"}`) : null, s.published ? t("pubblicato", "published") : null].filter(Boolean).join(" · ")}
+                    </small>
+                    {s.sections.length > 0 && <span className="adm-sess-tags">{s.sections.map((x) => <em key={x}>{x}</em>)}</span>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
 
           <section className="adm-section">
             <h3>{t("Pagamenti", "Payments")}</h3>

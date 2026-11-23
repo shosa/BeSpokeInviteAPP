@@ -141,6 +141,14 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   // Schede in alto nel pannello dei controlli, come nel riferimento: ciascuna apre una funzione del builder.
   const [tab, setTab] = useState<string>("dettagli");
   const [device, setDevice] = useState<Device>("mobile");
+  // Presenza per la console («In modifica ora»): all'apertura e ogni 30 secondi finché la scheda è visibile.
+  useEffect(() => {
+    const ping = () => { if (document.visibilityState === "visible") void fetch(`/api/invitations/${initial.id}/presence`, { method: "POST" }).catch(() => undefined); };
+    ping();
+    const id = setInterval(ping, 30_000);
+    document.addEventListener("visibilitychange", ping);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", ping); };
+  }, [initial.id]);
   // Telefono: si parte dai blocchi; l'anteprima è l'invito a tutto schermo con «indietro».
   const [mobileTab, setMobileTab] = useState<MobileTab>("blocchi");
   const [save, setSave] = useState<Save>("saved");

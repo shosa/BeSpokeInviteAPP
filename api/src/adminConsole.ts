@@ -23,7 +23,7 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
 
   app.get("/api/admin/overview", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
-    const [counts, stale, recent, past] = await Promise.all([
+    const [counts, stale, recent, past, editing, idle] = await Promise.all([
       pool.query(`SELECT
           (SELECT count(*)::int FROM orders o WHERE ${PENDING}) AS pending,
           (SELECT count(*)::int FROM invitations WHERE status = 'paid' AND edit_count >= 1) AS live,
@@ -45,10 +45,20 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
                   (SELECT 'rsvp', r.created_at, i.config->'event'->>'title', NULL, i.user_id, i.id::text FROM rsvps r JOIN invitations i ON i.id = r.invitation_id ORDER BY r.created_at DESC LIMIT 8)
                   UNION ALL
                   (SELECT 'invitation', i.created_at, i.config->'event'->>'title', u.name, u.id, i.id::text FROM invitations i JOIN users u ON u.id = i.user_id ORDER BY i.created_at DESC LIMIT 8)
+                  UNION ALL
+                  (SELECT 'publish', e.created_at, i.config->'event'->>'title', u.name, u.id, i.id::text FROM invitation_edits e JOIN invitations i ON i.id = e.invitation_id LEFT JOIN users u ON u.id = e.user_id WHERE e.kind = 'publish' ORDER BY e.created_at DESC LIMIT 8)
                   ORDER BY at DESC LIMIT 12`),
       pool.query(`SELECT count(*)::int AS n FROM invitations
                   WHERE edit_count >= 1 AND (config->'event'->>'eventDate') ~ '^\\d{4}-\\d{2}-\\d{2}$'
                     AND (config->'event'->>'eventDate')::date < current_date - 7`),
+      // Adesso nell'editor: inviti con l'editor aperto nell'ultimo minuto e mezzo.
+      pool.query(`SELECT i.id, i.config->'event'->>'title' AS title, u.id AS user_id, u.name, u.email, i.editor_seen_at,
+                         (SELECT min(e.created_at) FROM invitation_edits e WHERE e.invitation_id = i.id AND e.created_at > now() - interval '3 hours') AS since
+                  FROM invitations i JOIN users u ON u.id = i.user_id
+                  WHERE i.editor_seen_at > now() - interval '90 seconds' ORDER BY i.editor_seen_at DESC LIMIT 12`),
+      // Attivati ma mai pubblicati, fermi da più di 7 giorni: da ricontattare.
+      pool.query(`SELECT count(*)::int AS n FROM invitations
+                  WHERE status = 'paid' AND edit_count = 0 AND COALESCE(last_edit_at, created_at) < now() - interval '7 days'`),
     ]);
     const themes = await deps.enabledThemeIds();
     const mail = getLastMailResult();
@@ -59,7 +69,8 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     const off = themes.filter((t) => !t.enabled);
     if (off.length) todo.push({ kind: "themes-off", count: off.length });
     if (past.rows[0].n > 0) todo.push({ kind: "past-events", count: past.rows[0].n });
-    return { counts: counts.rows[0], stale: stale.rows, todo, mail, themesOff: off.map((t) => t.name), recent: recent.rows };
+    if (idle.rows[0].n > 0) todo.push({ kind: "idle-unpublished", count: idle.rows[0].n });
+    return { counts: counts.rows[0], stale: stale.rows, todo, mail, themesOff: off.map((t) => t.name), recent: recent.rows, editing: editing.rows };
   });
 
   // Scheda cliente: inviti, planner, acquisti da attivare e storia degli ordini (senza importi).
