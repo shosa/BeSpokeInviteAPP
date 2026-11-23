@@ -683,7 +683,7 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .fold-btn { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
 .fold-title { font: 400 20px/1.2 var(--font-display), Georgia, serif; flex: none; max-width: 70%; }
 .fold-sum { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-soft); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fold-chev { flex: none; color: var(--brass); transition: transform 0.2s ease; }
+.fold-chev { flex: none; margin-left: auto; color: var(--brass); transition: transform 0.2s ease; }
 .fold.is-open .fold-chev { transform: rotate(180deg); }
 .fold.is-open > .fold-body { margin-top: 14px; display: flex; flex-direction: column; gap: 14px; }
 .fold.is-danger .fold-title { color: #9b3b2f; }
