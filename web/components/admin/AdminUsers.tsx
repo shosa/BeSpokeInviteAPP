@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fold } from "./Fold";
 import { toast } from "sonner";
 import { ArrowLeft, BookOpen, Mail, Send, Ticket, Trash2 } from "lucide-react";
 import { fmtDate } from "./format";
@@ -179,8 +180,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
       </div>
 
       <div className="cu-two">
-        <section className="ac-card cu-grant" aria-label={t("Assegna un acquisto", "Assign a purchase")}>
-          <h3>{t("Assegna un acquisto", "Assign a purchase")}</h3>
+        <Fold className="ac-card cu-grant" title={t("Assegna un acquisto", "Assign a purchase")}>
           <p className="hint">{t("Compare nella sua area come «da attivare», come un acquisto dal negozio. Non entra negli ordini di Shopify.", "It appears in their account as «to activate», like a shop purchase. It doesn't go into Shopify orders.")}</p>
           <div className="cu-seg" role="radiogroup" aria-label={t("Prodotto", "Product")}>
             {([["invitation", t("Invito", "Invitation"), t("tutti i template + planner", "all templates + planner")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")], ["bundle", t("Pacchetto", "Bundle"), t("invito + planner", "invitation + planner")]] as const).map(([v, label, hint]) => (
@@ -193,10 +193,9 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
           </div>
           <label className="cu-check"><input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} />{t("Manda l'email con il link per attivarlo", "Send the email with the link to activate it")}</label>
           <button type="button" className="btn solid" disabled={busy} onClick={grant}>{t("Assegna", "Assign")}</button>
-        </section>
+        </Fold>
 
-        <section className="ac-card cu-history" aria-label={t("Storia degli ordini", "Order history")}>
-          <h3>{t("Ordini", "Orders")}</h3>
+        <Fold className="ac-card cu-history" title={t("Ordini", "Orders")} summary={String(d.orders.length)}>
           {d.orders.length === 0 ? <p className="hint">{t("Nessun ordine.", "No orders.")}</p> : (
             <ul>
               {d.orders.map((o) => (
@@ -208,7 +207,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
               ))}
             </ul>
           )}
-        </section>
+        </Fold>
       </div>
     </div>
   );

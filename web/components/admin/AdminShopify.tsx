@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Fold } from "./Fold";
 import { toast } from "sonner";
 import { Check, Copy, Info, Loader2 } from "lucide-react";
 import { useT } from "@/lib/lang";
@@ -97,11 +98,9 @@ export function AdminShopify() {
         <button type="button" className="btn outline small" onClick={runTest} disabled={testing}>{testing ? <Loader2 size={14} className="as-spin" aria-hidden="true" /> : null}{t("Verifica", "Test")}</button>
       </section>
 
-      <form className="ac-card sh-form" onSubmit={save}>
-        <div className="sh-head">
-          <h3>{t("Negozio e prodotti", "Shop and products")}</h3>
-          <span className="hint">{t("ID = il numero nell'indirizzo della pagina in Shopify", "ID = the number in the page address in Shopify")}</span>
-        </div>
+      <Fold className="ac-card" title={t("Negozio e prodotti", "Shop and products")} summary={draft.storeDomain || t("da configurare", "to set up")}>
+      <form className="sh-form" onSubmit={save}>
+        <p className="hint" style={{ margin: 0 }}>{t("ID = il numero nell'indirizzo della pagina in Shopify", "ID = the number in the page address in Shopify")}</p>
         <label className="sh-row">
           <span className="sh-label">{t("Dominio", "Domain")}</span>
           <input value={draft.storeDomain} onChange={set("storeDomain")} placeholder="nome-negozio.myshopify.com" maxLength={120} />
@@ -125,15 +124,14 @@ export function AdminShopify() {
           {dirty && <button type="button" className="link" onClick={() => { setDraft(saved); setError(null); }}>{t("Annulla", "Cancel")}</button>}
         </div>
       </form>
+      </Fold>
 
       <div className="sh-two">
-        <section className="ac-card sh-hook">
-          <h3>Webhook</h3>
+        <Fold className="ac-card sh-hook" title="Webhook">
           <p className="hint">{t("In Shopify: Impostazioni › Notifiche › Webhook › evento «Ordine pagato», formato JSON.", "In Shopify: Settings › Notifications › Webhooks › event «Order payment», JSON format.")}</p>
           <CopyField value={data.webhookUrl} />
-        </section>
-        <section className="ac-card sh-secrets">
-          <h3>{t("Segreti", "Secrets")}</h3>
+        </Fold>
+        <Fold className="ac-card sh-secrets" title={t("Segreti", "Secrets")} summary={secrets.every((i) => i.source !== "assente") ? t("tutti impostati", "all set") : t("mancano", "missing")}>
           <p className="hint">{t("Nel file .env del server, mai qui.", "In the server's .env file, never here.")}</p>
           <ul>
             {secrets.map((i) => (
@@ -144,7 +142,7 @@ export function AdminShopify() {
               </li>
             ))}
           </ul>
-        </section>
+        </Fold>
       </div>
     </div>
   );

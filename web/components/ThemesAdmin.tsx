@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Catalog, TemplateCategory } from "@inviteme/shared";
 import { LibraryIcon, PlannerIconPicker } from "./planner/PlannerIcon";
+import { Fold } from "./admin/Fold";
 import { Switch } from "./ui/Switch";
 import { useLang } from "@/lib/lang";
 import { themeCopy } from "@/lib/catalogCopy";
@@ -108,9 +109,9 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
 
   return (
     <>
+      <Fold className="tpl-upload-fold" title={t("Carica un template", "Upload a template")} summary="ZIP">
       <section className="tpl-upload">
         <div>
-          <h3>{t("Carica un template", "Upload a template")}</h3>
           <p className="hint">{t("Uno ZIP con la cartella del tema: theme.json, theme.css, assets/ e, se servono, blocks/. Il tema viene controllato prima di essere installato in themes/. Formato: docs/TEMI.md, «Esportare lo stile per la console».", "A ZIP with the style folder: theme.json, theme.css, assets/ and, if needed, blocks/. The style is checked before being installed in themes/. Format: docs/TEMI.md, «Esportare lo stile per la console».")}</p>
         </div>
         <label className={`btn solid${busy ? " is-busy" : ""}`} aria-disabled={busy}>
@@ -125,6 +126,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
           </div>
         )}
       </section>
+      </Fold>
 
       <CategoryManager categories={catalog.categories} counts={Object.fromEntries(catalog.categories.map((c) => [c.id, catalog.themes.filter((x) => x.categories.includes(c.id)).length]))} onSaved={onChanged} />
 
@@ -157,6 +159,8 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
               <small className="hint">{lang === "en" ? m.name : m.nameEn} · {(() => { const n = usage[m.id] ?? 0; return n === 0 ? t("mai scelto", "never chosen") : t(`${n} ${n === 1 ? "invito" : "inviti"}`, `${n} ${n === 1 ? "invitation" : "invitations"}`); })()}</small>
               <div className="tpl-tags"><span>IT · EN</span>{m.envelope && <span>{t("Busta-video", "Video envelope")}</span>}{m.backgroundVideo && <span>{t("Video di sfondo", "Background video")}</span>}{!th.enabled && <span className="is-off">{t("Disattivato", "Disabled")}</span>}</div>
               {/* Categorie del template: un tocco aggiunge o toglie. */}
+              <details className="tpl-cats-wrap">
+              <summary>{t("Categorie", "Categories")}: {th.categories.length ? catalog.categories.filter((c) => th.categories.includes(c.id)).map((c) => (lang === "en" ? c.nameEn : c.name)).join(", ") : t("nessuna", "none")}</summary>
               <div className="tpl-cats" role="group" aria-label={t("Categorie", "Categories")}>
                 {catalog.categories.map((c) => {
                   const on = th.categories.includes(c.id);
@@ -167,6 +171,7 @@ export function ThemesAdmin({ catalog, onChanged }: { catalog: Catalog; onChange
                   );
                 })}
               </div>
+              </details>
               <a className="btn outline small" href={`/api/themes/${m.id}/anteprima`} target="_blank" rel="noreferrer">{t("Apri anteprima", "Open preview")}</a>
               <Switch checked={th.enabled} onChange={(v) => setEnabled(m.id, v)} label={th.enabled ? t("Attivo", "Active") : t("Disattivato", "Disabled")} />
               {/* Interruttore fisso «Premium»: acceso = escluso dall'invito base. */}

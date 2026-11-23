@@ -677,3 +677,51 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .ov-live-tag { font-size: 12px; font-weight: 600; color: #2f5a2a; white-space: nowrap; }
 .adm-open { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--brass); text-decoration: none; }
 .adm-open:hover { text-decoration: underline; }
+
+/* Sezioni espandibili (Fold.tsx): titolo, riassunto e freccia; al telefono partono chiuse. */
+.fold-h { margin: 0; font: inherit; }
+.fold-btn { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.fold-title { font: 400 20px/1.2 var(--font-display), Georgia, serif; flex: none; max-width: 70%; }
+.fold-sum { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-soft); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fold-chev { flex: none; color: var(--brass); transition: transform 0.2s ease; }
+.fold.is-open .fold-chev { transform: rotate(180deg); }
+.fold.is-open > .fold-body { margin-top: 14px; display: flex; flex-direction: column; gap: 14px; }
+.fold.is-danger .fold-title { color: #9b3b2f; }
+.adm-section.fold .fold-title { font: 600 13px var(--font-text), sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.adm-section.fold.is-danger .fold-title { color: #9b3b2f; }
+.tpl-upload-fold { margin-bottom: 8px; }
+.tpl-upload-fold > .fold-h .fold-btn { padding: 4px 2px; }
+.tpl-cats-wrap { width: 100%; }
+.tpl-cats-wrap > summary { list-style: none; cursor: pointer; font-size: 12.5px; color: var(--ink-soft); text-align: center; padding: 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpl-cats-wrap > summary::-webkit-details-marker { display: none; }
+.tpl-cats-wrap > summary::after { content: " ▾"; color: var(--brass); }
+.tpl-cats-wrap[open] > summary::after { content: " ▴"; }
+.tpl-cats-wrap[open] .tpl-cats { margin-top: 6px; }
+
+/* Telefono: meno colonne di testo schiacciate, schede più compatte. */
+@media (max-width: 760px) {
+  .ac-card .fold-btn, .apro-card .fold-btn { min-height: 40px; }
+  .ov-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ov-stat { padding: 14px !important; gap: 4px !important; border-radius: 18px !important; }
+  .ov-stat span { font-size: 10.5px; letter-spacing: 0.1em; }
+  .ov-stat strong { font-size: 30px; }
+  .ov-stat small { font-size: 11.5px; line-height: 1.3; }
+  .adm-facts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px 14px; }
+  .adm-facts dd { font-size: 14px; }
+  .tpl-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 22px 12px !important; }
+  .tpl-admin-card { gap: 8px !important; min-width: 0; }
+  .tpl-admin-card .tpl-phone { width: 100%; max-width: 150px; height: auto; aspect-ratio: 252 / 520; padding: 5px; border-radius: 26px; }
+  .tpl-admin-card .tpl-screen { border-radius: 21px; }
+  .tpl-admin-card h3 { font-size: 16px; text-align: center; overflow-wrap: anywhere; }
+  .tpl-admin-card > small.hint { font-size: 11.5px; text-align: center; }
+  .tpl-admin-card .tpl-tags { display: none; }
+  .tpl-admin-card .btn.small { min-height: 36px; padding: 0 12px; font-size: 10.5px; }
+  .adm-media-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px; }
+  .adm-media-meta { padding: 8px; font-size: 11px; gap: 4px; }
+  .adm-media-meta code { font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .adm-media-del { min-height: 32px !important; padding: 0 8px !important; font-size: 10px !important; }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px; }
+  .adm-kpi { padding: 12px !important; }
+  .adm-kpi b { font-size: 24px !important; }
+  .adm-kpi small { font-size: 10.5px; }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Fold } from "./Fold";
 import { toast } from "sonner";
 import { Switch } from "../ui/Switch";
 import { useLang, useT } from "@/lib/lang";
@@ -105,8 +106,8 @@ export function AdminMail() {
       )}
 
       <div className="ac-two">
-        <form className="ac-card ac-form" onSubmit={save}>
-          <span className="ac-kicker">{t("Mittente", "Sender")}</span>
+        <Fold className="ac-card" title={t("Mittente", "Sender")} summary={draft.fromEmail || t("mittente di prova", "test sender")}>
+        <form className="ac-form" onSubmit={save}>
           <label className="ac-field">
             <span>{t("Nome del mittente", "Sender name")}</span>
             <input value={draft.fromName} onChange={(e) => set({ fromName: e.target.value })} maxLength={80} />
@@ -128,9 +129,10 @@ export function AdminMail() {
             {dirty && <button type="button" className="link" onClick={() => { setDraft(data.settings); setError(null); }}>{t("Annulla", "Cancel")}</button>}
           </div>
         </form>
+        </Fold>
 
-        <section className="ac-card ac-form">
-          <span className="ac-kicker">{t("Cosa si invia", "What gets sent")}</span>
+        <Fold className="ac-card" title={t("Cosa si invia", "What gets sent")} summary={[draft.notifyRsvp ? t("avvisi risposte", "reply notices") : null, draft.orderConfirm ? t("conferma pagamento", "payment confirmation") : null].filter(Boolean).join(" · ") || t("nessun avviso", "no notices")}>
+        <div className="ac-form">
           <label className="ac-field">
             <span>{t("Colore del marchio", "Brand colour")}</span>
             <span className="ac-color">
@@ -142,24 +144,25 @@ export function AdminMail() {
           <Toggle label={t("Avviso al cliente per ogni risposta", "Notify the customer of every reply")} hint={t("Il cliente riceve un'email quando un ospite risponde.", "The customer gets an email when a guest replies.")} checked={draft.notifyRsvp} onChange={(v) => set({ notifyRsvp: v })} />
           <Toggle label={t("Conferma al cliente dopo il pagamento", "Confirm to the customer after payment")} hint={t("Mail di ringraziamento con il link dell'invito attivo.", "Thank-you email with the live invitation link.")} checked={draft.orderConfirm} onChange={(v) => set({ orderConfirm: v })} />
           <p className="hint">{t("Le modifiche agli interruttori valgono dopo il salvataggio.", "Switch changes take effect after saving.")}</p>
-        </section>
+        </div>
+        </Fold>
       </div>
 
-      <section className="ac-card ac-test-send">
+      <Fold className="ac-card" title={t("Email di prova", "Test email")}>
+      <div className="ac-test-send">
         <div>
-          <span className="ac-kicker">{t("Prova", "Test")}</span>
           <p className="hint">{t("Manda una email di prova per verificare mittente e configurazione.", "Send a test email to check the sender and setup.")}</p>
         </div>
         <div className="ac-search-row">
           <input type="email" value={to} onChange={(e) => setTo(e.target.value)} placeholder={t("la-tua@email.it", "you@email.com")} aria-label={t("Indirizzo per la prova", "Test address")} />
           <button type="button" className="btn solid small" disabled={testing || !to.includes("@")} onClick={sendTest}>{testing ? t("Invio…", "Sending…") : t("Invia prova", "Send test")}</button>
         </div>
-      </section>
+      </div>
+      </Fold>
 
       <TemplateEditor templates={data.templates} accent={draft.accent} onSaved={load} />
 
-      <section className="ac-card">
-        <span className="ac-kicker">{t("Chiave del servizio", "Service key")}</span>
+      <Fold className="ac-card" title={t("Chiave del servizio", "Service key")} summary={data.keyPresent ? t("impostata", "set") : t("mancante", "missing")}>
         <p className="hint">{t("La chiave Resend è un segreto: si imposta nel file .env del server, mai nella console.", "The Resend key is a secret: it's set in the server's .env file, never in the console.")}</p>
         <ul className="ac-checks">
           <li className={data.keyPresent ? "is-ok" : "is-missing"}>
@@ -169,7 +172,7 @@ export function AdminMail() {
             <span className="ac-tag">{data.keyPresent ? t("dal file .env", "from the .env file") : t("da impostare", "to set")}</span>
           </li>
         </ul>
-      </section>
+      </Fold>
     </div>
   );
 }
@@ -239,8 +242,7 @@ function TemplateEditor({ templates, accent, onSaved }: { templates: TemplateInf
   }
 
   return (
-    <section className="ac-card ac-tpl" aria-label={t("Testi delle email", "Email texts")}>
-      <span className="ac-kicker">{t("Testi delle email", "Email texts")}</span>
+    <Fold className="ac-card ac-tpl" title={t("Testi delle email", "Email texts")} summary={t(`${templates.length} email`, `${templates.length} emails`)}>
       <nav className="ac-segment" aria-label={t("Tipo di email", "Email type")}>
         {templates.map((x) => (
           <button key={x.kind} type="button" className={x.kind === kind ? "is-on" : ""} onClick={() => setKind(x.kind)}>{TEMPLATE_LABEL[uiLang][x.kind] ?? x.label}</button>
@@ -277,6 +279,6 @@ function TemplateEditor({ templates, accent, onSaved }: { templates: TemplateInf
           <small className="hint">{t(`Dati di esempio. Il colore del marchio è ${accent}.`, `Sample data. The brand colour is ${accent}.`)}</small>
         </div>
       </div>
-    </section>
+    </Fold>
   );
 }

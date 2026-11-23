@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Fold } from "./Fold";
 import { toast } from "sonner";
 import { ExternalLink, Globe, PenLine, Search, Trash2, X } from "lucide-react";
 import { useT } from "@/lib/lang";
@@ -218,8 +219,7 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <button type="button" className="btn outline small" disabled={busy} onClick={() => setCalls(d.assistant_limit)}>{t("Esaurisci richieste AI", "Use up AI requests")}</button>
           </div>
 
-          <section className="adm-section">
-            <h3>{t("Cronologia delle modifiche", "Edit history")}</h3>
+          <Fold className="adm-section" title={t("Cronologia delle modifiche", "Edit history")} summary={d.sessions.length ? t(`${d.sessions.length} sessioni`, `${d.sessions.length} sessions`) : "—"} mobileOpen>
             {d.sessions.length === 0 && <p className="hint">{t("Nessuna modifica registrata (la cronologia parte dal 23 novembre 2026).", "No edits recorded (history starts on 23 November 2026).")}</p>}
             <ol className="adm-sessions">
               {d.sessions.map((s, i) => (
@@ -235,26 +235,23 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
                 </li>
               ))}
             </ol>
-          </section>
+          </Fold>
 
-          <section className="adm-section">
-            <h3>{t("Pagamenti", "Payments")}</h3>
+          <Fold className="adm-section" title={t("Pagamenti", "Payments")} summary={String(d.orders.length)}>
             {d.orders.length === 0 && <p className="hint">{t("Nessun ordine collegato.", "No linked orders.")}</p>}
             {d.orders.map((o) => (
               <p key={o.id} className="adm-line"><span>{fmtDate(o.created_at)}</span><b>{fmtEur(o.amount_cents, o.currency)}</b><small>{o.source} · {o.status}</small></p>
             ))}
-          </section>
+          </Fold>
 
-          <section className="adm-section">
-            <h3>{t("Risposte", "Replies")} ({d.rsvps.length})</h3>
+          <Fold className="adm-section" title={t("Risposte", "Replies")} summary={String(d.rsvps.length)}>
             {d.rsvps.length === 0 && <p className="hint">{t("Nessuna risposta.", "No replies.")}</p>}
             {d.rsvps.slice(0, 50).map((r) => (
               <p key={r.id} className="adm-line"><span>{fmtDate(r.created_at)}</span><small>{Object.entries(r.answers).map(([k, v]) => `${k}: ${String(v)}`).join(" · ")}</small></p>
             ))}
-          </section>
+          </Fold>
 
-          <section className="adm-section adm-danger">
-            <h3>{t("Elimina invito", "Delete invitation")}</h3>
+          <Fold className="adm-section adm-danger" title={t("Elimina invito", "Delete invitation")} tone="danger">
             <p className="hint">{t("Rimuove l'invito, le risposte e le foto che nessun altro invito usa. Gli ordini restano nel registro. Non si annulla.", "Removes the invitation, the replies and photos no other invitation uses. Orders stay in the log. This can't be undone.")}</p>
             <label className="adm-confirm">
               {t("Scrivi", "Type")} <code>{d.slug}</code> {t("per confermare", "to confirm")}
@@ -263,7 +260,7 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <button type="button" className="btn adm-btn-danger small" disabled={busy || confirm !== d.slug} onClick={remove}>
               <Trash2 size={15} aria-hidden="true" /> {t("Elimina definitivamente", "Delete permanently")}
             </button>
-          </section>
+          </Fold>
         </div>
       )}
     </aside>

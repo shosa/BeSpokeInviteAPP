@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Fold } from "./Fold";
 import { toast } from "sonner";
 import { useLang } from "@/lib/lang";
 import { Switch } from "../ui/Switch";
@@ -137,8 +138,8 @@ export function AdminPro() {
               <button type="button" className="btn outline small" onClick={accessLink} style={{ alignSelf: "flex-start" }}>{t("Invia link di accesso", "Send access link")}</button>
             </section>
 
-            <form className="apro-card" onSubmit={savePlan}>
-              <span className="apro-k">{t("Piano mensile", "Monthly plan")}</span>
+            <Fold className="apro-card" title={t("Piano mensile", "Monthly plan")} summary={d.plan.invitations || d.plan.planners ? t(`${d.plan.invitations} inviti + ${d.plan.planners} planner`, `${d.plan.invitations} inv. + ${d.plan.planners} planners`) : t("nessuno", "none")}>
+            <form className="apro-form" onSubmit={savePlan}>
               <div className="apro-fields">
                 <label className="apro-field">{t("Inviti al mese", "Invitations per month")}<input inputMode="numeric" value={plan.invitations} onChange={(e) => setPlan({ ...plan, invitations: e.target.value.replace(/\D/g, "") })} /></label>
                 <label className="apro-field">{t("Planner al mese", "Planners per month")}<input inputMode="numeric" value={plan.planners} onChange={(e) => setPlan({ ...plan, planners: e.target.value.replace(/\D/g, "") })} /></label>
@@ -153,9 +154,9 @@ export function AdminPro() {
               </p>
               <button type="submit" className="btn solid small" disabled={busy} style={{ alignSelf: "flex-start" }}>{t("Salva piano", "Save plan")}</button>
             </form>
+            </Fold>
 
-            <section className="apro-card">
-              <span className="apro-k">{t("Movimenti dei crediti", "Credit activity")}</span>
+            <Fold className="apro-card" title={t("Movimenti dei crediti", "Credit activity")} summary={String(d.ledger.length)}>
               <ol className="apro-log">
                 {d.ledger.map((m, i) => (
                   <li key={i}>
@@ -168,7 +169,7 @@ export function AdminPro() {
                 ))}
                 {!d.ledger.length && <li><span className="hint">{t("Ancora nessun movimento.", "No activity yet.")}</span></li>}
               </ol>
-            </section>
+            </Fold>
           </div>
         )}
       </div>
