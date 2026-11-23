@@ -1777,3 +1777,5 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; max-width: 100%; }
 @keyframes cr-letter { 0%, 25%, 85%, 100% { transform: translateY(0); } 45%, 65% { transform: translateY(-34px); } }
 @keyframes cr-seal { 0%, 15%, 85%, 100% { opacity: 1; transform: scale(1); } 30%, 70% { opacity: 0; transform: scale(0.6); } }
 @media (prefers-reduced-motion: reduce) { .cr-backdrop, .cr-card, .cr-bar span, .cr-steps li.is-on::before, .cr-env-flap, .cr-env-letter, .cr-env-seal { animation: none; } }
+/* Pagina di gestione: «Condividi» in evidenza tra le azioni rapide. */
+.pl-chip.is-share { background: var(--ink, #2a2119); border-color: var(--ink, #2a2119); color: #fff; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }

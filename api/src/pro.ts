@@ -48,6 +48,14 @@ function nextRenewal(s: Row): string | null {
   return d.toISOString().slice(0, 10);
 }
 
+// Ultima scadenza di rinnovo già passata (oggi compreso) per quel giorno del mese.
+function lastDue(day: number): string {
+  const now = new Date();
+  const thisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day));
+  const d = now >= thisMonth ? thisMonth : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, day));
+  return d.toISOString().slice(0, 10);
+}
+
 // Rinnovo mensile: al giorno di rinnovo i crediti del piano si aggiungono (rollover) o sostituiscono quelli rimasti.
 export async function runProRenewals(): Promise<number> {
   const { rows } = await pool.query(`SELECT ${STUDIO_COLS} FROM pro_studios WHERE active AND (monthly_inv > 0 OR monthly_pl > 0)`);
@@ -410,13 +418,28 @@ export function registerProRoutes(app: FastifyInstance, deps: Deps) {
     const monthlyPl = plan.planners !== undefined ? int(plan.planners, 0, 500) : s.monthly_pl;
     const renewDay = plan.renewDay !== undefined ? int(plan.renewDay, 1, 28) : s.renew_day;
     const rollover = typeof plan.rollover === "boolean" ? plan.rollover : s.rollover;
-    // Cambiando il giorno o attivando un piano, il rinnovo di questo mese riparte da capo.
-    const restart = renewDay !== s.renew_day || (!s.monthly_inv && !s.monthly_pl && (monthlyInv || monthlyPl));
-    await pool.query(
-      `UPDATE pro_studios SET name = $2, active = $3, monthly_inv = $4, monthly_pl = $5, renew_day = $6, rollover = $7${restart ? ", last_renewal = NULL" : ""} WHERE user_id = $1`,
-      [s.user_id, name, typeof b.active === "boolean" ? b.active : s.active, monthlyInv, monthlyPl, renewDay, rollover],
-    );
-    await runProRenewals();
+    // Attivando un piano i crediti del mese si aggiungono subito a quelli che lo studio ha già (senza toccare quelli
+    // assegnati a mano); cambiando il giorno no. In entrambi i casi il prossimo rinnovo è la scadenza successiva.
+    const activated = !s.monthly_inv && !s.monthly_pl && (monthlyInv > 0 || monthlyPl > 0);
+    const restart = activated || renewDay !== s.renew_day;
+    const db = await pool.connect();
+    try {
+      await db.query("BEGIN");
+      await db.query(
+        `UPDATE pro_studios SET name = $2, active = $3, monthly_inv = $4, monthly_pl = $5, renew_day = $6, rollover = $7${restart ? ", last_renewal = $8" : ""} WHERE user_id = $1`,
+        [s.user_id, name, typeof b.active === "boolean" ? b.active : s.active, monthlyInv, monthlyPl, renewDay, rollover, ...(restart ? [lastDue(renewDay)] : [])],
+      );
+      if (activated) {
+        await db.query("UPDATE pro_studios SET inv_credits = inv_credits + $2, pl_credits = pl_credits + $3 WHERE user_id = $1", [s.user_id, monthlyInv, monthlyPl]);
+        await db.query("INSERT INTO pro_ledger (studio_id, delta_inv, delta_pl, reason, by_email) VALUES ($1, $2, $3, $4, $5)", [s.user_id, monthlyInv, monthlyPl, "Attivazione del piano mensile", (await currentUser(req))?.email ?? null]);
+      }
+      await db.query("COMMIT");
+    } catch (e) {
+      await db.query("ROLLBACK").catch(() => undefined);
+      throw e;
+    } finally {
+      db.release();
+    }
     return { ok: true };
   });
 

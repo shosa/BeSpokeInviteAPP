@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import type { Catalog, InviteConfig, RsvpQuestion } from "@inviteme/shared";
 import { BarChart3, CalendarDays, Check, Clock, Eye, Pencil, Share2, StickyNote, Users } from "lucide-react";
 import { CopyLink } from "../CopyLink";
+import { ShareLinkButton } from "../account/ShareLinkButton";
 import { RsvpStats, RsvpTable, rsvpCopy } from "./RsvpInsights";
 import { ui, type Lang } from "@/lib/ui";
 
@@ -63,6 +64,8 @@ export function PlannerPanel({ data, lang = "it", plannerId = null }: { data: Pl
   return (
     <div className="pl">
       <div className="pl-quick" role="group" aria-label={T.quick}>
+        {/* Condividi: il nostro pannello con il QR code dell'invito, poi le app del sistema. */}
+        <ShareLinkButton className="pl-chip is-share" path={shareHref} title={String(manage.config.event.title ?? "")} label={lang === "en" ? "Share" : "Condividi"} icon={<Share2 size={16} aria-hidden="true" />} />
         <a className="pl-chip" href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer"><Share2 size={16} aria-hidden="true" />{T.whatsapp}</a>
         <CopyLink path={shareHref} lang={lang} />
         <a className="pl-chip" href={shareHref} target="_blank" rel="noreferrer"><Eye size={16} aria-hidden="true" />{T.view}</a>
