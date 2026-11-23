@@ -393,7 +393,7 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
       <section className="y-grp">
         <h2 className="y-gh">{t("Aspetto", "Look")}</h2>
         <div className="y-gl">
-          <button type="button" className="y-row" onClick={() => ctx.sheet({ kind: "photo" })}><span className="y-r-m"><span className="y-r-t">{t("Foto di copertina", "Cover photo")}</span><span className="y-r-s">{data.bannerImage ? t("Foto tua", "Your photo") : t("Nessuna foto", "No photo")}</span></span><IcChevron /></button>
+          <button type="button" data-edit className="y-row" onClick={() => ctx.sheet({ kind: "photo" })}><span className="y-r-m"><span className="y-r-t">{t("Foto di copertina", "Cover photo")}</span><span className="y-r-s">{data.bannerImage ? t("Foto tua", "Your photo") : t("Nessuna foto", "No photo")}</span></span><IcChevron /></button>
           <a className="y-row" href={`/lingua/${en ? "it" : "en"}`}><span className="y-r-m"><span className="y-r-t">{t("Lingua", "Language")}</span><span className="y-r-s">{en ? "English" : "Italiano"}</span></span><span className="y-r-v">{en ? "Italiano" : "English"}</span><IcChevron /></a>
         </div>
       </section>
@@ -427,7 +427,7 @@ export function SettingsView({ ctx }: { ctx: Ctx }) {
       </section>
 
       <div className="y-gl">
-        <a className="y-row" href={ctx.accountHref}><span className="y-r-m"><span className="y-r-t">{t("La mia area", "My account")}</span></span><IcChevron /></a>
+        <a className="y-row" href={ctx.accountHref}><span className="y-r-m"><span className="y-r-t">{ctx.readOnly ? t("Torna alla console", "Back to the console") : t("La mia area", "My account")}</span></span><IcChevron /></a>
       </div>
     </div>
   );

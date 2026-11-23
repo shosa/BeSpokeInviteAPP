@@ -571,7 +571,7 @@ button.y-card { font: inherit; }
 
 /* Sola lettura (anteprima admin): niente pulsanti di aggiunta, modifica o eliminazione; spunte e foto non cliccabili.
    Restano la navigazione, le schede, i filtri e l'apertura delle sezioni. */
-.yp.is-readonly .y-content :is(.y-btn, .btn, .y-tbtn, .pp-link, .bg-icon, .y-hero-set, .y-ph-acts, .y-wx-acts, .bg-add, .bg-form-actions, .bg-quote-actions, .seat-add, .fo-editor-actions, .fo-urgent, [data-edit], form button[type="submit"]) { display: none !important; }
+.yp.is-readonly .y-content :is(.y-btn, .btn, .y-tbtn, .pp-link, .bg-icon, .y-hero-set, .y-ph-acts, .y-wx-acts, .bg-add, .bg-form-actions, .bg-quote-actions, .seat-add, .fo-editor-actions, .fo-urgent, .pp-share, [data-edit], form button[type="submit"]) { display: none !important; }
 .yp.is-readonly .y-content :is(.y-ck, .pi-grid, .seat-chip, .seat-seat, .y-pill[data-edit]) { pointer-events: none; }
 .yp.is-readonly .y-content :is(input, select, textarea):disabled { opacity: 1; color: var(--label); -webkit-text-fill-color: var(--label); cursor: default; }
 .yp.is-readonly .y-home-head-actions .y-search-field { display: flex !important; }
