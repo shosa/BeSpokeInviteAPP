@@ -19,6 +19,7 @@ type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-exp
 type Deps = {
   requireUser: (req: FastifyRequest, reply: FastifyReply) => Promise<SessionUser | null>;
   loadCatalog: () => Promise<Catalog>;
+  requireAdmin: (req: FastifyRequest, reply: FastifyReply) => Promise<boolean>;
 };
 
 // bannerImage e archImage: foto scelte dal cliente per la testata del planner (sfondo e arco). Solo file caricati qui.
@@ -94,6 +95,57 @@ async function quoteBelongs(quoteId: unknown, plannerId: string): Promise<boolea
 }
 
 export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
+  // Tutti i dati del planner per la pagina (cliente e anteprima admin).
+  async function plannerPayload(p: Row) {
+    const catalog = await deps.loadCatalog();
+    const [guests, budget, tasks, vendors, tables, quotes, linkable] = await Promise.all([
+      pool.query("SELECT id, name, group_name, party_size, response, table_id FROM planner_guests WHERE planner_id = $1 ORDER BY group_name, name", [p.id]),
+      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid, quote_id FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
+      pool.query("SELECT id, title, done, days_before FROM planner_tasks WHERE planner_id = $1 ORDER BY days_before DESC, created_at", [p.id]),
+      pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE planner_id = $1 ORDER BY created_at", [p.id]),
+      pool.query("SELECT id, name, seats FROM planner_tables WHERE planner_id = $1 ORDER BY created_at", [p.id]),
+      pool.query("SELECT id, category, name, amount_cents, rating, notes, booked, signed, arrival, contact, tip_cents, envelope FROM planner_quotes WHERE planner_id = $1 ORDER BY category, amount_cents", [p.id]),
+      // Inviti del cliente che si possono collegare: quelli senza un altro planner.
+      pool.query(
+        "SELECT i.id, i.config->'event'->>'title' AS title FROM invitations i WHERE i.user_id = $1 AND i.status = 'paid' AND NOT EXISTS (SELECT 1 FROM planners x WHERE x.invitation_id = i.id AND x.id <> $2) ORDER BY i.created_at DESC",
+        [p.user_id, p.id],
+      ),
+    ]);
+    const invitation = await linkedInvitation(p.invitation_id, catalog);
+    const data = (p.data ?? {}) as PlannerData;
+    return {
+      id: p.id,
+      event: { title: p.title, eventDate: p.event_date ?? "", venue: p.venue, address: p.address, eventType: p.event_type },
+      invitation,
+      linkable: linkable.rows.map((r) => ({ id: r.id, title: r.title || "Invito senza titolo" })),
+      tables: tables.rows,
+      quotes: quotes.rows,
+      guests: guests.rows,
+      budget: budget.rows,
+      tasks: tasks.rows,
+      vendors: vendors.rows,
+      rsvpResponses: invitation?.rsvps ?? 0,
+      docs: data.docs ?? {},
+      notes: data.notes ?? "",
+      bannerImage: data.bannerImage ?? null,
+      archImage: data.archImage ?? null,
+      budgetCents: data.budgetCents ?? 0,
+      guestQuota: data.guestQuota ?? 0,
+      groupQuotas: data.groupQuotas ?? {},
+      icon: data.icon ?? null,
+    };
+  }
+
+  // Meteo del giorno dell'evento, dal luogo del planner.
+  async function weatherOf(p: Row) {
+    const date = p.event_date ?? "";
+    if (!ISO_DATE.test(date)) return { forecast: null, reason: "date" };
+    const place = await geocodeOne(p.address || p.venue || "");
+    if (!place) return { forecast: null, reason: "place" };
+    const forecast = await forecastFor(place.lat, place.lon, date);
+    return forecast ? { forecast, place: place.name } : { forecast: null, reason: "range", place: place.name };
+  }
+
   async function plannerOf(req: FastifyRequest, reply: FastifyReply): Promise<Row | null> {
     const user = await deps.requireUser(req, reply);
     if (!user) return null;
@@ -179,43 +231,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
   app.get<{ Params: { id: string } }>("/api/planners/:id/data", async (req, reply) => {
     const p = await plannerOf(req, reply);
     if (!p) return;
-    const catalog = await deps.loadCatalog();
-    const [guests, budget, tasks, vendors, tables, quotes, linkable] = await Promise.all([
-      pool.query("SELECT id, name, group_name, party_size, response, table_id FROM planner_guests WHERE planner_id = $1 ORDER BY group_name, name", [p.id]),
-      pool.query("SELECT id, category, label, amount_cents, to_char(due_date, 'YYYY-MM-DD') AS due_date, paid, quote_id FROM planner_budget_items WHERE planner_id = $1 ORDER BY due_date NULLS LAST, created_at", [p.id]),
-      pool.query("SELECT id, title, done, days_before FROM planner_tasks WHERE planner_id = $1 ORDER BY days_before DESC, created_at", [p.id]),
-      pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE planner_id = $1 ORDER BY created_at", [p.id]),
-      pool.query("SELECT id, name, seats FROM planner_tables WHERE planner_id = $1 ORDER BY created_at", [p.id]),
-      pool.query("SELECT id, category, name, amount_cents, rating, notes, booked, signed, arrival, contact, tip_cents, envelope FROM planner_quotes WHERE planner_id = $1 ORDER BY category, amount_cents", [p.id]),
-      // Inviti del cliente che si possono collegare: quelli senza un altro planner.
-      pool.query(
-        "SELECT i.id, i.config->'event'->>'title' AS title FROM invitations i WHERE i.user_id = $1 AND i.status = 'paid' AND NOT EXISTS (SELECT 1 FROM planners x WHERE x.invitation_id = i.id AND x.id <> $2) ORDER BY i.created_at DESC",
-        [p.user_id, p.id],
-      ),
-    ]);
-    const invitation = await linkedInvitation(p.invitation_id, catalog);
-    const data = (p.data ?? {}) as PlannerData;
-    return {
-      id: p.id,
-      event: { title: p.title, eventDate: p.event_date ?? "", venue: p.venue, address: p.address, eventType: p.event_type },
-      invitation,
-      linkable: linkable.rows.map((r) => ({ id: r.id, title: r.title || "Invito senza titolo" })),
-      tables: tables.rows,
-      quotes: quotes.rows,
-      guests: guests.rows,
-      budget: budget.rows,
-      tasks: tasks.rows,
-      vendors: vendors.rows,
-      rsvpResponses: invitation?.rsvps ?? 0,
-      docs: data.docs ?? {},
-      notes: data.notes ?? "",
-      bannerImage: data.bannerImage ?? null,
-      archImage: data.archImage ?? null,
-      budgetCents: data.budgetCents ?? 0,
-      guestQuota: data.guestQuota ?? 0,
-      groupQuotas: data.groupQuotas ?? {},
-      icon: data.icon ?? null,
-    };
+    return plannerPayload(p);
   });
 
   // Modifica dei dati del planner: evento (titolo, data, luogo) e dati dell'organizzatore. Ogni campo è facoltativo.
@@ -309,12 +325,30 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
   app.get<{ Params: { id: string } }>("/api/planners/:id/weather", async (req, reply) => {
     const p = await plannerOf(req, reply);
     if (!p) return;
-    const date = p.event_date ?? "";
-    if (!ISO_DATE.test(date)) return { forecast: null, reason: "date" };
-    const place = await geocodeOne(p.address || p.venue || "");
-    if (!place) return { forecast: null, reason: "place" };
-    const forecast = await forecastFor(place.lat, place.lon, date);
-    return forecast ? { forecast, place: place.name } : { forecast: null, reason: "range", place: place.name };
+    return weatherOf(p);
+  });
+
+  // Anteprima del planner per l'amministratore: stessi dati e meteo del cliente, in sola lettura (nessuna rotta di modifica).
+  async function adminPlanner(req: FastifyRequest, reply: FastifyReply): Promise<Row | null> {
+    if (!(await deps.requireAdmin(req, reply))) return null;
+    const id = (req.params as { id: string }).id;
+    if (!UUID.test(id)) { reply.code(404).send({ error: "Planner non trovato" }); return null; }
+    const { rows } = await pool.query(
+      "SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, created_at FROM planners WHERE id = $1",
+      [id],
+    );
+    if (!rows[0]) { reply.code(404).send({ error: "Planner non trovato" }); return null; }
+    return rows[0];
+  }
+  app.get<{ Params: { id: string } }>("/api/admin/planners/:id/data", async (req, reply) => {
+    const p = await adminPlanner(req, reply);
+    if (!p) return;
+    return plannerPayload(p);
+  });
+  app.get<{ Params: { id: string } }>("/api/admin/planners/:id/weather", async (req, reply) => {
+    const p = await adminPlanner(req, reply);
+    if (!p) return;
+    return weatherOf(p);
   });
 
   // Cartella in PDF: l'organizzatore sceglie le parti; il colore viene dal tema dell'invito collegato, se c'è.

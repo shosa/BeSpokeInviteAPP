@@ -108,6 +108,7 @@ export function PhotoSheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) 
   const current = data.bannerImage || data.archImage;
   async function upload(file: File) {
     if (demo) { ctx.toast(t("Nella demo la foto non si salva.", "The demo doesn't save photos.")); return; }
+    if (ctx.readOnly) { ctx.toast(t("Anteprima in sola lettura.", "Read-only preview.")); return; }
     setBusy(true);
     setError(null);
     const body = new FormData();
@@ -120,7 +121,7 @@ export function PhotoSheet({ ctx, onClose }: { ctx: Ctx; onClose: () => void }) 
     setBusy(false);
   }
   async function reset() {
-    if (demo) return;
+    if (demo || ctx.readOnly) return;
     setBusy(true);
     await ctx.act(async () => { await fetch(`/api/planners/${id}/image/banner`, { method: "DELETE" }); });
     setBusy(false);

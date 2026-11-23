@@ -173,7 +173,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
             <div className="cu-item-top"><span className="chip-pl"><BookOpen size={13} aria-hidden="true" />Planner</span><small>{p.invitation_id ? t("collegato", "linked") : t("da solo", "standalone")}</small></div>
             <strong>{p.title || t("Senza titolo", "Untitled")}</strong>
             <small>{[p.event_date, t(`${p.tasks_done}/${p.tasks} attività`, `${p.tasks_done}/${p.tasks} tasks`)].filter(Boolean).join(" · ")}</small>
-            <div className="cu-links"><a href={`/planner/${p.id}`} target="_blank" rel="noopener">{t("Apri il planner", "Open the planner")}</a></div>
+            <div className="cu-links"><a href={`/admin/planner/${p.id}`} target="_blank" rel="noopener">{t("Apri il planner", "Open the planner")}</a></div>
           </article>
         ))}
         {d.pending.length + d.invitations.length + d.planners.length === 0 && <p className="hint">{t("Nessun invito, planner o acquisto.", "No invitations, planners or purchases.")}</p>}

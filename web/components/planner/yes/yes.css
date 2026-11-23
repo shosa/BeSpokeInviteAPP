@@ -565,3 +565,6 @@ button.y-card { font: inherit; }
 @media (max-width: 860px) { .yp .seat-tray { position: static; max-height: 340px; } }
 /* Al computer il Riepilogo non tocca il bordo in alto (la barra in alto è nascosta). */
 @media (min-width: 960px) { .yp .y-content { padding-top: 20px; } }
+
+/* Anteprima dell'amministratore: etichetta fissa in alto, il planner si guarda ma non si modifica. */
+.y-readonly { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 90; padding: 8px 16px; border-radius: 999px; background: #2a2119; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); pointer-events: none; white-space: nowrap; max-width: calc(100vw - 20px); overflow: hidden; text-overflow: ellipsis; }

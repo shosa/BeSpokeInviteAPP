@@ -117,7 +117,7 @@ export function AdminOverview({ go }: { go: Go }) {
           <ul>
             {data.recent.map((r, i) => {
               const Icon = recentIcon[r.kind];
-              const open = () => (r.kind === "planner" && r.ref ? window.open(`/planner/${r.ref}`, "_blank") : r.user_id ? go("clienti", { userId: r.user_id }) : undefined);
+              const open = () => (r.kind === "planner" && r.ref ? window.open(`/admin/planner/${r.ref}`, "_blank") : r.user_id ? go("clienti", { userId: r.user_id }) : undefined);
               return (
                 <li key={i}>
                   <span className={`ov-ico is-${r.kind}`} aria-hidden="true"><Icon size={15} /></span>

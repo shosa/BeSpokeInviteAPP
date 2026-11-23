@@ -39,6 +39,7 @@ export type Ctx = {
   ev: EventCopy;
   en: boolean;
   demo: boolean;
+  readOnly: boolean; // anteprima dell'amministratore
   t: (it: string, en: string) => string;
   weather: Weather | null;
   view: View;
@@ -65,9 +66,11 @@ const NAV: { view: View; it: string; en: string; Icon: (p: { on?: boolean }) => 
   { view: "binder", it: "Cartella", en: "Binder", Icon: IcBinder },
 ];
 
-export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void }) {
+export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose, readOnly = false, apiBase }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void; readOnly?: boolean; apiBase?: string }) {
   const router = useRouter();
   const en = lang === "en";
+  // Rotte dei dati: quelle del cliente, o quelle in sola lettura dell'amministratore (apiBase).
+  const base = apiBase ?? `/api/planners/${id}`;
   const t = useCallback((it: string, eng: string) => (en ? eng : it), [en]);
   const [data, setData] = useState<PremiumData>(initial);
   const [view, setView] = useState<View>("home");
@@ -117,8 +120,8 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
 
   useEffect(() => {
     if (demo) return;
-    fetch(`/api/planners/${id}/weather`).then((r) => (r.ok ? r.json() : null)).then((w: Weather | null) => setWeather(w ?? { forecast: null })).catch(() => setWeather({ forecast: null }));
-  }, [id, demo]);
+    fetch(`${base}/weather`).then((r) => (r.ok ? r.json() : null)).then((w: Weather | null) => setWeather(w ?? { forecast: null })).catch(() => setWeather({ forecast: null }));
+  }, [base, demo]);
 
   // Barra in alto traslucida appena la pagina scorre.
   useEffect(() => {
@@ -138,8 +141,13 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // readOnly: anteprima dell'amministratore, si guarda tutto ma niente si modifica.
   const call = useCallback(async (method: Method, path: string, body?: unknown) => {
     setError(null);
+    if (readOnly) {
+      toast(t("Anteprima in sola lettura: le modifiche non sono possibili.", "Read-only preview: changes aren't possible."));
+      throw new Error("readonly");
+    }
     if (demo) {
       setData((d) => demoApply(d, method, path, body));
       return {};
@@ -153,20 +161,20 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
       throw new Error(msg);
     }
     return out;
-  }, [demo, id, t, toast]);
+  }, [demo, id, t, toast, readOnly]);
 
   // Dopo ogni modifica si ricaricano i dati dal server: il server è la sola fonte di verità.
   const act = useCallback(async (fn: () => Promise<unknown>) => {
     try {
       await fn();
       if (demo) return;
-      const res = await fetch(`/api/planners/${id}/data`);
+      const res = await fetch(`${base}/data`);
       if (res.ok) setData((await res.json()) as PremiumData);
       router.refresh();
     } catch {
       /* l'errore è già mostrato */
     }
-  }, [demo, id, router]);
+  }, [demo, base, router]);
 
   const s = useMemo(() => stats(data), [data]);
   const days = daysUntil(data.event.eventDate);
@@ -181,9 +189,9 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     settings: null,
   };
 
-  const openPdf = () => (demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
+  const openPdf = () => (readOnly ? toast(t("Anteprima in sola lettura: il PDF lo crea il cliente.", "Read-only preview: the customer creates the PDF.")) : demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
   const ev = eventCopy(data.event.eventType, en);
-  const ctx: Ctx = { actions: [], id, data, ev, en, demo, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
+  const ctx: Ctx = { actions: [], id, data, ev, en, demo, readOnly, t, weather, view, sub, go, call, act, sheet: setSheet, toast, pdf: openPdf, search: () => setPalette(true), accountHref, buyHref };
   const navIndex = NAV.findIndex((n) => n.view === view);
   const couple = data.event.title || ev.your;
 
@@ -263,6 +271,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
         </div>
       </nav>
 
+      {readOnly && <div className="y-readonly" role="status">{t("Anteprima amministratore · sola lettura", "Admin preview · read-only")}</div>}
       {demo && <a className="y-demo-buy" href={buyHref}>{t("Acquista il planner", "Get the planner")}</a>}
       {palette && <Palette ctx={ctx} onClose={() => setPalette(false)} openSheet={(x) => { setPalette(false); setSheet(x); }} />}
       {sheet?.kind === "guest" && <GuestSheet ctx={ctx} guest={sheet.guest} onClose={() => setSheet(null)} />}

@@ -41,7 +41,7 @@ export function AdminPlanners({ go }: { go: Go }) {
                 <button type="button" className="pl-admin-who" onClick={() => go("clienti", { userId: p.user_id })}>{p.name || p.email}</button>
                 <small className="hint">{[p.venue, `${p.guests} ${t("invitati", "guests")}`, t(`creato il ${fmtDate(p.created_at)}`, `created ${fmtDate(p.created_at)}`)].filter(Boolean).join(" · ")}</small>
                 <div className="pl-admin-bar" role="img" aria-label={t(`${p.tasks_done} attività su ${p.tasks}`, `${p.tasks_done} of ${p.tasks} tasks`)}><i style={{ width: `${pct}%` }} /></div>
-                <div className="pl-admin-foot"><small>{t(`${p.tasks_done}/${p.tasks} attività`, `${p.tasks_done}/${p.tasks} tasks`)}</small><a href={`/planner/${p.id}`} target="_blank" rel="noopener">{t("Apri", "Open")} →</a></div>
+                <div className="pl-admin-foot"><small>{t(`${p.tasks_done}/${p.tasks} attività`, `${p.tasks_done}/${p.tasks} tasks`)}</small><a href={`/admin/planner/${p.id}`} target="_blank" rel="noopener">{t("Apri", "Open")} →</a></div>
               </article>
             );
           })}

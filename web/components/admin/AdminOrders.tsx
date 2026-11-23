@@ -239,7 +239,7 @@ function GroupDetail({ g, go, t }: { g: Group; go?: Go; t: (it: string, en: stri
               <div className="ac-order-acts">
                 {x.invitation_id && <a className="btn outline small" href={`/api/admin/invitations/${x.invitation_id}/view`} target="_blank" rel="noopener">{t("Anteprima invito", "Invitation preview")}</a>}
                 {x.invitation_id && go && <button type="button" className="btn outline small" onClick={() => go("inviti", { invitationId: x.invitation_id! })}>{t("Dettaglio invito", "Invitation details")}</button>}
-                {x.planner_id && <a className="btn outline small" href={`/planner/${x.planner_id}`} target="_blank" rel="noopener">{t("Apri planner", "Open planner")}</a>}
+                {x.planner_id && <a className="btn outline small" href={`/admin/planner/${x.planner_id}`} target="_blank" rel="noopener">{t("Apri planner", "Open planner")}</a>}
               </div>
             )}
           </div>

@@ -562,7 +562,7 @@ export async function buildApp() {
   });
 
   // Il planner è un servizio a sé, con le sue rotte (/api/planners/…): plannerRoutes.ts.
-  registerPlannerRoutes(app, { requireUser, loadCatalog });
+  registerPlannerRoutes(app, { requireUser, loadCatalog, requireAdmin });
   registerProRoutes(app, { requireUser, requireAdmin, loadCatalog });
 
   // Note del pianificatore: testo libero per l'organizzatore (promemoria, nota del conto alla rovescia). Non va nella pagina invito.
