@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EVENT_TYPES, type EventType, type TemplateCategory, type ThemeManifest } from "@inviteme/shared";
 import { LibraryIcon } from "@/components/planner/PlannerIcon";
@@ -33,8 +33,16 @@ export function ActivateTemplate({ orderId, templates, locked = [], categories =
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const selected = templates.find((x) => x.id === themeId);
+  // «Crea» senza tipo di evento: messaggio sotto il pulsante e la scelta del tipo torna in vista, evidenziata.
+  const [missingType, setMissingType] = useState(false);
+  const typeRef = useRef<HTMLDivElement>(null);
 
   async function create() {
+    if (!eventType) {
+      setMissingType(true);
+      typeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     setBusy(true);
     setError(null);
     const res = await fetch("/api/account/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId, themeId, eventType }) });
@@ -51,11 +59,11 @@ export function ActivateTemplate({ orderId, templates, locked = [], categories =
   return (
     <div className="act">
       {/* Tipo di evento: si sceglie prima del template e resta salvato nell'invito (testi di partenza, planner). */}
-      <div className="act-type" role="radiogroup" aria-label={t("Tipo di evento", "Event type")}>
+      <div ref={typeRef} className={`act-type${missingType && !eventType ? " is-missing" : ""}`} role="radiogroup" aria-label={t("Tipo di evento", "Event type")}>
         <span className="act-kicker">{t("Che evento è?", "What's the event?")}</span>
         <div className="act-type-list">
           {EVENT_TYPES.map((x) => (
-            <button key={x.id} type="button" role="radio" aria-checked={eventType === x.id} className={`act-type-chip${eventType === x.id ? " is-on" : ""}`} onClick={() => setEventType(x.id)}>
+            <button key={x.id} type="button" role="radio" aria-checked={eventType === x.id} className={`act-type-chip${eventType === x.id ? " is-on" : ""}`} onClick={() => { setEventType(x.id); setMissingType(false); }}>
               {lang === "en" ? x.labelEn : x.label}
             </button>
           ))}
@@ -85,9 +93,10 @@ export function ActivateTemplate({ orderId, templates, locked = [], categories =
         </div>
         <div className="act-actions">
           <button type="button" className="btn outline" disabled={!selected} onClick={() => setPreviewOpen(true)}>{t("Anteprima", "Preview")}</button>
-          <button type="button" className="btn solid" disabled={busy || !themeId || !eventType} title={!eventType ? t("Scegli prima il tipo di evento", "Choose the event type first") : undefined} onClick={create}>{busy ? t("Creo il tuo invito…", "Creating your invitation…") : t("Crea il tuo invito", "Create your invitation")}</button>
+          <button type="button" className="btn solid" disabled={busy || !themeId} onClick={create}>{busy ? t("Creo il tuo invito…", "Creating your invitation…") : t("Crea il tuo invito", "Create your invitation")}</button>
         </div>
       </div>
+      {missingType && !eventType && <p className="act-missing" role="alert">{t("Scegli prima che evento è (in alto): matrimonio, compleanno… Poi premi di nuovo «Crea il tuo invito».", "First choose what the event is (at the top): wedding, birthday… Then press «Create your invitation» again.")}</p>}
       <p className="hint act-hint-foot">{t("Il template è solo il punto di partenza: testi, foto, colori e musica si cambiano nel builder.", "The template is just the starting point: texts, photos, colours and music can all be changed in the builder.")}</p>
       {error && <p className="form-error" role="alert">{error}</p>}
       {busy && <CreatingOverlay done={done} />}
