@@ -36,6 +36,7 @@ import {
   normalizeSlug,
   blockDef,
   withTheme,
+  csvCell,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -683,7 +684,8 @@ export async function buildApp() {
     const questions = (inv.config.rsvpQuestions ?? []) as Row[];
 
     if (req.query.format === "csv") {
-      const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      // Le risposte le scrivono gli ospiti: csvCell evita che diventino formule nel foglio di calcolo.
+      const esc = csvCell;
       const header = ["Ricevuta il", ...questions.map((q) => q.label)];
       const lines = rows.map((r) =>
         [

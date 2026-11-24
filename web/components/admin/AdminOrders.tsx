@@ -6,6 +6,7 @@ import { useT } from "@/lib/lang";
 import { toast } from "sonner";
 import type { Go } from "./types";
 import { CopyId } from "./CopyId";
+import { csvCell } from "@inviteme/shared";
 
 // Ordini senza importi: identificatori, cliente, invito e metadati utili per capire cosa è successo.
 export type OrderDetail = {
@@ -106,7 +107,7 @@ export function AdminOrders({ go }: { go?: Go }) {
   function exportCsv() {
     const head = t("id_ordine,data,cliente,email,invito,id_invito,fonte,stato,piano,tipo,riferimento", "order_id,date,customer,email,invitation,invitation_id,source,status,plan,kind,reference").split(",");
     const lines = shown.map((o) => [o.id, o.created_at, o.user_name ?? "", o.email ?? "", o.title ?? "", o.invitation_id ?? "", o.source, o.status, o.tier ?? "", o.kind, o.order_ref ?? ""]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";"));
+      .map(csvCell).join(";"));
     const blob = new Blob([[head.join(";"), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
