@@ -16,3 +16,10 @@ test("localRedirect usa una Location relativa", () => {
   assert.equal(r.status, 303);
   assert.equal(r.headers.get("location"), "/account");
 });
+
+test("hardening: i parametri di percorso delle pagine devono essere UUID", async () => {
+  const { isUuid } = await import("../../web/lib/ids");
+  assert.equal(isUuid("1e1e1e1e-1e1e-4e1e-8e1e-1e1e1e1e1e1e"), true);
+  assert.equal(isUuid("..%2Fadmin%2Fusers"), false);
+  assert.equal(isUuid("../admin"), false);
+});

@@ -3,6 +3,7 @@ import type { PremiumData } from "@/components/planner/PremiumPlanner";
 import { PlannerShell } from "@/components/planner/yes/PlannerShell";
 import { plannerFonts } from "@/components/planner/yes/fonts";
 import { ApiError, apiServer } from "@/lib/api";
+import { isUuid } from "@/lib/ids";
 import { getLang } from "@/lib/i18n";
 import { Nav } from "@/components/Nav";
 
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 // Un vecchio link con l'id di un invito porta al planner collegato, se c'è, altrimenti alla pagina delle risposte di quell'invito.
 export default async function Planner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   const lang = await getLang();
   const data = await apiServer<PremiumData>(`/api/planners/${id}/data`).catch(async (e) => {
     if (e instanceof ApiError && e.status === 401) redirect("/account");

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { PlannerPanel, type PlannerData } from "@/components/planner/PlannerPanel";
 import { ApiError, apiServer } from "@/lib/api";
+import { isUuid } from "@/lib/ids";
 import { accentOf, inkOn } from "@/lib/invitePalette";
 import { InviteHero } from "@/components/dashboard/InviteHero";
 import { themeDecor } from "@/lib/themeAssets";
@@ -14,6 +15,7 @@ export const dynamic = "force-dynamic";
 // (il planner è un servizio a parte che si collega facoltativamente a un invito).
 export default async function Risposte({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   try {
     const [manage, summary] = await Promise.all([
       apiServer<PlannerData["manage"] & { plannerId: string | null }>(`/api/invitations/${id}/manage`),

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ApiError, apiServer } from "@/lib/api";
+import { isUuid } from "@/lib/ids";
 import { getLang } from "@/lib/i18n";
 import { ProShell } from "@/components/pro/ProShell";
 import { ProClient } from "@/components/pro/ProClient";
@@ -12,6 +13,7 @@ export const metadata: Metadata = { title: "Cliente · Bespoke Pro" };
 
 export default async function ProClientPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   const lang = (await getLang()) === "en" ? "en" : "it";
   const studio = await loadStudio();
   const client = await apiServer<ProClientDetail>(`/api/pro/clients/${id}`).catch((e) => {

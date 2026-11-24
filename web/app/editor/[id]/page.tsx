@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { Builder, type Manage } from "@/components/Builder";
 import { ApiError, apiServer } from "@/lib/api";
+import { isUuid } from "@/lib/ids";
 import { getLang } from "@/lib/i18n";
 import { SetupGate } from "@/components/SetupGate";
 
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 // Il builder si apre solo per un invito acquistato (o di prova). Senza sessione o con un invito non pagato si torna al profilo.
 export default async function Editor({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   try {
     const manage = await apiServer<Manage>(`/api/invitations/${id}/manage`);
     if (manage.status !== "paid") redirect("/account");
