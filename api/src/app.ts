@@ -930,7 +930,8 @@ export async function buildApp() {
       const { rows } = await pool.query("SELECT id, user_id, draft, amount_cents, invitation_id FROM orders WHERE id = $1 AND user_id = $2 AND status = 'pending' AND draft IS NOT NULL", [b.orderId, user.id]);
       if (!rows[0]) return reply.code(404).send({ error: "Ordine non trovato" });
       if (rows[0].invitation_id) return { ok: true, invitationId: rows[0].invitation_id };
-      const invitationId = await createInvitationFromOrder(rows[0], "local", `TEST-${Date.now()}`);
+      const invitationId = await createInvitationFromOrder(rows[0], "local", `TEST-${Date.now()}`, false, { sql: "AND user_id = $2 AND status = 'pending'", params: [user.id] });
+      if (!invitationId) return reply.code(404).send({ error: "Ordine non trovato" });
       return { ok: true, invitationId };
     }
     const inv = b.invitationId && UUID.test(b.invitationId) ? await ownedInvitation(b.invitationId, user.id) : null;
@@ -1003,7 +1004,10 @@ export async function buildApp() {
     return { ...config, blocks };
   }
 
-  async function createInvitationFromOrder(order: { id: string; user_id: string; draft: { model: string; themeId: string; eventType: string; addons: string[]; tier?: string }; amount_cents: number }, source: "shopify" | "local", orderRef: string, sample = false): Promise<string> {
+  // Un ordine dà al massimo un invito: l'ordine si blocca (SELECT … FOR UPDATE) e si ricontrolla che sia ancora libero
+  // nella stessa transazione che inserisce l'invito. guard: condizioni in più sull'ordine (proprietario, stato), con i
+  // parametri da $2 in poi. Restituisce null se l'ordine non è più disponibile (già attivato da un'altra richiesta).
+  async function createInvitationFromOrder(order: { id: string; user_id: string; draft: { model: string; themeId: string; eventType: string; addons: string[]; tier?: string }; amount_cents: number }, source: "shopify" | "local", orderRef: string, sample = false, guard: { sql: string; params: unknown[] } = { sql: "", params: [] }): Promise<string | null> {
     const c = await loadCatalog();
     const d = order.draft;
     const theme = getTheme(c, d.themeId, d.model) ?? enabledThemes(c, d.model)[0];
@@ -1020,11 +1024,26 @@ export async function buildApp() {
     const id = randomUUID();
     // Slug provvisorio: l'ID. Il cliente sceglie il link al momento di pubblicare.
     const slug = id;
-    await pool.query(
-      "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier, planner) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7, $8)",
-      [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, "rsvp", JSON.stringify({ templateMusic: templateMusicOf(config) })],
-    );
-    await pool.query("UPDATE orders SET status = 'paid', invitation_id = $2, source = $3 WHERE id = $1", [order.id, id, source]);
+    const db = await pool.connect();
+    try {
+      await db.query("BEGIN");
+      const locked = await db.query(`SELECT id FROM orders WHERE id = $1 AND invitation_id IS NULL ${guard.sql} FOR UPDATE`, [order.id, ...guard.params]);
+      if (!locked.rows[0]) {
+        await db.query("ROLLBACK");
+        return null;
+      }
+      await db.query(
+        "INSERT INTO invitations (id, slug, user_id, config, status, purchased_addons, published_config, order_ref, tier, planner) VALUES ($1, $2, $3, $4, 'paid', $5, $4, $6, $7, $8)",
+        [id, slug, order.user_id, JSON.stringify(config), JSON.stringify(config.addons), orderRef, "rsvp", JSON.stringify({ templateMusic: templateMusicOf(config) })],
+      );
+      await db.query("UPDATE orders SET status = 'paid', invitation_id = $2, source = $3 WHERE id = $1", [order.id, id, source]);
+      await db.query("COMMIT");
+    } catch (e) {
+      await db.query("ROLLBACK").catch(() => undefined);
+      throw e;
+    } finally {
+      db.release();
+    }
     await track("order_paid", id);
     const { rows } = await pool.query("SELECT email FROM users WHERE id = $1", [order.user_id]);
     if (rows[0]) {
@@ -1060,6 +1079,7 @@ export async function buildApp() {
       [orderId, user!.id, amount, JSON.stringify(draft)],
     );
     const invitationId = await createInvitationFromOrder({ id: orderId, user_id: user!.id, draft, amount_cents: amount }, "local", `DEMO-${Date.now()}`, true);
+    if (!invitationId) return reply.code(500).send({ error: "Invito di prova non creato" });
     return { invitationId };
   });
 
@@ -1270,7 +1290,11 @@ export async function buildApp() {
       { id: row.id, user_id: row.user_id, draft: { ...row.draft, model, themeId, ...(isEventType(b.eventType) ? { eventType: b.eventType } : {}) }, amount_cents: row.amount_cents },
       "shopify",
       row.id,
+      false,
+      { sql: "AND user_id = $2 AND source = 'shopify' AND status = 'paid' AND COALESCE(draft->>'product', '') <> 'planner'", params: [user.id] },
     );
+    // Un'altra richiesta ha già attivato questo acquisto.
+    if (!id) return reply.code(404).send({ error: "Acquisto non trovato o già attivato" });
     // Invito di un cliente dello studio Pro: parte con i dati del cliente e si collega al suo planner, se c'è.
     if (row.pro_client_id) {
       const { rows: cl } = await pool.query("SELECT name, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address FROM pro_clients WHERE id = $1", [row.pro_client_id]);
@@ -1326,7 +1350,8 @@ export async function buildApp() {
     if (orderId) {
       const { rows } = await pool.query("SELECT id, user_id, draft, amount_cents, currency, invitation_id FROM orders WHERE id = $1 AND status = 'pending' AND draft IS NOT NULL", [orderId]);
       if (rows[0] && !rows[0].invitation_id && covers(rows[0])) {
-        await createInvitationFromOrder(rows[0], "shopify", order.name);
+        // null: un'altra consegna dello stesso webhook l'ha già attivato.
+        await createInvitationFromOrder(rows[0], "shopify", order.name, false, { sql: "AND status = 'pending'", params: [] });
         fulfilled = true;
       }
     } else if (invitationId && UUID.test(invitationId)) {

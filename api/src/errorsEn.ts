@@ -22,6 +22,7 @@ const EXACT: Record<string, string> = {
   "Questa è l'email dello studio": "This is the studio's email",
   // Inviti e builder
   "Invito non trovato": "Invitation not found",
+  "Invito di prova non creato": "Demo invitation not created",
   "Modello non disponibile": "Model not available",
   "Tema non disponibile per questo modello": "Style not available for this model",
   "Nessun tema disponibile per questo modello": "No style available for this model",
