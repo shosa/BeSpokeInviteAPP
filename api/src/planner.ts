@@ -1,6 +1,7 @@
 // Planner premium: raccolte dell'organizzatore (invitati, budget, attività, fornitori), cartella del matrimonio e meteo.
 // Qui sta la validazione dei dati, senza accesso al database: così è testabile da sola.
 import { BUDGET_CATEGORY_KEYS, CONTRACT_STATUSES, FOLDER, FOLDER_KEYS, ROW_FIELDS, ROW_LIMIT, RSVP_STATUSES, TEXT_LIMIT } from "@inviteme/shared";
+import { BoundedCache } from "./boundedCache";
 
 export type CollectionKind = "guests" | "budget" | "tasks" | "vendors" | "tables" | "quotes";
 
@@ -175,16 +176,16 @@ export type ForecastHour = { hour: number; tempC: number; precipMm: number };
 // code: codice del tempo WMO di Open-Meteo (0 sereno, 61 pioggia…), per il disegno del meteo nel planner.
 export type Forecast = { date: string; tmaxC: number; tminC: number; precipMm: number; precipProb: number | null; code?: number | null; hourly?: ForecastHour[] };
 const FORECAST_MS = 6 * 3600_000;
-const forecastCache = new Map<string, { at: number; value: Forecast | null }>();
+const forecastCache = new BoundedCache<Forecast | null>(FORECAST_MS);
 
 export async function forecastFor(lat: number, lon: number, date: string): Promise<Forecast | null> {
   const key = `${lat.toFixed(3)},${lon.toFixed(3)},${date}`;
   const hit = forecastCache.get(key);
-  if (hit && Date.now() - hit.at < FORECAST_MS) return hit.value;
+  if (hit !== undefined) return hit;
   let value: Forecast | null = null;
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=temperature_2m,precipitation&timezone=auto&start_date=${date}&end_date=${date}`;
-    const res = await fetch(url, { headers: { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" } });
+    const res = await fetch(url, { headers: { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" }, signal: AbortSignal.timeout(6000) });
     const d = (await res.json()) as { daily?: Record<string, (number | null)[]>; hourly?: { time?: string[]; temperature_2m?: (number | null)[]; precipitation?: (number | null)[] } };
     const day = d.daily;
     if (day?.time && day.temperature_2m_max?.[0] != null) {
@@ -204,6 +205,6 @@ export async function forecastFor(lat: number, lon: number, date: string): Promi
   } catch {
     value = null;
   }
-  forecastCache.set(key, { at: Date.now(), value });
+  forecastCache.set(key, value);
   return value;
 }

@@ -43,6 +43,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
 import { handleAssistant, type OwnedInvitation } from "./assistant";
 import { searchPlaces } from "./places";
+import { BoundedCache } from "./boundedCache";
 import { EFFORTS, listAssistantModels, loadAssistantSettings, saveAssistantSettings, type ModelOption } from "./assistantSettings";
 import { invalidateCatalog, loadCatalog, loadFullCatalog, reloadThemes, saveCatalog, themes } from "./catalog";
 import { previewShell } from "./engine/previewShell";
@@ -760,14 +761,14 @@ export async function buildApp() {
 
   // Pagina dimostrativa di un tema, con dati d'esempio: la usano la home e la scheda dei modelli.
   // Suggerimenti di indirizzo mentre si scrive (OpenStreetMap, senza chiave). Risultati in cache per 10 minuti.
-  const geoCache = new Map<string, { at: number; results: string[] }>();
+  const geoCache = new BoundedCache<string[]>(600_000);
   app.get("/api/geocode", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
     const q = String((req.query as { q?: string }).q ?? "").trim().slice(0, 200);
     if (q.length < 3) return { results: [] };
     const hit = geoCache.get(q);
-    if (hit && Date.now() - hit.at < 600_000) return { results: hit.results };
+    if (hit) return { results: hit };
     // Prima Photon (OpenStreetMap, completa anche le parole a metà mentre si scrive), poi Nominatim come riserva.
     const UA = { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" };
     let results: string[] = [];
@@ -792,7 +793,7 @@ export async function buildApp() {
         results = [];
       }
     }
-    geoCache.set(q, { at: Date.now(), results });
+    geoCache.set(q, results);
     return { results };
   });
 
