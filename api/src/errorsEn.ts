@@ -23,6 +23,8 @@ const EXACT: Record<string, string> = {
   // Inviti e builder
   "Invito non trovato": "Invitation not found",
   "Invito di prova non creato": "Demo invitation not created",
+  "Gli inviti nascono da un acquisto": "Invitations are created from a purchase",
+  "Hai già troppe bozze: eliminane una per crearne un'altra": "You already have too many drafts: delete one to create another",
   "Modello non disponibile": "Model not available",
   "Tema non disponibile per questo modello": "Style not available for this model",
   "Nessun tema disponibile per questo modello": "No style available for this model",

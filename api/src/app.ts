@@ -299,9 +299,16 @@ export async function buildApp() {
     }));
   });
 
+  // Bozze senza acquisto: in produzione gli inviti nascono dagli ordini (claim, demo, studio Pro). Questa rotta resta
+  // per gli admin, la modalità demo e lo sviluppo, con un tetto di bozze non pagate per utente (ognuna costa conversioni
+  // di file e, se fosse pagata, richieste all'assistente).
+  const MAX_DRAFTS = 5;
   app.post("/api/invitations", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
+    if (process.env.NODE_ENV === "production" && user.role !== "admin" && !demoMode()) return reply.code(403).send({ error: "Gli inviti nascono da un acquisto" });
+    const { rows: drafts } = await pool.query("SELECT count(*)::int AS n FROM invitations WHERE user_id = $1 AND status <> 'paid'", [user.id]);
+    if (user.role !== "admin" && (drafts[0]?.n ?? 0) >= MAX_DRAFTS) return reply.code(429).send({ error: "Hai già troppe bozze: eliminane una per crearne un'altra" });
     const c = await loadCatalog();
     const b = (req.body ?? {}) as { model?: string; eventType?: string; themeId?: string };
     const model = getModel(c, String(b.model ?? ""));
@@ -479,8 +486,10 @@ export async function buildApp() {
       {
         findOwned: async (id, userId) => {
           const inv = await ownedInvitation(id, userId);
+          // Le richieste all'assistente sono un servizio dell'invito acquistato: una bozza non pagata non ne ha.
+          if (!inv || inv.status !== "paid") return null;
           // Stesso dato dell'editor: le funzioni già attive per l'invito (pagate, o scelte in bozza).
-          return inv ? { ...inv, purchased_addons: [...ADDON_KEYS] } as OwnedInvitation : null;
+          return { ...inv, purchased_addons: [...ADDON_KEYS] } as OwnedInvitation;
         },
         loadCatalog,
         apiKey: process.env.ANTHROPIC_KEY || undefined,
