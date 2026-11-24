@@ -1,4 +1,4 @@
-# INTERFACCIA — Bespoke Invites
+# INTERFACCIA — Bespoke Invite
 
 Le regole di base per far sembrare ogni pagina, sezione e grafica del sito parte dello stesso progetto.
 Prima di aggiungere qualcosa di nuovo, controlla qui: se un elemento esiste già, usalo; se serve qualcosa di nuovo, costruiscilo con questi stessi ingredienti.
@@ -202,7 +202,7 @@ Regole:
 - Titoli in due tempi: una parte normale + una parte in corsivo oro.
 - **Mai inventare**: numeri di clienti, recensioni, scadenze o sconti a tempo devono essere veri.
 - Promesse di servizio (tempi di consegna, rimborso, lingue, funzioni della dashboard) devono corrispondere a ciò che offriamo davvero.
-- Il nome si scrive sempre **Bespoke Invites**; l'assistente è **Bespoke AI**.
+- Il nome si scrive sempre **Bespoke Invite**; l'assistente è **Bespoke AI**.
 
 ---
 

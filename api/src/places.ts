@@ -16,7 +16,7 @@ export async function searchPlaces(query: string): Promise<string[]> {
   let results: string[] = [];
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=it&q=${encodeURIComponent(q)}`, {
-      headers: { "User-Agent": "BespokeInvites/1.0 (https://app.thebespokeinvite.com)" },
+      headers: { "User-Agent": "BespokeInvite/1.0 (https://app.thebespokeinvite.com)" },
       signal: AbortSignal.timeout(6000),
     });
     const list = (await res.json()) as { display_name?: string }[];
@@ -36,7 +36,7 @@ export async function geocodeOne(query: string): Promise<{ lat: number; lon: num
   if (cached !== undefined) return cached;
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=it&q=${encodeURIComponent(q)}`, {
-      headers: { "User-Agent": "BespokeInvites/1.0 (https://app.thebespokeinvite.com)" },
+      headers: { "User-Agent": "BespokeInvite/1.0 (https://app.thebespokeinvite.com)" },
       signal: AbortSignal.timeout(6000),
     });
     const list = (await res.json()) as { lat?: string; lon?: string; display_name?: string }[];

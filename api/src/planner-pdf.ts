@@ -77,7 +77,7 @@ export async function buildPlannerPdf(data: PdfData, choices: PdfChoice[]): Prom
   // Spesa prevista: fornitori prenotati più le voci senza fornitore (come nella sezione Budget del planner).
   const spent = booked.reduce((n, q) => n + q.amount_cents, 0) + data.budget.filter((b) => !b.quote_id).reduce((n, b) => n + b.amount_cents, 0);
   const paidTotal = data.budget.filter((b) => b.paid).reduce((n, b) => n + b.amount_cents, 0);
-  const doc = new PDFDocument({ size: "A4", margins: { top: MARGIN, left: MARGIN, right: MARGIN, bottom: 0 }, bufferPages: true, info: { Title: `${t(`La cartella ${eventPhrases(data.eventType, "it").of}`, `The ${eventPhrases(data.eventType, "en").of} folder`)}: ${data.title}`, Author: "Bespoke Invites" } });
+  const doc = new PDFDocument({ size: "A4", margins: { top: MARGIN, left: MARGIN, right: MARGIN, bottom: 0 }, bufferPages: true, info: { Title: `${t(`La cartella ${eventPhrases(data.eventType, "it").of}`, `The ${eventPhrases(data.eventType, "en").of} folder`)}: ${data.title}`, Author: "Bespoke Invite" } });
   const chunks: Buffer[] = [];
   doc.on("data", (c: Buffer) => chunks.push(c));
   const done = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
@@ -144,7 +144,7 @@ export async function buildPlannerPdf(data: PdfData, choices: PdfChoice[]): Prom
   doc.font("Helvetica-Bold").fontSize(9).fillColor(accent).text(t(`LA CARTELLA ${eventPhrases(data.eventType, "it").of.toUpperCase()}`, `THE ${eventPhrases(data.eventType, "en").of.toUpperCase()} FOLDER`), MARGIN, 220, { characterSpacing: 2 });
   doc.font("Times-Roman").fontSize(44).fillColor(INK).text(data.title || t(eventPhrases(data.eventType, "it").your, eventPhrases(data.eventType, "en").your), MARGIN, 250, { width });
   doc.font("Helvetica").fontSize(13).fillColor(SOFT).text([dateLabel(data.eventDate), data.venue].filter(Boolean).join("  ·  "), MARGIN, doc.y + 14, { width });
-  doc.font("Helvetica").fontSize(8.5).fillColor(SOFT).text("Bespoke Invites", MARGIN, doc.page.height - MARGIN - 10);
+  doc.font("Helvetica").fontSize(8.5).fillColor(SOFT).text("Bespoke Invite", MARGIN, doc.page.height - MARGIN - 10);
 
   // Indice: pagina riservata, compilata alla fine con i numeri di pagina.
   doc.addPage();

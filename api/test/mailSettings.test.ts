@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { validateMailSettings, fromAddress, MAIL_DEFAULTS } from "../src/mailSettings";
 
 test("il mittente accetta nome ed email validi e normalizza l'email", () => {
-  const r = validateMailSettings({ fromName: " Bespoke Invites ", fromEmail: " Ciao@Dominio.it ", replyTo: "", notifyRsvp: false, orderConfirm: true });
+  const r = validateMailSettings({ fromName: " Bespoke Invite ", fromEmail: " Ciao@Dominio.it ", replyTo: "", notifyRsvp: false, orderConfirm: true });
   assert.ok(r.ok);
-  assert.equal(r.ok && r.value.fromName, "Bespoke Invites");
+  assert.equal(r.ok && r.value.fromName, "Bespoke Invite");
   assert.equal(r.ok && r.value.fromEmail, "ciao@dominio.it");
   assert.equal(r.ok && r.value.notifyRsvp, false);
 });

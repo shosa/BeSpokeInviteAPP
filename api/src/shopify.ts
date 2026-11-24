@@ -55,7 +55,7 @@ export async function createCheckout(input: CheckoutInput): Promise<{ checkoutUr
         input: {
           lines: [{ merchandiseId: variantId, quantity: 1, attributes }],
           attributes: input.orderId ? [{ key: "orderId", value: input.orderId }] : [{ key: "invitationId", value: input.invitationId ?? "" }],
-          note: `Bespoke Invites ${input.slug ?? input.orderId}`,
+          note: `Bespoke Invite ${input.slug ?? input.orderId}`,
         },
       },
     }),

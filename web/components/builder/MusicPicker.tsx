@@ -35,7 +35,7 @@ export function MusicPicker({
   type Entry = { key: string; url: string; title: string; sub: string; kind: "template" | "library" | "own" };
   const tracks: Entry[] = [
     ...(templateUrl ? [{ key: "template", url: templateUrl, title: en ? "Template music" : "Musica del template", sub: en ? "Included with the style you chose" : "Inclusa nello stile che hai scelto", kind: "template" as const }] : []),
-    ...libraryTracks.map((t) => ({ key: t.id, url: t.url, title: t.title, sub: t.artist || (en ? "Bespoke Invites library" : "Libreria Bespoke Invites"), kind: "library" as const })),
+    ...libraryTracks.map((t) => ({ key: t.id, url: t.url, title: t.title, sub: t.artist || (en ? "Bespoke Invite library" : "Libreria Bespoke Invite"), kind: "library" as const })),
     ...(ownUrl ? [{ key: "own", url: ownUrl, title: en ? "Your track" : "Il tuo brano", sub: en ? "Uploaded by you" : "Caricato da te", kind: "own" as const }] : []),
   ];
 

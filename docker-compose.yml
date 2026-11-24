@@ -1,6 +1,6 @@
-# Bespoke Invites: tre servizi. Il browser parla solo con "web"; "web" inoltra /api all'API; l'API parla con il database.
-# Nome del progetto: dà il nome ai container (bespokeinvites-db-1, -api-1, -web-1) e alla rete.
-name: bespokeinvites
+# Bespoke Invite: tre servizi. Il browser parla solo con "web"; "web" inoltra /api all'API; l'API parla con il database.
+# Nome del progetto: dà il nome ai container (bespokeinvite-db-1, -api-1, -web-1) e alla rete.
+name: bespokeinvite
 
 services:
   db:

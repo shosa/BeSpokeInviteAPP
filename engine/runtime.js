@@ -1,4 +1,4 @@
-/* Bespoke Invites — runtime del motore di rendering.
+/* Bespoke Invite — runtime del motore di rendering.
  *
  * Comportamenti riusabili da ogni tema, attivati con attributi data-* nel template (vedi docs/MOTORE.md):
  *   data-anim="fadeinup|fadein|zoomin|fadeinright"  rivelazione allo scroll (classe "in")

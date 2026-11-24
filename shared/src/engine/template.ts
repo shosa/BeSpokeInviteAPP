@@ -1,4 +1,4 @@
-// Motore di template di Bespoke Invites: un sottoinsieme di Mustache, sicuro per costruzione.
+// Motore di template di Bespoke Invite: un sottoinsieme di Mustache, sicuro per costruzione.
 // Ogni valore viene escapato: dai dati non può arrivare HTML grezzo. Il template invece è del tema, ed è fidato.
 //
 // Sintassi:

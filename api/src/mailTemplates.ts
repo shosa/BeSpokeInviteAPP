@@ -27,7 +27,7 @@ export const MAIL_LABELS: Record<MailTemplateKind, string> = {
 
 export const MAIL_TEMPLATE_DEFAULTS: Record<MailTemplateKind, MailTemplate> = {
   access: {
-    subject: "Il tuo link per entrare in Bespoke Invites",
+    subject: "Il tuo link per entrare in Bespoke Invite",
     title: "Entra nel tuo account",
     body: "Hai chiesto il link per entrare. Qui trovi i tuoi inviti e la galleria dei template.",
     button: "Entra",
@@ -58,7 +58,7 @@ export const MAIL_TEMPLATE_DEFAULTS: Record<MailTemplateKind, MailTemplate> = {
 
 export const MAIL_TEMPLATE_DEFAULTS_EN: Record<MailTemplateKind, MailTemplate> = {
   access: {
-    subject: "Your link to sign in to Bespoke Invites",
+    subject: "Your link to sign in to Bespoke Invite",
     title: "Sign in to your account",
     body: "You asked for a sign-in link. Here you'll find your invitations and the template gallery.",
     button: "Sign in",

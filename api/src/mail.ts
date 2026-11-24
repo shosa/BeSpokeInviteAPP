@@ -84,7 +84,7 @@ function shell(title: string, body: string, footer?: string, lang: MailLang = "i
 <tr><td style="padding:28px 40px 34px">
 <h1 style="margin:0 0 16px;font:400 28px/1.2 Georgia,'Times New Roman',serif;letter-spacing:-.01em;color:#2a2119">${title}</h1>${body}${footer ? `<p style="margin:26px 0 0;font:13px/1.6 Arial,Helvetica,sans-serif;color:#7b6a57">${esc(footer)}</p>` : ""}
 </td></tr></table>
-<p style="margin:18px 0 0;font:12px Arial,Helvetica,sans-serif;color:#7b6a57">${lang === "en" ? "You're receiving this email because you use Bespoke Invites." : "Ricevi questa email perché usi Bespoke Invites."}</p>
+<p style="margin:18px 0 0;font:12px Arial,Helvetica,sans-serif;color:#7b6a57">${lang === "en" ? "You're receiving this email because you use Bespoke Invite." : "Ricevi questa email perché usi Bespoke Invite."}</p>
 </td></tr></table></body></html>`;
 }
 
@@ -124,7 +124,7 @@ export function resetEmail(p: { to: string; token: string }): MailMessage {
   const link = `${appUrl()}/reset?token=${p.token}`;
   return {
     to: p.to,
-    subject: "Reimposta la password di Bespoke Invites",
+    subject: "Reimposta la password di Bespoke Invite",
     html: shell(
       "Reimposta la password",
       `<p style="font:16px/1.6 Arial,sans-serif;color:#4a4640">Hai chiesto di reimpostare la password. Il link vale 60 minuti.</p>${button(link, "Scegli una nuova password")}<p style="font:13px Arial,sans-serif;color:#8a8478">Se non sei stato tu, ignora questa email.</p>`,

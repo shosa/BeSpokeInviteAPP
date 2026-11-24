@@ -16,7 +16,7 @@ export type MailKind = "rsvp" | "order" | "test" | "other";
 export type MailResult = { at: string; ok: boolean; error?: string; kind: MailKind } | null;
 
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
-export const MAIL_DEFAULTS: MailSettings = { fromName: "Bespoke Invites", fromEmail: "", replyTo: "", notifyRsvp: true, orderConfirm: true, accent: "#8a6427" };
+export const MAIL_DEFAULTS: MailSettings = { fromName: "Bespoke Invite", fromEmail: "", replyTo: "", notifyRsvp: true, orderConfirm: true, accent: "#8a6427" };
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 let stored: Partial<MailSettings> = {};
@@ -35,7 +35,7 @@ export const getLastMailResult = (): MailResult => lastResult;
 export function fromAddress(): string {
   const s = getMailSettings();
   if (s.fromEmail) return `${s.fromName.replace(/[<>"]/g, "")} <${s.fromEmail}>`;
-  return process.env.MAIL_FROM ?? "Bespoke Invites <onboarding@resend.dev>";
+  return process.env.MAIL_FROM ?? "Bespoke Invite <onboarding@resend.dev>";
 }
 
 export async function loadMailSettings(): Promise<void> {

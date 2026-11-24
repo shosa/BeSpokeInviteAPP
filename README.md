@@ -1,4 +1,4 @@
-# Bespoke Invites
+# Bespoke Invite
 
 Inviti digitali per matrimoni ed eventi: copertina sigillata, musica, programma, mappa e conferma di presenza in un solo link.
 

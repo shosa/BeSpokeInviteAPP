@@ -57,7 +57,7 @@ const ALL = GROUPS.flatMap((g) => g.items);
 const MAIN_TABS: Tab[] = ["panoramica", "ordini", "clienti"];
 const MORE_TABS = ALL.filter((x) => !MAIN_TABS.includes(x.id));
 
-// Console admin di Bespoke Invites.
+// Console admin di Bespoke Invite.
 export function AdminConsole() {
   const tt = useT();
   const t = (p: Pair) => tt(p[0], p[1]);

@@ -185,7 +185,7 @@ export async function forecastFor(lat: number, lon: number, date: string): Promi
   let value: Forecast | null = null;
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=temperature_2m,precipitation&timezone=auto&start_date=${date}&end_date=${date}`;
-    const res = await fetch(url, { headers: { "User-Agent": "BespokeInvites/1.0 (https://app.thebespokeinvite.com)" }, signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers: { "User-Agent": "BespokeInvite/1.0 (https://app.thebespokeinvite.com)" }, signal: AbortSignal.timeout(6000) });
     const d = (await res.json()) as { daily?: Record<string, (number | null)[]>; hourly?: { time?: string[]; temperature_2m?: (number | null)[]; precipitation?: (number | null)[] } };
     const day = d.daily;
     if (day?.time && day.temperature_2m_max?.[0] != null) {

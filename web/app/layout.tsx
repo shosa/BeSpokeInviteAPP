@@ -8,7 +8,7 @@ import { ButtonRipple } from "@/components/ui/ButtonRipple";
 import { getLang } from "@/lib/i18n";
 import { LangProvider } from "@/lib/lang";
 
-// Titoli in Fraunces, interfaccia in Jost (sistema Bespoke Invites): scaricati in build e serviti dal nostro dominio.
+// Titoli in Fraunces, interfaccia in Jost (sistema Bespoke Invite): scaricati in build e serviti dal nostro dominio.
 const display = Fraunces({ subsets: ["latin"], variable: "--font-iv-display", display: "swap", weight: ["300", "400", "500"], style: ["normal", "italic"] });
 const text = Jost({ subsets: ["latin"], variable: "--font-text", display: "swap", weight: ["300", "400", "500", "600"] });
 

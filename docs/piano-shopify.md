@@ -1,11 +1,11 @@
-# Piano: vendita su Shopify, builder su Bespoke Invites
+# Piano: vendita su Shopify, builder su Bespoke Invite
 
 Stato: **proposta, in attesa di approvazione** (fase 1 non ancora avviata).
 
 ## Idea
 
 Shopify è il negozio e il registratore del pagamento: incassa, gestisce fatture, IVA, rimborsi ed email di conferma.
-Bespoke Invites è il builder: il cliente lo apre dopo l'acquisto con un link personale legato all'ordine.
+Bespoke Invite è il builder: il cliente lo apre dopo l'acquisto con un link personale legato all'ordine.
 
 ## Fasi
 
@@ -13,7 +13,7 @@ Una fase alla volta. Ogni fase va approvata prima di partire (CLAUDE.md).
 
 ### Fase 1: prezzi coerenti con Shopify
 
-Problema oggi: Shopify addebita il prezzo fisso della variante (`SHOPIFY_VARIANT_ID`), non quello scelto in Bespoke Invites.
+Problema oggi: Shopify addebita il prezzo fisso della variante (`SHOPIFY_VARIANT_ID`), non quello scelto in Bespoke Invite.
 
 - Una variante Shopify per modello: Invito Base, Invito Smart, Su misura.
 - Ogni funzione a pagamento è una riga separata nel carrello, con la sua variante.

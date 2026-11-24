@@ -31,7 +31,7 @@ export default async function Admin() {
         <Nav lang={lang} />
         <main className="wrap narrow admin-denied">
           <h1>{t("Non hai accesso alla console", "You don't have access to the console")}</h1>
-          <p className="lede">{t("La console è riservata agli amministratori di Bespoke Invites.", "The console is reserved for Bespoke Invites administrators.")}</p>
+          <p className="lede">{t("La console è riservata agli amministratori di Bespoke Invite.", "The console is reserved for Bespoke Invite administrators.")}</p>
         </main>
       </>
     );

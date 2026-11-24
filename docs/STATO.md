@@ -1,4 +1,4 @@
-# Stato del lavoro — Bespoke Invites
+# Stato del lavoro — Bespoke Invite
 
 Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 
@@ -31,7 +31,7 @@ Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 - **Acquisto:** il checkout accetta il livello; il premium usa `SHOPIFY_VARIANT_PREMIUM_ID` se configurata.
 - **Verificato:** test di validazione 6/6, pacchetto condiviso 61/61, flusso nel browser (invitati, attività standard, budget, riepilogo).
 - **Limiti da chiudere:** la quota è unica per l'invito (non per gruppo); gli invitati del planner non sono collegati alle risposte RSVP (che non identificano l'ospite); il prezzo premium va confermato sulla variante Shopify; 14 test di tema di `engine.test.ts` falliscono dal pull che ha rimosso quei temi.
-## Conversione in Bespoke Invites (in corso)
+## Conversione in Bespoke Invite (in corso)
 
 - **Perimetro:** planner (`/planner/[id]`), profilo con gli inviti (`/account`), builder (`/editor/[id]`), link pubblici (`/i/[slug]`). Niente home, landing, legal, checkout interno, registrazione o login con password. `/` rimanda al profilo.
 - **Accesso:** con il link personale `/accesso/[token]`: l'API verifica il token (salvato solo come hash in `access_tokens`, scadenza 365 giorni, revocabile) e apre la sessione. Il link lo crea `npm run access-token -w @inviteme/api -- <email> <nome>`. In seguito lo crea il webhook Shopify (fase 2 del piano).
@@ -39,7 +39,7 @@ Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 - **Modalità demo:** con `DEMO_MODE=true` e senza Shopify il profilo mostra «Crea un invito di prova»: `POST /api/demo/invitations` crea (se manca) un utente demo e un invito pagato di prova. Con Shopify configurato la demo è sempre spenta.
 - **Da decidere:** la console admin e i checkout API (`/api/checkout*`) restano finché la fase 1 del piano Shopify non li sostituisce.
 - **Verifica:** test API 65/65, typecheck di API e web. Nessun deploy: il cambio di accesso è da confermare prima, perché gli account con password non entrano più.
-## Builder con il sistema «Bespoke Invites» (in corso)
+## Builder con il sistema «Bespoke Invite» (in corso)
 
 - **Stile**: le regole del builder stanno in `web/components/builder/builder.css`, tutte sotto `.bl-app`. Le regole di builder erano in `web/app/globals.css` e sono state spostate; restano lì solo `.bl-icon` (usata dalla console admin) e gli stili condivisi.
 - **Palette e font**: crema, avorio e sabbia; oro metallico per i pulsanti principali; Fraunces per i titoli (caricato in `web/app/editor/layout.tsx`) e Jost per il testo.

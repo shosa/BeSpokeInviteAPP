@@ -25,7 +25,7 @@ function confirmPage(token: string, en: boolean) {
   const t = (it: string, eng: string) => (en ? eng : it);
   const html = `<!doctype html><html lang="${en ? "en" : "it"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>${t("Accedi con il link", "Sign in with the link")}</title></head>
 <body style="font-family:Georgia,serif;text-align:center;padding:60px 20px;color:#17242A;background:#fff">
-<p>${t("Sei già entrato in Bespoke Invites. Vuoi entrare con l'account di questo link?", "You're already signed in to Bespoke Invites. Do you want to sign in with this link's account?")}</p>
+<p>${t("Sei già entrato in Bespoke Invite. Vuoi entrare con l'account di questo link?", "You're already signed in to Bespoke Invite. Do you want to sign in with this link's account?")}</p>
 <form method="post" action="/accesso/${escapeHtml(encodeURIComponent(token))}"><button type="submit" style="font:inherit;padding:10px 22px;border:1px solid #17242A;background:#17242A;color:#fff;border-radius:6px;cursor:pointer">${t("Entra con questo link", "Sign in with this link")}</button></form>
 <p><a href="/account" style="color:#17242A">${t("Resta nell'account attuale", "Stay in the current account")}</a></p>
 </body></html>`;

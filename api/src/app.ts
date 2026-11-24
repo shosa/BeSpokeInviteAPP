@@ -774,7 +774,7 @@ export async function buildApp() {
     const hit = geoCache.get(q);
     if (hit) return { results: hit };
     // Prima Photon (OpenStreetMap, completa anche le parole a metà mentre si scrive), poi Nominatim come riserva.
-    const UA = { "User-Agent": "BespokeInvites/1.0 (https://app.thebespokeinvite.com)" };
+    const UA = { "User-Agent": "BespokeInvite/1.0 (https://app.thebespokeinvite.com)" };
     let results: string[] = [];
     try {
       const res = await fetch(`https://photon.komoot.io/api/?limit=6&q=${encodeURIComponent(q)}`, { headers: UA, signal: AbortSignal.timeout(4000) });
@@ -1845,9 +1845,9 @@ export async function buildApp() {
     if (!EMAIL.test(to)) return reply.code(400).send({ error: "Indirizzo di prova non valido" });
     const msg = {
       to,
-      subject: "Prova di posta: Bespoke Invites",
-      html: "<p>Questa è una prova. Se la ricevi, la posta di Bespoke Invites funziona.</p>",
-      text: "Questa è una prova. Se la ricevi, la posta di Bespoke Invites funziona.",
+      subject: "Prova di posta: Bespoke Invite",
+      html: "<p>Questa è una prova. Se la ricevi, la posta di Bespoke Invite funziona.</p>",
+      text: "Questa è una prova. Se la ricevi, la posta di Bespoke Invite funziona.",
     };
     try {
       await sendMail(msg, "test");
