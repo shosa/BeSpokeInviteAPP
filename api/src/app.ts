@@ -52,7 +52,7 @@ import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
 import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
 import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, readUpload, uploadLimits, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
-import { PASSWORD_MIN, SESSION_COOKIE, adminAllowed, currentUser, endSession, hashPassword, startSession, verifyPassword, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
+import { PASSWORD_MIN, SESSION_COOKIE, hashToken, adminAllowed, currentUser, endSession, hashPassword, startSession, verifyPassword, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
 import { getLastMailResult, getMailSettings, loadMailSettings, mailProvider, saveMailSettings, validateMailSettings, fromAddress, resendKey } from "./mailSettings";
 import { getAllMailTemplates, isMailKind, loadMailTemplates, rsvpVerdict, saveMailTemplate, validateMailTemplate, MAIL_VARIABLES } from "./mailTemplates";
@@ -282,7 +282,8 @@ export async function buildApp() {
     return { id: rows[0].id, email: rows[0].email, name: rows[0].name, role };
   });
 
-  // Imposta (o cambia) la password del cliente già entrato. Le altre sessioni restano aperte.
+  // Imposta (o cambia) la password del cliente già entrato. Le altre sessioni si chiudono e i link di accesso già
+  // inviati smettono di valere (chi li avesse ricevuti o rubati non entra più); questa sessione resta aperta.
   app.post("/api/auth/password", async (req, reply) => {
     const user = await currentUser(req);
     if (!user) return reply.code(401).send({ error: "Accedi per continuare" });
@@ -290,6 +291,8 @@ export async function buildApp() {
     if (password.length < PASSWORD_MIN || password.length > 200) return reply.code(400).send({ error: "La password deve avere almeno 8 caratteri" });
     if (password.trim().toLowerCase() === user.email.toLowerCase()) return reply.code(400).send({ error: "La password non può essere la tua email" });
     await pool.query("UPDATE users SET password_hash = $2 WHERE id = $1", [user.id, await hashPassword(password)]);
+    await pool.query("DELETE FROM sessions WHERE user_id = $1 AND token_hash <> $2", [user.id, hashToken(req.cookies[SESSION_COOKIE] ?? "")]);
+    await pool.query("UPDATE access_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL", [user.id]);
     return { ok: true };
   });
 
