@@ -656,11 +656,10 @@ button.ov-stat:hover { transform: translateY(-2px); border-color: var(--brass-li
 .adm-pill.is-dirty { background: #fbeee4; color: #8a4a1c; }
 @keyframes admLive { 70% { box-shadow: 0 0 0 7px rgba(63, 143, 58, 0); } 100% { box-shadow: 0 0 0 0 rgba(63, 143, 58, 0); } }
 @media (prefers-reduced-motion: reduce) { .adm-pill.is-live i, .ov-live-dot { animation: none; } }
-/* Badge di stato: non escono dalla cella. Su una riga sola finché c'è spazio, poi vanno a capo dentro il badge;
-   il pallino «in modifica ora» non si schiaccia mai (flex: none sopra), resta centrato sulla prima riga. */
-span.adm-pill { max-width: 100%; box-sizing: border-box; white-space: normal; line-height: 1.25; text-align: left; overflow-wrap: anywhere; vertical-align: middle; }
+/* Badge di stato: sempre su una riga; la loro colonna si allarga quanto serve al badge. Il pallino «in modifica ora» non si schiaccia mai (flex: none sopra), resta centrato sulla prima riga. */
+span.adm-pill { box-sizing: border-box; white-space: nowrap; flex: none; line-height: 1.25; vertical-align: middle; }
 span.adm-pill.is-live { align-items: center; padding-left: 9px; }
-.adm-table td:has(> .adm-pill) { min-width: 108px; }
+.adm-table td:has(> .adm-pill) { width: 1%; white-space: nowrap; }
 .adm-ago { white-space: nowrap; }
 .adm-table td small { display: block; }
 .adm-sessions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
