@@ -1168,6 +1168,13 @@ export async function buildApp() {
     return added;
   }
 
+  // L'ordine contiene una variante dell'invito (completo, pacchetto o base)?
+  function hasInvitationLine(order: { line_items?: { variant_id?: number | string | null }[] }): boolean {
+    const ids = getShopifyIds();
+    const ours = new Set([ids.variantId, ids.variantPremiumId, ids.variantBasicId].map((v) => normalizeVariant(v ?? "")).filter((v): v is string => Boolean(v)));
+    return (order.line_items ?? []).some((l) => l.variant_id != null && ours.has(normalizeVariant(String(l.variant_id)) ?? ""));
+  }
+
   async function registerShopifyPurchase(order: ShopifyOrderLite): Promise<boolean> {
     const ids = getShopifyIds();
     const base = normalizeVariant(ids.variantId);
@@ -1300,31 +1307,48 @@ export async function buildApp() {
       note_attributes?: { name: string; value: string }[];
       line_items?: { variant_id?: number | string | null; properties?: { name: string; value: string }[] }[];
     };
-    // Acquisto del nostro prodotto senza invito collegato: il cliente sceglie il template al primo accesso.
-    if (!orderIdFromOrder(order) && !invitationIdFromOrder(order)) {
+    // Gli attributi orderId / invitationId li può scrivere chi compra (attributi del carrello): da soli non bastano.
+    // Valgono solo se l'ordine contiene davvero una variante dell'invito e paga almeno l'importo dell'ordine creato
+    // dal server; altrimenti l'acquisto si registra come uno normale (solo ciò che è stato comprato davvero).
+    const orderId = orderIdFromOrder(order);
+    const invitationId = invitationIdFromOrder(order);
+    if ((!orderId && !invitationId) || !hasInvitationLine(order)) {
+      // Acquisto del nostro prodotto senza invito collegato: il cliente sceglie il template al primo accesso.
       return { ok: true, purchase: await registerShopifyPurchase(order) };
     }
-    const orderId = orderIdFromOrder(order);
-    if (orderId) {
-      const { rows } = await pool.query("SELECT id, user_id, draft, amount_cents, invitation_id FROM orders WHERE id = $1 AND status = 'pending' AND draft IS NOT NULL", [orderId]);
-      if (rows[0] && !rows[0].invitation_id) await createInvitationFromOrder(rows[0], "shopify", order.name);
-    }
-    const invitationId = invitationIdFromOrder(order);
+    // Webhook ripetuto: l'ordine Shopify è già registrato, non si concede nulla una seconda volta.
+    const seen = await pool.query("SELECT 1 FROM orders WHERE id = $1", [String(order.id)]);
+    if (seen.rows.length) return { ok: true, duplicate: true };
     const amountCents = Math.round(Number(order.total_price) * 100);
-    if (invitationId && UUID.test(invitationId)) {
-      const { rows } = await pool.query("SELECT id, status FROM invitations WHERE id = $1", [invitationId]);
-      if (rows[0]?.status === "paid") {
-        // Già pagato: conta solo un ordine di aggiornamento che dichiara le funzioni nuove.
-        if (orderAttr(order, "kind") === "upgrade") {
-          const addons = (orderAttr(order, "addons") ?? "").split(",").filter((k) => k && k !== "none");
-          await applyUpgrade(invitationId, addons, amountCents, "shopify", String(order.id));
-        }
-      } else if (rows[0]) await markPaid(invitationId, order.name, amountCents, "shopify");
+    const covers = (row: { amount_cents: number; currency?: string | null }) =>
+      Number.isFinite(amountCents) && amountCents >= Number(row.amount_cents) && String(order.currency ?? "").toUpperCase() === String(row.currency ?? "EUR").toUpperCase();
+    let fulfilled = false;
+    if (orderId) {
+      const { rows } = await pool.query("SELECT id, user_id, draft, amount_cents, currency, invitation_id FROM orders WHERE id = $1 AND status = 'pending' AND draft IS NOT NULL", [orderId]);
+      if (rows[0] && !rows[0].invitation_id && covers(rows[0])) {
+        await createInvitationFromOrder(rows[0], "shopify", order.name);
+        fulfilled = true;
+      }
+    } else if (invitationId && UUID.test(invitationId)) {
+      // Solo un pagamento in attesa creato dal server per quell'invito, con importo coerente.
+      const { rows } = await pool.query(
+        "SELECT o.id, o.kind, o.addons, o.amount_cents, o.currency, i.status FROM orders o JOIN invitations i ON i.id = o.invitation_id WHERE o.invitation_id = $1 AND o.status = 'pending' ORDER BY o.created_at DESC LIMIT 1",
+        [invitationId],
+      );
+      const pending = rows[0];
+      if (pending && covers(pending)) {
+        if (pending.status === "paid") {
+          if (pending.kind === "upgrade") await applyUpgrade(invitationId, (pending.addons as string[] | null) ?? [], amountCents, "shopify", String(order.id));
+        } else await markPaid(invitationId, order.name, amountCents, "shopify");
+        fulfilled = true;
+      }
     }
+    // Attributi che non corrispondono a un pagamento in attesa: vale quello che è stato comprato, come un acquisto normale.
+    if (!fulfilled) return { ok: true, purchase: await registerShopifyPurchase(order), ignored: "no matching pending order" };
     await pool.query(
       `INSERT INTO orders (id, invitation_id, amount_cents, currency, source, status) VALUES ($1, $2, $3, $4, 'shopify', 'paid')
        ON CONFLICT (id) DO NOTHING`,
-      [String(order.id), invitationId && UUID.test(invitationId) ? invitationId : null, Math.round(Number(order.total_price) * 100), order.currency],
+      [String(order.id), invitationId && UUID.test(invitationId) ? invitationId : null, amountCents, order.currency],
     );
     return { ok: true };
   });
