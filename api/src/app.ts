@@ -50,7 +50,7 @@ import { previewShell } from "./engine/previewShell";
 import { renderInvitePage } from "./engine/page";
 import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
 import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
-import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, type MediaKind } from "./media";
+import { MEDIA_DIR, MediaError, convertMedia, ensureMediaDirs, INPUT_TYPES, makeThumbnail, readUpload, uploadLimits, type MediaKind } from "./media";
 import { StockError, importStock, parseStockFilters, searchStock } from "./pixabay";
 import { PASSWORD_MIN, SESSION_COOKIE, adminAllowed, currentUser, endSession, hashPassword, startSession, verifyPassword, type SessionUser, createAccessToken, roleForEmail, userForAccessToken } from "./auth";
 import { accessEmail, appUrl, orderEmail, purchaseEmail, rsvpNoticeEmail, sendMail, type MailMessage } from "./mail";
@@ -878,13 +878,12 @@ export async function buildApp() {
     if (editRules({ status: inv.status, edit_count: inv.edit_count }).readOnly) return reply.code(409).send({ error: "Modifica già confermata: l'invito non si modifica più" });
     const kind = String(req.query.kind ?? "");
     if (!isMediaKind(kind)) return reply.code(400).send({ error: "Tipo di file non valido" });
-    const file = await req.file();
+    const file = await req.file({ limits: uploadLimits(kind) });
     if (!file) return reply.code(400).send({ error: "Nessun file ricevuto" });
     const ext = INPUT_TYPES[kind][file.mimetype];
     if (!ext) return reply.code(415).send({ error: "Formato non supportato" });
-    const buffer = await file.toBuffer();
-    if (file.file.truncated) return reply.code(413).send({ error: "File troppo grande" });
     try {
+      const buffer = await readUpload(file, kind);
       const saved = await convertMedia(kind, buffer, ext);
       return reply.code(201).send({ url: saved.url, kind, bytes: saved.bytes });
     } catch (e) {

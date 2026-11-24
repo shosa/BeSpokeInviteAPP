@@ -29,6 +29,24 @@ export class MediaError extends Error {
   }
 }
 
+// Limite del caricamento per tipo, applicato già mentre il file arriva (req.file({ limits })): una foto non può
+// occupare in memoria i 150 MB ammessi per un video.
+export const uploadLimits = (kind: MediaKind) => ({ fileSize: MEDIA_LIMITS[kind].inputBytes, files: 1 });
+const tooBig = (kind: MediaKind) => new MediaError(`File troppo grande (massimo ${Math.round(MEDIA_LIMITS[kind].inputBytes / 1048576)} MB)`, 413);
+
+// Legge il file caricato; oltre il limite del tipo risponde con lo stesso messaggio della conversione.
+export async function readUpload(file: { toBuffer(): Promise<Buffer>; file: { truncated: boolean } }, kind: MediaKind): Promise<Buffer> {
+  let buffer: Buffer;
+  try {
+    buffer = await file.toBuffer();
+  } catch (e) {
+    if ((e as { code?: string }).code === "FST_REQ_FILE_TOO_LARGE") throw tooBig(kind);
+    throw e;
+  }
+  if (file.file.truncated) throw tooBig(kind);
+  return buffer;
+}
+
 let queue: Promise<unknown> = Promise.resolve();
 
 // Ogni conversione aspetta la precedente. Niente due ffmpeg insieme sullo stesso server.
@@ -85,8 +103,9 @@ function keepsAlpha(kind: MediaKind, inputExt: string): boolean {
   return kind === "photo" && (inputExt === "png" || inputExt === "webp");
 }
 
-function args(kind: MediaKind, src: string, out: string): string[] {
-  const base = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-threads", "2", "-i", src];
+export function args(kind: MediaKind, src: string, out: string): string[] {
+  // Solo file locali: un file costruito ad arte (es. una playlist) non fa aprire a ffmpeg indirizzi di rete.
+  const base = ["-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-threads", "2", "-protocol_whitelist", "file,pipe", "-i", src];
   if (kind === "video") {
     return [...base, "-an", "-vf", "scale='min(1080,iw)':-2", "-c:v", "libx264", "-preset", "slower", "-crf", "29", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out];
   }
@@ -115,7 +134,7 @@ function probeDuration(file: string): Promise<number> {
   return new Promise((resolve, reject) => {
     execFile(
       "ffprobe",
-      ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file],
+      ["-v", "error", "-protocol_whitelist", "file,pipe", "-show_entries", "format=duration", "-of", "csv=p=0", file],
       { timeout: 30_000 },
       (err, stdout) => {
         if (err) return reject(new MediaError("File non leggibile o formato non supportato", 422));

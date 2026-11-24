@@ -4,7 +4,7 @@ import { isEventType, isPlannerIcon, plannerPdfName, type Catalog } from "@invit
 import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
-import { INPUT_TYPES, MediaError, convertMedia } from "./media";
+import { INPUT_TYPES, MediaError, convertMedia, readUpload, uploadLimits } from "./media";
 import { buildPlannerPdf, isPdfChoice, type PdfChoice } from "./planner-pdf";
 import type { SessionUser } from "./auth";
 
@@ -279,13 +279,12 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     if (!p) return;
     const key = IMAGE_SLOTS[req.params.slot as keyof typeof IMAGE_SLOTS];
     if (!key) return reply.code(404).send({ error: "Elemento non trovato" });
-    const file = await req.file();
+    const file = await req.file({ limits: uploadLimits("photo") });
     if (!file) return reply.code(400).send({ error: "Nessun file ricevuto" });
     const ext = INPUT_TYPES.photo[file.mimetype];
     if (!ext) return reply.code(415).send({ error: "Formato non supportato" });
-    const buffer = await file.toBuffer();
-    if (file.file.truncated) return reply.code(413).send({ error: "File troppo grande" });
     try {
+      const buffer = await readUpload(file, "photo");
       const saved = await convertMedia("photo", buffer, ext);
       await pool.query("UPDATE planners SET data = jsonb_set(coalesce(data, '{}'::jsonb), $2, to_jsonb($3::text)) WHERE id = $1", [p.id, `{${key}}`, saved.url]);
       return reply.code(201).send({ url: saved.url });
