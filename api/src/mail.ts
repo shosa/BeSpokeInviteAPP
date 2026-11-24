@@ -11,6 +11,9 @@ export const appUrl = () => (process.env.APP_URL ?? "http://localhost:3000").rep
 
 export type MailMessage = { to: string; subject: string; html: string; text: string };
 
+// Oggetto su una riga: niente a capo né caratteri di controllo (il titolo dell'invito lo scrive il cliente).
+export const cleanSubject = (s: string) => s.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s{2,}/g, " ").trim();
+
 // Logo incorporato nell'email (allegato inline, src="cid:…"): molti client non scaricano le immagini remote,
 // e il logo da URL compariva come immagine mancante. Il file è lo stesso servito dal frontend.
 const LOGO_CID = "bespoke-logo";
@@ -43,7 +46,7 @@ export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Prom
         body: JSON.stringify({
           from: fromAddress(),
           to: [msg.to],
-          subject: msg.subject,
+          subject: cleanSubject(msg.subject),
           html,
           text: msg.text,
           ...(logo ? { attachments: [{ content: logo, filename: "logo.png", content_type: "image/png", content_id: LOGO_CID }] } : {}),
@@ -53,7 +56,7 @@ export async function sendMail(msg: MailMessage, kind: MailKind = "other"): Prom
       });
       if (!res.ok) throw new Error(`Invio email non riuscito (${res.status})`);
     } else {
-      await pool.query("INSERT INTO outbox (to_address, subject, html, text) VALUES ($1, $2, $3, $4)", [msg.to, msg.subject, msg.html, msg.text]);
+      await pool.query("INSERT INTO outbox (to_address, subject, html, text) VALUES ($1, $2, $3, $4)", [msg.to, cleanSubject(msg.subject), msg.html, msg.text]);
     }
     await recordMailResult({ at: new Date().toISOString(), ok: true, kind });
   } catch (e) {

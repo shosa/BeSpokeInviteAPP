@@ -26,3 +26,9 @@ test("il testo scritto dalla console viene escapato nell'HTML", () => {
   assert.match(m.html, /Ciao &lt;b&gt;Anna&lt;\/b&gt; &amp; Luca/);
   assert.doesNotMatch(m.html, /<b>Anna/);
 });
+
+test("hardening: l'oggetto dell'email resta su una riga", async () => {
+  const { cleanSubject } = await import("../src/mail");
+  assert.equal(cleanSubject("Nuova risposta per Anna\r\nBcc: x@y.it"), "Nuova risposta per Anna Bcc: x@y.it");
+  assert.equal(cleanSubject("Pagamento\tricevuto\u0000"), "Pagamento ricevuto");
+});
