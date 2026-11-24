@@ -107,6 +107,12 @@ function renderFor(c: Catalog, slug: string, config: InviteConfig, preview = fal
   return renderInvitePage({ theme, config, slug, features: activeFeatures(c, config.model, config.addons), runtime: RUNTIME, preview, builder });
 }
 
+// Toglie da una mappa di limiti le voci più vecchie della finestra (at: istante della prima richiesta o dell'ultima).
+function pruneExpired<V extends { at: number } | number>(map: Map<string, V>, windowMs: number) {
+  const now = Date.now();
+  for (const [k, v] of map) if (now - (typeof v === "number" ? v : v.at) > windowMs) map.delete(k);
+}
+
 const NOT_FOUND_PAGE = `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Invito non disponibile · Invitation not available</title></head><body style="font-family:Georgia,serif;text-align:center;padding:60px 20px;color:#17242A"><p>Questo invito non è disponibile.</p><p lang="en">This invitation is not available.</p></body></html>`;
 
 export async function buildApp() {
@@ -225,13 +231,15 @@ export async function buildApp() {
     return { user: { ...user, hasPassword: String(rows[0]?.password_hash ?? "").startsWith("scrypt$"), pro: await isStudio(user.id) } };
   });
 
-  // Accesso con email e password (in alternativa al link). Al massimo 6 tentativi ogni 15 minuti per email, e 300 in tutto
-  // (non per IP: dietro i proxy l'API vede sempre lo stesso indirizzo).
+  // Accesso con email e password (in alternativa al link). Al massimo 6 tentativi ogni 15 minuti per email.
+  // Nessun limite globale: con un tetto unico chiunque bloccherebbe il login di tutti (dietro i proxy l'API vede sempre
+  // lo stesso indirizzo, quindi niente limite per IP). Le voci scadute si potano, la mappa non si svuota mai di colpo.
+  const LOGIN_WINDOW = 15 * 60_000;
   const loginAttempts = new Map<string, { n: number; at: number }>();
   const tooMany = (key: string, max: number) => {
     const now = Date.now();
     const a = loginAttempts.get(key);
-    if (!a || now - a.at > 15 * 60_000) { loginAttempts.set(key, { n: 1, at: now }); return false; }
+    if (!a || now - a.at > LOGIN_WINDOW) { loginAttempts.set(key, { n: 1, at: now }); return false; }
     a.n += 1;
     return a.n > max;
   };
@@ -240,8 +248,8 @@ export async function buildApp() {
     const email = String(b.email ?? "").trim().toLowerCase();
     const password = String(b.password ?? "");
     if (!EMAIL.test(email) || !password) return reply.code(400).send({ error: "Inserisci email e password" });
-    if (loginAttempts.size > 10_000) loginAttempts.clear();
-    if (tooMany(`e:${email}`, 6) || tooMany("all", 300)) return reply.code(429).send({ error: "Troppi tentativi: riprova tra qualche minuto, o entra con il link via email" });
+    if (loginAttempts.size > 10_000) pruneExpired(loginAttempts, LOGIN_WINDOW);
+    if (tooMany(`e:${email}`, 6)) return reply.code(429).send({ error: "Troppi tentativi: riprova tra qualche minuto, o entra con il link via email" });
     const { rows } = await pool.query("SELECT id, email, name, role, password_hash FROM users WHERE email = $1", [email]);
     const ok = rows[0] ? await verifyPassword(password, rows[0].password_hash) : await verifyPassword(password, "scrypt$AAAAAAAAAAAAAAAAAAAAAA==$AAAA");
     if (!rows[0] || !ok) return reply.code(401).send({ error: "Email o password non corretti" });
