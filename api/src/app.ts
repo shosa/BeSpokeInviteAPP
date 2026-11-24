@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import fs from "fs";
+import http from "http";
 import os from "os";
 import path from "path";
 import Fastify, { type FastifyReply, type FastifyRequest } from "fastify";
@@ -117,6 +118,17 @@ const NOT_FOUND_PAGE = `<!doctype html><html lang="it"><head><meta charset="utf-
 
 export async function buildApp() {
   const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? "info" }, bodyLimit: 12 * 1024 * 1024 });
+  // Errori interni (5xx): nei log il dettaglio, al cliente in produzione solo un messaggio generico (il testo di
+  // PostgreSQL o di una libreria può rivelare tabelle, colonne o percorsi). Gli errori 4xx restano come prima.
+  app.setErrorHandler((err: Error & { statusCode?: number; code?: string }, req, reply) => {
+    const status = typeof err.statusCode === "number" && err.statusCode >= 400 && err.statusCode < 600 ? err.statusCode : 500;
+    if (status >= 500) {
+      req.log.error({ err }, "errore interno");
+      const message = process.env.NODE_ENV === "production" ? "Errore interno: riprova tra poco" : err.message;
+      return reply.code(status).send({ statusCode: status, error: message, message });
+    }
+    return reply.code(status).send({ statusCode: status, ...(err.code ? { code: err.code } : {}), error: http.STATUS_CODES[status] ?? "Error", message: err.message });
+  });
   await app.register(cookie);
   // Sito in inglese: i messaggi per il cliente ({ error }, { message }) partono tradotti. Vedi errorsEn.ts.
   app.addHook("preSerialization", async (req, _reply, payload) => {
