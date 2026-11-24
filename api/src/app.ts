@@ -1691,7 +1691,10 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     // Per id o per slug: la pagina pubblica /i/<slug> ripiega qui quando l'invito non è pubblicato e chi guarda è admin.
     const key = String(req.params.id).slice(0, 80);
-    const { rows } = await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE slug = $1 OR id::text = $1 LIMIT 1", [key]);
+    // Un UUID si cerca solo come id (così uno slug scelto a forma di UUID non copre un altro invito), il resto come slug.
+    const { rows } = UUID.test(key)
+      ? await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE id = $1", [key])
+      : await pool.query("SELECT slug, edit_count, config, published_config FROM invitations WHERE slug = $1", [key]);
     const inv = rows[0];
     if (!inv) return reply.code(404).type("text/plain; charset=utf-8").send("Invito non trovato");
     const published = req.query.v === "published" && inv.edit_count >= 1;
