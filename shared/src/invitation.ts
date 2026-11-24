@@ -28,6 +28,19 @@ export function editRules(inv: { status: string; edit_count: number }): { readOn
   return { readOnly: false, themeLocked: inv.status === "paid" };
 }
 
+// Cambio di template: contenuto e blocchi restano; tornano al template solo i colori personalizzati dei blocchi.
+// Usata dal builder (anteprima e conferma), dal server e dall'assistente: stessa trasformazione ovunque.
+export function withTheme(config: InviteConfig, themeId: string): InviteConfig {
+  const blocks = config.blocks.map((b) => {
+    const props = { ...b.props };
+    delete props.lookBg;
+    delete props.lookInk;
+    delete props.lookCover;
+    return { ...b, props };
+  });
+  return { ...config, themeId, blocks };
+}
+
 // Lo slug del link: minuscole, numeri e trattini, da 3 a 60 caratteri, senza trattini agli estremi.
 export function normalizeSlug(input: unknown): string | null {
   const s = String(input ?? "").trim().toLowerCase().replace(/\s+/g, "-");

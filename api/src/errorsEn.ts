@@ -39,6 +39,8 @@ const EXACT: Record<string, string> = {
   "Il pannello è disponibile dopo il pagamento": "The panel is available after payment",
   "Tema non disponibile": "Style not available",
   "Template non disponibile": "Template not available",
+  "Il template di questo invito è già stato cambiato una volta": "This invitation's template has already been changed once",
+  "È già il template dell'invito": "This is already the invitation's template",
   "Ricarica dei crediti non disponibile in questo momento": "Credit top-up isn't available right now",
   "Il prodotto dei crediti non è visibile al negozio: va pubblicato nel canale di vendita collegato al sito": "The credits product isn't visible to the shop: it must be published on the sales channel linked to the site",
   "I crediti non sono in vendita in questo momento": "Credits aren't on sale right now",

@@ -25,7 +25,7 @@ import {
 } from "@inviteme/shared";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
-import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Music, Redo2, RotateCw, Smartphone, Sparkles, Undo2, Users, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, ClipboardCheck, Copy, Eye, ExternalLink, LayoutList, Languages, Link2, Mail, Maximize2, Menu, Minimize2, Monitor, Palette, Music, Redo2, RotateCw, Smartphone, Sparkles, Undo2, Users, X } from "lucide-react";
 import { Canvas } from "./builder/Canvas";
 import { Inspector } from "./builder/Inspector";
 import { AssistantPanel } from "./builder/AssistantPanel";
@@ -37,6 +37,7 @@ import { addonCopy, blockCopy, modelCopy } from "@/lib/catalogCopy";
 import { StockContext } from "./builder/PixabayDialog";
 import { PublishedPanel } from "./builder/PublishedPanel";
 import { PublishDialog } from "@/components/PublishDialog";
+import { ThemeSwitcher } from "./builder/ThemeSwitcher";
 
 export type Manage = {
   id: string;
@@ -55,6 +56,7 @@ export type Manage = {
   assistantTopup?: boolean; // ricarica dei crediti attiva su Shopify
   assistantPack?: number; // richieste per pacchetto
   templateMusic?: string | null; // brano incluso nel template, copiato nell'invito alla creazione
+  themeChange?: { available: boolean; locked: string[] }; // cambio di template: una sola volta per invito
 };
 
 type MobileTab = "blocchi" | "anteprima" | "proprieta";
@@ -114,6 +116,10 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   // Pubblicato = prima conferma: solo allora l'invito ha il suo link pubblico.
   const published = initial.editCount >= 1;
   const [publishOpen, setPublishOpen] = useState(false);
+  // Cambio di template: una sola volta per invito, dalla galleria a tutto schermo con l'anteprima della bozza.
+  const [themeChangeLeft, setThemeChangeLeft] = useState(initial.themeChange?.available ?? false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const themeLocked = useMemo(() => new Set(initial.themeChange?.locked ?? []), [initial.themeChange]);
   const editable = !locked;
   // Conferma = pubblicazione. Prima si salva la bozza (così la conferma vede l'ultima versione); se ci sono funzioni
   // nuove da pagare, il server lo dice e si va al checkout della differenza, senza perdere la bozza.
@@ -470,7 +476,22 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
   function setEvent(key: string, value: unknown, group?: string) {
     edit((c) => ({ ...c, event: { ...c.event, [key]: value } }), group);
   }
-  // Cambio di template: contenuto e blocchi restano; tornano al template solo i colori personalizzati.
+  // Cambio di template: si salva prima la bozza, poi il server applica il template (contenuto e blocchi restano,
+  // tornano al template solo i colori personalizzati) e la bozza che rimanda diventa il nuovo punto di partenza.
+  async function changeTheme(themeId: string): Promise<string | null> {
+    if (!(await persist(config))) return lang === "en" ? "Could not save the draft, please try again." : "Bozza non salvata, riprova.";
+    const res = await fetch(`/api/invitations/${initial.id}/theme`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ themeId }) });
+    const data = (await res.json().catch(() => ({}))) as { config?: InviteConfig; error?: string };
+    if (!res.ok || !data.config) {
+      if (res.status === 409) setThemeChangeLeft(false);
+      return data.error ?? (lang === "en" ? "Could not change the template, please try again." : "Cambio di template non riuscito, riprova.");
+    }
+    history.reset(data.config);
+    setThemeChangeLeft(false);
+    setThemeOpen(false);
+    toast.success(lang === "en" ? "Template changed. Publish to show it to your guests." : "Template cambiato. Pubblica per mostrarlo agli ospiti.");
+    return null;
+  }
   async function upload(kind: "photo" | "video" | "audio", file: File): Promise<string | null> {
     setBusy(kind);
     setError(null);
@@ -561,6 +582,9 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             <button type="button" aria-pressed={device === "mobile"} className="bl-icon" aria-label={L.phonePreview} data-label={L.phonePreview} onClick={() => setDevice("mobile")}><Smartphone size={17} /></button>
           </div>
           {locked && <span className="bl-published-badge"><span aria-hidden="true" />{lang === "en" ? "Published" : "Pubblicato"}</span>}
+          {!locked && themeChangeLeft && (
+            <button type="button" className="btn outline small bl-theme-change" onClick={() => { setTopMenu(false); setThemeOpen(true); }}><Palette size={15} aria-hidden="true" /> {lang === "en" ? "Change template" : "Cambia template"}</button>
+          )}
           {!locked && (
             <button type="button" className="btn solid small bl-desktop-save" disabled={save === "saving"} onClick={() => persist(config)}>{L.saveNow}</button>
           )}
@@ -784,6 +808,9 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
         </div>
       )}
 
+      {themeOpen && (
+        <ThemeSwitcher invitationId={initial.id} config={config} catalog={catalog} locked={themeLocked} lang={lang} onClose={() => setThemeOpen(false)} onConfirm={changeTheme} />
+      )}
       {publishOpen && (
         <PublishDialog
           id={initial.id}

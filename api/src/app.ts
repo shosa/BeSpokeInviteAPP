@@ -35,6 +35,7 @@ import {
   applySetup,
   normalizeSlug,
   blockDef,
+  withTheme,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -320,6 +321,12 @@ export async function buildApp() {
     return reply.code(201).send({ id, slug });
   });
 
+  // Template Premium che l'invito non può usare: quelli dell'invito base (ordine con draft.plan = "base").
+  async function lockedThemesFor(invitationId: string, c: Catalog): Promise<string[]> {
+    const { rows } = await pool.query("SELECT 1 FROM orders WHERE invitation_id = $1 AND draft->>'plan' = 'base' LIMIT 1", [invitationId]);
+    return rows.length ? c.themes.filter((t) => t.premium).map((t) => t.manifest.id) : [];
+  }
+
   app.get<{ Params: { id: string } }>("/api/invitations/:id/manage", async (req, reply) => {
     const user = await requireUser(req, reply);
     if (!user) return;
@@ -327,6 +334,7 @@ export async function buildApp() {
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     const c = await loadFullCatalog();
     const linked = await pool.query("SELECT id FROM planners WHERE invitation_id = $1", [inv.id]);
+    const locked = await lockedThemesFor(inv.id, c);
     return {
       id: inv.id,
       plannerId: (linked.rows[0]?.id as string | undefined) ?? null,
@@ -347,6 +355,8 @@ export async function buildApp() {
       assistantUsed: inv.assistant_calls ?? 0,
       catalog: c,
       hasRsvp: hasRsvp(c, inv.config),
+      // Cambio di template dal builder: una sola volta per invito. locked: template Premium esclusi dall'invito base.
+      themeChange: { available: !inv.theme_changed_at, locked },
     };
   });
 
@@ -517,6 +527,29 @@ export async function buildApp() {
     await pool.query("UPDATE invitations SET config = $1 WHERE id = $2", [JSON.stringify(config), inv.id]);
     await recordSave(inv.id, user.id, changedSections(inv.config as InviteConfig, config)).catch((e) => req.log.warn({ err: e }, "attività dell'editor non registrata"));
     return { ok: true };
+  });
+
+  // Cambio di template dal builder: una sola volta per invito. Contenuto e blocchi della bozza restano, tornano al
+  // template solo i colori personalizzati dei blocchi (withTheme). Gli ospiti lo vedono alla prossima pubblicazione.
+  app.post<{ Params: { id: string } }>("/api/invitations/:id/theme", async (req, reply) => {
+    const user = await requireUser(req, reply);
+    if (!user) return;
+    const inv = await ownedInvitation(req.params.id, user.id);
+    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    if (inv.theme_changed_at) return reply.code(409).send({ error: "Il template di questo invito è già stato cambiato una volta" });
+    const c = await loadCatalog();
+    const themeId = String((req.body as { themeId?: unknown } | undefined)?.themeId ?? "");
+    const theme = getTheme(c, themeId);
+    if (!theme) return reply.code(400).send({ error: "Template non disponibile" });
+    const current = inv.config as InviteConfig;
+    if (theme.id === current.themeId) return reply.code(400).send({ error: "È già il template dell'invito" });
+    if ((await lockedThemesFor(inv.id, c)).includes(theme.id)) return reply.code(403).send({ error: "Questo template è Premium: non è incluso nell'invito base" });
+    const config = withTheme(current, theme.id);
+    // Una sola volta anche con due richieste insieme: vince solo l'aggiornamento che trova theme_changed_at ancora vuoto.
+    const { rowCount } = await pool.query("UPDATE invitations SET config = $1, theme_changed_at = now() WHERE id = $2 AND theme_changed_at IS NULL", [JSON.stringify(config), inv.id]);
+    if (!rowCount) return reply.code(409).send({ error: "Il template di questo invito è già stato cambiato una volta" });
+    await recordSave(inv.id, user.id, changedSections(current, config)).catch((e) => req.log.warn({ err: e }, "attività dell'editor non registrata"));
+    return { ok: true, config };
   });
 
   // Presenza nell'editor: l'editor aperto lo segnala ogni 30 secondi; la console mostra chi sta modificando adesso.

@@ -1,7 +1,7 @@
 import { activeFeatures, getTheme, type Catalog } from "../catalog";
 import { BLOCK_TYPES, EVENT_FIELDS, blockDef, isFixedPosition, makeBlock, type BlockType } from "../blocks";
 import type { AddonKey } from "../addons";
-import { MAX_BLOCKS, type InviteConfig } from "../invitation";
+import { MAX_BLOCKS, withTheme, type InviteConfig } from "../invitation";
 import { emptyValue, sanitizeValues } from "../engine/values";
 import { isRecord, sanitizeQuestions, type FieldDef } from "../engine/manifest";
 import { EVENT_TYPES, type EventType } from "../catalog";
@@ -269,14 +269,7 @@ function applyAction(config: InviteConfig, action: Action, ctx: ActionContext): 
       const theme = getTheme(ctx.catalog, action.themeId, config.model);
       if (!theme) return { error: "template non disponibile per questo modello" };
       // Come il builder: il cambio di stile tiene contenuto e blocchi, e riporta al template i colori dei blocchi.
-      const blocks = config.blocks.map((b) => {
-        const props = { ...b.props };
-        delete props.lookBg;
-        delete props.lookInk;
-        delete props.lookCover;
-        return { ...b, props };
-      });
-      return { config: { ...config, themeId: theme.id, blocks } };
+      return { config: withTheme(config, theme.id) };
     }
   }
 }

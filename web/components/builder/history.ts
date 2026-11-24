@@ -38,5 +38,8 @@ export function useHistory<T>(initial: T) {
     });
   }, []);
 
-  return { present: state.present, set, undo, redo, canUndo: state.past.length > 0, canRedo: state.future.length > 0 };
+  // Nuovo punto di partenza senza passi da annullare (es. dopo un cambio di template confermato dal server).
+  const reset = useCallback((next: T) => setState({ past: [], present: next, future: [], group: null, at: 0 }), []);
+
+  return { present: state.present, set, undo, redo, reset, canUndo: state.past.length > 0, canRedo: state.future.length > 0 };
 }

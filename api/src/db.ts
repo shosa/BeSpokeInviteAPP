@@ -89,7 +89,6 @@ ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_asked boolean NOT NUL
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_free_run integer NOT NULL DEFAULT 0;
 -- Richieste di BeSpoke AI ricaricate con un acquisto su Shopify: si sommano al limite della console.
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS assistant_bonus integer NOT NULL DEFAULT 0;
-ALTER TABLE assistant_usage ADD COLUMN IF NOT EXISTS counted boolean NOT NULL DEFAULT true;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS draft jsonb;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_url text;
@@ -104,6 +103,7 @@ CREATE TABLE IF NOT EXISTS assistant_usage (
   actions integer NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE assistant_usage ADD COLUMN IF NOT EXISTS counted boolean NOT NULL DEFAULT true;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
 CREATE TABLE IF NOT EXISTS settings (
   key text PRIMARY KEY,
@@ -140,7 +140,6 @@ CREATE TABLE IF NOT EXISTS planner_tables (
   seats integer NOT NULL DEFAULT 8,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-ALTER TABLE planner_guests ADD COLUMN IF NOT EXISTS table_id uuid REFERENCES planner_tables(id) ON DELETE SET NULL;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS tier text NOT NULL DEFAULT 'rsvp';
 CREATE TABLE IF NOT EXISTS planner_budget_items (
   id uuid PRIMARY KEY,
@@ -178,6 +177,7 @@ CREATE TABLE IF NOT EXISTS planner_guests (
   response text NOT NULL DEFAULT 'pending' CHECK (response IN ('pending', 'yes', 'no')),
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE planner_guests ADD COLUMN IF NOT EXISTS table_id uuid REFERENCES planner_tables(id) ON DELETE SET NULL;
 
 -- Planner come servizio a sé (si compra a parte): un evento con i suoi dati, collegabile a un invito (facoltativo).
 CREATE TABLE IF NOT EXISTS planners (
@@ -289,6 +289,8 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_cl
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS last_edit_at timestamptz;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS last_published_at timestamptz;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS editor_seen_at timestamptz;
+-- Cambio di template dal builder: concesso una sola volta per invito (null = ancora disponibile).
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS theme_changed_at timestamptz;
 CREATE TABLE IF NOT EXISTS invitation_edits (
   id bigserial PRIMARY KEY,
   invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
