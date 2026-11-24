@@ -506,14 +506,24 @@ export async function buildApp() {
           const client = new Anthropic({ apiKey });
           return (params) => client.messages.create(params);
         },
+        // Prenotazione atomica: passa solo se il contatore è ancora sotto il limite (callLimit + crediti comprati).
+        reserveCall: async (invitationId, limit) => {
+          const { rowCount } = await pool.query("UPDATE invitations SET assistant_calls = assistant_calls + 1 WHERE id = $1 AND assistant_calls < $2", [invitationId, limit]);
+          return rowCount === 1;
+        },
+        releaseCall: async (invitationId) => {
+          await pool.query("UPDATE invitations SET assistant_calls = GREATEST(assistant_calls - 1, 0) WHERE id = $1", [invitationId]);
+        },
+        // La richiesta è già stata contata dalla prenotazione: qui si restituisce solo se non era da contare.
         recordUsage: async (invitationId, model, usage, actions, state) => {
+          const delta = state.reserved ? (state.counted ? 0 : -1) : state.counted ? 1 : 0;
           await pool.query(
             `WITH bump AS (
-               UPDATE invitations SET assistant_calls = assistant_calls + $8, assistant_asked = $9, assistant_free_run = $10
+               UPDATE invitations SET assistant_calls = GREATEST(assistant_calls + $8, 0), assistant_asked = $9, assistant_free_run = $10
                WHERE id = $1 RETURNING id)
              INSERT INTO assistant_usage (invitation_id, model, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, actions, counted)
              SELECT id, $2, $3, $4, $5, $6, $7, $11 FROM bump`,
-            [invitationId, model, usage.input, usage.output, usage.cacheRead, usage.cacheWrite, actions, state.counted ? 1 : 0, state.asked, state.freeRun, state.counted],
+            [invitationId, model, usage.input, usage.output, usage.cacheRead, usage.cacheWrite, actions, delta, state.asked, state.freeRun, state.counted],
           );
         },
       },

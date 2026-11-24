@@ -52,7 +52,12 @@ export type AssistantDeps = {
   apiKey: string | undefined;
   loadSettings: () => Promise<AssistantSettings>; // modello, sforzo e limite scelti dalla console
   makeCall: (apiKey: string) => ModelCall;
-  recordUsage: (invitationId: string, model: string, usage: Usage, actions: number, state: { counted: boolean; asked: boolean; freeRun: number }) => Promise<void>;
+  // reserved: la richiesta era già stata prenotata con reserveCall (recordUsage la restituisce se non è contata).
+  recordUsage: (invitationId: string, model: string, usage: Usage, actions: number, state: { counted: boolean; asked: boolean; freeRun: number; reserved?: boolean }) => Promise<void>;
+  // Prenota una richiesta prima di chiamare il modello, in modo atomico (false: limite raggiunto). Così richieste
+  // parallele non superano il limite. releaseCall la restituisce se il modello non risponde.
+  reserveCall?: (invitationId: string, limit: number) => Promise<boolean>;
+  releaseCall?: (invitationId: string) => Promise<void>;
   stock?: StockPort; // assente se la ricerca foto non è configurata
   places?: (query: string) => Promise<string[]>; // ricerca indirizzi reali
 };
@@ -345,6 +350,10 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
   }
   const chat = parseChat(input.body);
   if (!chat) return { status: 400, body: { error: "Messaggio non valido" } };
+  const reserved = deps.reserveCall ? await deps.reserveCall(inv.id, limit) : false;
+  if (deps.reserveCall && !reserved) {
+    return { status: 409, body: { error: "Hai usato tutte le richieste dell'assistente per questo invito" } };
+  }
 
   const catalog = await deps.loadCatalog();
   const rules = editRules(inv);
@@ -485,7 +494,8 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
     } catch (e) {
       // Nei log solo codice e tipo dell'errore: il messaggio può contenere dati della richiesta.
       console.error("assistente: chiamata al modello non riuscita", (e as { status?: number }).status ?? "", (e as Error).name);
-      // Il dettaglio dell'errore resta fuori dalla risposta.
+      // Il dettaglio dell'errore resta fuori dalla risposta. La richiesta prenotata torna disponibile.
+      if (reserved) await deps.releaseCall?.(inv.id).catch(() => undefined);
       return { status: 502, body: { error: "L'assistente non risponde in questo momento. Riprova tra poco." } };
     }
     usage.input += res.usage.input_tokens;
@@ -520,7 +530,7 @@ export async function handleAssistant(deps: AssistantDeps, input: { id: string; 
   const asked = !refused && (choice !== undefined || placeAsk !== undefined);
   // Ogni modifica all'invito consuma una richiesta, anche se arriva rispondendo a una scelta: gratis solo le risposte senza modifiche.
   const counted = !free || actions.length > 0;
-  await deps.recordUsage(inv.id, settings.model, usage, actions.length, { counted, asked, freeRun: counted ? 0 : inv.assistant_free_run + 1 });
+  await deps.recordUsage(inv.id, settings.model, usage, actions.length, { counted, asked, freeRun: counted ? 0 : inv.assistant_free_run + 1, reserved });
   return {
     status: 200,
     body: {
