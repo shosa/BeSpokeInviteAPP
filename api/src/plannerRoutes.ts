@@ -46,7 +46,7 @@ async function ownedPlanner(id: string, userId: string): Promise<Row | null> {
   if (!UUID.test(id)) return null;
   const { rows } = await pool.query(
     // Proprietario, oppure la coppia a cui lo studio Pro ha dato accesso al planner.
-    `SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, created_at FROM planners p
+    `SELECT id, user_id, invitation_id, title, to_char(event_date, 'YYYY-MM-DD') AS event_date, venue, address, COALESCE(event_type, 'wedding') AS event_type, data, pro_client_id, created_at FROM planners p
      WHERE p.id = $1 AND (p.user_id = $2 OR EXISTS (SELECT 1 FROM pro_access a WHERE a.client_id = p.pro_client_id AND a.user_id = $2 AND a.can_planner))`,
     [id, userId],
   );
@@ -105,10 +105,11 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       pool.query("SELECT id, name, role, contact, contract_status FROM planner_vendors WHERE planner_id = $1 ORDER BY created_at", [p.id]),
       pool.query("SELECT id, name, seats FROM planner_tables WHERE planner_id = $1 ORDER BY created_at", [p.id]),
       pool.query("SELECT id, category, name, amount_cents, rating, notes, booked, signed, arrival, contact, tip_cents, envelope FROM planner_quotes WHERE planner_id = $1 ORDER BY category, amount_cents", [p.id]),
-      // Inviti del cliente che si possono collegare: quelli senza un altro planner.
+      // Inviti del cliente che si possono collegare: quelli senza un altro planner. Planner di un cliente di uno studio
+      // Pro: solo gli inviti dello stesso cliente (non quelli degli altri clienti dello studio).
       pool.query(
-        "SELECT i.id, i.config->'event'->>'title' AS title FROM invitations i WHERE i.user_id = $1 AND i.status = 'paid' AND NOT EXISTS (SELECT 1 FROM planners x WHERE x.invitation_id = i.id AND x.id <> $2) ORDER BY i.created_at DESC",
-        [p.user_id, p.id],
+        "SELECT i.id, i.config->'event'->>'title' AS title FROM invitations i WHERE i.user_id = $1 AND i.status = 'paid' AND ($3::uuid IS NULL OR i.pro_client_id = $3) AND NOT EXISTS (SELECT 1 FROM planners x WHERE x.invitation_id = i.id AND x.id <> $2) ORDER BY i.created_at DESC",
+        [p.user_id, p.id, p.pro_client_id ?? null],
       ),
     ]);
     const invitation = await linkedInvitation(p.invitation_id, catalog);
@@ -313,7 +314,7 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
       return { ok: true, invitationId: null };
     }
     if (typeof invitationId !== "string" || !UUID.test(invitationId)) return reply.code(400).send({ error: "Invito non valido" });
-    const inv = await pool.query("SELECT id FROM invitations WHERE id = $1 AND user_id = $2", [invitationId, p.user_id]);
+    const inv = await pool.query("SELECT id FROM invitations WHERE id = $1 AND user_id = $2 AND ($3::uuid IS NULL OR pro_client_id = $3)", [invitationId, p.user_id, p.pro_client_id ?? null]);
     if (!inv.rows[0]) return reply.code(404).send({ error: "Invito non trovato" });
     const taken = await pool.query("SELECT id FROM planners WHERE invitation_id = $1 AND id <> $2", [invitationId, p.id]);
     if (taken.rows[0]) return reply.code(409).send({ error: "Quell'invito ha già un planner collegato" });
