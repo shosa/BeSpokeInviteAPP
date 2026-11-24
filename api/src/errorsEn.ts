@@ -10,6 +10,7 @@ const EXACT: Record<string, string> = {
   "Se l'email è quella dell'acquisto, ti abbiamo mandato il link per entrare.": "If this is the email you purchased with, we've sent you a link to sign in.",
   "Indirizzo email non valido": "Invalid email address",
   "Troppe richieste: riprova tra un minuto": "Too many requests: try again in a minute",
+  "Troppe risposte in questo momento: riprova tra qualche minuto": "Too many replies right now: try again in a few minutes",
   "Inserisci email e password": "Enter your email and password",
   "Troppi tentativi: riprova tra qualche minuto, o entra con il link via email": "Too many attempts: try again in a few minutes, or sign in with the email link",
   "Email o password non corretti": "Incorrect email or password",

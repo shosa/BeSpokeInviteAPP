@@ -916,11 +916,27 @@ export async function buildApp() {
     return { places: await searchPlaces(String(req.query.q ?? "")) };
   });
 
+  // Risposte anonime: al massimo RSVP_MAX ogni 10 minuti per invito (molto sopra il ritmo di ospiti veri), e al
+  // proprietario al massimo RSVP_MAILS email di notifica all'ora per invito (le risposte oltre restano salvate).
+  const RSVP_WINDOW = 10 * 60_000;
+  const RSVP_MAX = 60;
+  const RSVP_MAILS = 20;
+  const rsvpHits = new Map<string, { n: number; at: number }>();
+  const rsvpMails = new Map<string, { n: number; at: number }>();
+  const bump = (map: Map<string, { n: number; at: number }>, key: string, windowMs: number): number => {
+    if (map.size > 5000) pruneExpired(map, windowMs);
+    const now = Date.now();
+    const a = map.get(key);
+    if (!a || now - a.at > windowMs) { map.set(key, { n: 1, at: now }); return 1; }
+    a.n += 1;
+    return a.n;
+  };
   app.post("/api/rsvp", async (req, reply) => {
     const b = (req.body ?? {}) as { slug?: string; answers?: Record<string, unknown>; website?: unknown };
     // Campo trappola: un ospite vero non lo compila mai. Se arriva pieno è un bot: risposta ok, nulla salvato.
     if (typeof b.website === "string" && b.website.trim()) return reply.code(201).send({ ok: true });
     if (!b.slug || !b.answers || typeof b.answers !== "object") return reply.code(400).send({ error: "Dati mancanti" });
+    if (bump(rsvpHits, String(b.slug).slice(0, 100), RSVP_WINDOW) > RSVP_MAX) return reply.code(429).send({ error: "Troppe risposte in questo momento: riprova tra qualche minuto" });
     const { rows } = await pool.query(
       `SELECT i.id, i.config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
        WHERE i.slug = $1 AND i.status = 'paid' AND i.edit_count >= 1`,
@@ -945,8 +961,8 @@ export async function buildApp() {
 
     await pool.query("INSERT INTO rsvps (id, invitation_id, answers) VALUES ($1, $2, $3)", [randomUUID(), inv.id, JSON.stringify(answers)]);
     await track("rsvp_submitted", inv.id);
-    // Notifica al proprietario: un errore di posta non blocca la risposta dell'ospite.
-    await sendMail(
+    // Notifica al proprietario: un errore di posta non blocca la risposta dell'ospite. Oltre il tetto orario, niente email.
+    if (bump(rsvpMails, inv.id, 3_600_000) <= RSVP_MAILS) await sendMail(
       rsvpNoticeEmail({ to: inv.owner_email, title: titleOf(inv.config), attending: attendanceOf(questions, answers), invitationId: inv.id, lang: inv.config?.locale === "en" ? "en" : "it" }),
       "rsvp",
     ).catch((e) => req.log.warn({ err: e }, "notifica RSVP non inviata"));
