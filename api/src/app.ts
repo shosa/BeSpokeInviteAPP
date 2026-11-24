@@ -950,12 +950,14 @@ export async function buildApp() {
     if (!b.slug || !b.answers || typeof b.answers !== "object") return reply.code(400).send({ error: "Dati mancanti" });
     if (bump(rsvpHits, String(b.slug).slice(0, 100), RSVP_WINDOW) > RSVP_MAX) return reply.code(429).send({ error: "Troppe risposte in questo momento: riprova tra qualche minuto" });
     const { rows } = await pool.query(
-      `SELECT i.id, i.config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
+      `SELECT i.id, i.config, i.published_config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
        WHERE i.slug = $1 AND i.status = 'paid' AND i.edit_count >= 1`,
       [b.slug],
     );
-    const inv = rows[0];
-    if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
+    const found = rows[0];
+    if (!found) return reply.code(404).send({ error: "Invito non trovato" });
+    // Le domande sono quelle della pagina che vedono gli ospiti (versione pubblicata), non della bozza.
+    const inv = { ...found, config: found.published_config ?? found.config };
     const c = await loadCatalog();
     if (!hasRsvp(c, inv.config)) return reply.code(400).send({ error: "Questo invito non prevede conferma di presenza" });
 
