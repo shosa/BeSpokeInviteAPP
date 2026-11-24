@@ -58,7 +58,7 @@ export function ThemeSwitcher({ invitationId, config, catalog, locked, lang, onC
     setHtml(null);
     setPreviewError(false);
     setError(null);
-    fetch(`/api/invitations/${invitationId}/preview?cover=0`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(withTheme(config, picked.id)) })
+    fetch(`/api/invitations/${invitationId}/preview?cover=0&readonly=1`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(withTheme(config, picked.id)) })
       .then(async (res) => {
         if (!alive) return;
         if (!res.ok) return setPreviewError(true);

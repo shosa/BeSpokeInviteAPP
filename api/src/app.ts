@@ -807,7 +807,10 @@ export async function buildApp() {
     if (!config) return reply.code(400).send({ error: "Configurazione non valida" });
     // Di default l'anteprima mostra la pagina senza busta: il cliente vede subito i contenuti. ?cover=1 la mostra.
     const showCover = (req.query as { cover?: string }).cover === "1";
-    const html = renderFor(c, inv.slug, config, !showCover, true);
+    // ?readonly=1: la pagina come la vedono gli ospiti (si scorre normalmente, niente evidenziazione né selezione dei
+    // blocchi). Serve all'anteprima del cambio di template.
+    const readonly = (req.query as { readonly?: string }).readonly === "1";
+    const html = renderFor(c, inv.slug, config, !showCover, !readonly);
     if (!html) return reply.code(400).send({ error: "Tema non disponibile" });
     // anteprima del builder: senza barra di scorrimento
     return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").send(quietScroll(html));

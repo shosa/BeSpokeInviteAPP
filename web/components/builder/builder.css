@@ -808,7 +808,8 @@ button.bl-crumb:hover { color: var(--brass); }
 .bl-app .tsw-preview { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-bottom: 0; overflow: hidden; }
 .bl-app .tsw-devices { display: flex; gap: 6px; }
 .bl-app .tsw-devices .bl-icon[aria-pressed="true"] { background: var(--iv-grad-ochre); color: #fff; border-color: transparent; }
-.bl-app .tsw-frame { flex: 1; min-height: 0; display: grid; place-items: center; width: 100%; }
+.bl-app .tsw-frame { flex: 1 1 0; min-height: 0; display: flex; justify-content: center; align-items: center; width: 100%; }
+.bl-app .tsw-frame iframe { align-self: stretch; touch-action: auto; }
 .bl-app .tsw-frame iframe { display: block; height: 100%; border: 1px solid var(--line); background: #fff; box-shadow: var(--iv-shadow); }
 .bl-app .tsw-frame.is-mobile iframe { width: min(390px, 100%); border-radius: 32px; }
 .bl-app .tsw-frame.is-desktop iframe { width: min(1280px, 100%); border-radius: 14px; }
