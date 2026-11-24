@@ -716,7 +716,8 @@ export async function buildApp() {
     const inv = await ownedInvitation(req.params.id, user.id);
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     const { rows } = await pool.query("SELECT id, answers, created_at FROM rsvps WHERE invitation_id = $1 ORDER BY created_at DESC", [inv.id]);
-    const questions = (inv.config.rsvpQuestions ?? []) as Row[];
+    // Stesse domande con cui l'RSVP pubblico valida le risposte: quelle della versione pubblicata.
+    const questions = ((inv.published_config ?? inv.config).rsvpQuestions ?? []) as Row[];
 
     if (req.query.format === "csv") {
       // Le risposte le scrivono gli ospiti: csvCell evita che diventino formule nel foglio di calcolo.
