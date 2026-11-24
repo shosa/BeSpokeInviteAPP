@@ -164,7 +164,7 @@ export function AdminConsole() {
           {tab === "pro" && <AdminPro />}
           {tab === "template" && (catalog ? <ThemesAdmin catalog={catalog} onChanged={reload} /> : <p className="hint">{tt("Caricamento…", "Loading…")}</p>)}
           {tab === "musica" && <MusicLibrary tracks={catalog?.music ?? []} onChange={reload} />}
-          {tab === "file" && <AdminMedia />}
+          {tab === "file" && <AdminMedia go={go} />}
           {tab === "shopify" && <AdminShopify />}
           {tab === "email" && <AdminMail />}
           {tab === "assistente" && <AdminAssistant />}
