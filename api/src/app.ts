@@ -205,21 +205,30 @@ export async function buildApp() {
   });
 
   // Accesso dal sito: chi ha già un account inserisce l'email e riceve il link personale. La risposta è sempre la stessa,
-  // così non si scopre chi è registrato. Un indirizzo può chiedere un link al minuto.
+  // e arriva subito (la ricerca e l'invio avvengono dopo), così né il testo né il tempo dicono chi è registrato.
+  // Un indirizzo può chiedere un link al minuto; un account riceve al massimo LINKS_PER_HOUR link nuovi all'ora.
   const accessRequests = new Map<string, number>();
+  const LINKS_PER_HOUR = 5;
   app.post("/api/auth/request", async (req, reply) => {
     const email = String(((req.body ?? {}) as { email?: unknown }).email ?? "").trim().toLowerCase();
     const reply200 = { ok: true, message: "Se l'email è quella dell'acquisto, ti abbiamo mandato il link per entrare." };
     if (!EMAIL.test(email)) return reply.code(400).send({ error: "Indirizzo email non valido" });
-    if (accessRequests.size > 5000) accessRequests.clear();
+    // Mappa piena: si tolgono solo le voci scadute. Se resta piena (troppe richieste insieme) non si invia nulla.
+    if (accessRequests.size > 5000) pruneExpired(accessRequests, 60_000);
+    if (accessRequests.size > 5000) return reply.code(429).send({ error: "Troppe richieste: riprova tra un minuto" });
     const last = accessRequests.get(email) ?? 0;
     if (Date.now() - last < 60_000) return reply200;
     accessRequests.set(email, Date.now());
-    const { rows } = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
-    if (rows[0]) {
+    const lang = req.cookies.lang === "en" ? "en" : "it";
+    void (async () => {
+      const { rows } = await pool.query(
+        "SELECT u.id, (SELECT count(*)::int FROM access_tokens t WHERE t.user_id = u.id AND t.created_at > now() - interval '1 hour') AS recent FROM users u WHERE u.email = $1",
+        [email],
+      );
+      if (!rows[0] || rows[0].recent >= LINKS_PER_HOUR) return;
       const token = await createAccessToken(rows[0].id);
-      await sendMail(accessEmail({ to: email, link: `${appUrl()}/accesso/${token}`, lang: req.cookies.lang === "en" ? "en" : "it" }), "other").catch((e) => app.log.warn({ err: e }, "link di accesso non inviato"));
-    }
+      await sendMail(accessEmail({ to: email, link: `${appUrl()}/accesso/${token}`, lang }), "other");
+    })().catch((e) => app.log.warn({ err: e }, "link di accesso non inviato"));
     return reply200;
   });
 

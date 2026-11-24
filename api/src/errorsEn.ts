@@ -9,6 +9,7 @@ const EXACT: Record<string, string> = {
   "Link non valido o scaduto": "Invalid or expired link",
   "Se l'email è quella dell'acquisto, ti abbiamo mandato il link per entrare.": "If this is the email you purchased with, we've sent you a link to sign in.",
   "Indirizzo email non valido": "Invalid email address",
+  "Troppe richieste: riprova tra un minuto": "Too many requests: try again in a minute",
   "Inserisci email e password": "Enter your email and password",
   "Troppi tentativi: riprova tra qualche minuto, o entra con il link via email": "Too many attempts: try again in a few minutes, or sign in with the email link",
   "Email o password non corretti": "Incorrect email or password",
