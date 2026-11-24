@@ -281,6 +281,8 @@ CREATE TABLE IF NOT EXISTS pro_access (
   sent_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (client_id, user_id)
 );
+-- Accesso dato a un account creato dallo studio (true) o a uno che esisteva già: alla revoca si revocano i link solo dei primi.
+ALTER TABLE pro_access ADD COLUMN IF NOT EXISTS created_user boolean NOT NULL DEFAULT false;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
 ALTER TABLE planners ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS pro_client_id uuid REFERENCES pro_clients(id) ON DELETE SET NULL;

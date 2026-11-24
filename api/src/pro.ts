@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { isEventType, type Catalog } from "@inviteme/shared";
 import { pool } from "./db";
-import { createAccessToken, currentUser, type SessionUser } from "./auth";
+import { createAccessToken, currentUser, roleForEmail, type SessionUser } from "./auth";
 import { accessEmail, appUrl, sendMail } from "./mail";
 
 // Bespoke Pro: area dei wedding planner. Uno studio è un utente con una riga in pro_studios: ha i suoi clienti
@@ -93,6 +93,27 @@ async function userForEmail(email: string, name: string): Promise<string> {
     [randomUUID(), email.toLowerCase(), name || email.split("@")[0]],
   );
   return rows[0].id;
+}
+
+// Account della coppia per l'accesso dato da uno studio. created: l'account nasce ora (lo studio può ricevere il link).
+// Un account che esisteva già resta del suo proprietario: lo studio non riceve mai un suo link, e admin o studi
+// non si possono scegliere come coppia.
+async function couplePrincipal(email: string, name: string, studioId: string): Promise<{ id: string; created: boolean }> {
+  const lower = email.toLowerCase();
+  const ins = await pool.query(
+    "INSERT INTO users (id, email, name, password_hash) VALUES ($1, $2, $3, '') ON CONFLICT (email) DO NOTHING RETURNING id",
+    [randomUUID(), lower, name || lower.split("@")[0]],
+  );
+  if (ins.rows[0]) return { id: ins.rows[0].id, created: true };
+  const { rows } = await pool.query(
+    "SELECT u.id, u.role, EXISTS (SELECT 1 FROM pro_studios s WHERE s.user_id = u.id) AS studio FROM users u WHERE u.email = $1",
+    [lower],
+  );
+  const u = rows[0];
+  if (!u) throw new ProError("Email non utilizzabile");
+  if (u.id === studioId) throw new ProError("Questa è l'email dello studio");
+  if (u.role === "admin" || u.studio || roleForEmail(lower) === "admin") throw new ProError("Email non utilizzabile");
+  return { id: u.id, created: false };
 }
 
 export async function isStudio(userId: string): Promise<boolean> {
@@ -317,6 +338,8 @@ export function registerProRoutes(app: FastifyInstance, deps: Deps) {
   });
 
   // Accesso della coppia: crea (o ritrova) l'utente con quell'email, salva i permessi e, se richiesto, manda il link.
+  // Il link torna allo studio solo per un account appena creato da questa chiamata; per un account già esistente
+  // parte solo per email al suo indirizzo.
   app.post<{ Params: { id: string } }>("/api/pro/clients/:id/access", async (req, reply) => {
     const s = await studioOf(req, reply, true);
     if (!s) return;
@@ -325,30 +348,49 @@ export function registerProRoutes(app: FastifyInstance, deps: Deps) {
     const b = (req.body ?? {}) as { email?: unknown; canInvite?: unknown; canPlanner?: unknown; send?: unknown };
     const email = (text(b.email, 200) || c.email).toLowerCase();
     if (!EMAIL.test(email)) return reply.code(400).send({ error: "Serve l'email del cliente" });
-    const userId = await userForEmail(email, c.name);
-    if (userId === s.user_id) return reply.code(400).send({ error: "Questa è l'email dello studio" });
+    let principal: { id: string; created: boolean };
+    try {
+      principal = await couplePrincipal(email, c.name, s.user_id);
+    } catch (e) {
+      if (e instanceof ProError) return reply.code(400).send({ error: e.message });
+      throw e;
+    }
+    const userId = principal.id;
     await pool.query(
-      `INSERT INTO pro_access (client_id, user_id, can_invite, can_planner) VALUES ($1, $2, $3, $4)
+      `INSERT INTO pro_access (client_id, user_id, can_invite, can_planner, created_user) VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT (client_id, user_id) DO UPDATE SET can_invite = EXCLUDED.can_invite, can_planner = EXCLUDED.can_planner`,
-      [c.id, userId, b.canInvite !== false, b.canPlanner !== false],
+      [c.id, userId, b.canInvite !== false, b.canPlanner !== false, principal.created],
     );
     let mailed = false;
     let link: string | null = null;
     if (b.send === true) {
       const token = await createAccessToken(userId);
-      link = `${appUrl()}/accesso/${token}`;
-      mailed = await sendMail(accessEmail({ to: email, link, lang: req.cookies.lang === "en" ? "en" : "it" }), "other").then(() => true).catch(() => false);
+      const url = `${appUrl()}/accesso/${token}`;
+      mailed = await sendMail(accessEmail({ to: email, link: url, lang: req.cookies.lang === "en" ? "en" : "it" }), "other").then(() => true).catch(() => false);
       await pool.query("UPDATE pro_access SET sent_at = now() WHERE client_id = $1 AND user_id = $2", [c.id, userId]);
+      if (principal.created) link = url;
     }
-    return { ok: true, mailed, link };
+    return { ok: true, mailed, ...(link ? { link } : {}) };
   });
 
+  // Toglie l'accesso della coppia. Vale anche a studio sospeso. Per gli account creati dallo studio si revocano anche
+  // i link di accesso, se non resta nessun altro accesso dato da uno studio.
   app.delete<{ Params: { id: string }; Querystring: { email?: string } }>("/api/pro/clients/:id/access", async (req, reply) => {
-    const s = await studioOf(req, reply, true);
+    const s = await studioOf(req, reply);
     if (!s) return;
     const c = await clientOf(s.user_id, req.params.id);
     if (!c) return reply.code(404).send({ error: "Cliente non trovato" });
-    await pool.query("DELETE FROM pro_access a USING users u WHERE a.user_id = u.id AND a.client_id = $1 AND u.email = $2", [c.id, String(req.query.email ?? "").toLowerCase()]);
+    const { rows } = await pool.query(
+      "DELETE FROM pro_access a USING users u WHERE a.user_id = u.id AND a.client_id = $1 AND u.email = $2 RETURNING a.user_id, a.created_user",
+      [c.id, String(req.query.email ?? "").toLowerCase()],
+    );
+    for (const r of rows) {
+      if (!r.created_user) continue;
+      await pool.query(
+        "UPDATE access_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL AND NOT EXISTS (SELECT 1 FROM pro_access a WHERE a.user_id = $1)",
+        [r.user_id],
+      );
+    }
     return { ok: true };
   });
 

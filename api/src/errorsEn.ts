@@ -18,6 +18,8 @@ const EXACT: Record<string, string> = {
   "Ruolo non valido": "Invalid role",
   "Utente non trovato": "User not found",
   "Non disponibile": "Not available",
+  "Email non utilizzabile": "This email can't be used",
+  "Questa è l'email dello studio": "This is the studio's email",
   // Inviti e builder
   "Invito non trovato": "Invitation not found",
   "Modello non disponibile": "Model not available",

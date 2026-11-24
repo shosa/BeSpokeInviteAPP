@@ -51,7 +51,10 @@ export function ProClient({ c, lang, appUrl, active }: { c: ProClientDetail; lan
     const out = await call("access", `/api/pro/clients/${c.id}/access`, { method: "POST", body: JSON.stringify({ email: accessEmail, canInvite, canPlanner, send: true }) });
     if (!out) return;
     setLink(typeof out.link === "string" ? out.link : null);
-    toast.success(out.mailed ? t("Accesso inviato via email", "Access sent by email") : t("Accesso creato: copia il link e mandalo tu", "Access created: copy the link and send it yourself"));
+    // Per un account che esisteva già il link non torna allo studio: parte solo per email al cliente.
+    if (out.mailed) toast.success(t("Accesso inviato via email", "Access sent by email"));
+    else if (typeof out.link === "string") toast.success(t("Accesso creato: copia il link e mandalo tu", "Access created: copy the link and send it yourself"));
+    else toast.error(t("Accesso salvato, ma l'email non è partita: il cliente può chiedere il link dalla pagina di accesso", "Access saved, but the email wasn't sent: the client can request the link from the sign-in page"));
     router.refresh();
   }
   async function savePerms(email: string, inv: boolean, pl: boolean) {
