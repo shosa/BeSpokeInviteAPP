@@ -94,7 +94,7 @@ export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { in
           ))}
         </div>
         <div className="adm-seg" role="group" aria-label={t("Attività nell'editor", "Editor activity")}>
-          {([["", "Ogni attività", "Any activity"], ["live", "In modifica ora", "Editing now"], ["dirty", "Modifiche non pubblicate", "Unpublished changes"], ["never", "Mai pubblicati", "Never published"], ["stale", "Fermi da 7 giorni", "Idle 7 days"]] as const).map(([v, label, enl]) => (
+          {([["", "Ogni attività", "Any activity"], ["live", "In modifica ora", "Editing now"], ["dirty", "Modifiche non pubblicate", "Unpublished changes"], ["never", "Non online", "Not live"], ["stale", "Fermi da 7 giorni", "Idle 7 days"]] as const).map(([v, label, enl]) => (
             <button key={v} type="button" className={activity === v ? "is-on" : ""} aria-pressed={activity === v} onClick={() => setActivity(v)}>{t(label, enl)}</button>
           ))}
         </div>
@@ -124,7 +124,7 @@ export function AdminInvitations({ initialUser, onClearUser, initialOpen }: { in
                   {r.live ? <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span>
                     : r.dirty ? <span className="adm-pill is-dirty">{t("Da pubblicare", "To publish")}</span>
                     : r.edit_count >= 1 ? <span className="adm-pill is-paid">{t("Online", "Live")}</span>
-                    : <span className="adm-pill is-draft">{r.status === "paid" ? t("Mai pubblicato", "Never published") : t("Bozza", "Draft")}</span>}
+                    : <span className="adm-pill is-draft">{r.status === "paid" ? t("Non online", "Not live") : t("Bozza", "Draft")}</span>}
                 </td>
                 <td><span className="adm-ago">{ago(r.last_edit_at, en)}</span>{r.last_published_at && <small>{t("pubbl.", "publ.")} {ago(r.last_published_at, en)}</small>}</td>
                 <td>{fmtDate(r.created_at)}</td>
@@ -207,7 +207,7 @@ function InvitationDrawer({ id, onClose, onChanged }: { id: string; onClose: () 
             <div><dt>{t("Creato", "Created")}</dt><dd>{fmtDate(d.created_at)}</dd></div>
             <div><dt>{t("Visite", "Visits")}</dt><dd>{d.views}</dd></div>
             <div><dt>{t("Editor", "Editor")}</dt><dd>{d.live ? <span className="adm-pill is-live"><i aria-hidden="true" />{t("In modifica ora", "Editing now")}</span> : t(`Ultima modifica ${ago(d.last_edit_at, t("it", "en") === "en")}`, `Last edit ${ago(d.last_edit_at, true)}`)}</dd></div>
-            <div><dt>{t("Pubblicazione", "Publishing")}</dt><dd>{d.edit_count >= 1 ? `${d.dirty ? t("Modifiche da pubblicare · ", "Changes to publish · ") : ""}${t(`${d.edit_count} ${d.edit_count === 1 ? "volta" : "volte"}`, `${d.edit_count} ${d.edit_count === 1 ? "time" : "times"}`)}${d.last_published_at ? ` · ${ago(d.last_published_at, t("it", "en") === "en")}` : ""}` : t("Mai pubblicato", "Never published")}</dd></div>
+            <div><dt>{t("Pubblicazione", "Publishing")}</dt><dd>{d.edit_count >= 1 ? `${d.dirty ? t("Modifiche da pubblicare · ", "Changes to publish · ") : ""}${t(`${d.edit_count} ${d.edit_count === 1 ? "volta" : "volte"}`, `${d.edit_count} ${d.edit_count === 1 ? "time" : "times"}`)}${d.last_published_at ? ` · ${ago(d.last_published_at, t("it", "en") === "en")}` : ""}` : t("Non online", "Not live")}</dd></div>
             <div><dt>{t("Wizard iniziale", "Setup wizard")}</dt><dd>{d.planner?.setupDone ? t("Completato", "Done") : t("Non completato", "Not done")}</dd></div>
             <div><dt>BeSpoke AI</dt><dd>{t(`${Math.max(0, d.assistant_limit - d.assistant_calls)} rimaste · ${Math.min(d.assistant_calls, d.assistant_limit)} usate su ${d.assistant_limit}`, `${Math.max(0, d.assistant_limit - d.assistant_calls)} left · ${Math.min(d.assistant_calls, d.assistant_limit)} used of ${d.assistant_limit}`)}{d.assistant_bonus ? t(` (di cui ${d.assistant_bonus} ricaricate)`, ` (${d.assistant_bonus} topped up)`) : ""}</dd></div>
           </dl>
