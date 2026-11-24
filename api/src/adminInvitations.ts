@@ -122,18 +122,22 @@ export function registerAdminInvitations(app: FastifyInstance, requireAdmin: Gua
   app.delete<{ Params: { id: string }; Querystring: { confirm?: string } }>("/api/admin/invitations/:id", async (req, reply) => {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Invito non trovato" });
-    const { rows } = await pool.query("SELECT slug, config FROM invitations WHERE id = $1", [req.params.id]);
+    const { rows } = await pool.query("SELECT slug, config, published_config, planner FROM invitations WHERE id = $1", [req.params.id]);
     const inv = rows[0];
     if (!inv) return reply.code(404).send({ error: "Invito non trovato" });
     if (req.query.confirm !== inv.slug) return reply.code(400).send({ error: "Per confermare scrivi lo slug dell'invito" });
 
     const removed: string[] = [];
-    for (const name of mediaNames(inv.config)) {
-      // Il file resta se un altro invito o un brano della libreria lo usa ancora.
+    // File della bozza, della versione pubblicata e dei dati dell'invito (brano del template).
+    const names = new Set([...mediaNames(inv.config), ...mediaNames(inv.published_config), ...mediaNames(inv.planner)]);
+    for (const name of names) {
+      // Il file resta se un altro invito (bozza, pagina online o dati), un planner o un brano della libreria lo usa ancora.
+      const like = `%${escapeLike(name)}%`;
       const shared = await pool.query(
-        `SELECT 1 FROM invitations WHERE id <> $1 AND config::text LIKE $2
+        `SELECT 1 FROM invitations WHERE id <> $1 AND (config::text LIKE $2 OR COALESCE(published_config::text, '') LIKE $2 OR planner::text LIKE $2)
+         UNION ALL SELECT 1 FROM planners WHERE data::text LIKE $2
          UNION ALL SELECT 1 FROM music_tracks WHERE url = $3 LIMIT 1`,
-        [req.params.id, `%${name}%`, `/api/media/${name}`],
+        [req.params.id, like, `/api/media/${name}`],
       );
       if (shared.rowCount) continue;
       fs.rmSync(path.join(MEDIA_DIR, path.basename(name)), { force: true });

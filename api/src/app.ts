@@ -1640,7 +1640,16 @@ export async function buildApp() {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Brano non trovato" });
     const { rows } = await pool.query("DELETE FROM music_tracks WHERE id = $1 RETURNING url", [req.params.id]);
-    if (rows[0]?.url?.startsWith("/api/media/")) fs.rmSync(path.join(MEDIA_DIR, path.basename(rows[0].url)), { force: true });
+    // Il brano esce dalla libreria; il file resta se un invito (bozza, pagina online, brano del template) lo usa ancora.
+    if (rows[0]?.url?.startsWith("/api/media/")) {
+      const name = path.basename(rows[0].url);
+      const like = `%${name.replace(/[\\%_]/g, (c: string) => `\\${c}`)}%`;
+      const used = await pool.query(
+        "SELECT 1 FROM invitations WHERE config::text LIKE $1 OR COALESCE(published_config::text, '') LIKE $1 OR planner::text LIKE $1 LIMIT 1",
+        [like],
+      );
+      if (!used.rowCount) fs.rmSync(path.join(MEDIA_DIR, name), { force: true });
+    }
     return { ok: true };
   });
 
