@@ -678,7 +678,9 @@ export async function buildApp() {
     // Il luogo resta anche tra i dati dell'evento: il planner lo legge da lì.
     const config = { ...clean, event: { ...clean.event, venue } };
     const planner = { ...(inv.planner ?? {}), setupDone: true };
-    await pool.query("UPDATE invitations SET config = $2, published_config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
+    // Invito già online: il wizard cambia solo la bozza, gli ospiti vedono i dati nuovi alla prossima pubblicazione.
+    if (inv.edit_count >= 1) await pool.query("UPDATE invitations SET config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
+    else await pool.query("UPDATE invitations SET config = $2, published_config = $2, planner = $3 WHERE id = $1", [inv.id, JSON.stringify(config), JSON.stringify(planner)]);
     await recordSave(inv.id, user.id, ["Wizard iniziale"]).catch(() => undefined);
     return { ok: true };
   });
