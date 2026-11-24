@@ -1,4 +1,4 @@
-/* Nuova UI "Atelier" (artifact di design InviteMe Atelier): ceralacca, ottone, avorio e lino; titoli Cormorant Garamond, testo Jost. */
+/* Nuova UI "Atelier" (artifact di design Bespoke Invites Atelier): ceralacca, ottone, avorio e lino; titoli Cormorant Garamond, testo Jost. */
 
 /* ───────────── Token ───────────── */
 :root {
@@ -1527,7 +1527,7 @@ h2 { font-size: clamp(2rem, 3.2vw, 2.7rem); }
   .admin-body .actions { flex-wrap: wrap; gap: 10px; }
 }
 
-/* ───────────── Atelier: logo, home (struttura dell'artifact "InviteMe Atelier") ───────────── */
+/* ───────────── Atelier: logo, home (struttura dell'artifact "Bespoke Invites Atelier") ───────────── */
 .logo { display: inline-flex; align-items: baseline; gap: 9px; }
 .logo-word { font-family: var(--font-display), Georgia, serif; font-weight: 500; font-size: 27px; letter-spacing: .005em; color: var(--brass); line-height: 1; }
 .logo-rule { width: 26px; height: 1px; background: var(--brass-light); align-self: center; }

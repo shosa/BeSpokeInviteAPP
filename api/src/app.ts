@@ -774,7 +774,7 @@ export async function buildApp() {
     const hit = geoCache.get(q);
     if (hit) return { results: hit };
     // Prima Photon (OpenStreetMap, completa anche le parole a metà mentre si scrive), poi Nominatim come riserva.
-    const UA = { "User-Agent": "InviteMe/1.0 (https://app.thebespokeinvite.com)" };
+    const UA = { "User-Agent": "BespokeInvites/1.0 (https://app.thebespokeinvite.com)" };
     let results: string[] = [];
     try {
       const res = await fetch(`https://photon.komoot.io/api/?limit=6&q=${encodeURIComponent(q)}`, { headers: UA, signal: AbortSignal.timeout(4000) });

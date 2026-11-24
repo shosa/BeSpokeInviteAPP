@@ -1,4 +1,4 @@
-# Stato del lavoro — InviteMe
+# Stato del lavoro — Bespoke Invites
 
 Aggiornato a ogni checkpoint. Leggerlo prima di toccare il codice.
 

@@ -1,10 +1,10 @@
-# DESIGN.md — InviteMe, mondo visivo "atelier di stampa"
+# DESIGN.md — Bespoke Invites, mondo visivo "atelier di stampa"
 
 Questo documento fissa le decisioni visive durature. Il contenuto di prodotto sta in PRODUCT.md.
 
 ## Idea
 
-InviteMe è un laboratorio di stampa digitale. Il riferimento è il lavoro di uno stampatore a rilievo: carta spessa, inchiostro che affonda nella fibra, lacca e foglia d'oro. L'interfaccia si comporta come un banco di lavoro di quello studio: superfici di carta, inchiostro scuro, un solo colore di metallo per le azioni importanti.
+Bespoke Invites è un laboratorio di stampa digitale. Il riferimento è il lavoro di uno stampatore a rilievo: carta spessa, inchiostro che affonda nella fibra, lacca e foglia d'oro. L'interfaccia si comporta come un banco di lavoro di quello studio: superfici di carta, inchiostro scuro, un solo colore di metallo per le azioni importanti.
 
 Non è una versione "elegante" dei template di mercato. Il mondo non usa card identiche, eyebrow sopra i titoli, glow, gradiente sul testo o icone Unicode.
 
@@ -21,7 +21,7 @@ Non è una versione "elegante" dei template di mercato. Il mondo non usa card id
 
 Regole:
 - Il colore di accento è uno solo. Non si aggiungono altri accenti sulle pagine di prodotto.
-- Gli stili degli inviti (Carta, Notte, Rosa) sono dati configurabili dall'admin. Non influenzano l'interfaccia di InviteMe.
+- Gli stili degli inviti (Carta, Notte, Rosa) sono dati configurabili dall'admin. Non influenzano l'interfaccia di Bespoke Invites.
 
 ## Tipografia
 

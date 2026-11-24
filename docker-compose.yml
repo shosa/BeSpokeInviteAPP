@@ -1,5 +1,6 @@
-# InviteMe: tre servizi. Il browser parla solo con "web"; "web" inoltra /api all'API; l'API parla con il database.
-name: inviteme
+# Bespoke Invites: tre servizi. Il browser parla solo con "web"; "web" inoltra /api all'API; l'API parla con il database.
+# Nome del progetto: dà il nome ai container (bespokeinvites-db-1, -api-1, -web-1) e alla rete.
+name: bespokeinvites
 
 services:
   db:
@@ -61,5 +62,9 @@ services:
     restart: unless-stopped
 
 volumes:
+  # I volumi tengono il nome storico (inviteme_*): sono quelli con il database e i file dei clienti.
+  # Cambiarlo creerebbe volumi nuovi e vuoti.
   pgdata:
+    name: inviteme_pgdata
   media:
+    name: inviteme_media

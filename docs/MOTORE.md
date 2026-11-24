@@ -1,4 +1,4 @@
-# Motore di InviteMe
+# Motore di Bespoke Invites
 
 Un invito è una **lista ordinata di blocchi**. Ogni blocco ha un tipo, delle proprietà e può essere nascosto. Uno **stile** (tema) decide l'aspetto: colori, font, CSS, asset, ed I blocchi decidono cosa c'è nella pagina. Il motore compone la pagina ogni volta, dalla configurazione salvata: non ci sono pagine statiche da aggiornare.
 

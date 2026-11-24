@@ -13,7 +13,7 @@ I file sono in:
 
 `C:\Users\kisho\.codex\visualizations\2026\10\22\01a1648e-f7c5-7412-9a99-ddfa38a6d3e4\video-reference\`
 
-Genera **un solo asset per richiesta**. Scaricalo con il nome indicato. Non chiedere mai testo dentro le immagini: nomi, data e contenuti verranno sovrapposti dal motore InviteMe.
+Genera **un solo asset per richiesta**. Scaricalo con il nome indicato. Non chiedere mai testo dentro le immagini: nomi, data e contenuti verranno sovrapposti dal motore Bespoke Invites.
 
 ## Direzione artistica fissa
 

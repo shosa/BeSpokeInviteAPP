@@ -1,9 +1,9 @@
-# InviteMe — Product context
+# Bespoke Invites — Product context
 
 ## Cosa è
-InviteMe è un servizio di creazione di inviti digitali. L'utente sceglie un modello per tipologia di evento, lo personalizza con un builder visuale e un configuratore, paga online e ottiene un link condiviso (WhatsApp, email, social, QR code) con RSVP integrato.
+Bespoke Invites è un servizio di creazione di inviti digitali. L'utente sceglie un modello per tipologia di evento, lo personalizza con un builder visuale e un configuratore, paga online e ottiene un link condiviso (WhatsApp, email, social, QR code) con RSVP integrato.
 
-Riferimento funzionale (non visivo): webgencyinvitations.com. Replichiamo tipologie di evento, flusso builder/configuratore e modello di consegna. Il design, il copy, i nomi dei template e gli asset sono originali di InviteMe: non copiamo layout, immagini o marchi del sito di riferimento.
+Riferimento funzionale (non visivo): webgencyinvitations.com. Replichiamo tipologie di evento, flusso builder/configuratore e modello di consegna. Il design, il copy, i nomi dei template e gli asset sono originali di Bespoke Invites: non copiamo layout, immagini o marchi del sito di riferimento.
 
 ## Utenti
 - **Sposi e fidanzati** che vogliono un invito elegante e condivisibile con molti ospiti, senza pagare carta e stampa.
@@ -17,7 +17,7 @@ Bisogno principale: creare un invito bello in poche decine di minuti, senza desi
 **Persuade** per landing, gallery template e pricing. **Operate** per builder e configuratore (scansione chiara, controlli prevedibili, anteprima sempre visibile). **Experience** per la pagina invito pubblica: l'invito è protagonista, l'interfaccia si ritira.
 
 ## Vincoli
-- **Shopify headless**: prodotti, checkout, pagamenti e ordini passano da Shopify (Storefront API + webhook). Le metriche arrivano da Shopify (Admin API / webhook) e dagli eventi di InviteMe.
+- **Shopify headless**: prodotti, checkout, pagamenti e ordini passano da Shopify (Storefront API + webhook). Le metriche arrivano da Shopify (Admin API / webhook) e dagli eventi di Bespoke Invites.
 - **Multi-paese, multi-valuta**: prezzi per mercato tramite i mercati di Shopify. Lingue iniziali: italiano e inglese.
 - **Tipologie v1**: matrimoni (con anniversari e fidanzamenti come varianti), compleanni e baby shower, eventi aziendali e lauree.
 - **Stack**: Next.js + TypeScript.
