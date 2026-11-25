@@ -1,8 +1,10 @@
 /* Demo (/demo): stessi colori, caratteri e pulsanti del sito (globals.css). Qui solo impaginazione e telefoni. */
-.dm { overflow-x: hidden; }
-.dm .kicker { color: var(--brass-light); letter-spacing: 0.16em; }
-.dm h2 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
-.dm .btn svg { margin-right: 8px; }
+/* Le regole della demo valgono solo fuori dal planner (.dm-rest): il planner ha i suoi stili. Niente overflow sul
+   contenitore comune, altrimenti la barra laterale del planner (sticky) scorre con la pagina. */
+.dm-rest { overflow-x: hidden; }
+.dm-rest .kicker { color: var(--brass-light); letter-spacing: 0.16em; }
+.dm-rest h2 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
+.dm-rest .btn svg { margin-right: 8px; }
 
 .dm-hero { padding-top: clamp(40px, 7vw, 90px); padding-bottom: clamp(24px, 5vw, 56px); text-align: center; }
 .dm-hero h1 { margin-top: 10px; }
@@ -70,7 +72,7 @@ body.yp-open .dm-rest { display: none; }
   .dm-text { margin-left: auto; margin-right: auto; }
 }
 @media (max-width: 720px) {
-  .dm .wrap, .dmv { padding-left: 16px; padding-right: 16px; }
+  .dm-rest .wrap, .dmv { padding-left: 16px; padding-right: 16px; }
   .dm-frames { width: calc(390px * 0.58 + 18px + 70px); padding-bottom: 44px; }
   .dm-phone.is-big { --s: 0.58; }
   .dm-phone.is-small { --s: 0.34; }
