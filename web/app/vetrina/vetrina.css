@@ -1,0 +1,86 @@
+/* Vetrina privata: tre inviti nei loro telefoni e il planner. Carta avorio, ceralacca e ottone come il resto del sito. */
+.vt {
+  --vt-paper: #f6efe6;
+  --vt-card: #fcf8f3;
+  --vt-ink: #2b2320;
+  --vt-soft: #6e5a55;
+  --vt-wax: #5a1b23;
+  --vt-brass: #b98d5f;
+  --vt-line: #e2d3c2;
+  min-height: 100dvh;
+  background:
+    radial-gradient(60% 40% at 90% 0%, rgba(185, 141, 95, 0.16), transparent 70%),
+    radial-gradient(50% 35% at 0% 30%, rgba(90, 27, 35, 0.06), transparent 70%),
+    var(--vt-paper);
+  color: var(--vt-ink);
+  font-family: var(--font-text), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+.vt a { color: inherit; }
+.vt h1, .vt h2 { font-family: var(--font-iv-display), Georgia, serif; font-weight: 300; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
+.vt h1 em, .vt h2 em { font-style: italic; color: var(--vt-wax); }
+
+.vt-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px clamp(16px, 4vw, 48px); background: rgba(246, 239, 230, 0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--vt-line); }
+.vt-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-iv-display), Georgia, serif; font-size: 20px; }
+.vt-brand img { border-radius: 50%; }
+.vt-lang { display: inline-flex; padding: 3px; border: 1px solid var(--vt-line); border-radius: 999px; background: var(--vt-card); }
+.vt-lang a { min-width: 44px; padding: 7px 12px; border-radius: 999px; text-align: center; text-decoration: none; font-size: 13px; letter-spacing: 0.12em; color: var(--vt-soft); }
+.vt-lang a[aria-current="page"] { background: var(--vt-wax); color: #fff; }
+
+.vt-hero { max-width: 900px; margin: 0 auto; padding: clamp(48px, 9vw, 110px) 16px clamp(32px, 6vw, 70px); text-align: center; }
+.vt-kicker { margin: 0 0 14px; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--vt-brass); }
+.vt-hero h1 { font-size: clamp(38px, 6.4vw, 72px); }
+.vt-lede { max-width: 640px; margin: 20px auto 0; font-size: 17px; line-height: 1.6; color: var(--vt-soft); }
+.vt-jump { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 30px 0 0; padding: 0; list-style: none; }
+.vt-jump a { display: inline-block; padding: 9px 16px; border: 1px solid var(--vt-line); border-radius: 999px; background: var(--vt-card); text-decoration: none; font-size: 14px; }
+.vt-jump a:hover { border-color: var(--vt-brass); }
+
+.vt-invites { display: grid; gap: clamp(56px, 9vw, 120px); max-width: 1100px; margin: 0 auto; padding: 20px clamp(16px, 4vw, 40px) 40px; }
+.vt-card { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(28px, 6vw, 80px); scroll-margin-top: 90px; }
+.vt-card.is-flip { grid-template-columns: minmax(0, 1fr) auto; }
+.vt-card.is-flip .vt-phone { order: 2; }
+
+/* Telefono: l'invito si impagina a 390 px e si riduce per entrare nella cornice. */
+.vt-phone { --s: 0.74; width: calc(390px * var(--s) + 20px); padding: 10px; border-radius: 46px; background: linear-gradient(160deg, #3a302c, #1d1715); box-shadow: 0 40px 70px -40px rgba(43, 35, 32, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.vt-screen { position: relative; width: calc(390px * var(--s)); height: calc(844px * var(--s)); overflow: hidden; border-radius: 37px; background: #fff; }
+.vt-screen iframe { position: absolute; inset: 0 auto auto 0; width: 390px; height: 844px; border: 0; transform: scale(var(--s)); transform-origin: 0 0; }
+
+.vt-info { min-width: 0; }
+.vt-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vt-brass); }
+.vt-info h2 { font-size: clamp(36px, 5vw, 58px); }
+.vt-when { margin: 14px 0 0; font-size: 16px; line-height: 1.5; color: var(--vt-ink); }
+.vt-text { margin: 16px 0 0; max-width: 52ch; font-size: 16.5px; line-height: 1.65; color: var(--vt-soft); }
+.vt-notes { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; padding: 0; list-style: none; }
+.vt-notes li { padding: 6px 12px; border-radius: 999px; background: rgba(185, 141, 95, 0.14); font-size: 13px; color: var(--vt-ink); }
+.vt-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.vt-actions.is-center { justify-content: center; }
+.vt-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border: 1px solid var(--vt-line); border-radius: 999px; background: var(--vt-card); text-decoration: none; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; transition: border-color 0.2s ease, transform 0.2s ease; }
+.vt-btn:hover { border-color: var(--vt-brass); transform: translateY(-1px); }
+.vt-btn.is-solid { background: var(--vt-wax); border-color: var(--vt-wax); color: #fff; }
+.vt-btn.is-big { min-height: 54px; padding: 0 34px; font-size: 14px; }
+
+.vt-planner { max-width: 1000px; margin: clamp(40px, 8vw, 100px) auto 0; padding: clamp(32px, 6vw, 64px) clamp(18px, 5vw, 56px); border: 1px solid var(--vt-line); border-radius: 32px; background: var(--vt-card); box-shadow: 0 40px 80px -60px rgba(90, 27, 35, 0.45); text-align: center; scroll-margin-top: 90px; }
+.vt-planner-head h2 { font-size: clamp(30px, 4.4vw, 48px); }
+.vt-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 34px 0 0; }
+.vt-stats > div { padding: 18px 12px; border: 1px solid var(--vt-line); border-radius: 18px; background: var(--vt-paper); }
+.vt-stats dt { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--vt-soft); }
+.vt-stats dd { margin: 8px 0 0; font-family: var(--font-iv-display), Georgia, serif; font-size: 30px; font-weight: 300; }
+.vt-stats small { font-family: var(--font-text), sans-serif; font-size: 14px; color: var(--vt-soft); }
+.vt-fine { margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--vt-soft); }
+
+.vt-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; max-width: 1100px; margin: 0 auto; padding: 50px clamp(16px, 4vw, 40px) 40px; font-size: 13px; color: var(--vt-soft); }
+.vt-foot p { margin: 0; }
+
+@media (max-width: 820px) {
+  .vt-card, .vt-card.is-flip { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .vt-card.is-flip .vt-phone { order: 0; }
+  .vt-phone { --s: 0.7; }
+  .vt-meta, .vt-notes, .vt-actions { justify-content: center; }
+  .vt-text { margin-left: auto; margin-right: auto; }
+  .vt-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 380px) {
+  .vt-phone { --s: 0.64; }
+  .vt-btn { padding: 0 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .vt-btn { transition: none; } }

@@ -66,7 +66,7 @@ const NAV: { view: View; it: string; en: string; Icon: (p: { on?: boolean }) => 
   { view: "binder", it: "Cartella", en: "Binder", Icon: IcBinder },
 ];
 
-export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose, readOnly = false, apiBase }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void; readOnly?: boolean; apiBase?: string }) {
+export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose, readOnly = false, apiBase, demoWeather }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void; readOnly?: boolean; apiBase?: string; demoWeather?: Weather }) {
   const router = useRouter();
   const en = lang === "en";
   // Rotte dei dati: quelle del cliente, o quelle in sola lettura dell'amministratore (apiBase).
@@ -75,7 +75,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
   const [data, setData] = useState<PremiumData>(initial);
   const [view, setView] = useState<View>("home");
   const [sub, setSub] = useState("");
-  const [weather, setWeather] = useState<Weather | null>(demo ? DEMO_WEATHER : null);
+  const [weather, setWeather] = useState<Weather | null>(demo ? (demoWeather ?? DEMO_WEATHER) : null);
   const [error, setError] = useState<string | null>(null);
   const [sheet, setSheetRaw] = useState<Sheet>(null);
   // In sola lettura le finestre di modifica (invitato, attività, foto) non si aprono; chiuderle sì.

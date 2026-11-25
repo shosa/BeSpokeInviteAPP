@@ -38,6 +38,7 @@ import {
   blockDef,
   withTheme,
   csvCell,
+  SHOWCASE_TOKEN,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -47,6 +48,7 @@ import { BoundedCache } from "./boundedCache";
 import { EFFORTS, listAssistantModels, loadAssistantSettings, saveAssistantSettings, type ModelOption } from "./assistantSettings";
 import { invalidateCatalog, loadCatalog, loadFullCatalog, reloadThemes, saveCatalog, themes } from "./catalog";
 import { previewShell } from "./engine/previewShell";
+import { SHOWCASE_SLUG_PREFIX, isShowcaseKey, showcaseConfig, showcaseThemeId } from "./showcase";
 import { renderInvitePage } from "./engine/page";
 import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
 import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
@@ -802,6 +804,20 @@ export async function buildApp() {
   });
 
   // Anteprima dedicata di uno stile: telefono o desktop contenuto; a schermo intero da telefono.
+  // Vetrina privata (/vetrina/<token> sul sito): tre inviti completi con contenuti scritti a mano (showcase.ts).
+  // ?lang=it|en, ?cover=1 mostra la busta. Pagina generata a ogni richiesta, nulla di salvato; non indicizzata.
+  app.get<{ Params: { token: string; key: string }; Querystring: { lang?: string; cover?: string } }>("/api/showcase/:token/:key/page", async (req, reply) => {
+    const key = req.params.key;
+    if (req.params.token !== SHOWCASE_TOKEN || !isShowcaseKey(key)) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
+    const theme = themes().find((t) => t.manifest.id === showcaseThemeId(key));
+    if (!theme) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
+    const lang = req.query.lang === "en" ? "en" : "it";
+    const cover = req.query.cover === "1";
+    const config = showcaseConfig(key, lang, sampleConfig(theme.manifest, lang));
+    const html = renderInvitePage({ theme, config, slug: `${SHOWCASE_SLUG_PREFIX}${key}`, features: new Set(ADDON_KEYS), runtime: RUNTIME, preview: !cover });
+    return reply.type("text/html; charset=utf-8").header("Cache-Control", "no-store").header("X-Robots-Tag", "noindex, nofollow").send(cover ? html : quietScroll(html));
+  });
+
   app.get<{ Params: { id: string } }>("/api/themes/:id/anteprima", async (req, reply) => {
     const theme = themes().find((t) => t.manifest.id === req.params.id);
     if (!theme) return reply.code(404).type("text/plain; charset=utf-8").send("Tema non trovato");
@@ -954,6 +970,8 @@ export async function buildApp() {
     // Campo trappola: un ospite vero non lo compila mai. Se arriva pieno è un bot: risposta ok, nulla salvato.
     if (typeof b.website === "string" && b.website.trim()) return reply.code(201).send({ ok: true });
     if (!b.slug || !b.answers || typeof b.answers !== "object") return reply.code(400).send({ error: "Dati mancanti" });
+    // Inviti della vetrina: la risposta si accetta e non si salva (nessun invito, nessuna email).
+    if (String(b.slug).startsWith(SHOWCASE_SLUG_PREFIX)) return reply.code(201).send({ ok: true });
     if (bump(rsvpHits, String(b.slug).slice(0, 100), RSVP_WINDOW) > RSVP_MAX) return reply.code(429).send({ error: "Troppe risposte in questo momento: riprova tra qualche minuto" });
     const { rows } = await pool.query(
       `SELECT i.id, i.config, i.published_config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id

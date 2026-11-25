@@ -5,7 +5,7 @@ import { EVENT_TYPES } from "@inviteme/shared";
 import type { PremiumData } from "../PremiumPlanner";
 import { PlannerIcon } from "../PlannerIcon";
 import { YesPlanner } from "./YesPlanner";
-import { daysUntil } from "./model";
+import { daysUntil, type Weather } from "./model";
 
 // Pagina del planner dentro il sito: barra Bespoke, al centro icona, nome dell'evento e «Accedi al planner».
 // Il pulsante apre il planner a tutto schermo con un cerchio che si allarga dal punto toccato (macchia d'olio);
@@ -15,7 +15,7 @@ import { daysUntil } from "./model";
 type Stage = "closed" | "opening" | "open" | "closing";
 const MS = 650;
 
-export function PlannerShell({ id, initial, lang, demo = false, accountHref, buyHref, backHref = "/account", backLabel }: {
+export function PlannerShell({ id, initial, lang, demo = false, accountHref, buyHref, backHref = "/account", backLabel, demoWeather }: {
   id: string;
   initial: PremiumData;
   lang: "it" | "en";
@@ -24,6 +24,7 @@ export function PlannerShell({ id, initial, lang, demo = false, accountHref, buy
   buyHref?: string;
   backHref?: string;
   backLabel?: string;
+  demoWeather?: Weather; // demo: previsione d'esempio da mostrare (altrimenti quella di serie)
 }) {
   const en = lang === "en";
   const t = (it: string, eng: string) => (en ? eng : it);
@@ -91,7 +92,7 @@ export function PlannerShell({ id, initial, lang, demo = false, accountHref, buy
           className={`ypg-stage is-${stage}`}
           style={{ "--ox": `${origin.x}%`, "--oy": `${origin.y}%`, "--ms": `${MS}ms` } as React.CSSProperties}
         >
-          <YesPlanner id={id} initial={initial} lang={lang} demo={demo} accountHref={accountHref} buyHref={buyHref} onClose={close} />
+          <YesPlanner id={id} initial={initial} lang={lang} demo={demo} accountHref={accountHref} buyHref={buyHref} onClose={close} demoWeather={demoWeather} />
         </div>
       )}
     </>
