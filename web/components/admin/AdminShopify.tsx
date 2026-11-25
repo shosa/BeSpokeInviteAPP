@@ -77,9 +77,8 @@ export function AdminShopify() {
 
   // Righe dei prodotti: etichetta, campo, nome trovato dalla verifica, aiuto breve al passaggio del mouse.
   const rows: { key: keyof Ids; label: string; kind: string; found?: string; help: string; optional?: boolean }[] = [
-    { key: "variantId", label: t("Invito", "Invitation"), kind: t("variante", "variant"), found: test?.productTitle && [test.productTitle, test.variantTitle !== "Default Title" ? test.variantTitle : null].filter(Boolean).join(" · "), help: t("Invito completo: tutti i template.", "Full invitation: all templates.") },
+    { key: "variantId", label: t("Invito VIP", "VIP invitation"), kind: t("variante", "variant"), found: test?.productTitle && [test.productTitle, test.variantTitle !== "Default Title" ? test.variantTitle : null].filter(Boolean).join(" · "), help: t("Invito VIP: tutti i template e il planner.", "VIP invitation: all templates and the planner.") },
     { key: "variantBasicId", label: t("Invito base", "Basic invitation"), kind: t("variante", "variant"), found: test?.basicTitle, help: t("Solo template non Premium.", "Non-Premium templates only."), optional: true },
-    { key: "variantPremiumId", label: t("Invito + planner", "Invitation + planner"), kind: t("variante", "variant"), found: test?.premiumTitle, help: t("Pacchetto: un invito e un planner.", "Bundle: one invitation and one planner."), optional: true },
     { key: "plannerProductId", label: "Planner", kind: t("prodotto", "product"), found: test?.plannerTitle, help: t("Qualunque variante del prodotto dà un planner.", "Any variant of the product gives a planner."), optional: true },
     { key: "variantAiCreditsId", label: t("Crediti BeSpoke AI", "BeSpoke AI credits"), kind: t("variante", "variant"), found: test?.creditsTitle, help: t("Ricarica delle richieste di BeSpoke AI per un invito.", "Top-up of BeSpoke AI requests for one invitation."), optional: true },
   ];
@@ -114,7 +113,7 @@ export function AdminShopify() {
           </label>
         ))}
         <label className="sh-row">
-          <span className="sh-label">{t("Richieste per pacchetto", "Requests per pack")}<small>{t("crediti BeSpoke AI", "BeSpoke AI credits")}</small></span>
+          <span className="sh-label">{t("Richieste per ricarica", "Requests per top-up")}<small>{t("crediti BeSpoke AI", "BeSpoke AI credits")}</small></span>
           <input value={draft.aiCreditsPerPack} onChange={set("aiCreditsPerPack")} maxLength={3} inputMode="numeric" className="sh-short" />
           <span className="sh-found" />
         </label>

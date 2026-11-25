@@ -158,7 +158,6 @@ export function shopifyStatus(): ShopifyItem[] {
     { key: "variantAiCreditsId", label: "Prodotto o variante dei crediti BeSpoke AI", required: false, source: srcOf(stored.variantAiCreditsId, env.variantAiCreditsId), value: ids.variantAiCreditsId || null, secret: false },
     { key: "variantBasicId", label: "Variante dell'invito base (template non Premium)", required: false, source: srcOf(stored.variantBasicId, env.variantBasicId), value: ids.variantBasicId || null, secret: false },
     { key: "plannerProductId", label: "Prodotto planner (venduto a parte)", required: false, source: srcOf(stored.plannerProductId, env.plannerProductId), value: ids.plannerProductId || null, secret: false },
-    { key: "variantPremiumId", label: "Variante del pacchetto invito + planner", required: false, source: srcOf(stored.variantPremiumId, env.variantPremiumId), value: ids.variantPremiumId || null, secret: false },
     { key: "storefrontToken", label: "Token Storefront API", required: true, source: token ? "ambiente" : "assente", value: token ? "impostato nel .env" : null, secret: true },
     { key: "webhookSecret", label: "Segreto del webhook orders/paid", required: true, source: secret ? "ambiente" : "assente", value: secret ? "impostato nel .env" : null, secret: true },
   ];

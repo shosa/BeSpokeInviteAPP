@@ -52,7 +52,7 @@ const isManual = (o: OrderDetail) => o.id.startsWith("manuale-");
 const isPending = (o: OrderDetail) => o.status === "paid" && !o.invitation_id && !o.planner_id;
 
 // Righe dello stesso acquisto: un ordine Shopify con le sue righe («…-planner», «…-2», «…-base»), oppure gli
-// acquisti assegnati a mano nello stesso momento allo stesso cliente (es. invito + planner).
+// acquisti assegnati a mano nello stesso momento allo stesso cliente (es. Invito VIP e il suo planner).
 type Group = { key: string; items: OrderDetail[]; first: OrderDetail };
 function groupKey(o: OrderDetail): string {
   const shop = o.id.match(/^(\d+)(?:-|$)/);
@@ -68,7 +68,7 @@ function groupOrders(list: OrderDetail[]): Group[] {
     return { key, items: sorted, first: sorted[0]! };
   });
 }
-const productOf = (o: OrderDetail, t: (it: string, en: string) => string) => (o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito", "Invitation"));
+const productOf = (o: OrderDetail, t: (it: string, en: string) => string) => (o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito VIP", "VIP invitation"));
 function statusOf(g: Group, t: (it: string, en: string) => string): { label: string; cls: string } {
   const pending = g.items.filter(isPending).length;
   if (!g.items.every((o) => o.status === "paid")) return { label: t("In attesa", "Pending"), cls: "draft" };
