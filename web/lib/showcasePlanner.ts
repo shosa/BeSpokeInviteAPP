@@ -250,7 +250,8 @@ export function showcasePlanner(en: boolean): PremiumData {
     guestQuota: 130,
     groupQuotas: { [groups.sc]: 45, [groups.lm]: 40 },
     icon: null,
-    bannerImage: null,
+    // Foto di copertina: Julia_Malcher su Pixabay (licenza Pixabay), vedi public/stock/CREDITS.md.
+    bannerImage: "/stock/wedding-couple-julia-malcher.jpg",
     archImage: null,
   };
 }

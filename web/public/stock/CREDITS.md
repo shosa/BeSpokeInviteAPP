@@ -12,3 +12,4 @@ La foto di paesaggio (ritagliata) è di Pixabay (https://pixabay.com), con licen
 | landscape-lago-verde.jpg | ELG21 (Pixabay), ritaglio | https://pixabay.com/photos/lake-nature-travel-exploration-6701636/ |
 
 Le immagini sono solo di esempio nell'interfaccia del sito. Negli inviti dei clienti restano le foto caricate dal cliente.
+| wedding-couple-julia-malcher.jpg | Julia_Malcher (Pixabay) | https://pixabay.com/photos/wedding-bride-groom-beach-love-10320741/ |
