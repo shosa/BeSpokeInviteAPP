@@ -1,6 +1,6 @@
 import type { PremiumData } from "@/components/planner/PremiumPlanner";
 
-// Planner della vetrina: il matrimonio di Chiara e Salvo (Noto, 18 settembre 2027), lo stesso dell'invito
+// Planner della vetrina: il matrimonio di Giulia e Matteo (Noto, 18 settembre 2027), lo stesso dell'invito
 // «Melograno di Sicilia». Si tocca tutto; le modifiche restano in memoria e spariscono uscendo dalla pagina.
 
 const DATE = "2027-09-18";
@@ -15,8 +15,8 @@ type G = [name: string, size: number, response: "yes" | "pending" | "no", table?
 export function showcasePlanner(en: boolean): PremiumData {
   const L = (it: string, eng: string) => (en ? eng : it);
   const groups = {
-    sc: L("Famiglia Scivoletto (Chiara)", "Scivoletto family (Chiara)"),
-    lm: L("Famiglia Lo Monaco (Salvo)", "Lo Monaco family (Salvo)"),
+    sc: L("Famiglia Scivoletto (Giulia)", "Scivoletto family (Giulia)"),
+    lm: L("Famiglia Lo Monaco (Matteo)", "Lo Monaco family (Matteo)"),
     noto: L("Amici di Noto", "Friends from Noto"),
     mi: L("Amici di Milano", "Friends in Milan"),
     work: L("Colleghi", "Colleagues"),
@@ -42,7 +42,7 @@ export function showcasePlanner(en: boolean): PremiumData {
     mi: [
       ["Beatrice Colombo e Tommaso Galli", 2, "yes", "t5"], ["Francesca Brambilla", 1, "yes", "t5"], ["Luca e Anna Riva", 2, "yes", "t5"],
       ["Matteo Sala", 1, "pending"], ["Irene Fumagalli e Diego Monti", 2, "yes"], ["Camilla Ferri", 1, "yes"], ["Simone Villa e Laura Pozzi", 2, "no"],
-      ["Giulia Mariani", 1, "pending"], ["Andrea e Silvia Longoni", 2, "yes"], ["Chiara Bassi e Marco Viganò", 2, "yes"], ["Edoardo Rossetti", 1, "yes"], ["Nadia e Paolo Cereda", 2, "pending"],
+      ["Giada Mariani", 1, "pending"], ["Andrea e Silvia Longoni", 2, "yes"], ["Chiara Bassi e Marco Viganò", 2, "yes"], ["Edoardo Rossetti", 1, "yes"], ["Nadia e Paolo Cereda", 2, "pending"],
     ],
     work: [
       ["Roberta Cattaneo", 1, "yes"], ["Fabio De Santis e Marta Ricci", 2, "yes"], ["Pietro Mazza", 1, "pending"], ["Sofia Bianchi", 1, "yes"],
@@ -137,7 +137,7 @@ export function showcasePlanner(en: boolean): PremiumData {
   const ct = (rows: [string, string, string, string][]) => ({ items: rows.map(([name, it, eng, phone]) => ({ name, role: en ? eng : it, phone })) });
   return {
     id: "vetrina",
-    event: { title: "Chiara & Salvo", eventType: "wedding", eventDate: DATE, venue: "Tenuta Busulmone", address: "Contrada Busulmone, Noto" },
+    event: { title: "Giulia & Matteo", eventType: "wedding", eventDate: DATE, venue: "Tenuta Busulmone", address: "Contrada Busulmone, Noto" },
     invitation: null,
     linkable: [],
     guests,
@@ -162,8 +162,8 @@ export function showcasePlanner(en: boolean): PremiumData {
       ]),
       "ordine-cerimonia": tl([
         ["17:25", "Gli invitati prendono posto", "Guests take their seats"],
-        ["17:30", "Ingresso di Salvo con mamma Enza", "Salvo walks in with his mum Enza"],
-        ["17:33", "Ingresso di Chiara con papà Corrado (Ave Maria, violino)", "Chiara walks in with her dad Corrado (Ave Maria, violin)"],
+        ["17:30", "Ingresso di Matteo con mamma Enza", "Matteo walks in with his mum Enza"],
+        ["17:33", "Ingresso di Giulia con papà Corrado (Ave Maria, violino)", "Giulia walks in with her dad Corrado (Ave Maria, violin)"],
         ["17:40", "Lettura di Giusi: Neruda, Sonetto XVII", "Reading by Giusi: Neruda, Sonnet XVII"],
         ["17:50", "Promesse scritte da noi", "Our own vows"],
         ["17:55", "Scambio degli anelli (li porta il nipote Matteo)", "Ring exchange (nephew Matteo brings them)"],
@@ -171,17 +171,17 @@ export function showcasePlanner(en: boolean): PremiumData {
       ]),
       "chi-chiamare": ct([
         ["Valentina", "Coordinatrice della tenuta", "Venue coordinator", "+39 0931 000 412"],
-        ["Giusi", "Testimone di Chiara", "Chiara's witness", "+39 347 000 5531"],
-        ["Davide", "Testimone di Salvo", "Salvo's witness", "+39 328 000 1964"],
+        ["Giusi", "Testimone di Giulia", "Giulia's witness", "+39 347 000 5531"],
+        ["Davide", "Testimone di Matteo", "Matteo's witness", "+39 328 000 1964"],
         ["Marco Ippolito", "Fotografo", "Photographer", "+39 349 000 1185"],
         ["Autolinee Caruso", "Navette", "Shuttles", "+39 0931 000 778"],
         ["Radio Taxi Noto", "Rientro", "Ride home", "+39 0931 000 900"],
       ]),
       corteo: ct([
-        ["Giusi Scivoletto", "Testimone di Chiara", "Chiara's witness", "+39 347 000 5531"],
-        ["Martina Belfiore", "Testimone di Chiara", "Chiara's witness", "+39 340 000 8812"],
-        ["Davide Lo Monaco", "Testimone di Salvo", "Salvo's witness", "+39 328 000 1964"],
-        ["Totò Midolo", "Testimone di Salvo", "Salvo's witness", "+39 333 000 4120"],
+        ["Giusi Scivoletto", "Testimone di Giulia", "Giulia's witness", "+39 347 000 5531"],
+        ["Martina Belfiore", "Testimone di Giulia", "Giulia's witness", "+39 340 000 8812"],
+        ["Davide Lo Monaco", "Testimone di Matteo", "Matteo's witness", "+39 328 000 1964"],
+        ["Totò Midolo", "Testimone di Matteo", "Matteo's witness", "+39 333 000 4120"],
       ]),
       luoghi: ct([
         ["Tenuta Busulmone", "Contrada Busulmone, Noto", "Contrada Busulmone, Noto", "+39 0931 000 412"],
@@ -223,14 +223,14 @@ export function showcasePlanner(en: boolean): PremiumData {
         ["Ritardo navetta: Valentina ha il numero di un secondo autista", "Shuttle delay: Valentina has a backup driver's number", false],
       ]),
       "lista-foto": ck([
-        ["Chiara con nonna Pina sotto il melograno", "Chiara with Nonna Pina under the pomegranate tree", false],
+        ["Giulia con nonna Pina sotto il melograno", "Giulia with Nonna Pina under the pomegranate tree", false],
         ["Tutti i cugini Scivoletto e Lo Monaco insieme", "All the Scivoletto and Lo Monaco cousins together", false],
         ["Noi due sulla scalinata della Cattedrale (venerdì)", "The two of us on the Cathedral steps (Friday)", false],
       ]),
       "kit-emergenza": ck([
         ["Cerotti, ago e filo avorio, spille", "Plasters, ivory needle and thread, safety pins", false],
         ["Crema solare e ventaglio", "Sunscreen and a fan", false],
-        ["Antistaminico per Salvo (polline)", "Antihistamine for Salvo (pollen)", false],
+        ["Antistaminico per Matteo (polline)", "Antihistamine for Matteo (pollen)", false],
       ]),
       "ultima-settimana": ck([
         ["Consegnare alla tenuta il tableau e i segnaposto", "Drop off the seating chart and place cards at the venue", false],

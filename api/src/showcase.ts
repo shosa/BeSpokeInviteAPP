@@ -36,7 +36,7 @@ function melograno(lang: Lang): Content {
     themeId: "melograno-di-sicilia",
     eventType: "wedding",
     event: {
-      title: "Chiara & Salvo",
+      title: "Giulia & Matteo",
       hosts: it ? "Con le famiglie Scivoletto e Lo Monaco" : "Together with the Scivoletto and Lo Monaco families",
       eventDate: "2027-09-18",
       eventTime: "17:30",
@@ -44,14 +44,14 @@ function melograno(lang: Lang): Content {
       address: "Contrada Busulmone, 96017 Noto SR",
     },
     blocks: {
-      cover: { topText: it ? "Per voi, da Noto" : "For you, from Noto", sealText: "C·S" },
+      cover: { topText: it ? "Per voi, da Noto" : "For you, from Noto", sealText: "G·M" },
       hero: { kicker: it ? "Dopo nove anni e un trasloco a Milano" : "After nine years and one move to Milan", occasion: it ? "torniamo a casa per sposarci" : "we're coming home to get married", scrollLabel: it ? "Scorri" : "Scroll" },
       scratchdate: { dateTitle: it ? "Segnatevi la data" : "Save the date", revealLabel: it ? "Gratta e scopri" : "Scratch to reveal" },
       message: {
         heading: it ? "Due righe da parte nostra" : "A few words from us",
         body: it
-          ? "Ci siamo conosciuti al liceo Matteo Raeli, in fila per la granita da Costanzo, e da allora non abbiamo più smesso di litigare su quale sia la migliore: mandorla (Chiara) o gelso (Salvo).\nAbbiamo vissuto a Milano, poi a Torino, poi di nuovo a Milano. Ma per dirci sì volevamo tornare qui, tra la pietra dorata di Noto e gli alberi di melograno di nonna Pina.\nSarà una festa lunga, all'aperto, con il mare a dieci minuti. Ci farebbe felici avervi con noi, dal primo brindisi all'ultima granita del mattino dopo."
-          : "We met at secondary school in Noto, queuing for granita at Caffè Costanzo, and we've been arguing ever since about which flavour is best: almond (Chiara) or mulberry (Salvo).\nWe've lived in Milan, then Turin, then Milan again. But to say yes we wanted to come back here, among Noto's golden stone and Nonna Pina's pomegranate trees.\nIt'll be a long party, outdoors, with the sea ten minutes away. We'd love to have you with us, from the first toast to the last granita the morning after.",
+          ? "Ci siamo conosciuti al liceo, in fila per la granita da Costanzo, e da allora non abbiamo più smesso di litigare su quale sia la migliore: mandorla (Giulia) o gelso (Matteo).\nAbbiamo vissuto a Milano, poi a Torino, poi di nuovo a Milano. Ma per dirci sì volevamo tornare qui, tra la pietra dorata di Noto e gli alberi di melograno di nonna Pina.\nSarà una festa lunga, all'aperto, con il mare a dieci minuti. Ci farebbe felici avervi con noi, dal primo brindisi all'ultima granita del mattino dopo."
+          : "We met at secondary school in Noto, queuing for granita at Caffè Costanzo, and we've been arguing ever since about which flavour is best: almond (Giulia) or mulberry (Matteo).\nWe've lived in Milan, then Turin, then Milan again. But to say yes we wanted to come back here, among Noto's golden stone and Nonna Pina's pomegranate trees.\nIt'll be a long party, outdoors, with the sea ten minutes away. We'd love to have you with us, from the first toast to the last granita the morning after.",
       },
       program: {
         heading: it ? "Il programma" : "The day",
@@ -125,7 +125,7 @@ function melograno(lang: Lang): Content {
         submitLabel: it ? "Invia" : "Send",
         thanksLabel: it ? "Grazie! Ci vediamo a Noto" : "Thank you! See you in Noto",
       },
-      footer: { signature: it ? "Chiara e Salvo · per qualsiasi cosa, Chiara: 347 000 2814" : "Chiara & Salvo · for anything at all, Chiara: +39 347 000 2814" },
+      footer: { signature: it ? "Giulia e Matteo · per qualsiasi cosa, Giulia: 347 000 2814" : "Giulia & Matteo · for anything at all, Giulia: +39 347 000 2814" },
     },
     hide: ["gallery", "image", "video", "music"],
     rsvp: [
@@ -145,22 +145,22 @@ function smeraldo(lang: Lang): Content {
     themeId: "stemma-smeraldo",
     eventType: "wedding",
     event: {
-      title: "Giovanna & Piero",
+      title: "Alice & Davide",
       hosts: it ? "Francesca, Luca e Marta vi invitano a festeggiare" : "Francesca, Luca and Marta invite you to celebrate",
-      eventDate: "2027-05-22",
+      eventDate: "2027-06-12",
       eventTime: "11:00",
       venue: "Villa Le Lune di Bellosguardo",
       address: "Via di Bellosguardo 12, 50124 Firenze FI",
     },
     blocks: {
-      cover: { topText: it ? "1977 · 2027" : "1977 · 2027", sealText: "G·P" },
+      cover: { topText: it ? "1977 · 2027" : "1977 · 2027", sealText: "A·D" },
       hero: { kicker: it ? "Cinquant'anni fa, nella stessa chiesa" : "Fifty years ago, in the same church", occasion: it ? "festeggiano le nozze d'oro" : "celebrate their golden anniversary", scrollLabel: it ? "Scorri l'invito" : "Scroll down" },
       scratchdate: { dateTitle: it ? "Il giorno" : "The day", revealLabel: it ? "Scopri la data" : "Reveal the date" },
       message: {
         heading: it ? "Cinquant'anni, più o meno" : "Fifty years, give or take",
         body: it
-          ? "Il 21 maggio 1977 la mamma e il babbo si sono sposati a San Miniato al Monte, con un pranzo per sessanta persone in una trattoria del Galluzzo che oggi non c'è più.\nDa allora: una casa in via dei Serragli, tre figli, sei nipoti, un cane di nome Brunello e almeno quattrocento domeniche al mare a Castiglioncello.\nVorremmo festeggiarli come si deve, con le persone che hanno fatto parte di questa storia. Loro non sanno ancora tutto: vi chiediamo di non rovinare la sorpresa del pomeriggio."
-          : "On 21 May 1977 Mum and Dad got married at San Miniato al Monte, followed by lunch for sixty at a trattoria in Galluzzo that no longer exists.\nSince then: a home on Via dei Serragli, three children, six grandchildren, a dog called Brunello and at least four hundred Sundays at the beach in Castiglioncello.\nWe'd like to celebrate them properly, with the people who have been part of their story. They don't know everything yet: please don't spoil the afternoon surprise.",
+          ? "Il 12 giugno 1977 la mamma e il babbo si sono sposati a San Miniato al Monte, con un pranzo per sessanta persone in una trattoria del Galluzzo che oggi non c'è più.\nDa allora: una casa in via dei Serragli, tre figli, sei nipoti, un cane di nome Brunello e almeno quattrocento domeniche al mare a Castiglioncello.\nVorremmo festeggiarli come si deve, con le persone che hanno fatto parte di questa storia. Loro non sanno ancora tutto: vi chiediamo di non rovinare la sorpresa del pomeriggio."
+          : "On 12 June 1977 Mum and Dad got married at San Miniato al Monte, followed by lunch for sixty at a trattoria in Galluzzo that no longer exists.\nSince then: a home on Via dei Serragli, three children, six grandchildren, a dog called Brunello and at least four hundred Sundays at the beach in Castiglioncello.\nWe'd like to celebrate them properly, with the people who have been part of their story. They don't know everything yet: please don't spoil the afternoon surprise.",
       },
       gallery: { heading: it ? "Un po' di album di famiglia" : "From the family album" },
       image: { caption: it ? "Il salone della villa, dove si pranza." : "The villa's main hall, where lunch will be served." },
@@ -190,8 +190,8 @@ function smeraldo(lang: Lang): Content {
       transfer: {
         heading: it ? "Come arrivare" : "Getting there",
         body: it
-          ? "A San Miniato si parcheggia nel piazzale Galileo, cinque minuti a piedi in salita (per chi ha difficoltà, c'è un permesso per salire fino alla basilica: chiedete a Luca).\nPer la villa il parcheggio è all'interno, dal cancello di via di Bellosguardo. Da Firenze centro sono 15 minuti in taxi.\nChi arriva da fuori: l'Hotel Porta al Prato, vicino alla stazione, ci ha riservato dieci camere fino al 15 aprile."
-          : "At San Miniato, park in Piazzale Galileo and walk five minutes uphill (if walking is difficult, there's a permit to drive up to the basilica: ask Luca).\nAt the villa, parking is inside, through the gate on Via di Bellosguardo. It's 15 minutes by taxi from central Florence.\nComing from out of town? Hotel Porta al Prato, near the station, is holding ten rooms for us until 15 April.",
+          ? "A San Miniato si parcheggia nel piazzale Galileo, cinque minuti a piedi in salita (per chi ha difficoltà, c'è un permesso per salire fino alla basilica: chiedete a Luca).\nPer la villa il parcheggio è all'interno, dal cancello di via di Bellosguardo. Da Firenze centro sono 15 minuti in taxi.\nChi arriva da fuori: l'Hotel Porta al Prato, vicino alla stazione, ci ha riservato dieci camere fino al 10 maggio."
+          : "At San Miniato, park in Piazzale Galileo and walk five minutes uphill (if walking is difficult, there's a permit to drive up to the basilica: ask Luca).\nAt the villa, parking is inside, through the gate on Via di Bellosguardo. It's 15 minutes by taxi from central Florence.\nComing from out of town? Hotel Porta al Prato, near the station, is holding ten rooms for us until 10 May.",
       },
       gifts: {
         heading: it ? "Regali" : "Gifts",
@@ -229,7 +229,7 @@ function smeraldo(lang: Lang): Content {
       },
       video: { heading: it ? "Dal filmino del 1977" : "From the 1977 home movie" },
       rsvp: {
-        heading: it ? "Fateci sapere entro il 20 aprile" : "Please let us know by 20 April",
+        heading: it ? "Fateci sapere entro il 10 maggio" : "Please let us know by 10 May",
         intro: it ? "Ci serve per prenotare i posti in chiesa e al pranzo." : "We need it to reserve seats in church and at lunch.",
         openLabel: it ? "Rispondi" : "Reply",
         submitLabel: it ? "Invia la risposta" : "Send reply",
@@ -243,7 +243,7 @@ function smeraldo(lang: Lang): Content {
       Q.attending(it, it ? "Ci sarò" : "I'll be there", it ? "Non posso" : "I can't make it"),
       Q.guests(it),
       { id: "mass", label: it ? "Vieni anche alla messa?" : "Are you coming to the Mass too?", type: "yes-no", yes: it ? "Sì" : "Yes", no: it ? "Solo al pranzo" : "Just lunch" },
-      { id: "note", label: it ? "Un ricordo o un messaggio per Giovanna e Piero (lo leggeremo alla festa)" : "A memory or message for Giovanna and Piero (we'll read it at the party)", type: "text" },
+      { id: "note", label: it ? "Un ricordo o un messaggio per Alice e Davide (lo leggeremo alla festa)" : "A memory or message for Alice and Davide (we'll read it at the party)", type: "text" },
     ],
   };
 }

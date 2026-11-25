@@ -15,7 +15,7 @@ import { daysUntil, type Weather } from "./model";
 type Stage = "closed" | "opening" | "open" | "closing";
 const MS = 650;
 
-export function PlannerShell({ id, initial, lang, demo = false, accountHref, buyHref, backHref = "/account", backLabel, demoWeather }: {
+export function PlannerShell({ id, initial, lang, demo = false, accountHref, buyHref, backHref = "/account", backLabel, demoWeather, demoAccent, openFromHash = true }: {
   id: string;
   initial: PremiumData;
   lang: "it" | "en";
@@ -25,6 +25,8 @@ export function PlannerShell({ id, initial, lang, demo = false, accountHref, buy
   backHref?: string;
   backLabel?: string;
   demoWeather?: Weather; // demo: previsione d'esempio da mostrare (altrimenti quella di serie)
+  demoAccent?: string; // demo: colore del PDF (quello del tema dell'invito)
+  openFromHash?: boolean; // un'ancora nell'indirizzo (#tavoli…) apre subito il planner; false dove la pagina ha altre ancore
 }) {
   const en = lang === "en";
   const t = (it: string, eng: string) => (en ? eng : it);
@@ -35,7 +37,7 @@ export function PlannerShell({ id, initial, lang, demo = false, accountHref, buy
 
   // Link a una sezione del planner: si apre subito.
   useEffect(() => {
-    if (window.location.hash.length > 1) setStage("open");
+    if (openFromHash && window.location.hash.length > 1) setStage("open");
     return () => { if (timer.current) clearTimeout(timer.current); };
   }, []);
 
@@ -92,7 +94,7 @@ export function PlannerShell({ id, initial, lang, demo = false, accountHref, buy
           className={`ypg-stage is-${stage}`}
           style={{ "--ox": `${origin.x}%`, "--oy": `${origin.y}%`, "--ms": `${MS}ms` } as React.CSSProperties}
         >
-          <YesPlanner id={id} initial={initial} lang={lang} demo={demo} accountHref={accountHref} buyHref={buyHref} onClose={close} demoWeather={demoWeather} />
+          <YesPlanner id={id} initial={initial} lang={lang} demo={demo} accountHref={accountHref} buyHref={buyHref} onClose={close} demoWeather={demoWeather} demoAccent={demoAccent} />
         </div>
       )}
     </>

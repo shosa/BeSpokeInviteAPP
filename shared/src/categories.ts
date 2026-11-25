@@ -31,7 +31,3 @@ export const THEME_CATEGORIES: Record<string, ThemeCategory[]> = {
 export function themeCategories(themeId: string): ThemeCategory[] {
   return THEME_CATEGORIES[themeId] ?? ["wedding"];
 }
-
-// Vetrina privata (/vetrina/<token>): pagina dimostrativa raggiungibile solo da chi ha il link. Non è un segreto
-// (i contenuti sono di esempio): serve a non renderla raggiungibile da menu, motori di ricerca o indirizzi ovvi.
-export const SHOWCASE_TOKEN = "nd7q2vk9";

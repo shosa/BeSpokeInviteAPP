@@ -38,7 +38,6 @@ import {
   blockDef,
   withTheme,
   csvCell,
-  SHOWCASE_TOKEN,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -804,11 +803,11 @@ export async function buildApp() {
   });
 
   // Anteprima dedicata di uno stile: telefono o desktop contenuto; a schermo intero da telefono.
-  // Vetrina privata (/vetrina/<token> sul sito): tre inviti completi con contenuti scritti a mano (showcase.ts).
+  // Demo (/demo sul sito): tre inviti completi con contenuti scritti a mano (showcase.ts).
   // ?lang=it|en, ?cover=1 mostra la busta. Pagina generata a ogni richiesta, nulla di salvato; non indicizzata.
-  app.get<{ Params: { token: string; key: string }; Querystring: { lang?: string; cover?: string } }>("/api/showcase/:token/:key/page", async (req, reply) => {
+  app.get<{ Params: { key: string }; Querystring: { lang?: string; cover?: string } }>("/api/showcase/:key/page", async (req, reply) => {
     const key = req.params.key;
-    if (req.params.token !== SHOWCASE_TOKEN || !isShowcaseKey(key)) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
+    if (!isShowcaseKey(key)) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
     const theme = themes().find((t) => t.manifest.id === showcaseThemeId(key));
     if (!theme) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
     const lang = req.query.lang === "en" ? "en" : "it";

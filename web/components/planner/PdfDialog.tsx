@@ -16,7 +16,8 @@ const PARTS: { key: string; label: string; hint: string; en: [string, string] }[
 ];
 const ALL = [...PARTS.map((p) => p.key), ...FOLDER_GROUPS.map((g) => `cartella:${g}`)];
 
-export function PdfDialog({ id, onClose, title = "", eventType }: { id: string; onClose: () => void; title?: string; eventType?: string }) {
+// demoData: nella demo il planner non è salvato, quindi il PDF si crea dai dati che la pagina ha in memoria.
+export function PdfDialog({ id, onClose, title = "", eventType, demoData }: { id: string; onClose: () => void; title?: string; eventType?: string; demoData?: unknown }) {
   const lang = useLang();
   const en = lang === "en";
   const t = (it: string, eng: string) => (en ? eng : it);
@@ -32,10 +33,10 @@ export function PdfDialog({ id, onClose, title = "", eventType }: { id: string; 
     setDone(false);
     setError(null);
     try {
-      const res = await fetch(`/api/planners/${id}/pdf`, {
+      const res = await fetch(demoData ? "/api/demo/planner-pdf" : `/api/planners/${id}/pdf`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ include: [...picked], lang }),
+        body: JSON.stringify(demoData ? { include: [...picked], lang, data: demoData } : { include: [...picked], lang }),
       });
       if (!res.ok) {
         const out = (await res.json().catch(() => ({}))) as { error?: string };

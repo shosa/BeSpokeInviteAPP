@@ -5,7 +5,7 @@ import { pool } from "./db";
 import { COLLECTIONS, forecastFor, isCollectionKind, sanitizeDocs, sanitizeItem, type CollectionKind, type FolderValue } from "./planner";
 import { geocodeOne } from "./places";
 import { INPUT_TYPES, MediaError, convertMedia, readUpload, uploadLimits } from "./media";
-import { buildPlannerPdf, isPdfChoice, type PdfChoice } from "./planner-pdf";
+import { buildPlannerPdf, isPdfChoice, type PdfChoice, type PdfData } from "./planner-pdf";
 import type { SessionUser } from "./auth";
 
 // Planner come servizio a sé: si compra a parte (variante Shopify «planner»), ha un suo evento (titolo, data, luogo)
@@ -393,6 +393,26 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     return reply.header("Content-Type", "application/pdf").header("Content-Disposition", `attachment; filename="${plannerPdfName(p.event_type, p.title, lang === "en" ? "en" : "it")}"`).send(pdf);
   });
 
+  // PDF della demo (/demo e /planner/demo): stessi contenuti e stessa impaginazione, ma dai dati che la pagina ha in
+  // memoria (la demo non salva nulla). Pubblica: input ridotto a misura (liste e testi tagliati) e una richiesta per
+  // volta per processo; nginx limita le richieste per IP.
+  let demoPdfBusy = 0;
+  app.post("/api/demo/planner-pdf", { bodyLimit: 400 * 1024 }, async (req, reply) => {
+    const b = (req.body ?? {}) as { include?: unknown; lang?: unknown; data?: unknown };
+    const include = (Array.isArray(b.include) ? b.include : []).filter((x): x is PdfChoice => typeof x === "string" && isPdfChoice(x));
+    if (include.length === 0) return reply.code(400).send({ error: "Scegliete almeno una parte da includere" });
+    if (demoPdfBusy >= 2) return reply.code(429).send({ error: "Troppe richieste in questo momento: riprova tra qualche secondo" });
+    const lang = b.lang === "en" ? "en" : "it";
+    const data = demoPdfData(b.data, lang);
+    demoPdfBusy++;
+    try {
+      const pdf = await buildPlannerPdf(data, include);
+      return reply.header("Content-Type", "application/pdf").header("Content-Disposition", `attachment; filename="${plannerPdfName(data.eventType, data.title, lang)}"`).send(pdf);
+    } finally {
+      demoPdfBusy--;
+    }
+  });
+
   app.post<{ Params: { id: string; kind: string } }>("/api/planners/:id/:kind", async (req, reply) => {
     const p = await plannerOf(req, reply);
     if (!p) return;
@@ -450,4 +470,40 @@ export function registerPlannerRoutes(app: FastifyInstance, deps: Deps) {
     await pool.query(`DELETE FROM ${COLLECTIONS[kind as CollectionKind].table} WHERE id = $1 AND planner_id = $2`, [req.params.itemId, p.id]);
     return { ok: true };
   });
+}
+
+// Dati della demo per il PDF: si prende solo ciò che serve, con tipi controllati e misure massime.
+function demoPdfData(raw: unknown, lang: "it" | "en"): PdfData {
+  const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const str = (v: unknown, max = 200) => (typeof v === "string" ? v.slice(0, max) : "");
+  const num = (v: unknown, max = 1e10) => (typeof v === "number" && Number.isFinite(v) ? Math.max(0, Math.min(max, Math.round(v))) : 0);
+  const list = (v: unknown, max: number) => (Array.isArray(v) ? v.slice(0, max).filter((x): x is Record<string, unknown> => !!x && typeof x === "object") : []);
+  const date = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+  const ev = (o.event && typeof o.event === "object" ? o.event : {}) as Record<string, unknown>;
+  const docsIn = (o.docs && typeof o.docs === "object" ? o.docs : {}) as Record<string, unknown>;
+  const docs: PdfData["docs"] = {};
+  for (const [k, v] of Object.entries(docsIn).slice(0, 60)) {
+    if (typeof v === "string") docs[str(k, 60)] = str(v, 4000);
+    else if (v && typeof v === "object" && Array.isArray((v as { items?: unknown }).items)) {
+      docs[str(k, 60)] = { items: list((v as { items: unknown }).items, 80).map((row) => Object.fromEntries(Object.entries(row).slice(0, 6).map(([rk, rv]) => [str(rk, 20), typeof rv === "boolean" ? rv : str(rv, 300)]))) };
+    }
+  }
+  const response = (v: unknown) => (v === "yes" || v === "no" ? v : "pending");
+  return {
+    title: str(ev.title, 120) || (lang === "en" ? "Our event" : "Il nostro evento"),
+    eventType: str(ev.eventType, 20) || "wedding",
+    eventDate: date(ev.eventDate) ?? "",
+    venue: str(ev.venue, 160),
+    accent: /^#[0-9a-f]{6}$/i.test(str(o.accent, 7)) ? str(o.accent, 7) : "#8a6427",
+    budgetCents: num(o.budgetCents),
+    guestQuota: num(o.guestQuota, 5000),
+    guests: list(o.guests, 600).map((g) => ({ name: str(g.name, 120), group_name: str(g.group_name, 80), party_size: Math.max(1, num(g.party_size, 20)), response: response(g.response), table_id: str(g.table_id, 40) || null })),
+    tables: list(o.tables, 80).map((t) => ({ id: str(t.id, 40), name: str(t.name, 80), seats: num(t.seats, 50) })),
+    budget: list(o.budget, 200).map((x) => ({ label: str(x.label, 120), category: str(x.category, 30), amount_cents: num(x.amount_cents), due_date: date(x.due_date), paid: x.paid === true, quote_id: str(x.quote_id, 40) || null })),
+    quotes: list(o.quotes, 150).map((q) => ({ id: str(q.id, 40), category: str(q.category, 30), name: str(q.name, 120), amount_cents: num(q.amount_cents), booked: q.booked === true, signed: q.signed === true })),
+    tasks: list(o.tasks, 200).map((t) => ({ title: str(t.title, 200), done: t.done === true, days_before: num(t.days_before, 2000) })),
+    vendors: list(o.vendors, 80).map((v) => ({ name: str(v.name, 120), role: str(v.role, 80), contact: str(v.contact, 120), contract_status: v.contract_status === "signed" ? "signed" : "unsigned" })),
+    docs,
+    lang,
+  };
 }

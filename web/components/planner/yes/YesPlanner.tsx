@@ -66,7 +66,7 @@ const NAV: { view: View; it: string; en: string; Icon: (p: { on?: boolean }) => 
   { view: "binder", it: "Cartella", en: "Binder", Icon: IcBinder },
 ];
 
-export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose, readOnly = false, apiBase, demoWeather }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void; readOnly?: boolean; apiBase?: string; demoWeather?: Weather }) {
+export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/account#planner", buyHref = "/account#planner", onClose, readOnly = false, apiBase, demoWeather, demoAccent }: { id: string; initial: PremiumData; lang: "it" | "en"; demo?: boolean; accountHref?: string; buyHref?: string; onClose?: () => void; readOnly?: boolean; apiBase?: string; demoWeather?: Weather; demoAccent?: string }) {
   const router = useRouter();
   const en = lang === "en";
   // Rotte dei dati: quelle del cliente, o quelle in sola lettura dell'amministratore (apiBase).
@@ -191,7 +191,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
     settings: null,
   };
 
-  const openPdf = () => (readOnly ? toast(t("Anteprima in sola lettura: il PDF lo crea il cliente.", "Read-only preview: the customer creates the PDF.")) : demo ? toast(t("Nella demo il PDF non si crea: con il planner lo scarichi pronto da stampare.", "The demo can't create the PDF: with the planner you download it ready to print.")) : setPdfOpen(true));
+  const openPdf = () => (readOnly ? toast(t("Anteprima in sola lettura: il PDF lo crea il cliente.", "Read-only preview: the customer creates the PDF.")) : setPdfOpen(true));
   const ev = eventCopy(data.event.eventType, en);
   const rootRef = useRef<HTMLDivElement>(null);
   // Sola lettura: campi, menu a tendina e trascinamenti disattivati in tutto il planner, anche in ciò che compare dopo.
@@ -298,7 +298,7 @@ export function YesPlanner({ id, initial, lang, demo = false, accountHref = "/ac
       {sheet?.kind === "guest" && <GuestSheet ctx={ctx} guest={sheet.guest} onClose={() => setSheet(null)} />}
       {sheet?.kind === "task" && <TaskSheet ctx={ctx} task={sheet.task} onClose={() => setSheet(null)} />}
       {sheet?.kind === "photo" && <PhotoSheet ctx={ctx} onClose={() => setSheet(null)} />}
-      {pdfOpen && <PdfDialog id={id} title={data.event.title} eventType={data.event.eventType} onClose={() => setPdfOpen(false)} />}
+      {pdfOpen && <PdfDialog id={id} title={data.event.title} eventType={data.event.eventType} onClose={() => setPdfOpen(false)} demoData={demo ? { ...data, accent: demoAccent } : undefined} />}
       {toastText && <div className="y-toast" role="status" aria-live="polite">{toastText}</div>}
     </div>
   );
