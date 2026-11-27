@@ -1,9 +1,10 @@
 "use client";
 
-import { BLOCK_LABELS, EVENT_FIELDS, EVENT_TYPES, HERO_EVENT_KEYS, blockDef, type BlockDef, type BlockInstance, type Catalog, type EventType, type FieldDef, type FontId, type InviteConfig, type RsvpQuestion } from "@inviteme/shared";
+import { BLOCK_LABELS, EVENT_FIELDS, EVENT_TYPES, HERO_EVENT_KEYS, blockDef, type BlockDef, type BlockInstance, type Catalog, type EventType, type FieldDef, type FontId, type InviteConfig, type Locale, type RsvpQuestion, LOCALES, LOCALE_INFO } from "@inviteme/shared";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ArrowLeft, Ellipsis, Eye, EyeOff, Image as ImageIcon, LayoutGrid, Palette, Shapes, Trash2, Type } from "lucide-react";
+import { ArrowLeft, Ellipsis, Eye, EyeOff, Image as ImageIcon, LayoutGrid, Palette, Shapes, Sparkles, Trash2, Type } from "lucide-react";
+import { Flag } from "@/components/ui/Flag";
 import { Field, FieldEditor, type Values } from "./fields";
 import { FontButton } from "./FontButton";
 import { ui } from "@/lib/ui";
@@ -134,7 +135,8 @@ type Props = {
   onSetEvent: (key: string, value: unknown, group?: string) => void;
   locked?: boolean;
   videoEnvelope?: boolean; // il tema apre l'invito con un filmato: la Busta non ha proprietà
-  onSetLocale: (locale: "it" | "en") => void;
+  onSetLocale: (locale: Locale) => void;
+  onSetExtraLocales: (locales: Locale[]) => void;
   // Quale parte del pannello generale mostrare, scelta dalle schede: dettagli, tema, lingua, link.
   section?: "dettagli" | "tema" | "lingua" | "link";
   shareUrl?: string;
@@ -238,6 +240,7 @@ export function Inspector(p: Props) {
   const hasMap = p.config.blocks.some((b) => b.type === "map");
   const hasHero = p.config.blocks.some((b) => b.type === "hero");
   const show = (k: "dettagli" | "tema" | "lingua" | "link") => !p.section || p.section === k;
+  const en = p.lang === "en";
   return (
     <div className="bl-inspector">
       <header className="bl-insp-head">
@@ -276,16 +279,32 @@ export function Inspector(p: Props) {
       )}
 
       {show("lingua") && (
-      <section className="bl-group" aria-labelledby="bl-lang">
-        <h3 id="bl-lang">{L.pageLang}</h3>
-        <div className="bl-fields">
-          <Field label={L.pageLangField}>
-            <select value={p.config.locale} onChange={(e) => p.onSetLocale(e.target.value as "it" | "en")}>
-              <option value="it">Italiano</option>
-              <option value="en">English</option>
-            </select>
-          </Field>
+      <section className="bl-group bl-langs" aria-labelledby="bl-lang">
+        <h3 id="bl-lang">{en ? "Main language" : "Lingua principale"}</h3>
+        <p className="hint">{en ? "The language you write the invitation in: it's the one you see here in the builder." : "La lingua in cui scrivete l'invito: è quella che vedete qui nel builder."}</p>
+        <div className="bl-lang-grid" role="radiogroup" aria-labelledby="bl-lang">
+          {LOCALES.map((l) => (
+            <button key={l} type="button" role="radio" aria-checked={p.config.locale === l} className={`bl-lang-opt${p.config.locale === l ? " is-on" : ""}`} onClick={() => p.onSetLocale(l)}>
+              <Flag locale={l} /><span>{en ? LOCALE_INFO[l].en : LOCALE_INFO[l].it}</span>
+            </button>
+          ))}
         </div>
+        <h3 className="bl-lang-h">{en ? "Other languages" : "Altre lingue"}</h3>
+        <p className="hint">{en ? "Guests choose the language from a small button at the top right of the invitation." : "Gli ospiti scelgono la lingua da un piccolo pulsante in alto a destra nell'invito."}</p>
+        <div className="bl-lang-grid">
+          {LOCALES.filter((l) => l !== p.config.locale).map((l) => {
+            const on = (p.config.extraLocales ?? []).includes(l);
+            return (
+              <label key={l} className={`bl-lang-opt${on ? " is-on" : ""}`}>
+                <input type="checkbox" checked={on} onChange={(e) => p.onSetExtraLocales(e.target.checked ? [...(p.config.extraLocales ?? []), l] : (p.config.extraLocales ?? []).filter((x) => x !== l))} />
+                <Flag locale={l} /><span>{en ? LOCALE_INFO[l].en : LOCALE_INFO[l].it}</span>
+              </label>
+            );
+          })}
+        </div>
+        <p className="bl-lang-ai"><Sparkles size={15} aria-hidden="true" /> {en
+          ? "BeSpoke AI translates the invitation automatically into the languages you add, starting from the main language, every time you publish. Names, places and addresses stay as they are."
+          : "Verrà tradotto automaticamente da BeSpoke AI nelle lingue che aggiungete, partendo dalla lingua principale, a ogni pubblicazione. Nomi, luoghi e indirizzi restano come sono."}</p>
       </section>
       )}
 

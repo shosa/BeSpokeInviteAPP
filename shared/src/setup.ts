@@ -1,6 +1,7 @@
 import { BLOCK_TYPES, makeBlock, type BlockInstance, type BlockType } from "./blocks";
 import { sanitizeQuestions, type RsvpQuestion } from "./engine/manifest";
 import type { InviteConfig } from "./invitation";
+import type { Locale } from "./locales";
 
 // Wizard iniziale del builder (e del planner): i dati di base dell'invito, chiesti a passi.
 // Dalle risposte si impostano i campi dell'evento e si aggiungono o tolgono i blocchi collegati:
@@ -18,29 +19,36 @@ export type SetupInput = {
 
 // Domande pronte da attivare nel wizard. Nome e presenza sono sempre incluse.
 export type PresetQuestion = RsvpQuestion & { locked?: boolean; on?: boolean };
-export function presetQuestions(locale: "it" | "en"): PresetQuestion[] {
-  const en = locale === "en";
+export function presetQuestions(locale: Locale): PresetQuestion[] {
+  const T: Record<Locale, string[]> = {
+    // nome, presenza, sì, no, persone, allergie, alloggio, navetta, sì breve, messaggio
+    it: ["Nome e cognome", "Parteciperai?", "Sì, con piacere", "Purtroppo non posso", "Numero di persone (compreso te)", "Allergie o intolleranze", "Ti serve un alloggio?", "Ti serve la navetta?", "Sì", "Un messaggio per gli sposi"],
+    en: ["Full name", "Will you attend?", "Yes, with pleasure", "Sorry, I cannot", "Number of people (including you)", "Allergies or intolerances", "Do you need accommodation?", "Do you need the shuttle?", "Yes", "A message for the hosts"],
+    es: ["Nombre y apellidos", "¿Vendrás?", "Sí, con mucho gusto", "Lo siento, no puedo", "Número de personas (incluido tú)", "Alergias o intolerancias", "¿Necesitas alojamiento?", "¿Necesitas el autobús?", "Sí", "Un mensaje para los anfitriones"],
+    fr: ["Nom et prénom", "Serez-vous présent ?", "Oui, avec plaisir", "Désolé, je ne peux pas", "Nombre de personnes (vous compris)", "Allergies ou intolérances", "Avez-vous besoin d'un hébergement ?", "Avez-vous besoin de la navette ?", "Oui", "Un message pour les hôtes"],
+  };
+  const t = T[locale] ?? T.it;
   return [
-    { id: "name", label: en ? "Full name" : "Nome e cognome", type: "text", required: true, locked: true, on: true },
-    { id: "attending", label: en ? "Will you attend?" : "Parteciperai?", type: "yes-no", required: true, yes: en ? "Yes, with pleasure" : "Sì, con piacere", no: en ? "Sorry, I cannot" : "Purtroppo non posso", locked: true, on: true },
-    { id: "guests", label: en ? "Number of people (including you)" : "Numero di persone (compreso te)", type: "number", on: true },
-    { id: "allergies", label: en ? "Allergies or intolerances" : "Allergie o intolleranze", type: "text" },
-    { id: "lodging", label: en ? "Do you need accommodation?" : "Ti serve un alloggio?", type: "yes-no", yes: en ? "Yes" : "Sì", no: "No" },
-    { id: "shuttle", label: en ? "Do you need the shuttle?" : "Ti serve la navetta?", type: "yes-no", yes: en ? "Yes" : "Sì", no: "No" },
-    { id: "note", label: en ? "A message for the hosts" : "Un messaggio per gli sposi", type: "text", on: true },
+    { id: "name", label: t[0], type: "text", required: true, locked: true, on: true },
+    { id: "attending", label: t[1], type: "yes-no", required: true, yes: t[2], no: t[3], locked: true, on: true },
+    { id: "guests", label: t[4], type: "number", on: true },
+    { id: "allergies", label: t[5], type: "text" },
+    { id: "lodging", label: t[6], type: "yes-no", yes: t[8], no: locale === "fr" ? "Non" : "No" },
+    { id: "shuttle", label: t[7], type: "yes-no", yes: t[8], no: locale === "fr" ? "Non" : "No" },
+    { id: "note", label: t[9], type: "text", on: true },
   ];
 }
 
 const ORDER = BLOCK_TYPES as readonly string[];
 
 // Inserisce un blocco al suo posto naturale (l'ordine del registro dei blocchi), se manca. Ritorna il blocco.
-function ensure(blocks: BlockInstance[], type: BlockType, locale: "it" | "en"): BlockInstance {
+function ensure(blocks: BlockInstance[], type: BlockType, locale: Locale): BlockInstance {
   const found = blocks.find((b) => b.type === type);
   if (found) {
     found.hidden = false;
     return found;
   }
-  const block = makeBlock(type, locale);
+  const block = makeBlock(type, locale === "it" ? "it" : "en");
   const at = blocks.findIndex((b) => ORDER.indexOf(b.type) > ORDER.indexOf(type));
   if (at < 0) blocks.push(block);
   else blocks.splice(at, 0, block);
@@ -51,7 +59,7 @@ const without = (blocks: BlockInstance[], type: BlockType) => blocks.filter((b) 
 
 // Applica le risposte del wizard alla configurazione. Non valida: il server passa il risultato da sanitizeConfig.
 export function applySetup(config: InviteConfig, input: SetupInput): InviteConfig {
-  const locale = config.locale === "en" ? "en" : "it";
+  const locale: Locale = config.locale ?? "it";
   let blocks: BlockInstance[] = JSON.parse(JSON.stringify(config.blocks ?? []));
   const event = { ...(config.event ?? {}), title: input.title, eventDate: input.eventDate, venue: input.venue, address: input.address };
 

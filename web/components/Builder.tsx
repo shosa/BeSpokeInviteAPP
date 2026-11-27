@@ -22,6 +22,7 @@ import {
   type RsvpQuestion,
   blockDef,
   isFixedPosition,
+  cleanExtraLocales,
 } from "@inviteme/shared";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
@@ -38,6 +39,7 @@ import { StockContext } from "./builder/PixabayDialog";
 import { PublishedPanel } from "./builder/PublishedPanel";
 import { PublishDialog } from "@/components/PublishDialog";
 import { ThemeSwitcher } from "./builder/ThemeSwitcher";
+import { PublishProgress } from "./PublishProgress";
 
 export type Manage = {
   id: string;
@@ -132,15 +134,11 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       setPublishOpen(true);
       return;
     }
-    const res = await fetch(`/api/invitations/${initial.id}/confirm-edit`, { method: "POST" });
-    if (res.ok) return (window.location.href = `/inviti/${initial.id}/risposte`);
-    const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
-    if (res.status === 409 && data.code === "payment_required") {
-      setSummary(false);
-      return checkout();
-    }
-    setError(data.error ?? (lang === "en" ? "Confirmation failed, please try again." : "Conferma non riuscita, riprova."));
+    // Pubblicazione con le fasi in lista (e la traduzione nelle lingue in più): la fa PublishProgress.
+    setSummary(false);
+    setPublishing(true);
   }
+  const [publishing, setPublishing] = useState(false);
 
   const [selected, setSelected] = useState<string | null>(null);
   const [panel, setPanel] = useState<"proprieta" | "ospiti">("proprieta");
@@ -413,7 +411,7 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
 
   // Con una funzione a pagamento da attivare, la attiva e aggiunge il blocco in un solo passo.
   function addBlock(type: BlockType, feature?: AddonKey) {
-    const b = makeBlock(type, config.locale);
+    const b = makeBlock(type, config.locale === "it" ? "it" : "en");
     const top = !!blockDef(type)?.anchored;
     edit((c) => ({ ...c, blocks: top ? [b, ...c.blocks] : [...c.blocks, b], addons: feature && !c.addons.includes(feature) ? [...c.addons, feature] : c.addons }));
     setSelected(b.id);
@@ -744,7 +742,8 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
             onSetProp={setProp}
             onSetEvent={setEvent}
             locked={locked}
-            onSetLocale={(locale) => edit((c) => ({ ...c, locale }))}
+            onSetLocale={(locale) => edit((c) => ({ ...c, locale, extraLocales: cleanExtraLocales(locale, c.extraLocales) }))}
+            onSetExtraLocales={(extra) => edit((c) => ({ ...c, extraLocales: cleanExtraLocales(c.locale, extra) }))}
             onSetEventType={(eventType: EventType) => edit((c) => ({ ...c, eventType }))}
             onSetQuestions={(rsvpQuestions: RsvpQuestion[]) => edit((c) => ({ ...c, rsvpQuestions }), "questions")}
             onToggle={toggleBlock}
@@ -811,8 +810,27 @@ function BuilderEditor({ initial, lang }: { initial: Manage; lang: Lang }) {
       {themeOpen && (
         <ThemeSwitcher invitationId={initial.id} config={config} catalog={catalog} locked={themeLocked} lang={lang} onClose={() => setThemeOpen(false)} onConfirm={changeTheme} />
       )}
+      {publishing && (
+        <div className="bl-modal-backdrop">
+          <div className="bl-modal publish-dialog" role="dialog" aria-modal="true" aria-label={lang === "en" ? "Publishing" : "Pubblicazione"}>
+            <PublishProgress
+              id={initial.id}
+              body={{}}
+              extraLocales={config.extraLocales ?? []}
+              lang={lang}
+              onDone={() => { window.location.href = `/inviti/${initial.id}/risposte`; }}
+              onError={(msg, code) => {
+                setPublishing(false);
+                if (code === "payment_required") return checkout();
+                setError(msg);
+              }}
+            />
+          </div>
+        </div>
+      )}
       {publishOpen && (
         <PublishDialog
+          extraLocales={config.extraLocales ?? []}
           id={initial.id}
           origin={origin}
           lang={lang}

@@ -30,6 +30,7 @@ import {
   type EventType,
   type Catalog,
   type InviteConfig,
+  type Locale,
   type RsvpQuestion,
   attendanceOf,
   partySizeOf,
@@ -38,6 +39,9 @@ import {
   blockDef,
   withTheme,
   csvCell,
+  LOCALES,
+  isLocale,
+  cleanExtraLocales,
 } from "@inviteme/shared";
 import Anthropic from "@anthropic-ai/sdk";
 import { pool, migrate, track } from "./db";
@@ -48,6 +52,7 @@ import { EFFORTS, listAssistantModels, loadAssistantSettings, saveAssistantSetti
 import { invalidateCatalog, loadCatalog, loadFullCatalog, reloadThemes, saveCatalog, themes } from "./catalog";
 import { previewShell } from "./engine/previewShell";
 import { SHOWCASE_SLUG_PREFIX, isShowcaseKey, showcaseConfig, showcaseThemeId } from "./showcase";
+import { translateConfig, type TranslationMemory } from "./translate";
 import { renderInvitePage } from "./engine/page";
 import { RUNTIME_PATH, THEMES_DIR, sampleConfig } from "./engine/themes";
 import { installThemeZip, removeThemeDir, ThemeUploadError } from "./themeUpload";
@@ -104,10 +109,10 @@ const isMediaKind = (v: string): v is MediaKind => v === "photo" || v === "video
 const NO_SCROLLBAR = "<style>html,body{scrollbar-width:none;-ms-overflow-style:none}::-webkit-scrollbar{display:none}</style>";
 const quietScroll = (html: string) => (html.includes("</head>") ? html.replace("</head>", `${NO_SCROLLBAR}</head>`) : NO_SCROLLBAR + html);
 
-function renderFor(c: Catalog, slug: string, config: InviteConfig, preview = false, builder = false): string | null {
+function renderFor(c: Catalog, slug: string, config: InviteConfig, preview = false, builder = false, languages?: Locale[]): string | null {
   const theme = themes().find((t) => t.manifest.id === config.themeId);
   if (!theme) return null;
-  return renderInvitePage({ theme, config, slug, features: activeFeatures(c, config.model, config.addons), runtime: RUNTIME, preview, builder });
+  return renderInvitePage({ theme, config, slug, features: activeFeatures(c, config.model, config.addons), runtime: RUNTIME, preview, builder, languages });
 }
 
 // Toglie da una mappa di limiti le voci più vecchie della finestra (at: istante della prima richiesta o dell'ultima).
@@ -637,15 +642,41 @@ export async function buildApp() {
       if (!chosen) return reply.code(400).send({ error: "Scegli un link: lettere minuscole, numeri e trattini (3–60 caratteri)." });
       slug = chosen;
     }
+    // Link già preso da un altro invito: lo si dice subito, prima di tradurre.
+    if (slug !== inv.slug) {
+      const taken = await pool.query("SELECT 1 FROM invitations WHERE slug = $1 AND id <> $2", [slug, inv.id]);
+      if (taken.rows.length) return reply.code(409).send({ error: "Questo link è già in uso: scegline un altro." });
+    }
+    // Lingue in più: BeSpoke AI traduce la versione che si pubblica, partendo dalla lingua principale. Solo i testi nuovi
+    // o cambiati passano dal modello (memoria per lingua). Se una lingua non riesce, l'invito si pubblica lo stesso.
+    const config = inv.config as InviteConfig;
+    const memory = (inv.translation_memory ?? {}) as TranslationMemory;
+    const translations: Partial<Record<Locale, InviteConfig>> = {};
+    const translated: Locale[] = [];
+    const failed: Locale[] = [];
+    for (const to of config.extraLocales ?? []) {
+      try {
+        const out = await translateConfig(config, to, memory[to] ?? {});
+        translations[to] = out.config;
+        memory[to] = out.memory;
+        translated.push(to);
+      } catch (e) {
+        req.log.warn({ err: e, to }, "traduzione dell'invito non riuscita");
+        failed.push(to);
+      }
+    }
     // edit_count conta le pubblicazioni (da 1 in su l'invito è online).
     try {
-      await pool.query("UPDATE invitations SET edit_count = edit_count + 1, published_config = config, slug = $2 WHERE id = $1", [inv.id, slug]);
+      await pool.query(
+        "UPDATE invitations SET edit_count = edit_count + 1, published_config = $3, slug = $2, published_translations = $4, translation_memory = $5 WHERE id = $1",
+        [inv.id, slug, JSON.stringify(config), JSON.stringify(translations), JSON.stringify(memory)],
+      );
       await recordPublish(inv.id, user.id).catch((e) => req.log.warn({ err: e }, "pubblicazione non registrata"));
     } catch (e) {
       if ((e as { code?: string }).code === "23505") return reply.code(409).send({ error: "Questo link è già in uso: scegline un altro." });
       throw e;
     }
-    return { ok: true, editCount: inv.edit_count + 1, slug };
+    return { ok: true, editCount: inv.edit_count + 1, slug, translated, failed };
   });
 
   // Il planner è un servizio a sé, con le sue rotte (/api/planners/…): plannerRoutes.ts.
@@ -669,15 +700,31 @@ export async function buildApp() {
     if (!title) return reply.code(400).send({ error: "Scrivete i nomi o il titolo dell'evento" });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || Number.isNaN(Date.parse(eventDate + "T00:00:00"))) return reply.code(400).send({ error: "Inserite una data valida" });
     const venue = text(b.venue, 120);
-    const applied = applySetup(inv.config as InviteConfig, {
+    const signature = text(b.signature, 80);
+    let applied = applySetup(inv.config as InviteConfig, {
       title,
       eventDate,
       venue,
       address: text(b.address, 200),
-      signature: text(b.signature, 80),
+      signature,
       rsvp: b.rsvp === true,
       questions: Array.isArray(b.questions) ? (b.questions as RsvpQuestion[]) : [],
     });
+    // Lingua base scelta nel wizard: è quella del builder. Se è diversa da quella dei testi di partenza del template,
+    // BeSpoke AI li traduce; nomi, luogo, ringraziamento e domande scritti nel wizard restano come sono.
+    const base = isLocale(b.locale) ? b.locale : applied.locale;
+    if (base !== applied.locale) {
+      try {
+        const out = await translateConfig(applied, base, {}, { rsvp: false });
+        applied = out.config;
+        const footer = applied.blocks.find((x) => x.type === "footer");
+        if (footer && signature) footer.props = { ...footer.props, signature };
+      } catch (e) {
+        req.log.warn({ err: e, base }, "testi di partenza non tradotti");
+        applied = { ...applied, locale: base };
+      }
+      applied = { ...applied, extraLocales: cleanExtraLocales(base, applied.extraLocales) };
+    }
     const clean = sanitizeConfig(await loadCatalog(), applied);
     if (!clean) return reply.code(400).send({ error: "Configurazione non valida" });
     // Il luogo resta anche tra i dati dell'evento: il planner lo legge da lì.
@@ -757,7 +804,18 @@ export async function buildApp() {
     if (!inv) return reply.code(404).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
     const c = await loadCatalog();
     // Agli ospiti va la versione pubblicata; le modifiche in bozza restano private fino alla conferma.
-    const html = renderFor(c, inv.slug, (inv.published_config ?? inv.config) as InviteConfig);
+    // Lingua: ?lang= se è tra quelle pubblicate, altrimenti la prima del browser che l'invito ha, altrimenti la principale.
+    const primary = (inv.published_config ?? inv.config) as InviteConfig;
+    const translations = (inv.published_translations ?? {}) as Partial<Record<Locale, InviteConfig>>;
+    const languages: Locale[] = [primary.locale, ...LOCALES.filter((l) => l !== primary.locale && translations[l])];
+    const asked = (req.query as { lang?: string }).lang;
+    const fromBrowser = String(req.headers["accept-language"] ?? "")
+      .split(",")
+      .map((x) => x.trim().slice(0, 2).toLowerCase())
+      .find((x) => languages.includes(x as Locale));
+    const lang: Locale = isLocale(asked) && languages.includes(asked) ? asked : ((fromBrowser as Locale | undefined) ?? primary.locale);
+    const shown = lang === primary.locale ? primary : translations[lang]!;
+    const html = renderFor(c, inv.slug, shown, false, false, languages);
     if (!html) return reply.code(410).type("text/html; charset=utf-8").send(NOT_FOUND_PAGE);
     await pool.query("UPDATE invitations SET views = views + 1 WHERE id = $1", [inv.id]);
     await track("invitation_viewed", inv.id);
@@ -973,7 +1031,7 @@ export async function buildApp() {
     if (String(b.slug).startsWith(SHOWCASE_SLUG_PREFIX)) return reply.code(201).send({ ok: true });
     if (bump(rsvpHits, String(b.slug).slice(0, 100), RSVP_WINDOW) > RSVP_MAX) return reply.code(429).send({ error: "Troppe risposte in questo momento: riprova tra qualche minuto" });
     const { rows } = await pool.query(
-      `SELECT i.id, i.config, i.published_config, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
+      `SELECT i.id, i.config, i.published_config, i.published_translations, u.email AS owner_email FROM invitations i JOIN users u ON u.id = i.user_id
        WHERE i.slug = $1 AND i.status = 'paid' AND i.edit_count >= 1`,
       [b.slug],
     );
@@ -988,11 +1046,18 @@ export async function buildApp() {
     const questions = (inv.config.rsvpQuestions as RsvpQuestion[]) ?? [];
     const answers: Record<string, string | number | boolean> = {};
     for (const q of questions) {
-      const v = b.answers[q.id];
+      const v: unknown = b.answers[q.id];
       if (q.type === "yes-no" && typeof v === "boolean") answers[q.id] = v;
       else if (q.type === "number" && typeof v === "number" && v >= 0 && v <= 50) answers[q.id] = Math.round(v);
       else if (q.type === "text" && typeof v === "string" && v.trim()) answers[q.id] = v.trim().slice(0, 500);
       else if (q.type === "choice" && typeof v === "string" && (q.options ?? []).includes(v)) answers[q.id] = v;
+      else if (q.type === "choice" && typeof v === "string") {
+        // Risposta dalla pagina in un'altra lingua: l'opzione tradotta si salva come quella originale (stessa posizione).
+        for (const t of Object.values((found.published_translations ?? {}) as Record<string, InviteConfig>)) {
+          const i = t?.rsvpQuestions?.find((x) => x.id === q.id)?.options?.indexOf(v) ?? -1;
+          if (i >= 0 && q.options?.[i]) { answers[q.id] = q.options[i]; break; }
+        }
+      }
       if (q.required && answers[q.id] === undefined) return reply.code(400).send({ error: `Manca una risposta: ${q.label}` });
     }
 

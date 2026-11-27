@@ -1052,14 +1052,19 @@ h2 { font-size: clamp(2rem, 3.2vw, 2.7rem); }
 /* Telefono: la vetrina dei template mostra più stili insieme, più piccoli e con una sfumatura leggera ai bordi. */
 @media (max-width: 720px) {
   .tpl-track { -webkit-mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent); mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent); padding: 8px 14px 18px; gap: 12px; }
-  .tpl-carousel.is-lg .tpl-track { grid-auto-columns: 168px; gap: 12px; padding: 8px 14px 18px; }
-  .tpl-carousel.is-lg .tpl-phone { width: 168px; height: 350px; padding: 6px; border-radius: 34px; }
-  .tpl-carousel.is-lg .tpl-screen { border-radius: 28px; }
-  .tpl-carousel.is-lg .tpl-screen iframe { width: 390px; height: 832px; transform: scale(0.4); }
-  .tpl-carousel.is-lg .tpl-hit { border-radius: 34px; }
-  .tpl-carousel.is-lg .tpl-meta { width: 168px; }
-  .tpl-carousel.is-lg .tpl-meta h3 { font-size: 1rem; }
-  .tpl-carousel.is-lg .tpl-meta p { display: none; }
+  /* Scelta del template al telefono: uno al centro, due interi ai lati e due tagliati ai bordi (circa 4,4 telefoni). */
+  .tpl-carousel.is-lg { --tw: 21.5vw; }
+  .tpl-carousel.is-lg .tpl-track { grid-auto-columns: var(--tw); gap: 8px; padding: 10px 14px 16px; }
+  .tpl-carousel.is-lg .tpl-phone { width: var(--tw); height: calc(var(--tw) * 2.08); padding: 4px; border-radius: 18px; }
+  .tpl-carousel.is-lg .tpl-screen { border-radius: 14px; }
+  .tpl-carousel.is-lg .tpl-screen iframe { width: 390px; height: 832px; transform: scale(0.2); }
+  .tpl-carousel.is-lg .tpl-hit { border-radius: 18px; }
+  .tpl-carousel.is-lg .tpl-meta { width: var(--tw); }
+  .tpl-carousel.is-lg .tpl-meta h3 { font-size: 0.74rem; line-height: 1.2; }
+  .tpl-carousel.is-lg .tpl-meta p, .tpl-carousel.is-lg .tpl-premium { display: none; }
+  .tpl-carousel.is-lg .tpl-chosen { font-size: 9px; }
+  .tpl-carousel.is-lg .tpl-lock svg { width: 30px; height: 30px; padding: 7px; }
+  .tpl-carousel.is-lg .tpl-lock b { font-size: 10px; }
 }
 .pl-pay { max-width: 620px; margin: 0 auto; }
 .pl-pay .pl-btn { text-decoration: none; display: inline-block; justify-self: start; }
@@ -1805,3 +1810,6 @@ html, body { overflow-x: clip; overscroll-behavior-x: none; max-width: 100%; }
 @keyframes actNudge { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 @media (prefers-reduced-motion: reduce) { .act-type.is-missing .act-type-list { animation: none; } }
 @media (max-width: 720px) { .act-missing { text-align: center; } }
+/* Bandierine delle lingue (SVG da shared/locales.ts). */
+.flag { display: inline-block; flex: none; width: 22px; height: 15px; border-radius: 3px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12); vertical-align: middle; }
+.flag svg { display: block; width: 100%; height: 100%; }

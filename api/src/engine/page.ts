@@ -12,6 +12,9 @@ import {
   type BlockType,
   type FontId,
   type InviteConfig,
+  type Locale,
+  LOCALE_INFO,
+  FLAG_SVG,
   type RsvpQuestion,
   type TemplateNode,
   type ThemeManifest,
@@ -40,15 +43,20 @@ export type PageInput = {
   preview?: boolean; // anteprima e demo: niente busta, il contenuto è subito visibile
   builder?: boolean; // anteprima del builder: ogni blocco ha un contenitore con il suo id, per evidenziarlo e selezionarlo
   missing?: Set<string>; // validazione: segnaposto che non trovano un dato
+  languages?: Locale[]; // lingue disponibili dell'invito pubblicato: con più di una compare il selettore in alto a destra
 };
 
 const MONTHS = {
   it: ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"],
   en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  es: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+  fr: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
 };
 const WEEKDAYS = {
   it: ["domenica", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"],
   en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  es: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
+  fr: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
 };
 
 // Riferimenti "assets/…" nel CSS e nei template dei blocchi: il motore li porta sul percorso pubblico dello stile.
@@ -117,6 +125,8 @@ export function renderInvitePage(input: PageInput): string {
       const names: Record<string, Record<string, string>> = {
         it: { villa: "Villa", chiesa: "Chiesa", ristorante: "Ristorante", giardino: "Giardino", hotel: "Hotel", sala: "Sala ricevimenti", spiaggia: "Spiaggia", altro: "Altro" },
         en: { villa: "Villa", chiesa: "Church", ristorante: "Restaurant", giardino: "Garden", hotel: "Hotel", sala: "Function room", spiaggia: "Beach", altro: "Other" },
+        es: { villa: "Villa", chiesa: "Iglesia", ristorante: "Restaurante", giardino: "Jardín", hotel: "Hotel", sala: "Salón de celebraciones", spiaggia: "Playa", altro: "Otro" },
+        fr: { villa: "Villa", chiesa: "Église", ristorante: "Restaurant", giardino: "Jardin", hotel: "Hôtel", sala: "Salle de réception", spiaggia: "Plage", altro: "Autre" },
       };
       const kind = typeof block.props.kind === "string" ? block.props.kind : "";
       merged.kindLabel = names[config.locale]?.[kind] ?? "";
@@ -175,6 +185,7 @@ ${css}${REVEAL_CSS}${m.envelope ? ENVELOPE_CSS : DRAWN_ENVELOPE_CSS}${m.backgrou
 </head>
 <body class="theme-${escapeHtml(m.id)}">
 ${bodyVideo}${html}
+${!input.preview && !input.builder && (input.languages?.length ?? 0) > 1 ? langSwitch(input.languages!, config.locale) : ""}
 <script type="application/json" id="inv-data">${payload}</script>
 <script>
 ${runtime}
@@ -193,7 +204,7 @@ function pageGlobals(input: PageInput): Record<string, unknown> {
     ...config.event,
     features: Object.fromEntries(ADDON_KEYS.map((k) => [k, features.has(k)])),
     rsvp,
-    rsvpQuestions: config.rsvpQuestions.map(questionView),
+    rsvpQuestions: config.rsvpQuestions.map((q) => questionView(q, config.locale)),
     date: dateView(String(config.event.eventDate ?? ""), config.locale),
     monogram: monogram(String(config.event.title ?? "")),
     theme: { id: m.id, name: m.name, description: m.description, themeColor: m.themeColor },
@@ -530,7 +541,9 @@ export function monogram(title: string): string {
 }
 
 // Vista di una domanda per il template: flag per tipo, così il template sceglie l'input giusto con una sezione.
-function questionView(q: RsvpQuestion) {
+const YES: Record<Locale, string> = { it: "Sì", en: "Yes", es: "Sí", fr: "Oui" };
+const NO: Record<Locale, string> = { it: "No", en: "No", es: "No", fr: "Non" };
+function questionView(q: RsvpQuestion, locale: Locale) {
   return {
     qid: q.id,
     label: q.label,
@@ -541,13 +554,13 @@ function questionView(q: RsvpQuestion) {
     isText: q.type === "text",
     isNumber: q.type === "number",
     isChoice: q.type === "choice",
-    yes: q.yes ?? "Sì",
-    no: q.no ?? "No",
+    yes: q.yes ?? YES[locale] ?? YES.it,
+    no: q.no ?? NO[locale] ?? NO.it,
     options: (q.options ?? []).map((o, i) => ({ value: o, label: o, optionId: `${q.id}-${i}` })),
   };
 }
 
-function dateView(iso: string, locale: "it" | "en") {
+function dateView(iso: string, locale: Locale) {
   const d = new Date(`${iso}T12:00:00`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || Number.isNaN(d.getTime())) {
     return { day: "", month: "", monthShort: "", year: "", weekday: "", long: "", iso: "" };
@@ -559,4 +572,39 @@ function dateView(iso: string, locale: "it" | "en") {
   // Il mese abbreviato (tre lettere) entra nei riquadri della data senza uscirne.
   const monthShort = month.slice(0, 3).replace(/^./, (c) => c.toUpperCase());
   return { day, month, monthShort, year, weekday, long: `${day} ${month} ${year}`, iso };
+}
+
+// Selettore della lingua per gli ospiti: un bottone tondo in alto a destra con la bandiera della lingua attuale;
+// al tocco si apre un piccolo menu con le altre lingue (link a ?lang=…, la scelta resta nell'indirizzo).
+// Sta sopra la busta e i contenuti, ma è piccolo e semitrasparente per non coprire l'invito.
+function langSwitch(languages: Locale[], current: Locale): string {
+  const items = languages
+    .map((l) => `<li><a href="?lang=${l}" hreflang="${l}" lang="${l}"${l === current ? ' aria-current="true"' : ""}><span class="bi-flag">${FLAG_SVG[l]}</span>${escapeHtml(LOCALE_INFO[l].native)}</a></li>`)
+    .join("");
+  const label: Record<Locale, string> = { it: "Lingua", en: "Language", es: "Idioma", fr: "Langue" };
+  return `<div class="bi-lang" data-bi-lang>
+<button type="button" class="bi-lang-btn" aria-haspopup="true" aria-expanded="false" aria-label="${escapeHtml(label[current])}: ${escapeHtml(LOCALE_INFO[current].native)}"><span class="bi-flag">${FLAG_SVG[current]}</span></button>
+<ul class="bi-lang-menu" role="list" hidden>${items}</ul>
+</div>
+<style>
+.bi-lang{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:2147483000;font:500 14px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif}
+.bi-lang-btn{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid rgba(0,0,0,.08);border-radius:50%;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px -6px rgba(0,0,0,.35);cursor:pointer;opacity:.85;transition:opacity .2s,transform .2s}
+.bi-lang-btn:hover,.bi-lang-btn[aria-expanded="true"]{opacity:1;transform:scale(1.04)}
+.bi-lang-btn:focus-visible,.bi-lang-menu a:focus-visible{outline:2px solid #8a6427;outline-offset:2px}
+.bi-flag{display:inline-block;width:22px;height:15px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12);flex:none}
+.bi-flag svg{display:block;width:100%;height:100%}
+.bi-lang-menu{position:absolute;top:48px;right:0;min-width:160px;margin:0;padding:6px;list-style:none;border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 18px 40px -16px rgba(0,0,0,.4);animation:biLangIn .18s ease}
+.bi-lang-menu a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#2b2320;text-decoration:none}
+.bi-lang-menu a:hover{background:rgba(0,0,0,.05)}
+.bi-lang-menu a[aria-current="true"]{font-weight:600;background:rgba(0,0,0,.04)}
+@keyframes biLangIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bi-lang-menu{animation:none}.bi-lang-btn{transition:none}}
+</style>
+<script>
+(function(){var w=document.querySelector('[data-bi-lang]');if(!w)return;var b=w.querySelector('button'),m=w.querySelector('ul');
+function set(o){m.hidden=!o;b.setAttribute('aria-expanded',o?'true':'false');}
+b.addEventListener('click',function(e){e.stopPropagation();set(m.hidden);});
+document.addEventListener('click',function(e){if(!w.contains(e.target))set(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){set(false);b.focus();}});})();
+</script>`;
 }

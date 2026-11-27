@@ -28,8 +28,8 @@ export async function apiPublic<T>(path: string): Promise<T | null> {
 }
 
 // Risposta HTML dell'API (pagina invito): null se non esiste.
-export async function apiPublicHtml(path: string): Promise<string | null> {
-  const res = await fetch(`${API}${path}`, { cache: "no-store" });
+export async function apiPublicHtml(path: string, headers: Record<string, string> = {}): Promise<string | null> {
+  const res = await fetch(`${API}${path}`, { cache: "no-store", headers });
   if (res.status === 404) return null;
   if (!res.ok) throw new ApiError(res.status, `Errore ${res.status}`);
   return res.text();

@@ -605,12 +605,12 @@ img {
 /* Pagina di scelta: il template scelto resta visibile e l'alone non viene tagliato */
 .act-page .tpl-carousel.is-lg .tpl-track { padding: 44px 56px 56px; }
 @media (max-width: 720px) {
-  /* Telefono: un template grande al centro e i vicini che si intravedono. Le proporzioni del telefono restano
+  /* Telefono: un template al centro, due interi ai lati e due tagliati ai bordi. Le proporzioni del telefono restano
      sempre quelle della cornice (340 x 700): mai altezze fisse, che la stiravano. */
-  .act-page .tpl-carousel.is-lg .tpl-track { grid-auto-columns: min(64vw, 270px); gap: 16px; padding: 40px calc((100vw - min(64vw, 270px)) / 2) 40px; scroll-padding: 0; }
-  .act-page .tpl-carousel.is-lg .tpl-phone { width: 100%; height: auto; aspect-ratio: 340 / 700; padding: 7px; border-radius: 40px; }
-  .act-page .tpl-carousel.is-lg .tpl-screen { border-radius: 33px; }
-  .act-page .tpl-carousel.is-lg .tpl-hit { border-radius: 40px; }
+  .act-page .tpl-carousel.is-lg .tpl-track { grid-auto-columns: 21vw; gap: 8px; padding: 22px calc((100vw - 21vw) / 2) 24px; scroll-padding: 0; }
+  .act-page .tpl-carousel.is-lg .tpl-phone { width: 100%; height: auto; aspect-ratio: 340 / 700; padding: 4px; border-radius: 18px; }
+  .act-page .tpl-carousel.is-lg .tpl-screen { border-radius: 14px; }
+  .act-page .tpl-carousel.is-lg .tpl-hit { border-radius: 18px; }
   .act-page .tpl-carousel.is-lg .tpl-meta { width: 100%; }
 }
 
@@ -906,3 +906,9 @@ img {
 .act-grid-name { font-size: 14px; line-height: 1.3; }
 .act-grid-item.is-on .act-grid-name { font-weight: 500; }
 @media (prefers-reduced-motion: reduce) { .act-grid-phone, .act-view { transition: none; } }
+
+/* Telefono: con i template piccoli il sollevamento di quello scelto è più leggero. */
+@media (max-width: 720px) { .act-page .tpl-card.is-on { transform: translateY(-6px) scale(1.06); } }
+/* Anteprima del template: il modale non passa i gesti alla pagina sotto (iPhone). */
+.demo-backdrop:has(> .tp-modal) { overscroll-behavior: contain; touch-action: manipulation; }
+.tp-modal iframe { touch-action: manipulation; }

@@ -4,6 +4,7 @@ import { sanitizeValues } from "./engine/values";
 import { sanitizeQuestions, type RsvpQuestion, type ThemeManifest } from "./engine/manifest";
 import { BLOCK_TYPES, EVENT_DEFAULTS, EVENT_FIELDS, HERO_EVENT_KEYS, blockDef, defaultBlocks, makeBlock, newBlockId, templateBlocks, type BlockInstance, type BlockType } from "./blocks";
 import { sanitizeFontMap } from "./fonts";
+import { cleanExtraLocales, isLocale, type Locale } from "./locales";
 
 export type { RsvpQuestion } from "./engine/manifest";
 export type { BlockInstance, BlockType } from "./blocks";
@@ -15,7 +16,8 @@ export type InviteConfig = {
   model: string;
   addons: AddonKey[]; // solo funzioni acquistabili per il modello
   eventType: EventType;
-  locale: "it" | "en";
+  locale: Locale; // lingua principale: quella in cui si scrive, mostrata nel builder
+  extraLocales?: Locale[]; // lingue in più, tradotte da BeSpoke AI alla pubblicazione
   event: Record<string, unknown>; // titolo, nomi, data, ora, luogo, indirizzo
   blocks: BlockInstance[];
   rsvpQuestions: RsvpQuestion[];
@@ -92,8 +94,22 @@ export function partySizeOf(questions: RsvpQuestion[], answers: Record<string, u
   return Number.isFinite(n) && n >= 1 ? Math.round(n) : 1;
 }
 
-export function defaultRsvp(locale: "it" | "en"): RsvpQuestion[] {
-  return locale === "en" ? DEFAULT_RSVP_EN : DEFAULT_RSVP;
+// Stesse domande in spagnolo e francese, per gli inviti con queste lingue principali.
+export const DEFAULT_RSVP_ES: RsvpQuestion[] = [
+  { id: "name", label: "Nombre y apellidos", type: "text", required: true },
+  { id: "attending", label: "¿Vendrás?", type: "yes-no", required: true, yes: "Sí, con mucho gusto", no: "Lo siento, no puedo" },
+  { id: "guests", label: "Número de personas (incluido tú)", type: "number" },
+  { id: "note", label: "Un mensaje para los anfitriones", type: "text" },
+];
+export const DEFAULT_RSVP_FR: RsvpQuestion[] = [
+  { id: "name", label: "Nom et prénom", type: "text", required: true },
+  { id: "attending", label: "Serez-vous présent ?", type: "yes-no", required: true, yes: "Oui, avec plaisir", no: "Désolé, je ne peux pas" },
+  { id: "guests", label: "Nombre de personnes (vous compris)", type: "number" },
+  { id: "note", label: "Un message pour les hôtes", type: "text" },
+];
+
+export function defaultRsvp(locale: Locale): RsvpQuestion[] {
+  return locale === "en" ? DEFAULT_RSVP_EN : locale === "es" ? DEFAULT_RSVP_ES : locale === "fr" ? DEFAULT_RSVP_FR : DEFAULT_RSVP;
 }
 
 // Config di partenza per un nuovo invito, con i blocchi che le funzioni del modello abilitano.
@@ -129,7 +145,8 @@ export function makeSlug(title: string): string {
 export function sanitizeConfig(c: Catalog, input: unknown): InviteConfig | null {
   if (!input || typeof input !== "object") return null;
   const x = input as Record<string, unknown>;
-  const locale: "it" | "en" = x.locale === "en" ? "en" : "it";
+  const locale: Locale = isLocale(x.locale) ? x.locale : "it";
+  const extraLocales = cleanExtraLocales(locale, x.extraLocales);
   const models = enabledModels(c);
   if (models.length === 0) return null;
   const model = getModel(c, String(x.model)) ? String(x.model) : models[0].id;
@@ -153,6 +170,7 @@ export function sanitizeConfig(c: Catalog, input: unknown): InviteConfig | null 
     addons: selected,
     eventType,
     locale,
+    ...(extraLocales.length ? { extraLocales } : {}),
     event: sanitizeValues(EVENT_FIELDS, x.event, features),
     blocks,
     rsvpQuestions: questions.length ? questions : hasForm ? defaultRsvp(locale) : [],

@@ -15,3 +15,5 @@ export * from "./folder";
 export * from "./setup";
 export * from "./plannerIcons";
 export * from "./csv";
+export * from "./locales";
+export * from "./translatable";

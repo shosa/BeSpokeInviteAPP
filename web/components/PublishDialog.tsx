@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Locale } from "@inviteme/shared";
+import { PublishProgress } from "./PublishProgress";
 
 // Pubblicazione: il cliente sceglie il link che manderà agli ospiti. Il server propone alcuni nomi liberi, costruiti dai nomi e dalla data.
 export function PublishDialog({
@@ -10,7 +12,9 @@ export function PublishDialog({
   onPayment,
   onDone,
   onClose,
+  extraLocales = [],
 }: {
+  extraLocales?: Locale[];
   id: string;
   origin: string;
   lang: "it" | "en";
@@ -34,15 +38,26 @@ export function PublishDialog({
       .catch(() => setError(en ? "Suggestions not available." : "Suggerimenti non disponibili."));
   }, [id, en]);
 
-  async function publish() {
-    setBusy(true);
+  // Pubblicazione: le fasi in lista (con la traduzione nelle lingue in più) al posto della scelta del link.
+  function publish() {
     setError(null);
-    const res = await fetch(`/api/invitations/${id}/confirm-edit`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: value }) });
-    const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
-    setBusy(false);
-    if (res.ok) return onDone();
-    if (res.status === 409 && data.code === "payment_required") return onPayment();
-    setError(data.error ?? (en ? "Publishing failed." : "Pubblicazione non riuscita."));
+    setBusy(true);
+  }
+  if (busy) {
+    return (
+      <div className="bl-modal-backdrop">
+        <div className="bl-modal publish-dialog" role="dialog" aria-modal="true" aria-label={en ? "Publishing" : "Pubblicazione"}>
+          <PublishProgress
+            id={id}
+            body={{ slug: value }}
+            extraLocales={extraLocales}
+            lang={lang}
+            onDone={onDone}
+            onError={(msg, code) => { setBusy(false); if (code === "payment_required") onPayment(); else setError(msg); }}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (

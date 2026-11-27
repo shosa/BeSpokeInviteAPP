@@ -827,3 +827,31 @@ button.bl-crumb:hover { color: var(--brass); }
   .bl-app .tsw-preview { padding: 12px 12px 0; }
 }
 @media (prefers-reduced-motion: reduce) { .bl-app .tsw { animation: none; } }
+
+/* ───────────── Lingue: principale (una) e altre (tradotte da BeSpoke AI alla pubblicazione) ───────────── */
+.bl-app .bl-langs .hint { margin-bottom: 10px; }
+.bl-app .bl-lang-h { margin-top: 20px !important; }
+.bl-app .bl-lang-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bl-app .bl-lang-opt { position: relative; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+.bl-app .bl-lang-opt:hover { border-color: var(--brass-light); }
+.bl-app .bl-lang-opt.is-on { border-color: var(--brass); background: #fff8e8; box-shadow: inset 0 0 0 1px var(--brass); }
+.bl-app .bl-lang-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.bl-app .bl-lang-opt:has(input:focus-visible) { outline: 2px solid var(--brass); outline-offset: 2px; }
+.bl-app .bl-lang-ai { display: flex; gap: 8px; align-items: flex-start; margin: 16px 0 0; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(224, 181, 107, 0.16), rgba(196, 137, 58, 0.08)); font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+.bl-app .bl-lang-ai svg { flex: none; margin-top: 2px; color: var(--brass); }
+
+/* ───────────── Pubblicazione: le fasi in lista (la traduzione è vera, le altre accompagnano l'attesa) ───────────── */
+.pub-progress { display: grid; gap: 16px; }
+.pub-progress h2 { margin: 0; font-family: var(--font-display, Georgia), serif; font-weight: 300; font-size: 26px; }
+.pub-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.pub-step { display: flex; align-items: center; gap: 12px; padding: 8px 4px; font-size: 15px; color: #8b7b6b; transition: color 0.25s ease; }
+.pub-step.is-active, .pub-step.is-done { color: #2a2119; }
+.pub-step.is-failed { color: #9b3b2f; }
+.pub-ico { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #d9cdbb; background: #fff; }
+.pub-step.is-done .pub-ico { border-color: transparent; background: #8a6427; color: #fff; }
+.pub-step.is-failed .pub-ico { border-color: transparent; background: #9b3b2f; color: #fff; }
+.pub-step.is-active .pub-ico { border-color: #e2d3bf; border-top-color: #b8893f; animation: pubSpin 0.8s linear infinite; }
+.pub-step .flag { width: 20px; height: 14px; }
+.pub-note { margin: 0; font-size: 13.5px; color: #6b5a48; }
+@keyframes pubSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pub-step.is-active .pub-ico { animation: none; } }

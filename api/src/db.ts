@@ -293,6 +293,10 @@ ALTER TABLE invitations ADD COLUMN IF NOT EXISTS last_published_at timestamptz;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS editor_seen_at timestamptz;
 -- Cambio di template dal builder: concesso una sola volta per invito (null = ancora disponibile).
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS theme_changed_at timestamptz;
+-- Lingue in più: traduzioni di BeSpoke AI. translation_memory = testi già tradotti per lingua (si ritraduce solo ciò che
+-- cambia); published_translations = la versione pubblicata in ogni lingua in più, servita agli ospiti.
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS translation_memory jsonb NOT NULL DEFAULT '{}';
+ALTER TABLE invitations ADD COLUMN IF NOT EXISTS published_translations jsonb NOT NULL DEFAULT '{}';
 CREATE TABLE IF NOT EXISTS invitation_edits (
   id bigserial PRIMARY KEY,
   invitation_id uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { Switch } from "@/components/ui/Switch";
 import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/lang";
@@ -25,6 +25,22 @@ export function ThemePreview({ themeId, themeName, onClose, onChoose }: { themeI
   const t = useT();
   const [cover, setCover] = useState(true);
   const src = `/api/themes/${encodeURIComponent(themeId)}/anteprima?cover=${cover ? 1 : 0}`;
+
+  // Pagina dietro bloccata mentre l'anteprima è aperta. Su iPhone, senza blocco, il tocco sull'invito diventava uno
+  // scorrimento della pagina sotto e «Tocca per aprire» non arrivava alla busta. Il body fisso tiene la posizione.
+  useEffect(() => {
+    const y = window.scrollY;
+    const html = document.documentElement;
+    const body = document.body;
+    const prev = { html: html.style.overflow, body: body.style.cssText };
+    html.style.overflow = "hidden";
+    body.style.cssText += `;overflow:hidden;position:fixed;top:-${y}px;left:0;right:0;width:100%;overscroll-behavior:none;`;
+    return () => {
+      html.style.overflow = prev.html;
+      body.style.cssText = prev.body;
+      window.scrollTo(0, y);
+    };
+  }, []);
 
   return (
     <div className="demo-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>

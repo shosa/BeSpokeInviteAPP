@@ -175,7 +175,7 @@ function applyAction(config: InviteConfig, action: Action, ctx: ActionContext): 
       if (def.feature && !features.has(def.feature)) return { error: `${def.label}: funzione non attiva nell'invito` };
       if (config.blocks.length >= MAX_BLOCKS) return { error: `troppi blocchi (massimo ${MAX_BLOCKS})` };
       if (action.blockId && config.blocks.some((b) => b.id === action.blockId)) return { error: "id di blocco già usato" };
-      const made = makeBlock(action.type, config.locale);
+      const made = makeBlock(action.type, config.locale === "it" ? "it" : "en");
       const block = action.blockId ? { ...made, id: action.blockId } : made;
       return { config: { ...config, blocks: def.anchored ? [block, ...config.blocks] : [...config.blocks, block] } };
     }

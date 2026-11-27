@@ -2,8 +2,9 @@
 
 import { useMemo, useState, type ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { presetQuestions, setupDefaults, type InviteConfig, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, Heart, ListChecks, MailCheck, MapPin, PenLine, Plus, Trash2, type LucideIcon } from "lucide-react";
+import { LOCALES, LOCALE_INFO, presetQuestions, setupDefaults, type InviteConfig, type Locale, type RsvpQuestion, type RsvpQuestionType } from "@inviteme/shared";
+import { Flag } from "./ui/Flag";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Heart, Languages, ListChecks, MailCheck, MapPin, PenLine, Plus, Sparkles, Trash2, type LucideIcon } from "lucide-react";
 import { AddressField } from "./builder/AddressField";
 import { DatePicker } from "./ui/DatePicker";
 import "./setup.css";
@@ -14,8 +15,9 @@ import { useLang } from "@/lib/lang";
 // luogo → Location, indirizzo → Mappa, ringraziamento → Firma, conferma → Conferma di presenza con le domande.
 // Finché non è completato non si prosegue: niente chiusura.
 
-type StepKey = "title" | "date" | "venue" | "signature" | "rsvp" | "questions";
+type StepKey = "lang" | "title" | "date" | "venue" | "signature" | "rsvp" | "questions";
 const STEPS: { key: StepKey; label: string; en: string; icon: LucideIcon }[] = [
+  { key: "lang", label: "Lingua", en: "Language", icon: Languages },
   { key: "title", label: "Nomi", en: "Names", icon: Heart },
   { key: "date", label: "Data", en: "Date", icon: CalendarDays },
   { key: "venue", label: "Luogo", en: "Venue", icon: MapPin },
@@ -34,7 +36,8 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
   const router = useRouter();
   const lang = useLang();
   const t = (it: string, en: string) => (lang === "en" ? en : it);
-  const locale = config.locale === "en" ? "en" : "it";
+  // Lingua base dell'invito: quella in cui si scrive e che si vede nel builder. Le domande pronte la seguono.
+  const [locale, setLocale] = useState<Locale>(config.locale ?? "it");
   const start = useMemo(() => setupDefaults(config), [config]);
   const presets = useMemo(() => presetQuestions(locale), [locale]);
 
@@ -91,7 +94,7 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
         used.add(qid);
         const q: RsvpQuestion = { id: qid, label: c.label.trim().slice(0, 160), type: c.type };
         if (c.type === "choice") q.options = c.options.split(",").map((o) => o.trim()).filter(Boolean).slice(0, 6);
-        if (c.type === "yes-no") { q.yes = locale === "en" ? "Yes" : "Sì"; q.no = "No"; }
+        if (c.type === "yes-no") { q.yes = { it: "Sì", en: "Yes", es: "Sí", fr: "Oui" }[locale]; q.no = locale === "fr" ? "Non" : "No"; }
         return q;
       });
     return [...fromPresets, ...own];
@@ -104,7 +107,7 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
       const res = await fetch(`/api/invitations/${id}/setup`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title, eventDate, venue, address, signature, rsvp: rsvp === true, questions: rsvp ? questions() : [] }),
+        body: JSON.stringify({ locale, title, eventDate, venue, address, signature, rsvp: rsvp === true, questions: rsvp ? questions() : [] }),
       });
       const out = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(out.error ?? t("Non è stato possibile salvare", "Could not save"));
@@ -147,6 +150,19 @@ export function SetupGate({ id, config, setupDone, children }: { id: string; con
           <div className="sw-body" key={current.key}>
             <span className="sw-ico" aria-hidden="true">{(() => { const I = current.icon; return <I size={26} strokeWidth={1.5} />; })()}</span>
             <p className="sw-count">{t(`Passo ${step + 1} di ${steps.length}`, `Step ${step + 1} of ${steps.length}`)}</p>
+
+            {current.key === "lang" && (<>
+              <h2 id="sw-title">{t("In che lingua scrivete l'invito?", "Which language will you write the invitation in?")}</h2>
+              <p className="hint">{t("È la lingua principale: quella che vedrete nel builder. Dopo potrete aggiungere altre lingue per gli ospiti.", "It's the main language: the one you'll see in the builder. Later you can add other languages for your guests.")}</p>
+              <div className="sw-langs" role="radiogroup" aria-labelledby="sw-title">
+                {LOCALES.map((l) => (
+                  <button key={l} type="button" role="radio" aria-checked={locale === l} className={`sw-lang${locale === l ? " is-on" : ""}`} onClick={() => setLocale(l)}>
+                    <Flag locale={l} /><strong>{LOCALE_INFO[l].native}</strong>
+                  </button>
+                ))}
+              </div>
+              <p className="sw-ai"><Sparkles size={15} aria-hidden="true" />{t("Le altre lingue le traduce BeSpoke AI quando pubblicate, partendo da questa.", "BeSpoke AI translates the other languages when you publish, starting from this one.")}</p>
+            </>)}
 
             {current.key === "title" && (<>
               <h2 id="sw-title">{t("Come si chiama il vostro evento?", "What is your event called?")}</h2>
