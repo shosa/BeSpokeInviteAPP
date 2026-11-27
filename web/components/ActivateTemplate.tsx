@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GalleryHorizontal, LayoutGrid, Lock, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { EVENT_TYPES, type EventType, type TemplateCategory, type ThemeManifest } from "@inviteme/shared";
 import { LibraryIcon } from "@/components/planner/PlannerIcon";
@@ -29,6 +30,15 @@ export function ActivateTemplate({ orderId, templates, locked = [], categories =
   }
   const [themeId, setThemeId] = useState(templates.find((x) => !lockedSet.has(x.id))?.id ?? "");
   const [previewOpen, setPreviewOpen] = useState(false);
+  // Vista della scelta: carosello (di serie) o griglia (2 colonne al telefono, 4-6 al computer). Si ricorda nel browser.
+  const [view, setView] = useState<"slider" | "grid">("slider");
+  useEffect(() => {
+    try { if (localStorage.getItem("act-view") === "grid") setView("grid"); } catch { /* memoria del browser non disponibile */ }
+  }, []);
+  function pickView(v: "slider" | "grid") {
+    setView(v);
+    try { localStorage.setItem("act-view", v); } catch { /* niente */ }
+  }
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -81,8 +91,41 @@ export function ActivateTemplate({ orderId, templates, locked = [], categories =
           })}
         </div>
       )}
+      <div className="act-views" role="group" aria-label={t("Vista dei template", "Template view")}>
+        <button type="button" className={`act-view${view === "slider" ? " is-on" : ""}`} aria-pressed={view === "slider"} aria-label={t("Vista a carosello", "Carousel view")} title={t("Carosello", "Carousel")} onClick={() => pickView("slider")}><GalleryHorizontal size={18} aria-hidden="true" /></button>
+        <button type="button" className={`act-view${view === "grid" ? " is-on" : ""}`} aria-pressed={view === "grid"} aria-label={t("Vista a griglia", "Grid view")} title={t("Griglia", "Grid")} onClick={() => pickView("grid")}><LayoutGrid size={18} aria-hidden="true" /></button>
+      </div>
       {visible.length > 0 ? (
-        <TemplateCarousel key={category} templates={visible} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} locked={lockedSet} />
+        view === "grid" ? (
+          <ul className="act-grid" aria-label="Template">
+            {visible.map((x) => {
+              const on = x.id === themeId;
+              const isLocked = lockedSet.has(x.id);
+              const name = themeCopy(x, lang);
+              return (
+                <li key={x.id}>
+                  <button
+                    type="button"
+                    className={`act-grid-item${on ? " is-on" : ""}${isLocked ? " is-locked" : ""}`}
+                    aria-pressed={on}
+                    aria-disabled={isLocked || undefined}
+                    title={isLocked ? t("Premium · non incluso nell'invito base", "Premium · not included in the basic invitation") : name}
+                    onClick={() => { if (!isLocked) setThemeId(x.id); }}
+                  >
+                    <span className="act-grid-phone" style={{ background: x.themeColor }}>
+                      {x.envelope?.poster && <img src={`/api/themes/${encodeURIComponent(x.id)}/cover.jpg`} alt="" loading="lazy" decoding="async" draggable={false} />}
+                      {isLocked && <span className="act-grid-badge"><Lock size={13} aria-hidden="true" /> Premium</span>}
+                      {on && <span className="act-grid-badge is-on"><Check size={13} aria-hidden="true" /> {t("Scelto", "Chosen")}</span>}
+                    </span>
+                    <span className="act-grid-name">{name}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <TemplateCarousel key={category} templates={visible} selectedId={themeId} onSelect={setThemeId} label="Template" lang={lang} size="lg" autoplay={false} locked={lockedSet} />
+        )
       ) : (
         <p className="hint">{t("Nessun template disponibile al momento.", "No templates available right now.")}</p>
       )}

@@ -107,15 +107,15 @@ export function registerAdminConsole(app: FastifyInstance, deps: Deps) {
     if (!(await requireAdmin(req, reply))) return;
     if (!UUID.test(req.params.id)) return reply.code(404).send({ error: "Utente non trovato" });
     const b = (req.body ?? {}) as { product?: unknown; qty?: unknown; reason?: unknown; notify?: unknown };
-    // invitation: Invito VIP (tutti i template, include il planner); basic: invito base (solo template non Premium,
-    // senza planner); planner: solo il planner.
-    const product = b.product === "planner" || b.product === "basic" ? b.product : "invitation";
+    // invitation: Invito VIP (tutti i template, include il planner); premium: Invito Premium (tutti i template, senza
+    // planner; solo dalla console); basic: invito base (solo template non Premium, senza planner); planner: solo il planner.
+    const product = b.product === "planner" || b.product === "basic" || b.product === "premium" ? b.product : "invitation";
     const qty = Math.max(1, Math.min(10, Math.round(Number(b.qty) || 1)));
     const reason = (GRANT_REASONS as readonly string[]).includes(String(b.reason)) ? String(b.reason) : "omaggio";
     const { rows: users } = await pool.query("SELECT id, email FROM users WHERE id = $1", [req.params.id]);
     if (!users[0]) return reply.code(404).send({ error: "Utente non trovato" });
     const manual = { reason, at: new Date().toISOString(), by: (await currentUser(req))?.email ?? null };
-    const invitationDraft = { model: "invitation-rsvp", themeId: "", eventType: "wedding", addons: [], tier: "rsvp", manual, ...(product === "basic" ? { plan: "base" } : {}) };
+    const invitationDraft = { model: "invitation-rsvp", themeId: "", eventType: "wedding", addons: [], tier: "rsvp", manual, ...(product === "basic" ? { plan: "base" } : product === "premium" ? { plan: "premium" } : {}) };
     const rows: Record<string, unknown>[] = [];
     for (let n = 0; n < qty; n++) {
       if (product !== "planner") rows.push(invitationDraft);

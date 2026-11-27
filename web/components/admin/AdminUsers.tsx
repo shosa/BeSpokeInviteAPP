@@ -16,7 +16,7 @@ type Detail = {
   pending: { id: string; created_at: string; product: string; plan?: string; manual: { reason: string } | null }[];
   orders: { id: string; created_at: string; status: string; kind: string; product: string; plan?: string; manual: { reason: string } | null; invitation_id: string | null; planner_id: string | null }[];
 };
-type Product = "invitation" | "basic" | "planner";
+type Product = "invitation" | "premium" | "basic" | "planner";
 const REASONS: { id: string; it: string; en: string }[] = [
   { id: "omaggio", it: "Omaggio", en: "Gift" },
   { id: "sostituzione", it: "Sostituzione", en: "Replacement" },
@@ -122,7 +122,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
   if (err) return <div className="ac-stack"><button type="button" className="cu-back" onClick={onBack}><ArrowLeft size={16} aria-hidden="true" />{t("Clienti", "Customers")}</button><p className="form-error">{err}</p></div>;
   if (!d) return <p className="hint">{t("Caricamento…", "Loading…")}</p>;
   const u = d.user;
-  const productName = (p: string, plan?: string) => (p === "planner" ? "Planner" : plan === "base" ? t("Invito base", "Basic invitation") : t("Invito VIP", "VIP invitation"));
+  const productName = (p: string, plan?: string) => (p === "planner" ? "Planner" : plan === "base" ? t("Invito base", "Basic invitation") : plan === "premium" ? t("Invito Premium", "Premium invitation") : t("Invito VIP", "VIP invitation"));
   const reasonName = (r?: string) => { const x = REASONS.find((y) => y.id === r); return x ? t(x.it, x.en) : ""; };
 
   return (
@@ -183,7 +183,7 @@ function CustomerCard({ id, onBack, onOpenInvitations }: { id: string; onBack: (
         <Fold className="ac-card cu-grant" title={t("Assegna un acquisto", "Assign a purchase")}>
           <p className="hint">{t("Compare nella sua area come «da attivare», come un acquisto dal negozio. Non entra negli ordini di Shopify.", "It appears in their account as «to activate», like a shop purchase. It doesn't go into Shopify orders.")}</p>
           <div className="cu-seg" role="radiogroup" aria-label={t("Prodotto", "Product")}>
-            {([["invitation", t("Invito VIP", "VIP invitation"), t("tutti i template + planner", "all templates + planner")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")]] as const).map(([v, label, hint]) => (
+            {([["invitation", t("Invito VIP", "VIP invitation"), t("tutti i template + planner", "all templates + planner")], ["premium", t("Invito Premium", "Premium invitation"), t("tutti i template, senza planner", "all templates, no planner")], ["basic", t("Invito base", "Basic invitation"), t("solo non Premium", "non-Premium only")], ["planner", "Planner", t("organizza l'evento", "plans the event")]] as const).map(([v, label, hint]) => (
               <button key={v} type="button" role="radio" aria-checked={product === v} className={product === v ? "is-on" : ""} onClick={() => setProduct(v)}><b>{label}</b><small>{hint}</small></button>
             ))}
           </div>

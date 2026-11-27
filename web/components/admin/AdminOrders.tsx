@@ -18,7 +18,7 @@ export type OrderDetail = {
   status_url: string | null;
   tier: string | null;
   product?: "invitation" | "planner";
-  plan?: "base" | "full";
+  plan?: "base" | "premium" | "full";
   model: string | null;
   invitation_id: string | null;
   slug: string | null;
@@ -68,7 +68,7 @@ function groupOrders(list: OrderDetail[]): Group[] {
     return { key, items: sorted, first: sorted[0]! };
   });
 }
-const productOf = (o: OrderDetail, t: (it: string, en: string) => string) => (o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : t("Invito VIP", "VIP invitation"));
+const productOf = (o: OrderDetail, t: (it: string, en: string) => string) => (o.product === "planner" ? "Planner" : o.plan === "base" ? t("Invito base", "Basic invitation") : o.plan === "premium" ? t("Invito Premium", "Premium invitation") : t("Invito VIP", "VIP invitation"));
 function statusOf(g: Group, t: (it: string, en: string) => string): { label: string; cls: string } {
   const pending = g.items.filter(isPending).length;
   if (!g.items.every((o) => o.status === "paid")) return { label: t("In attesa", "Pending"), cls: "draft" };
